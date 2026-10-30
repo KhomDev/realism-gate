@@ -56,8 +56,9 @@ tar xzf "realism-gate-${version#v}-$target.tar.gz"
 ```
 
 Exit status: 0 when no active finding reaches `--fail-on`, 1 when one does, 2
-on a usage, input or declaration error. A run that finds no parseable test
-suite at all exits 2 rather than reporting a clean result.
+on a usage, input or declaration error. A run that finds no test suite at all
+(nothing parsed, or nothing matched `--match-contract`) exits 2 rather than
+reporting a clean result: nothing checked is not the same as nothing found.
 
 ## Formats
 

@@ -98,6 +98,22 @@ jobs:
       - name: Install cargo-audit
         uses: taiki-e/install-action@cargo-audit
 
+      # .cargo/audit.toml ignores advisories for crates that are in Cargo.lock
+      # only as optional dependencies nobody enables. If one of them ever
+      # enters the real build graph, the ignore is no longer true: fail.
+      - name: Ignored vulnerable crates are not built
+        shell: bash
+        run: |
+          set -eu
+          for crate in crypto-bigint; do
+            if cargo tree -i "$crate" --target all -e all 2>/dev/null | grep -q .; then
+              echo "::error::$crate is now in the build graph; its advisory ignore must be revisited"
+              cargo tree -i "$crate" --target all -e all
+              exit 1
+            fi
+          done
+          echo "ignored crates are absent from the build graph"
+
       - name: Audit
         run: cargo audit
 

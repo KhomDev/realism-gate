@@ -176,6 +176,30 @@ fn usage_errors_exit_two() {
 }
 
 #[test]
+fn finding_no_test_suite_is_an_error_not_a_pass() {
+    let dir = std::env::temp_dir().join(format!("rg-empty-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    std::fs::write(
+        dir.join("Vault.sol"),
+        "contract Vault { function deposit() external {} }",
+    )
+    .unwrap();
+    let o = run(&["check", dir.to_str().unwrap(), "--no-declaration"]);
+    assert_eq!(o.status.code(), Some(2));
+    assert!(stderr(&o).contains("no test suite found"), "{}", stderr(&o));
+
+    let o = run(&[
+        "check",
+        "tests/fixtures/good",
+        "--no-declaration",
+        "--match-contract",
+        "^NoSuchSuite$",
+    ]);
+    assert_eq!(o.status.code(), Some(2));
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
 fn an_invalid_declaration_exits_two() {
     let dir = std::env::temp_dir().join(format!("rg-decl-{}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();

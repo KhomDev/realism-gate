@@ -152,7 +152,7 @@ realism-gate init                  write a realism.yaml template
 ```
 
 Exit status: `0` no active finding at or above `--fail-on`; `1` there is one;
-`2` usage, input or declaration error.
+`2` usage, input or declaration error, or no test suite found at all.
 
 ### Silencing a finding
 

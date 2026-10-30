@@ -282,8 +282,17 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
         }
     }
 
-    if report.summary.suites == 0 && !report.parse_errors.is_empty() {
-        return Err("no test suite could be parsed".to_string());
+    // Nothing checked is not the same as nothing found.
+    if report.summary.suites == 0 {
+        return Err(if report.parse_errors.is_empty() {
+            "no test suite found: no concrete contract with a public test* function matched"
+                .to_string()
+        } else {
+            format!(
+                "no test suite found ({} parse error(s); see the report)",
+                report.parse_errors.len()
+            )
+        });
     }
     let failed = args.fail_on.level().is_some_and(|l| report.fails(l));
     Ok(if failed {

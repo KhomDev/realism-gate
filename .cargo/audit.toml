@@ -1,5 +1,16 @@
-# cargo-audit configuration. Mirrors the advisory ignore in deny.toml.
+# cargo-audit configuration.
+#
+# cargo-audit reads Cargo.lock, which records every optional dependency the
+# graph could ever enable, whether or not a feature enables it. Each ignore
+# below is either not compiled into realism-gate at all, or not a
+# vulnerability. CI checks the first kind: the `audit` job fails if an ignored
+# crate ever appears in `cargo tree`.
 [advisories]
-# `paste` is unmaintained, not vulnerable: a compile-time macro reached only
-# through solar -> alloy-primitives. Revisit when either drops it.
-ignore = ["RUSTSEC-2024-0436"]
+ignore = [
+    # crypto-bigint: reachable only through alloy-primitives' optional `k256`
+    # feature, which solar does not enable. Not in the build graph.
+    "RUSTSEC-2026-0387",
+    # paste: unmaintained, not vulnerable. A compile-time macro reached through
+    # solar -> alloy-primitives. Mirrors the ignore in deny.toml.
+    "RUSTSEC-2024-0436",
+]
