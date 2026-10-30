@@ -1,7 +1,7 @@
 # realism-gate
 
 [![ci](https://github.com/KhomDev/realism-gate/actions/workflows/ci.yml/badge.svg)](https://github.com/KhomDev/realism-gate/actions/workflows/ci.yml)
-[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![license: MIT](https://img.shields.io/badge/license-MIT-informational.svg)](LICENSE)
 
 **A static checker for Foundry proof-of-concept tests. It asks one question:
 does this PoC show what an unprivileged attacker can do, or only what the
