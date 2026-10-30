@@ -1,0 +1,171 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  # ---------------------------------------------------------------- build & test
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install toolchain
+        run: rustup toolchain install stable --profile minimal --component clippy,rustfmt
+
+      - name: Format check
+        run: cargo fmt --all -- --check
+
+      - name: Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      # Includes tests/docs.rs: the rule pages and the README example are
+      # regenerated from the code and compared, so neither can drift.
+      - name: Test
+        run: cargo test --locked
+
+      - name: Smoke test
+        shell: bash
+        run: |
+          set -eu
+          cargo build --locked
+          ./target/debug/realism-gate --version
+          ./target/debug/rgate rules
+          ./target/debug/realism-gate explain RG06 > /dev/null
+          ./target/debug/realism-gate check tests/fixtures/good --no-declaration
+          if ./target/debug/realism-gate check tests/fixtures/bad --no-declaration; then
+            echo "::error::the bad fixtures must fail the run"
+            exit 1
+          fi
+
+  # --------------------------------------------------------------------- MSRV
+  msrv:
+    name: msrv
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Read the declared MSRV
+        id: msrv
+        shell: bash
+        run: |
+          set -eu
+          version=$(grep -E '^rust-version' Cargo.toml | head -n1 | sed -E 's/.*"(.*)".*/\1/')
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "MSRV from Cargo.toml: $version"
+
+      - name: Install MSRV toolchain
+        run: rustup toolchain install ${{ steps.msrv.outputs.version }} --profile minimal
+
+      - name: Test on MSRV
+        run: cargo +${{ steps.msrv.outputs.version }} test --locked
+
+  # ------------------------------------------------------------- supply chain
+  deny:
+    name: cargo-deny
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check
+          arguments: --all-features
+
+  audit:
+    name: cargo-audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install toolchain
+        run: rustup toolchain install stable --profile minimal
+
+      - name: Install cargo-audit
+        uses: taiki-e/install-action@cargo-audit
+
+      - name: Audit
+        run: cargo audit
+
+  # ------------------------------------------------------- the no-network claim
+  no-network:
+    name: no network code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install toolchain
+        run: rustup toolchain install stable --profile minimal
+
+      # A PoC under review may be for an embargoed finding. The checker must
+      # never be able to send it anywhere, so this is a property, not a promise.
+      - name: Dependency graph carries no network crate
+        shell: bash
+        run: |
+          set -eu
+          cargo tree --edges normal --prefix none --no-dedupe \
+            | awk '{print $1}' | sort -u > /tmp/packages.txt
+          echo "packages in the normal dependency graph: $(wc -l < /tmp/packages.txt)"
+          deny='reqwest|hyper|ureq|curl|isahc|surf|attohttpc|tokio|async-std|native-tls|rustls|openssl|tungstenite'
+          if grep -E "^($deny)(-|$)" /tmp/packages.txt; then
+            echo "::error::realism-gate must not depend on a network crate"
+            exit 1
+          fi
+
+      - name: No socket or request code in src/
+        shell: bash
+        run: |
+          set -eu
+          if grep -rniE '(TcpStream|UdpSocket|TcpListener|std::net|reqwest|hyper|ureq|attohttpc|isahc)' src/ ; then
+            echo "::error::network code found in src/"
+            exit 1
+          fi
+
+  # ------------------------------------------------------------- repo hygiene
+  hygiene:
+    name: hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      # No host paths, no private-workspace strings, no platform or target
+      # names in fixtures and docs, no mojibake.
+      - name: Hygiene checks
+        run: python scripts/check_hygiene.py
+
+  # --------------------------------------------- the published corpus numbers
+  corpus:
+    name: corpus benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install toolchain
+        run: rustup toolchain install stable --profile minimal
+
+      - name: Build
+        run: cargo build --release --locked
+
+      # Re-measures the numbers in docs/benchmark.md against the pinned corpus
+      # commit and fails if they moved. A rule change that moves them must
+      # update the document in the same pull request.
+      - name: Measure and compare
+        run: bash scripts/bench-corpus.sh --check

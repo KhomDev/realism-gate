@@ -1,0 +1,70 @@
+# cargo-deny configuration.
+#
+# Six direct dependencies. The parser (solar) brings most of the graph; every
+# other addition is a supply-chain decision, so the checks are strict where
+# they can be and explicit where they cannot.
+
+[graph]
+targets = [
+    { triple = "x86_64-unknown-linux-gnu" },
+    { triple = "aarch64-unknown-linux-gnu" },
+    { triple = "x86_64-apple-darwin" },
+    { triple = "aarch64-apple-darwin" },
+    { triple = "x86_64-pc-windows-msvc" },
+]
+
+[advisories]
+version = 2
+ignore = [
+    # `paste` is unmaintained, not vulnerable. It is a compile-time macro crate
+    # reached only through the parser's `alloy-primitives` dependency, and
+    # there is no maintained drop-in the parser could switch to from here.
+    # Revisit when solar or alloy-primitives drops it.
+    { id = "RUSTSEC-2024-0436", reason = "unmaintained proc-macro reached via solar -> alloy-primitives; no vulnerability" },
+]
+yanked = "deny"
+
+[licenses]
+version = 2
+# Everything in the resolved graph is under one of these. A dependency that
+# arrives under another licence is a decision to make explicitly, here.
+allow = [
+    "MIT",
+    "MIT-0",
+    "Apache-2.0",
+    "BSD-3-Clause",
+    "Unicode-3.0",
+    "Unlicense",
+    "Zlib",
+    "CC0-1.0",
+]
+confidence-threshold = 0.9
+
+[bans]
+# The parser's graph carries a few duplicated versions it does not control.
+# They are reported, not fatal.
+multiple-versions = "warn"
+wildcards = "deny"
+# realism-gate never touches the network. This is the manifest-level half of
+# that guarantee; CI also greps the resolved graph and the source.
+deny = [
+    { name = "reqwest" },
+    { name = "hyper" },
+    { name = "ureq" },
+    { name = "curl" },
+    { name = "isahc" },
+    { name = "surf" },
+    { name = "attohttpc" },
+    { name = "tokio" },
+    { name = "async-std" },
+    { name = "native-tls" },
+    { name = "rustls" },
+    { name = "openssl" },
+    { name = "tungstenite" },
+]
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

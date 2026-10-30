@@ -1,0 +1,60 @@
+name: False positive or false negative
+description: A rule fires on a sound PoC, or misses a defective one
+title: "[rule] "
+labels: ["rule-accuracy"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the most useful report you can file. Every rule page lists its
+        known false-positive modes; if yours is not there, the page is wrong
+        too.
+
+        **Do not paste a PoC for a live, unfixed finding.** It may be under
+        embargo. Reduce it to the smallest synthetic test that reproduces the
+        behaviour: rename contracts, drop addresses, keep only the lines the
+        rule looks at.
+
+  - type: input
+    id: rule
+    attributes:
+      label: Rule
+      placeholder: RG06
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What happened?
+      options:
+        - It fired on a PoC that is sound (false positive)
+        - It did not fire on a PoC that has the defect (false negative)
+        - It fired with the wrong severity
+        - The message or location is wrong
+    validations:
+      required: true
+
+  - type: textarea
+    id: snippet
+    attributes:
+      label: Minimal Solidity that reproduces it
+      render: solidity
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why the verdict is wrong
+      description: What an attacker can or cannot do here, in one or two sentences.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `realism-gate --version`
+    validations:
+      required: true

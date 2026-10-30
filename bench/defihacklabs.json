@@ -1,0 +1,57 @@
+{
+  "corpus": "DeFiHackLabs",
+  "commit": "2c99b565ae24ea2006adf181da20c4419b3edc30",
+  "files": 891,
+  "suites": 869,
+  "tests": 886,
+  "files_with_parse_errors": 1,
+  "tests_with_any_finding": 630,
+  "tests_with_a_finding_other_than_RG08": 23,
+  "rules": {
+    "RG01": {
+      "findings": {
+        "error": 1
+      },
+      "tests": 1
+    },
+    "RG02": {
+      "findings": {
+        "warn": 15
+      },
+      "tests": 13
+    },
+    "RG04": {
+      "findings": {
+        "error": 5,
+        "warn": 2
+      },
+      "tests": 3
+    },
+    "RG05": {
+      "findings": {
+        "error": 3,
+        "warn": 1
+      },
+      "tests": 4
+    },
+    "RG08": {
+      "findings": {
+        "error": 16,
+        "warn": 595
+      },
+      "tests": 611
+    },
+    "RG10": {
+      "findings": {
+        "warn": 5
+      },
+      "tests": 5
+    },
+    "RG11": {
+      "findings": {
+        "warn": 1
+      },
+      "tests": 1
+    }
+  }
+}

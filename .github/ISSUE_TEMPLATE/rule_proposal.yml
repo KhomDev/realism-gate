@@ -1,0 +1,47 @@
+name: Rule proposal
+description: A pattern that makes a passing PoC prove less than it claims
+title: "[proposal] "
+labels: ["rule-proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A good proposal names a defect a triager would reject a PoC for, shows
+        it in a synthetic test, and shows the sound version that must not
+        fire. A rule without the second example is a rule with an unknown
+        false-positive rate.
+
+  - type: textarea
+    id: defect
+    attributes:
+      label: The defect
+      description: What the PoC appears to prove, and what it actually proves.
+    validations:
+      required: true
+
+  - type: textarea
+    id: bad
+    attributes:
+      label: A test that should fire
+      render: solidity
+    validations:
+      required: true
+
+  - type: textarea
+    id: good
+    attributes:
+      label: A sound test that must not fire
+      render: solidity
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Proposed severity
+      options:
+        - error (the PoC does not show what an unprivileged attacker can do)
+        - warn (the PoC may be valid but needs a justification)
+        - note (context the severity argument has to carry)
+    validations:
+      required: true

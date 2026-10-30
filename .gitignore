@@ -1,0 +1,38 @@
+# .gitignore for realism-gate.
+#
+# This repository ships a checker, not anyone's PoCs. Keep your own tests,
+# declarations and reports out of the tree: a PoC for a live finding may be
+# under embargo.
+
+# --- your own PoCs and reports (never commit) --------------------------------
+/poc/
+/private/
+*.PRIVATE.*
+realism-report*.json
+realism-report*.sarif
+
+# --- benchmark checkouts (fetched by scripts/bench-corpus.sh) ---------------
+/.corpus/
+
+# --- secrets -----------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# --- build / tooling ---------------------------------------------------------
+target/
+dist/
+__pycache__/
+*.py[cod]
+
+# --- scratch -------------------------------------------------------------------
+tmp/
+.tmp/
+
+# --- editors / OS ------------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,40 @@
+name: Bug report
+description: The CLI crashes, misparses a file, or behaves differently from the docs
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: What is wrong?
+      options:
+        - It crashes or hangs
+        - A valid Solidity file is reported as unparseable
+        - JSON or SARIF output is malformed or does not match docs/ci.md
+        - An exit code does not match the docs
+        - The docs state something the tool does not do
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: The exact command and a minimal synthetic input. No PoCs for live findings.
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: What it printed
+      render: text
+
+  - type: input
+    id: version
+    attributes:
+      label: Version and platform
+      placeholder: realism-gate 0.1.0, Linux x86-64
+    validations:
+      required: true
