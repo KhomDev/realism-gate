@@ -51,6 +51,8 @@ def main(argv: list[str]) -> int:
             for rule in sorted(by_rule)
         },
     }
+    # LF on every platform, so the file compares equal to the committed one.
+    sys.stdout.reconfigure(newline="\n")
     json.dump(out, sys.stdout, indent=2, sort_keys=False)
     sys.stdout.write("\n")
     return 0

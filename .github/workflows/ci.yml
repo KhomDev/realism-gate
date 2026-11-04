@@ -2,7 +2,7 @@ name: ci
 
 on:
   push:
-    branches: [main]
+    branches: [main, "release/**"]
   pull_request:
 
 permissions:
@@ -51,6 +51,32 @@ jobs:
             echo "::error::the bad fixtures must fail the run"
             exit 1
           fi
+
+  # ------------------------------------------------------------ crates.io package
+  package:
+    name: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install toolchain
+        run: rustup toolchain install stable --profile minimal
+
+      # The published crate is the program, not the corpus or the fixtures.
+      # Anything outside src/ and the five top-level files is a mistake.
+      - name: Package contents
+        shell: bash
+        run: |
+          set -eu
+          cargo package --list --locked > /tmp/files.txt
+          cat /tmp/files.txt
+          if grep -vE '^(src/.*\.rs|Cargo\.toml|Cargo\.toml\.orig|Cargo\.lock|README\.md|LICENSE|CHANGELOG\.md|\.cargo_vcs_info\.json)$' /tmp/files.txt; then
+            echo "::error::unexpected files in the crate"
+            exit 1
+          fi
+
+      - name: Publish dry run (builds from the packaged crate)
+        run: cargo publish --dry-run --locked
 
   # --------------------------------------------------------------------- MSRV
   msrv:
