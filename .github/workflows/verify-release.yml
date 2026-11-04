@@ -1,0 +1,44 @@
+name: verify release
+
+# Run by hand after a release is published and `cargo publish` is done:
+# installs that release on Linux, macOS and Windows through cargo binstall
+# and through the plain archive, and checks the version and one fixture's
+# output. It writes nothing.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to verify, e.g. v0.2.0
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    name: install (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Install cargo-binstall
+        uses: taiki-e/install-action@cargo-binstall
+
+      - name: cargo binstall from crates.io
+        shell: bash
+        env:
+          TAG: ${{ inputs.tag }}
+        run: bash scripts/install-check.sh binstall "$TAG"
+
+      - name: Plain archive from the GitHub release
+        shell: bash
+        env:
+          TAG: ${{ inputs.tag }}
+        run: bash scripts/install-check.sh release "$TAG"

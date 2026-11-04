@@ -38,3 +38,15 @@ opt-level = 3
 lto = true
 codegen-units = 1
 strip = true
+
+# cargo-binstall: where the release workflow puts each archive and what is in
+# it. Spelled out rather than left to binstall's guessing, and checked by the
+# release workflow's dry run, which installs through this metadata.
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ version }-{ target }.tar.gz"
+bin-dir = "{ name }-{ version }-{ target }/{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ version }-{ target }.zip"
+pkg-fmt = "zip"

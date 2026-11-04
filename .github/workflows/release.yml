@@ -1,9 +1,16 @@
 name: release
 
-# Triggered by a tag matching v*, e.g. v0.1.0.
+# A tag matching v* (e.g. v0.2.0) builds every target, attests the archives,
+# writes SHA256SUMS and publishes a GitHub release. A tag with a hyphen
+# (v0.2.0-rc.1) publishes a pre-release.
+#
+# Run by hand (workflow_dispatch) it is a dry run: the same builds and
+# archives, then an install test on Linux, macOS and Windows, through the
+# plain archives and through cargo-binstall's metadata against a local mirror
+# of the release layout. A dry run creates no tag, no release, no attestation.
 #
 # Nothing here publishes to crates.io. The crate name is claimed permanently
-# and the action is irreversible, so publishing is a separate, manual step.
+# and the action is irreversible, so `cargo publish` is a separate, manual step.
 
 on:
   push:
@@ -11,9 +18,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  id-token: write
-  attestations: write
+  contents: read
 
 env:
   CARGO_TERM_COLOR: always
@@ -22,25 +27,28 @@ jobs:
   # A release whose tag does not match the crate version, or whose tests fail,
   # is worse than no release.
   verify:
-    name: verify the tag
+    name: verify
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v7
 
-      - name: Tag matches the Cargo.toml version
+      - name: Version (and, on a tag, that it matches Cargo.toml)
         id: version
         shell: bash
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           set -eu
-          tag="${{ github.ref_name }}"
           version=$(grep -E '^version' Cargo.toml | head -n1 | sed -E 's/.*"(.*)".*/\1/')
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          if [ "v$version" != "$tag" ]; then
-            echo "::error::tag $tag does not match Cargo.toml version $version"
+          if [ "$REF_TYPE" = tag ] && [ "v$version" != "$REF_NAME" ]; then
+            echo "::error::tag $REF_NAME does not match Cargo.toml version $version"
             exit 1
           fi
+          echo "version $version (ref $REF_TYPE $REF_NAME)"
 
       - name: Install toolchain
         run: rustup toolchain install stable --profile minimal --component clippy,rustfmt
@@ -58,17 +66,21 @@ jobs:
     name: build (${{ matrix.target }})
     needs: verify
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     strategy:
       fail-fast: false
       matrix:
         include:
+          # Static musl binaries run on any Linux distribution.
           - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
+            target: x86_64-unknown-linux-musl
             archive: tar.gz
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-gnu
+          - os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
             archive: tar.gz
-            cross: true
           - os: macos-latest
             target: x86_64-apple-darwin
             archive: tar.gz
@@ -84,37 +96,43 @@ jobs:
       - name: Install toolchain
         run: rustup toolchain install stable --profile minimal --target ${{ matrix.target }}
 
-      - name: Install the cross linker
-        if: matrix.cross
+      - name: Install musl tools
+        if: contains(matrix.target, 'musl')
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu
-          echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> "$GITHUB_ENV"
+          sudo apt-get install -y musl-tools
 
       - name: Build
         run: cargo build --release --locked --target ${{ matrix.target }}
 
       - name: Package
         shell: bash
+        env:
+          VERSION: ${{ needs.verify.outputs.version }}
+          TARGET: ${{ matrix.target }}
+          ARCHIVE: ${{ matrix.archive }}
         run: |
           set -eu
-          version="${{ needs.verify.outputs.version }}"
-          name="realism-gate-$version-${{ matrix.target }}"
+          # cargo-binstall finds archives through [package.metadata.binstall]
+          # in Cargo.toml; this name and layout must match it.
+          name="realism-gate-$VERSION-$TARGET"
           mkdir -p "dist/$name"
           ext=""
-          if [ "${{ matrix.archive }}" = "zip" ]; then ext=".exe"; fi
-          cp "target/${{ matrix.target }}/release/realism-gate$ext" "dist/$name/"
-          cp "target/${{ matrix.target }}/release/rgate$ext" "dist/$name/"
+          if [ "$ARCHIVE" = "zip" ]; then ext=".exe"; fi
+          cp "target/$TARGET/release/realism-gate$ext" "dist/$name/"
+          cp "target/$TARGET/release/rgate$ext" "dist/$name/"
           cp README.md LICENSE CHANGELOG.md "dist/$name/"
           cd dist
-          if [ "${{ matrix.archive }}" = "zip" ]; then
-            (cd "$name" && 7z a "../$name.zip" . >/dev/null)
+          if [ "$ARCHIVE" = "zip" ]; then
+            7z a "$name.zip" "$name" >/dev/null
           else
             tar czf "$name.tar.gz" "$name"
           fi
           rm -rf "$name"
+          ls -l
 
       - name: Attest build provenance
+        if: github.ref_type == 'tag'
         uses: actions/attest-build-provenance@v4
         with:
           subject-path: dist/*
@@ -126,35 +144,89 @@ jobs:
           path: dist/*
           if-no-files-found: error
 
-  release:
-    name: publish the release
-    needs: [verify, build]
+  checksums:
+    name: checksums
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-
-      - name: Download every artifact
+      - name: Download every archive
         uses: actions/download-artifact@v8
         with:
           path: dist
           merge-multiple: true
 
-      - name: Checksums
+      - name: SHA256SUMS
         shell: bash
         run: |
           set -eu
           cd dist
+          test "$(ls ./*.tar.gz ./*.zip | wc -l)" = 5
           sha256sum ./*.tar.gz ./*.zip > SHA256SUMS
-          ls -l
           cat SHA256SUMS
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/*
+          if-no-files-found: error
+
+  # Installs what was just built, the way users will, on all three systems.
+  install-test:
+    name: install test (${{ matrix.os }})
+    needs: [verify, checksums]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: mirror/KhomDev/realism-gate/releases/download/v${{ needs.verify.outputs.version }}
+
+      - name: Install cargo-binstall
+        uses: taiki-e/install-action@cargo-binstall
+
+      - name: Plain archive, checksum, version, one fixture
+        shell: bash
+        env:
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: bash scripts/install-check.sh archive "$VERSION" "mirror/KhomDev/realism-gate/releases/download/v$VERSION"
+
+      # The same metadata cargo-binstall will read from crates.io, with the
+      # repository URL pointed at a local copy of the release layout.
+      - name: cargo binstall through the crate's metadata
+        shell: bash
+        env:
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: bash scripts/install-check.sh binstall-mirror "$VERSION" mirror
+
+  release:
+    name: publish the release
+    if: github.ref_type == 'tag'
+    needs: [verify, checksums, install-test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
 
       - name: Release notes from CHANGELOG.md
         shell: bash
+        env:
+          VERSION: ${{ needs.verify.outputs.version }}
         run: |
           set -eu
-          version="${{ needs.verify.outputs.version }}"
           # index() rather than a regex: '[' would open a bracket expression.
-          awk -v h="## [$version]" '
+          awk -v h="## [$VERSION]" '
             index($0, h) == 1 { on = 1; next }
             on && index($0, "## [") == 1 { exit }
             on { print }
@@ -162,13 +234,17 @@ jobs:
           test -s notes.md
           cat >> notes.md <<'EOF'
 
-          ### Verify the download
+          ### Install
+
+              cargo binstall realism-gate
+
+          or download an archive below and check it:
 
               sha256sum -c SHA256SUMS --ignore-missing
-              gh attestation verify <asset> --repo KhomDev/realism-gate
+              gh attestation verify <archive> --repo KhomDev/realism-gate
 
           Two binaries are included, `realism-gate` and `rgate`. They are the
-          same program.
+          same program. Linux builds are static (musl).
           EOF
 
       - name: Create the release
@@ -179,4 +255,5 @@ jobs:
             dist/*.zip
             dist/SHA256SUMS
           body_path: notes.md
+          prerelease: ${{ contains(github.ref_name, '-') }}
           fail_on_unmatched_files: true
