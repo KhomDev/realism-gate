@@ -1,0 +1,35 @@
+{
+  "label": "v0.1.0-local-build-windows",
+  "version": "realism-gate 0.1.0",
+  "binary_bytes": 4568064,
+  "corpus_commit": "2c99b565ae24ea2006adf181da20c4419b3edc30",
+  "runs_ms": [
+    684.4,
+    694.0,
+    756.5,
+    683.3,
+    681.3,
+    651.7,
+    671.4,
+    714.1,
+    790.1,
+    996.0,
+    1027.5,
+    840.5,
+    1023.5,
+    955.9,
+    818.9,
+    816.8,
+    698.1,
+    728.2,
+    786.3,
+    788.9,
+    796.4
+  ],
+  "median_ms": 786.3,
+  "host": {
+    "system": "Windows",
+    "machine": "AMD64",
+    "cpus": 8
+  }
+}

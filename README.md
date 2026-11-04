@@ -41,7 +41,7 @@ if the README has drifted.
 <!-- BEGIN:example -->
 
 ```text
-realism-gate 0.1.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 0.2.0  ·  1 file  ·  1 suite  ·  1 test
 
 test/VaultDrain.t.sol
   warn   RG11 unpinned-fork  test/VaultDrain.t.sol:17:9  VaultDrainTest::test_attackerDrainsVault
@@ -83,31 +83,38 @@ shows why a rule exists and how it can be wrong.
 
 ## Install
 
-From a release (Linux, macOS, Windows; checksums and build provenance
-attached):
+With [cargo-binstall](https://github.com/cargo-bins/cargo-binstall), a
+prebuilt binary in seconds, no Rust toolchain needed:
 
 ```bash
-gh release download --repo KhomDev/realism-gate --pattern '*x86_64-unknown-linux-gnu*' --pattern SHA256SUMS
-sha256sum -c SHA256SUMS --ignore-missing
+cargo binstall realism-gate
 ```
 
-From source (Rust 1.95 or newer):
+Or download a release archive for Linux (static musl), macOS or Windows, and
+check it against the release's checksums and build provenance:
 
 ```bash
-cargo install --locked --git https://github.com/KhomDev/realism-gate
+gh release download --repo KhomDev/realism-gate --pattern '*x86_64-unknown-linux-musl*' --pattern SHA256SUMS
+sha256sum -c SHA256SUMS --ignore-missing
+tar xzf realism-gate-*-x86_64-unknown-linux-musl.tar.gz
+```
+
+In GitHub Actions, one step (details in [docs/ci.md](docs/ci.md)):
+
+```yaml
+- uses: KhomDev/realism-gate@v0
+  with:
+    path: test/
+```
+
+From source with Rust 1.95 or newer:
+
+```bash
+cargo install realism-gate --locked
 ```
 
 Two binaries are installed, `realism-gate` and the short `rgate`. They are the
 same program.
-
-In CI, see [docs/ci.md](docs/ci.md). The short version:
-
-```yaml
-- uses: KhomDev/realism-gate@v0.1.0
-  with:
-    paths: test
-    upload-sarif: true
-```
 
 ## The rules
 
