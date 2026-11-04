@@ -64,11 +64,9 @@ What it does on every run:
 
 `exit-code` (0 clean, 1 findings at or above `fail-on`, 2 could not check),
 `errors`, `warnings`, `notes`, `version`, `report` (JSON path), `markdown`,
-`sarif`, and `comment` (`posted`, `updated`, `skipped`, `failed`).
-
-GitHub sets no outputs for a composite action whose run fails the step. If a
-later step needs the counts even when findings are present, run the action
-with `fail-on: none` and fail on `exit-code` yourself.
+`sarif`, and `comment` (`posted`, `updated`, `skipped`, `failed`). They are
+set when the action fails the job too; read them from a step that runs
+anyway (`if: always()`, or `continue-on-error: true` on the action).
 
 ### When there is nothing to check
 

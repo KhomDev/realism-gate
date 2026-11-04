@@ -171,7 +171,9 @@ runs:
         # GitHub runs `bash -e`; realism-gate exits 1 on findings and the step
         # must go on to write the summary.
         set +e -o pipefail
-        out="$RUNNER_TEMP/realism-gate-out"
+        # One directory per invocation, so the paths in the outputs stay valid
+        # when a job runs the action more than once.
+        out="$(mktemp -d "$RUNNER_TEMP/realism-gate-XXXXXX")"
         mkdir -p "$out"
         report="$out/report.json"
         md="$out/summary.md"
@@ -295,22 +297,23 @@ runs:
           note skipped "realism-gate: this pull request comes from a fork, so its token cannot comment. The results are in this job summary."
           exit 0
         fi
-        body="$RUNNER_TEMP/realism-gate-out/comment.md"
+        dir="$(dirname "$RG_MD")"
+        body="$dir/comment.md"
         { echo "$RG_MARKER"; cat "$RG_MD"; } > "$body"
         # One comment per job id, found by its hidden marker and edited in
         # place, never a new one per push.
         id=$(gh api --paginate "repos/$RG_REPO/issues/$RG_PR/comments" \
               --jq ".[] | select(.body | startswith(\"$RG_MARKER\")) | .id" 2>/dev/null | head -n1)
         if [ -n "$id" ]; then
-          if gh api --method PATCH "repos/$RG_REPO/issues/comments/$id" -F "body=@$body" >/dev/null 2>"$RUNNER_TEMP/realism-gate-out/gh.txt"; then
+          if gh api --method PATCH "repos/$RG_REPO/issues/comments/$id" -F "body=@$body" >/dev/null 2>"$dir/gh.txt"; then
             note updated
           else
-            note failed "realism-gate: could not update the PR comment ($(head -n1 "$RUNNER_TEMP/realism-gate-out/gh.txt")). The results are in this job summary."
+            note failed "realism-gate: could not update the PR comment ($(head -n1 "$dir/gh.txt")). The results are in this job summary."
           fi
-        elif gh api --method POST "repos/$RG_REPO/issues/$RG_PR/comments" -F "body=@$body" >/dev/null 2>"$RUNNER_TEMP/realism-gate-out/gh.txt"; then
+        elif gh api --method POST "repos/$RG_REPO/issues/$RG_PR/comments" -F "body=@$body" >/dev/null 2>"$dir/gh.txt"; then
           note posted
         else
-          note failed "realism-gate: could not comment on the PR ($(head -n1 "$RUNNER_TEMP/realism-gate-out/gh.txt")); it needs pull-requests: write. The results are in this job summary."
+          note failed "realism-gate: could not comment on the PR ($(head -n1 "$dir/gh.txt")); it needs pull-requests: write. The results are in this job summary."
         fi
         exit 0
 
