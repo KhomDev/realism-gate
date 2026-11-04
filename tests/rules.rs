@@ -135,6 +135,14 @@ fn rg10_no_baseline() {
 }
 
 #[test]
+fn rg10_test_contract_ether_has_no_baseline() {
+    expect(
+        "tests/fixtures/bad/RG10_test_contract_ether.t.sol",
+        &[("RG10", Warn, 19)],
+    );
+}
+
+#[test]
 fn rg11_unpinned_fork() {
     expect(
         "tests/fixtures/bad/RG11_unpinned_fork.t.sol",

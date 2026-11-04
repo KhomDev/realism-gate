@@ -4,7 +4,7 @@ use super::privilege::is_read_method;
 use super::{Ctx, Raw, snippet};
 use crate::finding::Severity;
 use crate::identity::{compact, key};
-use crate::ir::{Expr, ExprKind, Lit};
+use crate::ir::{Expr, ExprKind, Lit, StmtKind};
 use crate::trace::{Call, CallClass, OpKind, Phase};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -156,21 +156,35 @@ fn tautology_of_condition(ctx: &Ctx<'_, '_>, cond: &Expr) -> Option<String> {
     }
 }
 
+/// What a measurement reads: whose balance or state (`who`), and of which
+/// asset (`"ether"` for `.balance`, else the contract the read is made on).
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct Subject {
+    who: String,
+    asset: String,
+}
+
+const ETHER: &str = "ether";
+
 /// Measurement reads inside an expression: calls to value-reading methods and
-/// `.balance` member reads. Maps the read's canonical text to its subject:
-/// whose balance or state it reads.
-fn reads_in(e: &Expr, out: &mut BTreeMap<String, String>) {
+/// `.balance` member reads. Maps the read's canonical text to its subject.
+fn reads_in(e: &Expr, out: &mut BTreeMap<String, Subject>) {
     match &e.kind {
         ExprKind::Call { callee, args, .. } => {
             if let ExprKind::Member(receiver, m) = &callee.kind
                 && is_measure(m)
             {
-                let subject = args.first().map(key).unwrap_or_else(|| key(receiver));
-                out.insert(compact(&e.text), subject);
+                let who = args.first().map(key).unwrap_or_else(|| key(receiver));
+                let asset = key(receiver);
+                out.insert(compact(&e.text), Subject { who, asset });
             }
         }
         ExprKind::Member(base, m) if m == "balance" => {
-            out.insert(compact(&e.text), key(base));
+            let subject = Subject {
+                who: key(base),
+                asset: ETHER.to_string(),
+            };
+            out.insert(compact(&e.text), subject);
         }
         _ => {}
     }
@@ -245,11 +259,148 @@ fn is_directional_claim(c: &Call<'_>) -> bool {
     }
 }
 
+/// The value of a number literal such as `0`, `1_000e6` or `2.1 ether`, when
+/// it is one. Approximate: it is only compared with another literal.
+fn literal_value(e: &Expr) -> Option<f64> {
+    if !matches!(e.kind, ExprKind::Lit(Lit::Number)) {
+        return None;
+    }
+    let text = e.text.replace('_', "");
+    let mut parts = text.split_whitespace();
+    let number: f64 = parts.next()?.parse().ok()?;
+    let unit = match parts.next() {
+        None | Some("wei") => 1.0,
+        Some("gwei") => 1e9,
+        Some("ether") => 1e18,
+        Some(_) => return None,
+    };
+    Some(number * unit)
+}
+
+/// The lower bound a directional assertion claims the measured value exceeds,
+/// when it is a literal: `assertGt(x, 2 ether)` claims more than 2 ether.
+fn claim_bound(c: &Call<'_>) -> Option<f64> {
+    match c.method.as_str() {
+        "assertTrue" | "assert" => match c.args.first().map(|e| &e.kind) {
+            Some(ExprKind::Binary(l, op, r)) => match op.as_str() {
+                ">" | ">=" => literal_value(r),
+                "<" | "<=" => literal_value(l),
+                _ => None,
+            },
+            _ => None,
+        },
+        m if m.starts_with("assertLt") || m.starts_with("assertLe") => {
+            c.args.first().and_then(literal_value)
+        }
+        _ => c.args.get(1).and_then(literal_value),
+    }
+}
+
+/// For `x == address(0) ? a : b`, the branch taken once the test has assigned
+/// `x` something other than zero: `Some(false)` for `b`. This is the shape of
+/// a shared base contract's "default to the test contract" getter.
+fn defaulted_branch(ctx: &Ctx<'_, '_>, cond: &Expr) -> Option<bool> {
+    let ExprKind::Binary(l, op, r) = &cond.kind else {
+        return None;
+    };
+    let (var, zero) = match op.as_str() {
+        "==" => (l, r),
+        _ => return None,
+    };
+    let name = var.as_ident()?;
+    if compact(&zero.text) != "address(0)" {
+        return None;
+    }
+    let assigned = ctx
+        .env
+        .assigns
+        .get(name)
+        .is_some_and(|vs| vs.iter().any(|v| compact(&v.text) != "address(0)"));
+    assigned.then_some(false)
+}
+
+/// Every key an address expression can stand for: itself, what it is
+/// assigned, and what a zero-argument internal getter returns, following a
+/// few levels. `vm.deal(_attacker(), 0)` in a shared modifier, where
+/// `_attacker()` returns `attacker` and setUp assigns `attacker = ATTACKER`,
+/// reaches `ATTACKER`.
+fn aliases<'p>(ctx: &Ctx<'p, '_>, start: Vec<&'p Expr>, seed: Option<&str>) -> BTreeSet<String> {
+    let mut out = BTreeSet::new();
+    let mut todo = start;
+    if let Some(k) = seed {
+        out.insert(k.to_string());
+        todo.extend(ctx.env.assigns.get(k).into_iter().flatten().copied());
+    }
+    let mut budget = 32;
+    while let Some(e) = todo.pop() {
+        budget -= 1;
+        if budget == 0 {
+            break;
+        }
+        match &e.kind {
+            ExprKind::Ternary(cond, a, b) => {
+                match defaulted_branch(ctx, cond) {
+                    Some(false) => todo.push(b),
+                    _ => {
+                        todo.push(a);
+                        todo.push(b);
+                    }
+                }
+                continue;
+            }
+            ExprKind::Call { callee, args, .. } if args.is_empty() => {
+                if let Some(name) = callee.as_ident()
+                    && let Some((_, f)) = ctx.suite.function(name)
+                    && let Some(body) = &f.body
+                    && let [stmt] = body.as_slice()
+                    && let StmtKind::Return(Some(value)) = &stmt.kind
+                {
+                    todo.push(value);
+                    continue;
+                }
+            }
+            _ => {}
+        }
+        let k = key(e);
+        if out.insert(k.clone()) {
+            todo.extend(ctx.env.assigns.get(&k).into_iter().flatten().copied());
+        }
+    }
+    out
+}
+
+/// A balance the harness sets with a cheat before the exploit: `vm.deal`,
+/// `deal`, `hoax`. A gain measured from a balance the test itself fixed is a
+/// difference, even when the before-value is never read.
+struct Funding {
+    op: usize,
+    who: BTreeSet<String>,
+    asset: String,
+    /// The amount, when it is a literal.
+    amount: Option<f64>,
+}
+
+impl Funding {
+    /// Whether a claim with this lower bound measures a gain over the funded
+    /// amount. Funding to zero always does. A claim of "more than 0" over a
+    /// funded balance does not: the funding alone satisfies it. Otherwise the
+    /// bound has to reach the funded amount when both are literals.
+    fn is_baseline_for(&self, bound: Option<f64>) -> bool {
+        match (self.amount, bound) {
+            (Some(0.0), _) => true,
+            (_, Some(0.0)) => false,
+            (Some(a), Some(b)) => b >= a,
+            _ => true,
+        }
+    }
+}
+
 /// One directional assertion and the measurements it depends on.
 struct Claim {
     op: usize,
     /// read text -> subject
-    reads: BTreeMap<String, String>,
+    reads: BTreeMap<String, Subject>,
+    bound: Option<f64>,
 }
 
 /// RG10: a directional assertion whose every measurement is read once, after
@@ -261,12 +412,12 @@ pub fn no_baseline(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
     // Ops that change state: deployments and external calls that are not reads.
     let mut writes: Vec<usize> = Vec::new();
     // Which measurements each local was computed from.
-    let mut provenance: BTreeMap<String, BTreeMap<String, String>> = BTreeMap::new();
+    let mut provenance: BTreeMap<String, BTreeMap<String, Subject>> = BTreeMap::new();
     // Contracts the harness deploys: they start with nothing, so an absolute
-    // read of them is already a difference.
-    let mut fresh: BTreeSet<String> = BTreeSet::new();
-    // Addresses the harness funds with a cheat; never "fresh".
-    let mut dealt: BTreeSet<String> = BTreeSet::new();
+    // read of them is already a difference. The test contract starts with no
+    // tokens, but Foundry gives it an ether balance.
+    let mut fresh: BTreeSet<String> = BTreeSet::from(["this".to_string()]);
+    let mut funding: Vec<Funding> = Vec::new();
     let mut claims: Vec<Claim> = Vec::new();
     // A call written inside an assertion or a log is a read, whatever its name.
     let mut observed: BTreeSet<*const Expr> = BTreeSet::new();
@@ -297,13 +448,25 @@ pub fn no_baseline(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
                     CallClass::Cheat | CallClass::StdCheat
                         if matches!(c.method.as_str(), "deal" | "hoax" | "startHoax") =>
                     {
-                        let to = if c.method == "deal" && c.args.len() >= 3 {
-                            c.args.get(1)
+                        // deal(token, to, amount), deal(to, amount),
+                        // hoax(to[, amount]): hoax without an amount funds
+                        // 2^128 wei.
+                        let (asset, to, amount) = if c.method == "deal" && c.args.len() >= 3 {
+                            (key(&c.args[0]), c.args.get(1), c.args.get(2))
                         } else {
-                            c.args.first()
+                            (ETHER.to_string(), c.args.first(), c.args.get(1))
+                        };
+                        let amount = match amount {
+                            Some(a) => literal_value(a),
+                            None => Some(2f64.powi(128)),
                         };
                         if let Some(to) = to {
-                            dealt.insert(key(to));
+                            funding.push(Funding {
+                                op: i,
+                                who: aliases(ctx, vec![to], None),
+                                asset,
+                                amount,
+                            });
                         }
                     }
                     _ => {}
@@ -330,7 +493,11 @@ pub fn no_baseline(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
                         }
                     }
                     if !used.is_empty() {
-                        claims.push(Claim { op: i, reads: used });
+                        claims.push(Claim {
+                            op: i,
+                            reads: used,
+                            bound: claim_bound(c),
+                        });
                     }
                 }
             }
@@ -403,7 +570,24 @@ pub fn no_baseline(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
             continue;
         }
         let baselined = claim.reads.iter().any(|(r, subject)| {
-            has_baseline(r, claim.op) || (fresh.contains(subject) && !dealt.contains(subject))
+            if has_baseline(r, claim.op) {
+                return true;
+            }
+            let who = aliases(ctx, vec![], Some(&subject.who));
+            let funded: Vec<&Funding> = funding
+                .iter()
+                .filter(|f| f.op < claim.op && f.asset == subject.asset)
+                .filter(|f| !f.who.is_disjoint(&who))
+                .collect();
+            if funded.is_empty() {
+                let fresh_here = who.iter().any(|w| fresh.contains(w));
+                return fresh_here && !(subject.asset == ETHER && who.contains("this"));
+            }
+            // The test fixed this balance, then changed state before the
+            // claim: the claim measures from a known value.
+            funded.iter().any(|f| {
+                f.is_baseline_for(claim.bound) && writes.iter().any(|&w| w > f.op && w < claim.op)
+            })
         });
         if baselined {
             return;

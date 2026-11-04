@@ -5,8 +5,8 @@
   "suites": 869,
   "tests": 886,
   "files_with_parse_errors": 1,
-  "tests_with_any_finding": 630,
-  "tests_with_a_finding_other_than_RG08": 23,
+  "tests_with_any_finding": 627,
+  "tests_with_a_finding_other_than_RG08": 20,
   "rules": {
     "RG01": {
       "findings": {
@@ -43,9 +43,9 @@
     },
     "RG10": {
       "findings": {
-        "warn": 5
+        "warn": 2
       },
-      "tests": 5
+      "tests": 2
     },
     "RG11": {
       "findings": {

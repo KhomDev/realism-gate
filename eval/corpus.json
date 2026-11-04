@@ -1,0 +1,35 @@
+{
+  "in_sample": {
+    "repository": "https://github.com/SunWeb3Sec/DeFiHackLabs",
+    "license": "Apache-2.0",
+    "commit": "2c99b565ae24ea2006adf181da20c4419b3edc30",
+    "path": "src/test",
+    "dir": ".corpus/defihacklabs",
+    "note": "the commit docs/benchmark.md uses; the 0.1.0 rules were written against it",
+    "listing_sha256": "a7e8949a4b0613670edff919820aa793d0eca255e0b3f2f4fd6b243f2f803bc7",
+    "sol_files": 891
+  },
+  "later": {
+    "repository": "https://github.com/SunWeb3Sec/DeFiHackLabs",
+    "license": "Apache-2.0",
+    "commit": "d4bd931e758a375ed7fcecf52322dfeab54f8c0d",
+    "path": "src/test",
+    "dir": ".corpus/defihacklabs-later",
+    "only_new_vs": "in_sample",
+    "note": "upstream main as fetched on 2026-11-04 (committed 2026-10-30); only .sol files absent from the in-sample commit count. Labelled before the v0.2.0 fixes were written, and two of the fixed false-positive patterns were first seen here, so this is a second tuning set, not a held-out one",
+    "listing_sha256": "8b62f86ab1effa66ecc43ed6ab738dfacf814d81d6fef1ddf3b8f5cce712fa19",
+    "sol_files": 944,
+    "new_sol_files": 70,
+    "new_files_sha256": "318c8027cfa386766a32d71bb29f7b166bcc7d6e3a6dba17e15f09c8504eea24"
+  },
+  "fresh": {
+    "repository": "https://github.com/SunWeb3Sec/DeFiVulnLabs",
+    "license": "none stated in the repository; fetched for measurement only, never vendored, and the committed flag files omit its source text",
+    "commit": "f61f6ee5c3f89eb7685030647f8df19997596f8b",
+    "path": "src/test",
+    "dir": ".corpus/defivulnlabs",
+    "note": "a different corpus (local-deployment vulnerability demos, not fork reproductions); first opened after the v0.2.0 rule logic was frozen, and not used to change it",
+    "listing_sha256": "219497dfbf4b7d0fb34ea2f96d78a142b6bc12c39a17cd35f3b1db1f94d1c8b2",
+    "sol_files": 57
+  }
+}

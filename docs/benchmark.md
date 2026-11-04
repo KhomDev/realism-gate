@@ -35,9 +35,9 @@ says it fires on, and how often does it fire on something it should not".
 | Test suites | 869 |
 | Tests | 886 |
 | Files the parser could not fully parse | 1 |
-| Tests with no finding at all | 256 |
+| Tests with no finding at all | 259 |
 | Tests whose only finding is RG08 | 607 |
-| Tests with a finding other than RG08 | 23 |
+| Tests with a finding other than RG08 | 20 |
 
 The machine-readable version is `bench/defihacklabs.json`.
 
@@ -54,7 +54,12 @@ logs the attacker's balance before and after, and the reader compares the
 numbers. It is exactly the habit RG08 exists to break in a bounty PoC, where
 the triager should not have to trust a log line.
 
-### Every other finding, reviewed
+### Every other finding, reviewed (0.1.0)
+
+This table is the 0.1.0 review. In v0.2.0, RG10 raises 2 findings instead of 5:
+the three it dropped all read a balance the test had fixed itself with
+`deal`, `vm.deal` or a logging modifier. The labelled re-measurement that
+replaces this review is in `eval/` and `docs/precision.md`.
 
 | Rule | Findings | Tests | Correct | Debatable | False positive |
 |---|---:|---:|---:|---:|---:|
