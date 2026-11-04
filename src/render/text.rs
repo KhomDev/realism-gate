@@ -95,6 +95,16 @@ pub fn render(report: &Report, opts: TextOptions) -> String {
     if let Some(d) = &report.declaration {
         out.push_str(&format!("declaration  {d}\n"));
     }
+    if let Some(c) = &report.config {
+        out.push_str(&format!("config       {c}\n"));
+    }
+    if let Some(c) = &report.changed_since {
+        out.push_str(&format!(
+            "changed      {} since {}; findings elsewhere are not reported\n",
+            plural(c.files, "file", "files"),
+            c.git_ref
+        ));
+    }
     out.push('\n');
 
     let mut current_file: Option<&str> = None;

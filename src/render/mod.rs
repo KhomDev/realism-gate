@@ -1,7 +1,9 @@
 //! Output formats. JSON and SARIF are the stable, machine-readable interface;
-//! the text format is for people and may change between releases.
+//! the text and Markdown formats are for people and may change between
+//! releases.
 
 pub mod json;
+pub mod markdown;
 pub mod sarif;
 pub mod text;
 

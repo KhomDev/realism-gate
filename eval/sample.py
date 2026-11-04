@@ -59,6 +59,7 @@ def main(argv: list[str]) -> int:
     exclude: set[str] = set()
     for path in argv[2:]:
         exclude |= {f["id"] for f in load(path)}
+    sys.stdout.reconfigure(newline="\n")
     pool: dict[str, dict] = {}
     for path in argv[1].split(","):
         for f in load(path):

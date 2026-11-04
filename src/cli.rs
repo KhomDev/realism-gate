@@ -3,14 +3,17 @@
 //! Exit codes: 0 when no active finding reaches `--fail-on`, 1 when one does,
 //! 2 on a usage, input or declaration error.
 
+use crate::changed;
+use crate::config::{self, Config, Level};
 use crate::declaration::{self, Declaration};
-use crate::engine::{self, LoadedDeclaration, Options};
+use crate::engine::{self, ChangedSince, LoadedDeclaration, Options};
 use crate::finding::Severity;
 use crate::project::{self, Project};
 use crate::render::{self, text::TextOptions};
 use crate::rules::{self, RULES};
 use clap::{Parser, Subcommand, ValueEnum};
 use regex::Regex;
+use std::collections::BTreeMap;
 use std::io::{IsTerminal, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -30,6 +33,8 @@ pub struct Cli {
     pub command: Command,
 }
 
+// Parsed once per process; boxing the large variant would buy nothing.
+#[allow(clippy::large_enum_variant)]
 #[derive(Subcommand, Debug)]
 pub enum Command {
     /// Check test files or directories (default: ./test if it exists, else .).
@@ -89,6 +94,23 @@ pub struct CheckArgs {
     /// Also print findings silenced by an allow comment.
     #[arg(long)]
     pub show_suppressed: bool,
+    /// The configuration file. Defaults to ./realism-gate.toml if present.
+    #[arg(long, value_name = "FILE")]
+    pub config: Option<PathBuf>,
+    /// Ignore ./realism-gate.toml even if it exists.
+    #[arg(long, conflicts_with = "config")]
+    pub no_config: bool,
+    /// Set a rule's severity: RULE=error|warn|note|off. Overrides the config.
+    #[arg(long, value_delimiter = ',', value_name = "RULE=LEVEL")]
+    pub severity: Vec<String>,
+    /// Do not check tests in, or report findings in, paths matching this glob.
+    /// Adds to the config's `exclude`.
+    #[arg(long, value_name = "GLOB")]
+    pub exclude: Vec<String>,
+    /// Only report findings in files changed since this git revision
+    /// (committed, staged, unstaged or untracked). Everything is still read.
+    #[arg(long, value_name = "REF")]
+    pub changed_since: Option<String>,
     #[arg(long, value_enum, default_value_t = ColorChoice::Auto)]
     pub color: ColorChoice,
 }
@@ -98,6 +120,8 @@ pub enum Format {
     Text,
     Json,
     Sarif,
+    /// For a CI job summary or a pull-request comment.
+    Markdown,
 }
 
 #[derive(ValueEnum, Clone, Copy, Debug, PartialEq, Eq)]
@@ -245,13 +269,74 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
         _ => None,
     };
 
+    let config_path = match (&args.config, args.no_config) {
+        (Some(p), _) => Some(p.clone()),
+        (None, false) if Path::new(config::FILE_NAME).is_file() => {
+            Some(PathBuf::from(config::FILE_NAME))
+        }
+        _ => None,
+    };
+    let config = match &config_path {
+        Some(p) => {
+            let text = std::fs::read_to_string(p).map_err(|e| format!("{}: {e}", p.display()))?;
+            Config::parse(&text).map_err(|e| format!("{}: {e}", p.display()))?
+        }
+        None => Config::default(),
+    };
+
+    let only = resolve_rules(&args.rules)?;
+    let mut skip = resolve_rules(&args.skip)?;
+    // Flags win over the file: a rule named in --rules runs even if the
+    // config turns it off, and --severity replaces the config's level.
+    let mut levels = config.rules.clone();
+    for o in &args.severity {
+        if o.trim().is_empty() {
+            continue;
+        }
+        let (rule, level) = config::parse_override(o)?;
+        levels.insert(rule, level);
+    }
+    let mut severity = BTreeMap::new();
+    for (rule, level) in levels {
+        match level {
+            Level::Off if !only.contains(&rule) => {
+                skip.insert(rule);
+            }
+            Level::Off => {}
+            Level::Set(s) => {
+                severity.insert(rule, s);
+            }
+        }
+    }
+    let exclude = config
+        .exclude
+        .iter()
+        .chain(&args.exclude)
+        .map(|g| config::glob(g))
+        .collect::<Result<Vec<_>, _>>()?;
+    let changed = match &args.changed_since {
+        Some(r) => Some(changed::files(r, &cwd)?),
+        None => None,
+    };
+
     let opts = Options {
-        only: resolve_rules(&args.rules)?,
-        skip: resolve_rules(&args.skip)?,
+        only,
+        skip,
         match_test: compile(&args.match_test, "--match-test")?,
         match_contract: compile(&args.match_contract, "--match-contract")?,
+        severity,
+        exclude,
+        only_files: changed.clone(),
     };
-    let report = engine::analyze(&project, loaded.as_ref(), &opts);
+    let mut report = engine::analyze(&project, loaded.as_ref(), &opts);
+    report.config = config_path.map(|p| project::display_path(&p, &cwd));
+    report.changed_since = match (&args.changed_since, &changed) {
+        (Some(r), Some(files)) => Some(ChangedSince {
+            git_ref: r.clone(),
+            files: files.len(),
+        }),
+        _ => None,
+    };
 
     let to_terminal = args.output.is_none() && std::io::stdout().is_terminal();
     let color = match args.color {
@@ -270,6 +355,7 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
         ),
         Format::Json => render::json::render(&report),
         Format::Sarif => render::sarif::render(&report),
+        Format::Markdown => render::markdown::render(&report, args.fail_on.level()),
     };
     match &args.output {
         Some(path) => {

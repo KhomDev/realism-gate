@@ -131,7 +131,9 @@ pub fn code_replacement(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
         }
         out.push(Raw {
             rule: "RG05",
-            severity: by_phase(op, Severity::Error, Severity::Warn),
+            // Capped at warn: on the labelled corpora it was right on 2 of 5
+            // flags, below the 80% floor for an error (docs/precision.md).
+            severity: Severity::Warn,
             unit: op.unit,
             pos: op.pos,
             message: format!(

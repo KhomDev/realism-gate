@@ -90,7 +90,7 @@ fn rg04_storage_write() {
 fn rg05_code_replacement() {
     expect(
         "tests/fixtures/bad/RG05_code_replacement.t.sol",
-        &[("RG05", Error, 26)],
+        &[("RG05", Warn, 26)],
     );
 }
 

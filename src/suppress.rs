@@ -5,6 +5,9 @@
 //! vm.store(address(token), slot, bytes32(amount));
 //! ```
 //!
+//! The parentheses are optional: `realism-gate: allow RG04 <reason>` and
+//! `realism-gate: allow RG04, RG06 <reason>` mean the same thing.
+//!
 //! A directive applies to its own line and the line below it. It must give a
 //! reason; a bare `allow(RG04)` is ignored and the finding stays active, with a
 //! note in the output saying why.
@@ -22,7 +25,10 @@ pub struct Directive {
 fn pattern() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
     RE.get_or_init(|| {
-        Regex::new(r"(?://|/\*|^\s*\*)\s*realism-gate:\s*allow\(([^)]*)\)(.*)").expect("valid")
+        Regex::new(
+            r"(?i:(?://|/\*|^\s*\*)\s*realism-gate:\s*allow)(?:\(([^)]*)\)|\s+((?i:RG\d{2})(?:\s*,\s*(?i:RG\d{2}))*)\b)(.*)",
+        )
+        .expect("valid")
     })
 }
 
@@ -33,12 +39,16 @@ pub fn directives(source: &str) -> Vec<Directive> {
         let Some(caps) = pattern().captures(line) else {
             continue;
         };
-        let rules = caps[1]
+        let list = caps
+            .get(1)
+            .or_else(|| caps.get(2))
+            .map_or("", |m| m.as_str());
+        let rules = list
             .split(',')
             .map(|r| r.trim().to_ascii_uppercase())
             .filter(|r| !r.is_empty())
             .collect();
-        let reason = caps[2]
+        let reason = caps[3]
             .trim()
             .trim_end_matches("*/")
             .trim()
@@ -88,6 +98,21 @@ mod tests {
     #[test]
     fn text_outside_comments_is_not_a_directive() {
         assert!(directives("string s = \"realism-gate: allow(RG01) x\";").is_empty());
+    }
+
+    #[test]
+    fn parentheses_are_optional() {
+        let d = directives("// realism-gate: allow RG04, rg06 funding the attacker\nb();");
+        assert_eq!(d[0].rules, vec!["RG04", "RG06"]);
+        assert_eq!(d[0].reason, "funding the attacker");
+        let d = directives("x(); // realism-gate: allow RG11");
+        assert_eq!(d[0].rules, vec!["RG11"]);
+        assert_eq!(d[0].reason, "");
+    }
+
+    #[test]
+    fn a_word_after_allow_is_not_a_rule() {
+        assert!(directives("// realism-gate: allow everything").is_empty());
     }
 
     #[test]

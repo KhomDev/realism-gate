@@ -22,12 +22,38 @@ pub struct Options {
     pub skip: BTreeSet<String>,
     pub match_test: Option<Regex>,
     pub match_contract: Option<Regex>,
+    /// Rule id -> the severity every finding of that rule takes.
+    pub severity: BTreeMap<String, Severity>,
+    /// Displayed paths whose suites are not checked and whose findings are not
+    /// reported. Their contracts are still read as bases.
+    pub exclude: Vec<Regex>,
+    /// When set, only findings in these files, or raised in a suite defined
+    /// in one of them, are reported (`--changed-since`).
+    pub only_files: Option<BTreeSet<String>>,
 }
 
 impl Options {
     fn enabled(&self, rule: &str) -> bool {
         (self.only.is_empty() || self.only.contains(rule)) && !self.skip.contains(rule)
     }
+
+    fn excluded(&self, path: &str) -> bool {
+        self.exclude.iter().any(|re| re.is_match(path))
+    }
+
+    fn in_scope(&self, file: &str, suite_file: &str) -> bool {
+        self.only_files
+            .as_ref()
+            .is_none_or(|set| set.contains(file) || set.contains(suite_file))
+    }
+}
+
+/// `--changed-since`: the revision and how many files differ from it.
+#[derive(Debug, Clone, Serialize)]
+pub struct ChangedSince {
+    #[serde(rename = "ref")]
+    pub git_ref: String,
+    pub files: usize,
 }
 
 /// A declaration together with where it came from.
@@ -52,12 +78,18 @@ pub struct Summary {
     pub warnings: usize,
     pub notes: usize,
     pub suppressed: usize,
+    /// Allow comments ignored because they give no reason. The findings they
+    /// name stay active.
+    pub suppressions_ignored: usize,
 }
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Report {
     pub summary: Summary,
     pub declaration: Option<String>,
+    /// The `realism-gate.toml` that was applied, if any.
+    pub config: Option<String>,
+    pub changed_since: Option<ChangedSince>,
     pub findings: Vec<Finding>,
     pub parse_errors: Vec<ParseError>,
 }
@@ -92,7 +124,7 @@ pub fn analyze(
         ..Summary::default()
     };
 
-    let mut add = |raw: Raw, suite: &str, test: &str| {
+    let mut add = |raw: Raw, suite: &str, suite_file: &str, test: &str| {
         if !opts.enabled(raw.rule) {
             return;
         }
@@ -102,6 +134,9 @@ pub fn analyze(
         } else {
             (project.units[raw.unit].path.clone(), &directives[raw.unit])
         };
+        if opts.excluded(&file) || !opts.in_scope(&file, suite_file) {
+            return;
+        }
         let k = (file.clone(), raw.pos.line, raw.pos.col, raw.rule);
         if let Some(existing) = merged.get_mut(&k) {
             if !test.is_empty() && !existing.tests.iter().any(|t| t == test) {
@@ -126,7 +161,7 @@ pub fn analyze(
             Finding {
                 rule: info.id,
                 slug: info.slug,
-                severity: raw.severity,
+                severity: opts.severity.get(info.id).copied().unwrap_or(raw.severity),
                 file,
                 line: raw.pos.line,
                 column: raw.pos.col,
@@ -151,6 +186,10 @@ pub fn analyze(
         {
             continue;
         }
+        let suite_file = project.units[suite.unit].path.as_str();
+        if opts.excluded(suite_file) {
+            continue;
+        }
         summary.suites += 1;
         for test in &suite.tests {
             if let Some(re) = &opts.match_test
@@ -167,13 +206,13 @@ pub fn analyze(
                 env.declared_privileged = d.decl.privileged_identities().collect();
             }
             for raw in rules::check_test(project, &suite, &tr, &env) {
-                add(raw, &suite.contract.name, &test.name);
+                add(raw, &suite.contract.name, suite_file, &test.name);
             }
         }
     }
     if let Some(d) = declaration {
         for raw in d.decl.check(DECLARATION_UNIT, d.text) {
-            add(raw, "", "");
+            add(raw, "", "", "");
         }
     }
 
@@ -182,6 +221,9 @@ pub fn analyze(
         (&a.file, a.line, a.column, a.rule).cmp(&(&b.file, b.line, b.column, b.rule))
     });
     for f in &findings {
+        if f.ignored_suppression.is_some() {
+            summary.suppressions_ignored += 1;
+        }
         if !f.is_active() {
             summary.suppressed += 1;
             continue;
@@ -205,6 +247,8 @@ pub fn analyze(
     Report {
         summary,
         declaration: declaration.map(|d| d.path.clone()),
+        config: None,
+        changed_since: None,
         findings,
         parse_errors,
     }

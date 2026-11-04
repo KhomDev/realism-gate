@@ -211,3 +211,36 @@ jobs:
       # update the document in the same pull request.
       - name: Measure and compare
         run: bash scripts/bench-corpus.sh --check
+
+  # ------------------------------------------- the published precision numbers
+  eval:
+    name: precision evaluation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install toolchain
+        run: rustup toolchain install stable --profile minimal
+
+      - name: Build
+        run: cargo build --release --locked
+
+      # The "before" side of every before/after figure is the 0.1.0 release
+      # binary itself, checked against the release's SHA256SUMS.
+      - name: Fetch the 0.1.0 release binary
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -eu
+          mkdir -p /tmp/rg010 && cd /tmp/rg010
+          gh release download v0.1.0 --repo KhomDev/realism-gate \
+            --pattern 'realism-gate-0.1.0-x86_64-unknown-linux-gnu.tar.gz' --pattern SHA256SUMS
+          sha256sum -c SHA256SUMS --ignore-missing
+          tar xzf realism-gate-0.1.0-x86_64-unknown-linux-gnu.tar.gz
+
+      # Regenerates every flag file and the precision tables from the pinned
+      # corpora and the committed labels, and fails if anything differs or if
+      # a rule below the 80% floor ships as error (ruling R3).
+      - name: Reproduce the evaluation
+        run: bash eval/run.sh /tmp/rg010/realism-gate-0.1.0-x86_64-unknown-linux-gnu/realism-gate target/release/realism-gate --check

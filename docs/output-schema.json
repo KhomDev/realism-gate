@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/KhomDev/realism-gate/blob/main/docs/output-schema.json",
+  "title": "realism-gate check --format json, schema 1",
+  "description": "Within schema 1 fields are only added, never removed or redefined. A consumer should ignore fields it does not know. tests/schema.rs checks real output against this file.",
+  "type": "object",
+  "required": ["tool", "version", "schema", "summary", "declaration", "config", "changed_since", "findings", "parse_errors"],
+  "additionalProperties": false,
+  "properties": {
+    "tool": { "type": "string", "enum": ["realism-gate"] },
+    "version": { "type": "string", "description": "The realism-gate version that wrote the report." },
+    "schema": { "type": "integer", "enum": [1] },
+    "summary": {
+      "type": "object",
+      "required": ["files", "suites", "tests", "errors", "warnings", "notes", "suppressed", "suppressions_ignored"],
+      "additionalProperties": false,
+      "properties": {
+        "files": { "type": "integer", "description": "Solidity files read." },
+        "suites": { "type": "integer", "description": "Test contracts checked." },
+        "tests": { "type": "integer", "description": "Test functions checked." },
+        "errors": { "type": "integer", "description": "Active findings at error." },
+        "warnings": { "type": "integer", "description": "Active findings at warn." },
+        "notes": { "type": "integer", "description": "Active findings at note." },
+        "suppressed": { "type": "integer", "description": "Findings silenced by an allow comment with a reason." },
+        "suppressions_ignored": { "type": "integer", "description": "Allow comments ignored because they give no reason; their findings stay active. Added in 0.2.0." }
+      }
+    },
+    "declaration": { "type": ["string", "null"], "description": "Path of the realism.yaml applied." },
+    "config": { "type": ["string", "null"], "description": "Path of the realism-gate.toml applied. Added in 0.2.0." },
+    "changed_since": {
+      "description": "Set with --changed-since: findings are limited to files changed since this revision. Added in 0.2.0.",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["ref", "files"],
+          "additionalProperties": false,
+          "properties": {
+            "ref": { "type": "string" },
+            "files": { "type": "integer", "description": "Files that differ from ref, of any kind." }
+          }
+        }
+      ]
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rule", "slug", "severity", "file", "line", "column", "suite", "tests", "message", "evidence", "help"],
+        "additionalProperties": false,
+        "properties": {
+          "rule": { "type": "string", "description": "RG01 .. RG14." },
+          "slug": { "type": "string" },
+          "severity": { "type": "string", "enum": ["error", "warn", "note"] },
+          "file": { "type": "string", "description": "Relative to the working directory, forward slashes." },
+          "line": { "type": "integer" },
+          "column": { "type": "integer" },
+          "suite": { "type": "string", "description": "The test contract; empty for a finding on the declaration." },
+          "tests": { "type": "array", "items": { "type": "string" } },
+          "message": { "type": "string" },
+          "evidence": { "type": "string", "description": "The source the finding points at, on one line." },
+          "help": { "type": "string" },
+          "suppressed": {
+            "type": "object",
+            "description": "Present when an allow comment with a reason silenced the finding.",
+            "required": ["line", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "line": { "type": "integer" },
+              "reason": { "type": "string" }
+            }
+          },
+          "ignored_suppression": { "type": "integer", "description": "Line of an allow comment ignored for lack of a reason." }
+        }
+      }
+    },
+    "parse_errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["file", "message"],
+        "additionalProperties": false,
+        "properties": {
+          "file": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  }
+}

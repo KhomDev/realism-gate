@@ -117,7 +117,7 @@ In CI, see [docs/ci.md](docs/ci.md). The short version:
 | [RG02](docs/rules/RG02.md) `privileged-step-in-exploit` | warn | the test body pranks as an owner, admin, keeper, or a protocol contract |
 | [RG03](docs/rules/RG03.md) `deployer-is-attacker` | warn | the test deploys the protocol and then attacks it as the deployer |
 | [RG04](docs/rules/RG04.md) `storage-write` | error | `vm.store` writes a slot of a contract under review |
-| [RG05](docs/rules/RG05.md) `code-replacement` | error | `vm.etch` or `deployCodeTo` replaces a dependency's code |
+| [RG05](docs/rules/RG05.md) `code-replacement` | warn | `vm.etch` or `deployCodeTo` replaces a dependency's code |
 | [RG06](docs/rules/RG06.md) `balance-injection` | error | `deal()` writes a protocol contract's balance |
 | [RG07](docs/rules/RG07.md) `mocked-call` | warn | `vm.mockCall` makes a dependency return a value it would not |
 | [RG08](docs/rules/RG08.md) `no-assertion` | error | the test asserts nothing (warn if it only logs) |
@@ -136,15 +136,21 @@ and is reported one level lower than the same cheat in the exploit.
 
 ```text
 realism-gate check [PATHS]...      default: ./test if it exists, else .
-    --format text|json|sarif       json and sarif are the stable interfaces
+    --format text|json|sarif|markdown
+                                   json and sarif are the stable interfaces
     --output FILE
     --fail-on error|warn|note|never   default: error
     --rules RG04,RG06              run only these
     --skip RG08                    skip these
+    --severity RG05=error          set a rule's level (error|warn|note|off)
+    --exclude 'test/legacy/**'     do not check or report these paths
+    --changed-since origin/main    only report findings in changed files
     --match-test REGEX
     --match-contract REGEX
     --declaration FILE             default: ./realism.yaml if present
     --no-declaration
+    --config FILE                  default: ./realism-gate.toml if present
+    --no-config
     --show-suppressed
 realism-gate rules [--format json]
 realism-gate explain RULE [--markdown]
@@ -152,7 +158,30 @@ realism-gate init                  write a realism.yaml template
 ```
 
 Exit status: `0` no active finding at or above `--fail-on`; `1` there is one;
-`2` usage, input or declaration error, or no test suite found at all.
+`2` usage, input, configuration or declaration error, or no test suite found
+at all. The JSON format is described by
+[docs/output-schema.json](docs/output-schema.json).
+
+### Configuration
+
+An optional `realism-gate.toml` next to where you run it:
+
+```toml
+exclude = ["test/legacy/**"]   # not checked, not reported
+
+[rules]
+RG11 = "off"                   # error | warn | note | off
+RG05 = "error"
+```
+
+Flags override it: `--rules` runs a rule the file turns off, `--severity`
+replaces a level, `--exclude` adds patterns.
+
+### Only what changed
+
+`--changed-since REF` still reads every file (inheritance needs them) but
+reports only findings in files that differ from `REF`, including uncommitted
+and untracked ones. It runs the local `git`; it never fetches.
 
 ### Silencing a finding
 
@@ -161,8 +190,9 @@ Exit status: `0` no active finding at or above `--fail-on`; `1` there is one;
 vm.createSelectFork("mainnet");
 ```
 
-The comment applies to its own line and the next one. It must give a reason;
-a bare `allow(RG11)` is ignored, and the output says so. Silenced findings
+`// realism-gate: allow RG11 <reason>` (no parentheses) works too. The comment
+applies to its own line and the next one. It must give a reason; a bare
+`allow(RG11)` is ignored, and the output counts it (`suppressions_ignored`). Silenced findings
 stay in the JSON and SARIF output, marked as suppressed.
 
 ### Declaring the attacker model
@@ -190,21 +220,26 @@ A declaration replaces the name heuristics, silences RG02 for declared roles,
 and enables the boundary rules RG12-RG14. See
 [docs/declaration.md](docs/declaration.md).
 
-## Measured on a public corpus
+## Measured on public corpora
 
 On the 886 tests of [DeFiHackLabs](https://github.com/SunWeb3Sec/DeFiHackLabs)
 at a pinned commit (reproductions of real exploits, not bounty submissions):
 
 - **611 tests (69.0%) assert nothing.** 595 log values a reader has to trust.
-- **23 tests** have a finding beyond that. I read all 33 of those findings in
-  context: **28 correct, 2 debatable, 3 false positives**, all three in RG05
-  and documented on its page.
-- The whole corpus is analysed in about two seconds.
+- **20 tests** have a finding beyond that.
+- The whole corpus is analysed in under a second on a laptop
+  ([eval/perf](eval/perf)).
 
-The numbers are in-sample (the corpus was used while the rules were written),
-and the review is one person's judgement. CI re-measures them on every change.
-Method, the per-rule table and what reading the corpus changed:
-[docs/benchmark.md](docs/benchmark.md).
+For v0.2.0 a sample of every rule's flags was labelled by reading the source
+around each one, on that corpus, on 70 files added to it later, and on a
+second corpus never used for tuning. Most rules were right on every labelled
+flag. Two were not: RG10 was right on 2 of 5 in-sample flags in 0.1.0 (the
+fix brings it to 2 of 2, at the cost of one true positive on the later
+files), and RG05 is right on 2 of 5 overall, so it is now a warning, never an
+error. Small counts carry wide intervals, and nothing here measures recall.
+The tables, the intervals and what the numbers do not cover:
+[docs/precision.md](docs/precision.md). Everything is regenerated and compared
+in CI.
 
 ## What it cannot tell you
 

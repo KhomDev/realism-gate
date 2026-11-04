@@ -29,8 +29,7 @@
     },
     "RG05": {
       "findings": {
-        "error": 3,
-        "warn": 1
+        "warn": 4
       },
       "tests": 4
     },
