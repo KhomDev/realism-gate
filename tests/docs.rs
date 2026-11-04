@@ -83,3 +83,15 @@ fn readme_example_is_current() {
         "README example is stale; run with REALISM_GATE_BLESS=1"
     );
 }
+
+/// `uses: KhomDev/realism-gate@v0` must download the release it belongs to,
+/// so the action's default version moves with the crate version.
+#[test]
+fn action_default_version_is_the_crate_version() {
+    let action = std::fs::read_to_string(root().join("action.yml")).unwrap();
+    let want = format!("RG_DEFAULT_VERSION: v{}", env!("CARGO_PKG_VERSION"));
+    assert!(
+        action.lines().any(|l| l.trim() == want),
+        "action.yml must set `{want}`"
+    );
+}

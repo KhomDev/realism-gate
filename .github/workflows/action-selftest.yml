@@ -1,0 +1,164 @@
+name: action self-test
+
+# Runs the action from this checkout (`uses: ./`) on fixtures whose result is
+# known, on Linux, macOS and Windows, and asserts its outputs and outcome. The
+# binary is built from this checkout and passed with the `binary` input, so
+# the test does not depend on a published release; the download path is
+# covered by verify-release.yml after a release.
+
+on:
+  push:
+    branches: [main, "release/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  selftest:
+    name: self-test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            bin: target/debug/realism-gate
+          - os: macos-latest
+            bin: target/debug/realism-gate
+          - os: windows-latest
+            bin: target/debug/realism-gate.exe
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install toolchain
+        run: rustup toolchain install stable --profile minimal
+
+      - name: Build
+        run: cargo build --locked
+
+      - name: Make the empty and no-test inputs
+        shell: bash
+        run: |
+          mkdir -p selftest/empty selftest/notests
+          printf 'pragma solidity ^0.8.20;\ncontract Lib { function f() public {} }\n' > selftest/notests/Lib.sol
+
+      # --- clean: passes, nothing found
+      - id: clean
+        uses: ./
+        with:
+          binary: ${{ matrix.bin }}
+          path: tests/fixtures/good
+          changed-only: "false"
+          comment: "false"
+
+      # --- warn-only: passes at fail-on error, fails at fail-on warn
+      - id: warn_pass
+        uses: ./
+        with:
+          binary: ${{ matrix.bin }}
+          path: tests/fixtures/bad/RG11_unpinned_fork.t.sol
+          changed-only: "false"
+          comment: "false"
+      - id: warn_fail
+        continue-on-error: true
+        uses: ./
+        with:
+          binary: ${{ matrix.bin }}
+          path: tests/fixtures/bad/RG11_unpinned_fork.t.sol
+          fail-on: warn
+          changed-only: "false"
+          comment: "false"
+
+      # --- error: fails by default, passes at fail-on none; a glob path
+      - id: error_fail
+        continue-on-error: true
+        uses: ./
+        with:
+          binary: ${{ matrix.bin }}
+          path: tests/fixtures/bad/RG06_*.sol
+          changed-only: "false"
+          comment: "false"
+          sarif: "false"
+      - id: error_none
+        uses: ./
+        with:
+          binary: ${{ matrix.bin }}
+          path: tests/fixtures/bad/RG06_*.sol
+          fail-on: none
+          changed-only: "false"
+          comment: "false"
+
+      # --- empty path and no Foundry tests: usage errors (exit 2), never a pass
+      - id: empty
+        continue-on-error: true
+        uses: ./
+        with:
+          binary: ${{ matrix.bin }}
+          path: selftest/empty
+          changed-only: "false"
+          comment: "false"
+      - id: notests
+        continue-on-error: true
+        uses: ./
+        with:
+          binary: ${{ matrix.bin }}
+          path: selftest/notests
+          fail-on: none
+          changed-only: "false"
+          comment: "false"
+
+      # --- the 0.1.0 input names still work
+      - id: legacy
+        continue-on-error: true
+        uses: ./
+        with:
+          binary: ${{ matrix.bin }}
+          paths: tests/fixtures/bad/RG06_balance_injection.t.sol
+          changed-only: "false"
+          comment: "false"
+
+      - name: Assert outcomes and outputs
+        shell: bash
+        env:
+          R: ${{ toJSON(steps) }}
+        run: |
+          set -eu
+          fail=0
+          check() {
+            # check STEP FIELD EXPECTED
+            got=$(printf '%s' "$R" | python3 -c "import json,sys; s=json.load(sys.stdin)['$1']; print(s['outcome'] if '$2'=='outcome' else s['outputs'].get('$2',''))" 2>/dev/null \
+               || printf '%s' "$R" | python -c "import json,sys; s=json.load(sys.stdin)['$1']; print(s['outcome'] if '$2'=='outcome' else s['outputs'].get('$2',''))")
+            got=$(printf '%s' "$got" | tr -d '\r')
+            if [ "$got" = "$3" ]; then echo "ok    $1.$2 = $3"; else echo "FAIL  $1.$2 = '$got', expected '$3'"; fail=1; fi
+          }
+          check clean outcome success
+          check clean exit-code 0
+          check clean errors 0
+          check warn_pass outcome success
+          check warn_pass warnings 1
+          check warn_fail outcome failure
+          check warn_fail exit-code 1
+          check error_fail outcome failure
+          check error_fail exit-code 1
+          check error_fail errors 1
+          check error_none outcome success
+          check error_none errors 1
+          check empty outcome failure
+          check empty exit-code 2
+          check notests outcome failure
+          check notests exit-code 2
+          check legacy outcome failure
+          check legacy errors 1
+          exit $fail
+
+      - name: The summary is the Markdown report
+        shell: bash
+        env:
+          MD: ${{ steps.error_none.outputs.markdown }}
+        run: |
+          set -eu
+          grep -q 'RG06' "$MD"
+          grep -q 'PASS' "$MD"
+          head -n 5 "$MD"

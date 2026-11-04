@@ -1,122 +1,331 @@
-name: realism-gate
-description: Check Foundry PoC tests for what makes a passing PoC prove less than it claims.
+name: realism-gate PoC check
+description: Flag what makes a Foundry proof of concept prove less than it claims. Static, no Rust toolchain needed.
 author: KhomDev
 branding:
   icon: shield
   color: gray-dark
 
 inputs:
+  path:
+    description: Files, directories or globs of Foundry tests, space-separated.
+    required: false
+    default: test/
   version:
-    description: Release to run, e.g. v0.1.0. Defaults to the action's own ref when it is a release tag.
+    description: realism-gate release to run, e.g. v0.2.0. Empty means the release this action belongs to.
     required: false
     default: ""
-  paths:
-    description: Space-separated files or directories to check.
+  changed-only:
+    description: On a pull request (or push), report only findings in files it changes. Everything is still read.
     required: false
-    default: test
+    default: "true"
   fail-on:
-    description: error, warn, note or never.
+    description: none, note, warn or error. The job fails on a finding at or above this level.
     required: false
     default: error
+  comment:
+    description: On a pull request, keep one comment with the results, edited in place (needs pull-requests write).
+    required: false
+    default: "true"
+  sarif:
+    description: Also write SARIF and upload it to GitHub code scanning (needs security-events write).
+    required: false
+    default: "false"
   declaration:
     description: Path to a realism.yaml. Empty means ./realism.yaml if it exists.
     required: false
     default: ""
   args:
-    description: Extra arguments passed to `realism-gate check`.
+    description: Extra arguments for `realism-gate check`.
+    required: false
+    default: ""
+  github-token:
+    description: Token for the PR comment and for fetching the base commit.
+    required: false
+    default: ${{ github.token }}
+  binary:
+    description: For testing this action. A realism-gate binary to run instead of downloading one.
+    required: false
+    default: ""
+  paths:
+    description: Deprecated (0.1.0 name of `path`). Used when set.
     required: false
     default: ""
   upload-sarif:
-    description: Upload the results to GitHub code scanning (needs security-events write).
+    description: Deprecated (0.1.0 name of `sarif`). "true" turns `sarif` on.
     required: false
     default: "false"
 
 outputs:
+  exit-code:
+    description: 0 clean, 1 a finding at or above fail-on, 2 usage or input error.
+    value: ${{ steps.run.outputs.exit-code }}
+  errors:
+    description: Active findings at error.
+    value: ${{ steps.run.outputs.errors }}
+  warnings:
+    description: Active findings at warn.
+    value: ${{ steps.run.outputs.warnings }}
+  notes:
+    description: Active findings at note.
+    value: ${{ steps.run.outputs.notes }}
+  version:
+    description: The realism-gate version that ran.
+    value: ${{ steps.install.outputs.version }}
+  report:
+    description: Path of the JSON report.
+    value: ${{ steps.run.outputs.report }}
+  markdown:
+    description: Path of the Markdown summary (what the comment and step summary show).
+    value: ${{ steps.run.outputs.markdown }}
   sarif:
-    description: Path of the SARIF report.
+    description: Path of the SARIF report, when `sarif` is on.
     value: ${{ steps.run.outputs.sarif }}
+  comment:
+    description: "posted, updated, skipped, or failed: what happened to the PR comment."
+    value: ${{ steps.comment.outputs.result }}
 
 runs:
   using: composite
   steps:
-    - name: Download and verify realism-gate
+    - name: Install realism-gate
       id: install
       shell: bash
       env:
         RG_VERSION: ${{ inputs.version }}
         RG_ACTION_REF: ${{ github.action_ref }}
+        RG_BINARY: ${{ inputs.binary }}
+        # The release this copy of the action belongs to. tests/docs.rs keeps
+        # it equal to the crate version, so `@v0` runs the newest v0 release.
+        RG_DEFAULT_VERSION: v0.1.0
       run: |
         set -euo pipefail
-        version="$RG_VERSION"
-        if [ -z "$version" ]; then
-          case "$RG_ACTION_REF" in
-            v*) version="$RG_ACTION_REF" ;;
-            *) echo "::error::set the 'version' input (the action ref '$RG_ACTION_REF' is not a release tag)"; exit 1 ;;
+        if [ -n "$RG_BINARY" ]; then
+          bin="$(cd "$(dirname "$RG_BINARY")" && pwd)/$(basename "$RG_BINARY")"
+          version="$("$bin" --version | tr -d '\r' | awk '{print $2}')"
+          echo "::notice::running the given binary $RG_BINARY ($version), not a release download"
+        else
+          version="$RG_VERSION"
+          if [ -z "$version" ]; then
+            if [[ "$RG_ACTION_REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-.].*)?$ ]]; then
+              version="$RG_ACTION_REF"
+            else
+              version="$RG_DEFAULT_VERSION"
+            fi
+          fi
+          case "$version" in v*) ;; *) version="v$version" ;; esac
+          case "${RUNNER_OS}-${RUNNER_ARCH}" in
+            Linux-X64) target=x86_64-unknown-linux-musl; ext=tar.gz ;;
+            Linux-ARM64) target=aarch64-unknown-linux-musl; ext=tar.gz ;;
+            macOS-X64) target=x86_64-apple-darwin; ext=tar.gz ;;
+            macOS-ARM64) target=aarch64-apple-darwin; ext=tar.gz ;;
+            Windows-X64) target=x86_64-pc-windows-msvc; ext=zip ;;
+            *) echo "::error::no realism-gate build for ${RUNNER_OS}-${RUNNER_ARCH}"; exit 1 ;;
           esac
+          name="realism-gate-${version#v}-$target"
+          base="https://github.com/KhomDev/realism-gate/releases/download/$version"
+          dir="$RUNNER_TEMP/realism-gate-$version"
+          mkdir -p "$dir"
+          cd "$dir"
+          curl -fsSL --retry 3 -o "$name.$ext" "$base/$name.$ext"
+          curl -fsSL --retry 3 -o SHA256SUMS "$base/SHA256SUMS"
+          # The archive must be listed, and must match.
+          grep " ./$name.$ext\$" SHA256SUMS | sed 's# \./# #' > check.txt
+          test -s check.txt
+          if command -v sha256sum >/dev/null 2>&1; then
+            sha256sum -c check.txt
+          else
+            shasum -a 256 -c check.txt
+          fi
+          if [ "$ext" = zip ]; then
+            unzip -q -o "$name.zip"
+            bin="$dir/$name/realism-gate.exe"
+          else
+            tar xzf "$name.tar.gz"
+            bin="$dir/$name/realism-gate"
+          fi
+          version="${version#v}"
         fi
-        case "${RUNNER_OS}-${RUNNER_ARCH}" in
-          Linux-X64) target=x86_64-unknown-linux-gnu; ext=tar.gz ;;
-          Linux-ARM64) target=aarch64-unknown-linux-gnu; ext=tar.gz ;;
-          macOS-X64) target=x86_64-apple-darwin; ext=tar.gz ;;
-          macOS-ARM64) target=aarch64-apple-darwin; ext=tar.gz ;;
-          Windows-X64) target=x86_64-pc-windows-msvc; ext=zip ;;
-          *) echo "::error::no realism-gate build for ${RUNNER_OS}-${RUNNER_ARCH}"; exit 1 ;;
-        esac
-        name="realism-gate-${version#v}-$target"
-        base="https://github.com/KhomDev/realism-gate/releases/download/$version"
-        dir="$RUNNER_TEMP/realism-gate"
-        mkdir -p "$dir"
-        cd "$dir"
-        curl -fsSL -o "$name.$ext" "$base/$name.$ext"
-        curl -fsSL -o SHA256SUMS "$base/SHA256SUMS"
-        grep " ./$name.$ext\$" SHA256SUMS | sed 's# \./# #' > check.txt
-        test -s check.txt
-        if command -v sha256sum >/dev/null 2>&1; then
-          sha256sum -c check.txt
-        else
-          shasum -a 256 -c check.txt
-        fi
-        if [ "$ext" = zip ]; then
-          unzip -q -o "$name.zip" -d "$name"
-          bin="$dir/$name/realism-gate.exe"
-        else
-          tar xzf "$name.tar.gz"
-          bin="$dir/$name/realism-gate"
-        fi
+        "$bin" --version
         echo "bin=$bin" >> "$GITHUB_OUTPUT"
+        echo "version=$version" >> "$GITHUB_OUTPUT"
 
     - name: Run realism-gate
       id: run
       shell: bash
       env:
         RG_BIN: ${{ steps.install.outputs.bin }}
-        RG_PATHS: ${{ inputs.paths }}
+        RG_PATH: ${{ inputs.path }}
+        RG_PATHS_OLD: ${{ inputs.paths }}
         RG_FAIL_ON: ${{ inputs.fail-on }}
+        RG_CHANGED_ONLY: ${{ inputs.changed-only }}
+        RG_SARIF: ${{ inputs.sarif }}
+        RG_UPLOAD_SARIF_OLD: ${{ inputs.upload-sarif }}
         RG_DECLARATION: ${{ inputs.declaration }}
         RG_ARGS: ${{ inputs.args }}
+        RG_EVENT: ${{ github.event_name }}
+        RG_PR_BASE: ${{ github.event.pull_request.base.sha }}
+        RG_PUSH_BEFORE: ${{ github.event.before }}
       run: |
-        set -uo pipefail
-        sarif="$RUNNER_TEMP/realism-gate.sarif"
-        decl=()
-        if [ -n "$RG_DECLARATION" ]; then decl=(--declaration "$RG_DECLARATION"); fi
-        # shellcheck disable=SC2086
-        "$RG_BIN" check $RG_PATHS "${decl[@]}" --format sarif --output "$sarif" --fail-on never $RG_ARGS
-        echo "sarif=$sarif" >> "$GITHUB_OUTPUT"
-        # shellcheck disable=SC2086
-        "$RG_BIN" check $RG_PATHS "${decl[@]}" --color always --fail-on "$RG_FAIL_ON" $RG_ARGS
+        # No `set -u`: macOS runners may run bash 3.2, where an empty array
+        # counts as unset.
+        set -o pipefail
+        out="$RUNNER_TEMP/realism-gate-out"
+        mkdir -p "$out"
+        report="$out/report.json"
+        md="$out/summary.md"
+        sarif=""
+        {
+          echo "report=$report"
+          echo "markdown=$md"
+        } >> "$GITHUB_OUTPUT"
+
+        case "$RG_FAIL_ON" in
+          none|never) fail_on=never ;;
+          note|warn|error) fail_on="$RG_FAIL_ON" ;;
+          *) echo "::error::fail-on must be none, note, warn or error, not '$RG_FAIL_ON'"; exit 2 ;;
+        esac
+
+        # Paths: `paths` (0.1.0) wins when set; globs are expanded here.
+        spec="${RG_PATHS_OLD:-$RG_PATH}"
+        [ -n "${spec// /}" ] || spec="test/"
+        shopt -s globstar 2>/dev/null || true
+        shopt -s nullglob
+        paths=()
+        for p in $spec; do
+          matches=( $p )
+          if [ ${#matches[@]} -gt 0 ]; then
+            paths+=( "${matches[@]}" )
+          else
+            paths+=( "$p" )
+          fi
+        done
+        shopt -u nullglob
+
+        flags=()
+        if [ -n "$RG_DECLARATION" ]; then flags+=(--declaration "$RG_DECLARATION"); fi
+
+        # changed-only: compare with the PR base, or the commit before a push.
+        if [ "$RG_CHANGED_ONLY" = "true" ]; then
+          base=""
+          case "$RG_EVENT" in
+            pull_request|pull_request_target|merge_group) base="$RG_PR_BASE" ;;
+            push) base="$RG_PUSH_BEFORE" ;;
+          esac
+          if [ -n "$base" ] && [ "$base" != "0000000000000000000000000000000000000000" ]; then
+            if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+              git fetch --no-tags --quiet --depth=1 origin "$base" 2>/dev/null || true
+            fi
+            if git cat-file -e "$base^{commit}" 2>/dev/null; then
+              flags+=(--changed-since "$base")
+            else
+              echo "::warning::changed-only: base commit $base is not in the clone and could not be fetched; checking everything"
+            fi
+          else
+            echo "::notice::changed-only: no base commit for a '$RG_EVENT' event; checking everything"
+          fi
+        fi
+
+        # shellcheck disable=SC2206
+        extra=( $RG_ARGS )
+        "$RG_BIN" check "${paths[@]}" "${flags[@]}" "${extra[@]}" --format json --output "$report" --fail-on "$fail_on" 2> "$out/stderr.txt"
         status=$?
-        echo "status=$status" >> "$GITHUB_OUTPUT"
+        echo "exit-code=$status" >> "$GITHUB_OUTPUT"
+        if [ "$status" = 2 ]; then
+          {
+            echo "### realism-gate: could not check"
+            echo
+            echo '```text'
+            cat "$out/stderr.txt"
+            echo '```'
+            echo
+            echo "Paths: \`${paths[*]}\`. A path with no Foundry test is an error, not a pass."
+          } > "$md"
+          cat "$md" >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::realism-gate: $(head -n1 "$out/stderr.txt")"
+          echo "errors=0" >> "$GITHUB_OUTPUT"
+          echo "warnings=0" >> "$GITHUB_OUTPUT"
+          echo "notes=0" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        cat "$out/stderr.txt" >&2
+
+        "$RG_BIN" check "${paths[@]}" "${flags[@]}" "${extra[@]}" --format markdown --output "$md" --fail-on "$fail_on" 2>/dev/null
+        if [ "$RG_SARIF" = "true" ] || [ "$RG_UPLOAD_SARIF_OLD" = "true" ]; then
+          sarif="$out/realism-gate.sarif"
+          "$RG_BIN" check "${paths[@]}" "${flags[@]}" "${extra[@]}" --format sarif --output "$sarif" --fail-on never 2>/dev/null
+          echo "sarif=$sarif" >> "$GITHUB_OUTPUT"
+        fi
+        # Counts for the outputs, from the stable JSON.
+        for level in errors warnings notes; do
+          n=$(grep -m1 "\"$level\":" "$report" | tr -dc '0-9')
+          echo "$level=${n:-0}" >> "$GITHUB_OUTPUT"
+        done
+        cat "$md" >> "$GITHUB_STEP_SUMMARY"
+        # Also print the findings in the log, for people reading it there.
+        "$RG_BIN" check "${paths[@]}" "${flags[@]}" "${extra[@]}" --color always --fail-on never 2>/dev/null || true
+        exit 0
+
+    - name: Comment on the pull request
+      id: comment
+      if: inputs.comment == 'true' && github.event.pull_request.number != ''
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        RG_MD: ${{ steps.run.outputs.markdown }}
+        RG_REPO: ${{ github.repository }}
+        RG_PR: ${{ github.event.pull_request.number }}
+        RG_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        # The job id is [A-Za-z0-9_-]: safe inside the jq filter below.
+        RG_MARKER: "<!-- realism-gate job=${{ github.job }} -->"
+      run: |
+        set -o pipefail
+        note() {
+          echo "result=$1" >> "$GITHUB_OUTPUT"
+          if [ -n "${2:-}" ]; then
+            printf '\n> %s\n' "$2" >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice::$2"
+          fi
+        }
+        # A pull request from a fork gets a read-only token: no comment is
+        # possible, and that is not a failure. docs/ci.md shows the safe
+        # follow-up workflow for commenting on fork pull requests.
+        if [ -n "$RG_HEAD_REPO" ] && [ "$RG_HEAD_REPO" != "$RG_REPO" ]; then
+          note skipped "realism-gate: this pull request comes from a fork, so its token cannot comment. The results are in this job summary."
+          exit 0
+        fi
+        body="$RUNNER_TEMP/realism-gate-out/comment.md"
+        { echo "$RG_MARKER"; cat "$RG_MD"; } > "$body"
+        # One comment per job id, found by its hidden marker and edited in
+        # place, never a new one per push.
+        id=$(gh api --paginate "repos/$RG_REPO/issues/$RG_PR/comments" \
+              --jq ".[] | select(.body | startswith(\"$RG_MARKER\")) | .id" 2>/dev/null | head -n1)
+        if [ -n "$id" ]; then
+          if gh api --method PATCH "repos/$RG_REPO/issues/comments/$id" -F "body=@$body" >/dev/null 2>"$RUNNER_TEMP/realism-gate-out/gh.txt"; then
+            note updated
+          else
+            note failed "realism-gate: could not update the PR comment ($(head -n1 "$RUNNER_TEMP/realism-gate-out/gh.txt")). The results are in this job summary."
+          fi
+        elif gh api --method POST "repos/$RG_REPO/issues/$RG_PR/comments" -F "body=@$body" >/dev/null 2>"$RUNNER_TEMP/realism-gate-out/gh.txt"; then
+          note posted
+        else
+          note failed "realism-gate: could not comment on the PR ($(head -n1 "$RUNNER_TEMP/realism-gate-out/gh.txt")); it needs pull-requests: write. The results are in this job summary."
+        fi
         exit 0
 
     - name: Upload SARIF
-      if: inputs.upload-sarif == 'true'
+      if: steps.run.outputs.sarif != '' && (github.event.pull_request.head.repo.full_name == '' || github.event.pull_request.head.repo.full_name == github.repository)
       uses: github/codeql-action/upload-sarif@v4
       with:
         sarif_file: ${{ steps.run.outputs.sarif }}
         category: realism-gate
 
-    - name: Fail on findings
+    - name: Result
       shell: bash
       env:
-        RG_STATUS: ${{ steps.run.outputs.status }}
-      run: exit "$RG_STATUS"
+        RG_STATUS: ${{ steps.run.outputs.exit-code }}
+      run: |
+        case "$RG_STATUS" in
+          0) echo "realism-gate: pass" ;;
+          1) echo "::error::realism-gate: a finding at or above fail-on; see the job summary"; exit 1 ;;
+          *) echo "::error::realism-gate could not check the given path (exit ${RG_STATUS:-unknown})"; exit 2 ;;
+        esac

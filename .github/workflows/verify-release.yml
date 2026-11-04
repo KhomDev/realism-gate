@@ -1,9 +1,9 @@
 name: verify release
 
 # Run by hand after a release is published and `cargo publish` is done:
-# installs that release on Linux, macOS and Windows through cargo binstall
-# and through the plain archive, and checks the version and one fixture's
-# output. It writes nothing.
+# installs that release on Linux, macOS and Windows the three ways the README
+# documents (cargo binstall, the plain archive, the GitHub Action) and checks
+# the version and one fixture's output. It writes nothing.
 
 on:
   workflow_dispatch:
@@ -42,3 +42,36 @@ jobs:
         env:
           TAG: ${{ inputs.tag }}
         run: bash scripts/install-check.sh release "$TAG"
+
+  action:
+    name: action (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag }}
+
+      # The action as checked out at the tag, downloading that release.
+      - id: rg
+        uses: ./
+        with:
+          version: ${{ inputs.tag }}
+          path: tests/fixtures/bad/RG06_balance_injection.t.sol
+          changed-only: "false"
+          comment: "false"
+          fail-on: none
+
+      - name: The action found the one error
+        shell: bash
+        env:
+          ERRORS: ${{ steps.rg.outputs.errors }}
+          VERSION: ${{ steps.rg.outputs.version }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -eu
+          test "$ERRORS" = 1
+          test "v$VERSION" = "$TAG"
