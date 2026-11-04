@@ -168,7 +168,9 @@ runs:
       run: |
         # No `set -u`: macOS runners may run bash 3.2, where an empty array
         # counts as unset.
-        set -o pipefail
+        # GitHub runs `bash -e`; realism-gate exits 1 on findings and the step
+        # must go on to write the summary.
+        set +e -o pipefail
         out="$RUNNER_TEMP/realism-gate-out"
         mkdir -p "$out"
         report="$out/report.json"
@@ -278,7 +280,7 @@ runs:
         # The job id is [A-Za-z0-9_-]: safe inside the jq filter below.
         RG_MARKER: "<!-- realism-gate job=${{ github.job }} -->"
       run: |
-        set -o pipefail
+        set +e -o pipefail
         note() {
           echo "result=$1" >> "$GITHUB_OUTPUT"
           if [ -n "${2:-}" ]; then
