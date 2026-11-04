@@ -66,6 +66,10 @@ What it does on every run:
 `errors`, `warnings`, `notes`, `version`, `report` (JSON path), `markdown`,
 `sarif`, and `comment` (`posted`, `updated`, `skipped`, `failed`).
 
+GitHub sets no outputs for a composite action whose run fails the step. If a
+later step needs the counts even when findings are present, run the action
+with `fail-on: none` and fail on `exit-code` yourself.
+
 ### When there is nothing to check
 
 A `path` with no Foundry test in it fails the job with exit code 2, whatever

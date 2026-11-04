@@ -5,6 +5,9 @@ name: action self-test
 # binary is built from this checkout and passed with the `binary` input, so
 # the test does not depend on a published release; the download path is
 # covered by verify-release.yml after a release.
+#
+# GitHub exposes no outputs from a composite action whose step failed, so the
+# failing cases are checked through the files the action writes.
 
 on:
   push:
@@ -71,6 +74,9 @@ jobs:
           changed-only: "false"
           comment: "false"
 
+      - name: "warn_fail: what the action wrote"
+        shell: bash
+        run: bash .github/selftest-check.sh FAIL warnings 1
       # --- error: fails by default, passes at fail-on none; a glob path
       - id: error_fail
         continue-on-error: true
@@ -81,6 +87,9 @@ jobs:
           changed-only: "false"
           comment: "false"
           sarif: "false"
+      - name: "error_fail: what the action wrote"
+        shell: bash
+        run: bash .github/selftest-check.sh FAIL errors 1
       - id: error_none
         uses: ./
         with:
@@ -99,6 +108,9 @@ jobs:
           path: selftest/empty
           changed-only: "false"
           comment: "false"
+      - name: "empty: what the action wrote"
+        shell: bash
+        run: bash .github/selftest-check.sh "could not check"
       - id: notests
         continue-on-error: true
         uses: ./
@@ -109,6 +121,9 @@ jobs:
           changed-only: "false"
           comment: "false"
 
+      - name: "notests: what the action wrote"
+        shell: bash
+        run: bash .github/selftest-check.sh "could not check"
       # --- the 0.1.0 input names still work
       - id: legacy
         continue-on-error: true
@@ -119,6 +134,9 @@ jobs:
           changed-only: "false"
           comment: "false"
 
+      - name: "legacy: what the action wrote"
+        shell: bash
+        run: bash .github/selftest-check.sh FAIL errors 1
       - name: Assert outcomes and outputs
         shell: bash
         env:
@@ -139,18 +157,12 @@ jobs:
           check warn_pass outcome success
           check warn_pass warnings 1
           check warn_fail outcome failure
-          check warn_fail exit-code 1
           check error_fail outcome failure
-          check error_fail exit-code 1
-          check error_fail errors 1
           check error_none outcome success
           check error_none errors 1
           check empty outcome failure
-          check empty exit-code 2
           check notests outcome failure
-          check notests exit-code 2
           check legacy outcome failure
-          check legacy errors 1
           exit $fail
 
       - name: The summary is the Markdown report
