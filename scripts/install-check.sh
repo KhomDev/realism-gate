@@ -79,21 +79,43 @@ case "$mode" in
         bin="$work/root/bin/realism-gate$exe"
         ;;
     binstall-mirror)
+        # cargo-binstall only downloads over HTTPS, so the mirror gets a
+        # throwaway CA, valid for this run only, passed to binstall as an
+        # extra root. Nothing is added to the system trust store.
         mirror="$(cd "${3:?mirror root}" && pwd)"
         port=18765
-        "$py" -m http.server "$port" --bind 127.0.0.1 --directory "$mirror" >/dev/null 2>&1 &
+        tls="$work/tls"
+        mkdir -p "$tls"
+        (
+            cd "$tls"
+            export MSYS_NO_PATHCONV=1
+            openssl req -x509 -newkey rsa:2048 -nodes -days 2 -subj "/CN=realism-gate test CA" \
+                -keyout ca.key -out ca.pem 2>/dev/null
+            openssl req -newkey rsa:2048 -nodes -subj "/CN=127.0.0.1" \
+                -keyout srv.key -out srv.csr 2>/dev/null
+            {
+                echo "subjectAltName=IP:127.0.0.1"
+                echo "basicConstraints=CA:FALSE"
+                echo "extendedKeyUsage=serverAuth"
+            } > ext.cnf
+            openssl x509 -req -in srv.csr -CA ca.pem -CAkey ca.key -CAcreateserial -days 2 \
+                -extfile ext.cnf -out srv.pem 2>/dev/null
+        )
+        "$py" "$root/scripts/serve-https.py" "$mirror" "$port" "$tls/srv.pem" "$tls/srv.key" &
         server=$!
         for _ in $(seq 1 50); do
-            curl -fsS -o /dev/null "http://127.0.0.1:$port/" && break
+            # A TCP connect, not curl: Windows curl cannot check this CA's revocation.
+            "$py" -c "import socket; socket.create_connection(('127.0.0.1', $port), 1)" 2>/dev/null && break
             sleep 0.2
         done
         mkdir -p "$work/crate"
         cp -r "$root/src" "$work/crate/"
-        sed "s#^repository = .*#repository = \"http://127.0.0.1:$port/KhomDev/realism-gate\"#" \
+        sed "s#^repository = .*#repository = \"https://127.0.0.1:$port/KhomDev/realism-gate\"#" \
             "$root/Cargo.toml" > "$work/crate/Cargo.toml"
         grep -q "^version = \"$version\"" "$work/crate/Cargo.toml"
         cargo binstall --manifest-path "$work/crate/Cargo.toml" realism-gate --no-confirm --force \
-            --strategies crate-meta-data --no-discover-github-token --root "$work/root"
+            --strategies crate-meta-data --no-discover-github-token \
+            --root-certificates "$tls/ca.pem" --root "$work/root"
         bin="$work/root/bin/realism-gate$exe"
         ;;
     *)
