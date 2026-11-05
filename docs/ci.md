@@ -11,7 +11,7 @@
 That is the whole setup. The action needs no Rust toolchain: it downloads the
 release binary for the runner (Linux x86-64 and arm64, macOS x86-64 and arm64,
 Windows x86-64), checks it against the release's `SHA256SUMS`, and runs it.
-`@v0` follows the newest 0.x release; pin `@v0.2.0` or a commit SHA if you
+`@v0` follows the newest 0.x release; pin `@v0.2.1` or a commit SHA if you
 want nothing to move.
 
 A complete workflow:
@@ -48,7 +48,7 @@ What it does on every run:
 | Input | Default | Meaning |
 |---|---|---|
 | `path` | `test/` | Files, directories or globs, space-separated. |
-| `version` | this action's release | realism-gate release to download, e.g. `v0.2.0`. |
+| `version` | this action's release | realism-gate release to download, e.g. `v0.2.1`. |
 | `changed-only` | `true` | Report only findings in files changed by the PR (or the push). |
 | `fail-on` | `error` | `none`, `note`, `warn` or `error`. |
 | `comment` | `true` | Keep one PR comment with the results. |
@@ -181,7 +181,7 @@ realism-gate check test --format sarif --output realism.sarif
 or download and check an archive:
 
 ```bash
-version=v0.2.0
+version=v0.2.1
 target=x86_64-unknown-linux-musl
 curl -fsSLO "https://github.com/KhomDev/realism-gate/releases/download/$version/realism-gate-${version#v}-$target.tar.gz"
 curl -fsSLO "https://github.com/KhomDev/realism-gate/releases/download/$version/SHA256SUMS"

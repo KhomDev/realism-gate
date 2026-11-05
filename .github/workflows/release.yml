@@ -1,8 +1,9 @@
 name: release
 
-# A tag matching v* (e.g. v0.2.0) builds every target, attests the archives,
+# A version tag (vX.Y.Z, e.g. v0.2.1) builds every target, attests the archives,
 # writes SHA256SUMS and publishes a GitHub release. A tag with a hyphen
-# (v0.2.0-rc.1) publishes a pre-release.
+# (v0.2.1-rc.1) publishes a pre-release. The floating major tag `v0` is not a
+# version: it only moves the GitHub Action, so it does not match the filter.
 #
 # Run by hand (workflow_dispatch) it is a dry run: the same builds and
 # archives, then an install test on Linux, macOS and Windows, through the
@@ -14,7 +15,7 @@ name: release
 
 on:
   push:
-    tags: ["v*"]
+    tags: ["v[0-9]+.[0-9]+.[0-9]+", "v[0-9]+.[0-9]+.[0-9]+-*"]
   workflow_dispatch:
 
 permissions:
