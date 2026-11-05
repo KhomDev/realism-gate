@@ -41,7 +41,7 @@ if the README has drifted.
 <!-- BEGIN:example -->
 
 ```text
-realism-gate 0.2.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 0.2.1  ·  1 file  ·  1 suite  ·  1 test
 
 test/VaultDrain.t.sol
   warn   RG11 unpinned-fork  test/VaultDrain.t.sol:17:9  VaultDrainTest::test_attackerDrainsVault

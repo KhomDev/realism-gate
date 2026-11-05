@@ -9,14 +9,44 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Release tag to verify, e.g. v0.2.0
+        description: Release tag to verify, e.g. v0.2.1
         required: true
 
 permissions:
   contents: read
 
 jobs:
+  # Run too early, every install job fails with an error that looks like a
+  # broken release. Fail once, plainly, until the release and the crate exist.
+  preflight:
+    name: release and crate are published
+    runs-on: ubuntu-latest
+    steps:
+      - name: GitHub release has its archives and SHA256SUMS
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -eu
+          assets=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name') || {
+            echo "::error::no GitHub release $TAG yet; run this after the release workflow finishes"; exit 1; }
+          echo "$assets"
+          grep -qx SHA256SUMS <<<"$assets" || { echo "::error::release $TAG has no SHA256SUMS yet"; exit 1; }
+      - name: crates.io has the version
+        shell: bash
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -eu
+          v="${TAG#v}"
+          code=$(curl -sS -o /dev/null -w '%{http_code}' -A "realism-gate-verify-release (github.com/KhomDev/realism-gate)" \
+            "https://crates.io/api/v1/crates/realism-gate/$v")
+          [ "$code" = 200 ] || { echo "::error::realism-gate $v is not on crates.io yet (HTTP $code); run cargo publish first"; exit 1; }
+          echo "realism-gate $v is on crates.io"
+
   install:
+    needs: preflight
     name: install (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
@@ -44,6 +74,7 @@ jobs:
         run: bash scripts/install-check.sh release "$TAG"
 
   action:
+    needs: preflight
     name: action (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:

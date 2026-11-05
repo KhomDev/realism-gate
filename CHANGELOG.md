@@ -8,6 +8,25 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-05
+
+A release-pipeline fix. The rules, the findings and the JSON/SARIF output are
+unchanged from 0.2.0.
+
+### Fixed
+
+- The `release` workflow ran on the floating `v0` Action tag and failed its
+  tag-matches-version check, leaving a red run every time `v0` moved. It now
+  runs only on version tags (`vX.Y.Z` and `vX.Y.Z-*`).
+- `verify release` run before the release was finished failed in every install
+  job with a misleading `cargo-binstall` error. A new `preflight` job fails once,
+  with a plain message, until the GitHub release has its `SHA256SUMS` and the
+  version is on crates.io.
+
+### Changed
+
+- The Action's default release, the docs and the examples point at `v0.2.1`.
+
 ## [0.2.0] - 2026-11-04
 
 Installable without Rust, usable in CI in one line, and measured: every
@@ -105,6 +124,7 @@ First release.
 - A pinned public-corpus benchmark (`scripts/bench-corpus.sh`,
   `bench/defihacklabs.json`, `docs/benchmark.md`), re-measured in CI.
 
-[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/KhomDev/realism-gate/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/KhomDev/realism-gate/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/KhomDev/realism-gate/releases/tag/v0.1.0
