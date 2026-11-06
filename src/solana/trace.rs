@@ -1,11 +1,13 @@
-//! The execution trace of one Rust test: every call it makes, in order, with
-//! the helpers it calls inlined at the call site.
+//! The execution trace of one Solana test: every call it makes, in order,
+//! with the helpers it calls inlined at the call site.
 //!
-//! A Solana test has no `setUp()`. The world is built by the test itself or by
+//! A Rust test has no `setUp()`. The world is built by the test itself or by
 //! helpers it calls (`setup()`, `TestEnv::new()`), so the trace is one flat
-//! sequence, and the rules decide later where the exploit begins. Each op
-//! records whether it runs inside a helper whose name says it builds the
-//! world.
+//! sequence, and the rules decide later where the exploit begins. A
+//! TypeScript test is preceded by what mocha runs first (its `describe`
+//! bodies, `before` hooks and the tests above it), which the trace walks
+//! before the test. Each op records whether it runs inside a helper or hook
+//! that builds the world.
 //!
 //! When a helper is inlined, its parameters are bound to the caller's
 //! arguments: inside `fn send(svm: &mut LiteSVM, ix: Instruction, signer:
@@ -14,7 +16,7 @@
 //! calls `send(&mut svm, ix, &admin)`.
 
 use super::harness;
-use super::ir::Function;
+use super::ir::{Dialect, Function};
 use crate::identity::{compact, words};
 use crate::ir::{Expr, ExprKind, Pos, Stmt, StmtKind};
 use crate::project::Project;
@@ -24,7 +26,9 @@ use std::rc::Rc;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CallClass {
     /// Anything that fails the test when its condition does not hold:
-    /// `assert!`, `assert_eq!`, `.unwrap_err()`, a validating Mollusk run.
+    /// `assert!`, `assert_eq!`, `.unwrap_err()`, a validating Mollusk run, an
+    /// `assert_*` helper method (`svm.assert_token_balance(..)`), or a
+    /// TypeScript assertion (lowered to the same macros).
     Assert,
     /// `println!`, `dbg!`, `msg!`, `log::info!`.
     Log,
@@ -240,6 +244,13 @@ pub fn is_setup_name(name: &str) -> bool {
         || ws.windows(2).any(|p| p[0] == "set" && p[1] == "up")
 }
 
+/// An assertion helper method: `svm.assert_token_balance(&ata, 100)`.
+/// `assert_success()` only checks that a transaction did not fail, like
+/// `.unwrap()`, and is not one.
+fn is_assert_method(name: &str) -> bool {
+    name.starts_with("assert_") && name != "assert_success"
+}
+
 fn is_assert_macro(name: &str) -> bool {
     let n = name.strip_prefix("debug_").unwrap_or(name);
     let n = n.strip_prefix("prop_").unwrap_or(n);
@@ -258,6 +269,7 @@ pub struct Trace<'p> {
     pub test: &'p Function,
     /// The file the test is written in.
     pub unit: usize,
+    pub dialect: Dialect,
 }
 
 impl<'p> Trace<'p> {
@@ -272,9 +284,10 @@ impl<'p> Trace<'p> {
 const MAX_INLINE_DEPTH: usize = 8;
 
 /// The functions a test can call: those in its own file first, then those in
-/// shared test code (any Rust file under a `tests` or `test` directory, such
-/// as `tests/common/mod.rs`). Program source is never inlined: it is the code
-/// under review, and a test reaches it through transactions.
+/// shared test code in the same language (any file under a `tests` or `test`
+/// directory, such as `tests/common/mod.rs` or `tests/utils.ts`). Program
+/// source is never inlined: it is the code under review, and a test reaches it
+/// through transactions.
 pub struct Scopes<'p> {
     project: &'p Project,
     shared: Vec<usize>,
@@ -287,7 +300,7 @@ impl<'p> Scopes<'p> {
             .iter()
             .enumerate()
             .filter(|(_, u)| {
-                u.rust.is_some()
+                u.solana.is_some()
                     && u.path
                         .split('/')
                         .rev()
@@ -302,15 +315,27 @@ impl<'p> Scopes<'p> {
     /// The first function matching `pred`, searching `from` and then the
     /// shared test files.
     fn find(&self, from: usize, pred: impl Fn(&Function) -> bool) -> Option<(usize, &'p Function)> {
+        let dialect = self.dialect(from);
         std::iter::once(from)
             .chain(self.shared.iter().copied().filter(|&u| u != from))
             .find_map(|u| {
-                let file = self.project.units[u].rust.as_ref()?;
+                let file = self.project.units[u].solana.as_ref()?;
+                if file.dialect != dialect {
+                    return None;
+                }
                 file.functions
                     .iter()
-                    .find(|f| !f.test && pred(f))
+                    .find(|f| !f.test && !f.hook && pred(f))
                     .map(|f| (u, f))
             })
+    }
+
+    fn dialect(&self, unit: usize) -> Dialect {
+        self.project.units[unit]
+            .solana
+            .as_ref()
+            .map(|f| f.dialect)
+            .unwrap_or_default()
     }
 }
 
@@ -335,11 +360,18 @@ pub fn build<'p>(scopes: &Scopes<'p>, unit: usize, test: &'p Function) -> Trace<
         ops: Vec::new(),
         stack: Vec::new(),
     };
+    if let Some(file) = &scopes.project.units[unit].solana {
+        for prior in &test.before {
+            let f = &file.functions[prior.function];
+            b.walk(unit, f, Scope::new(), prior.setup, None);
+        }
+    }
     b.walk(unit, test, Scope::new(), false, None);
     Trace {
         ops: b.ops,
         test,
         unit,
+        dialect: scopes.dialect(unit),
     }
 }
 
@@ -533,6 +565,7 @@ impl<'p> Builder<'p, '_> {
                 call.receiver = Some(receiver);
                 call.class = if matches!(method.as_str(), "unwrap_err" | "expect_err")
                     || harness::is_validating_run(method)
+                    || is_assert_method(method)
                 {
                     CallClass::Assert
                 } else if self.resolve(callee, args.len()).is_some() {
@@ -546,10 +579,10 @@ impl<'p> Builder<'p, '_> {
         call
     }
 
-    /// The test-code function a call goes to, if any. Rust has neither
-    /// overloading nor default arguments, so a function with a different
-    /// number of parameters is not the one called: `liquidity.borrow(amount)`
-    /// is not a fixture's `borrow(&self, banks, payer, amount)`.
+    /// The test-code function a call goes to, if any. A function that cannot
+    /// take the call's number of arguments is not the one called:
+    /// `liquidity.borrow(amount)` is not a fixture's
+    /// `borrow(&self, banks, payer, amount)`.
     fn resolve(&self, callee: &Expr, nargs: usize) -> Option<(usize, &'p Function)> {
         let from = self.frame().unit;
         let current_owner = self.frame().function.owner.clone();
@@ -571,7 +604,7 @@ impl<'p> Builder<'p, '_> {
                     }
                 };
                 self.scopes.find(from, |f| {
-                    f.name == name && f.owner == owner && !f.method && f.params.len() == nargs
+                    f.name == name && f.owner == owner && !f.method && f.accepts(nargs)
                 })
             }
             ExprKind::Member(receiver, method) => {
@@ -582,7 +615,7 @@ impl<'p> Builder<'p, '_> {
                 self.scopes.find(from, |f| {
                     f.method
                         && f.name == *method
-                        && f.params.len() == nargs
+                        && f.accepts(nargs)
                         && (!on_self || current_owner.is_none() || f.owner == current_owner)
                 })
             }
@@ -601,7 +634,7 @@ mod tests {
 
     fn trace_names(p: &Project, unit: usize) -> Vec<String> {
         let scopes = Scopes::new(p);
-        let file = p.units[unit].rust.as_ref().unwrap();
+        let file = p.units[unit].solana.as_ref().unwrap();
         let test = file.functions.iter().find(|f| f.test).unwrap();
         let t = build(&scopes, unit, test);
         t.ops
@@ -657,21 +690,17 @@ mod tests {
         "#,
         )]);
         let scopes = Scopes::new(&p);
-        let file = p.units[0].rust.as_ref().unwrap();
+        let file = p.units[0].solana.as_ref().unwrap();
         let test = file.functions.iter().find(|f| f.test).unwrap();
         let t = build(&scopes, 0, test);
         let (_, op, c) = t
             .calls()
             .find(|(_, _, c)| c.name == "new_signed_with_payer")
             .unwrap();
-        let Some(harness::Event::Transaction {
-            signers: Some(signers),
-            ..
-        }) = harness::event(c)
-        else {
+        let Some(harness::Event::Transaction { signers, .. }) = harness::event(c) else {
             panic!("not a transaction");
         };
-        assert_eq!(op.keys(signers), vec!["admin"]);
+        assert_eq!(op.keys(signers[0]), vec!["admin"]);
     }
 
     #[test]
@@ -707,7 +736,7 @@ mod tests {
             "t.rs",
             "fn f() { g(&ctx.payer.pubkey(), Some(&attacker.pubkey()), kp.insecure_clone(), spl_token::ID); }",
         )]);
-        let file = p.units[0].rust.as_ref().unwrap();
+        let file = p.units[0].solana.as_ref().unwrap();
         let StmtKind::Expr(e) = &file.functions[0].body[0].kind else {
             panic!()
         };

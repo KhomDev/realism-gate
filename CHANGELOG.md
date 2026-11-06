@@ -8,6 +8,100 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-06
+
+Anchor. realism-gate now checks Anchor's TypeScript proof-of-concept tests,
+the mocha or jest suites `anchor test` runs, and the two Anchor test crates
+in Rust, with the same rule ids, output and suppressions. The Solidity and
+Rust findings, and the JSON/SARIF output, are unchanged.
+
+### Added
+
+- **Anchor TypeScript tests.** `.ts`, `.mts`, `.cts`, `.js`, `.mjs` and
+  `.cjs` files that import a Solana package (`@coral-xyz/anchor`, anything
+  under `@solana/`, bankrun, LiteSVM) are parsed with oxc. Other JavaScript
+  in the tree, such as a Hardhat suite, is not read. Each `it(..)` /
+  `test(..)` is checked when it drives a harness: an Anchor program client,
+  web3.js, bankrun or LiteSVM.
+- Mocha's order is part of the trace: the file's top level, `describe`
+  bodies, `before` hooks and the tests above a test run before it, as mocha
+  runs them, then `beforeEach`. A test whose title says it sets up
+  (`it("is initialized")`) is the setup of the tests after it, not a PoC of
+  its own. Helpers (functions, arrow functions bound to a name, class
+  methods) are inlined from the test's file and TypeScript files under
+  `tests/`.
+- The TypeScript forms of the Solana rules: `.methods.x(..).signers([..]).rpc()`,
+  the legacy `program.rpc.x(.., { accounts, signers })`, `sendAndConfirm`
+  and `sendAndConfirmTransaction` as transactions with their signers; a role
+  field in the `.accounts({ .. })` of an initializing instruction as a grant
+  (RG01); `setAccount` and the accounts and programs handed to bankrun's
+  `startAnchor` as writes and loads (RG04-RG06); chai, node and jest
+  assertions (RG08-RG10); `new Connection(url)` as a live cluster (RG11).
+- Anchor's provider wallet signs every `.rpc()` as the fee payer. It counts
+  as a signer only when it is the only one or the instruction names it in
+  its accounts, so a wallet that is the admin does not make every attacker
+  transaction it paid for a privileged one (RG02), and an exploit signed by
+  the wallet alone is RG03.
+- **Rust:** anchor-client's `program.request()` .. `.signer(&kp)` .. `.send()`
+  is a transaction signed by its signers and the client's payer, and
+  `Client::new` for a public cluster is a live client (RG11); anchor-litesvm's
+  `AnchorLiteSVM::build_with_program` and `execute_instruction(ix, signers)`
+  are a program load and a transaction; an `assert_*` helper method
+  (`svm.assert_token_balance(..)`) is an assertion.
+- Every rule page and `realism-gate explain` show a TypeScript example next
+  to each Rust one. `tests/typescript.rs` runs them and fails if one does not
+  do what its page says.
+- [`examples/anchor-vault-drain`](examples/anchor-vault-drain/tests/vault-drain.ts),
+  the Rust example's PoC in Anchor TypeScript, with its output in the
+  README.
+
+### Changed
+
+- The Solana pipeline moved from `src/rust/` to `src/solana/`, with the Rust
+  frontend in `parse_rust.rs` and the TypeScript one in `parse_ts.rs`. The
+  library API is not stable; the CLI and outputs are unaffected.
+- `realism-gate rules --format json` lists `typescript` in the `languages`
+  of every rule that checks Solana tests.
+- `--match-contract` also matches TypeScript suite names, the `describe`
+  titles (`vault > withdraw`), which are also the `suite` field.
+- RG04 and RG06 name the method as the test spells it (`setAccount`).
+- An account owned by the token program is read as a token account (RG06),
+  and a value read through a cluster client's `getAccountInfo` or loaded
+  with `readFileSync` / `JSON.parse` as copied state, not a write (RG04).
+- RG09 no longer reports `assert!(false)` / `assert.ok(false)`, which always
+  fails, nor a local that is assigned different values (a flag set in a
+  callback).
+- RG11 reads a URL held in a local or constant, so `new Connection(ENDPOINT)`
+  with `ENDPOINT = "http://localhost:8899"` is local.
+- RG10 treats calls that differ only in string arguments
+  (`balances(payer, "before")`, `balances(payer, "after")`) as one reading
+  taken twice.
+- The Action's default release, the docs and the examples point at `v0.4.0`.
+
+### Not covered
+
+- RG07 is not checked in TypeScript either. `Anchor.toml`, tests generated
+  in loops, and the signers of spl-token's JavaScript helpers are not read;
+  the full list is in
+  [docs/limitations.md](docs/limitations.md#in-anchor-typescript-tests).
+
+### Measured
+
+- The precision of the TypeScript rules is **not measured**, as for Rust. As
+  a robustness check, Anchor (`33868ff`), solana-developers/program-examples
+  (`c0cafc5`) and LiteSVM's Node tests (`c848c56`): 229 files, 292 tests,
+  all parsed; reading their findings found five false-positive patterns,
+  fixed and pinned by tests
+  ([docs/precision.md](docs/precision.md#anchor-typescript-tests)).
+- Rust: the LiteSVM and solana-program-library findings are identical to
+  0.3.0's. Solidity: `scripts/bench-corpus.sh --check` matches
+  `bench/defihacklabs.json`, and `eval/run.sh --check` reproduces the flags
+  and precision tables on all three corpora unchanged.
+- Release binary on the same Windows x86-64 laptop: 6,497,280 -> 7,243,776
+  bytes (+11.5%), the TypeScript parser.
+- The minimum supported Rust stays 1.95: oxc is pinned to 0.146, its last
+  release that builds on it.
+
 ## [0.3.0] - 2026-11-06
 
 Solana programs. realism-gate now checks Rust proof-of-concept tests written
@@ -192,7 +286,8 @@ First release.
 - A pinned public-corpus benchmark (`scripts/bench-corpus.sh`,
   `bench/defihacklabs.json`, `docs/benchmark.md`), re-measured in CI.
 
-[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/KhomDev/realism-gate/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/KhomDev/realism-gate/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/KhomDev/realism-gate/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/KhomDev/realism-gate/compare/v0.1.0...v0.2.0

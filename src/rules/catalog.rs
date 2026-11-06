@@ -19,8 +19,8 @@ pub struct RuleInfo {
     pub bad: &'static str,
     pub good: &'static str,
     pub false_positives: &'static [&'static str],
-    /// How the rule applies to Rust (Solana) tests.
-    pub rust: RustNotes,
+    /// How the rule applies to Solana tests, in Rust and Anchor TypeScript.
+    pub solana: SolanaNotes,
 }
 
 /// The source language a finding was raised in.
@@ -28,20 +28,25 @@ pub struct RuleInfo {
 pub enum Lang {
     Solidity,
     Rust,
+    TypeScript,
 }
 
-/// How a rule applies to Rust (Solana) tests.
+/// How a rule applies to Solana tests. Rust and TypeScript tests are read
+/// into one model, so a rule applies to both or to neither.
 #[derive(Debug, Clone, Copy)]
-pub enum RustNotes {
-    /// Checked. The Solana form of the summary, the fix and the examples.
+pub enum SolanaNotes {
+    /// Checked. The Solana form of the summary and the fix, and examples in
+    /// Rust and in Anchor TypeScript.
     Checked {
         summary: &'static str,
         fix: &'static str,
-        bad: &'static str,
-        good: &'static str,
+        rust_bad: &'static str,
+        rust_good: &'static str,
+        ts_bad: &'static str,
+        ts_good: &'static str,
         false_positives: &'static [&'static str],
     },
-    /// Not checked in Rust tests, and why.
+    /// Not checked in Solana tests, and why.
     NotChecked(&'static str),
     /// The rule reads `realism.yaml`, so it is the same in both languages.
     Declaration,
@@ -50,16 +55,16 @@ pub enum RustNotes {
 impl RuleInfo {
     /// The fix that applies to a finding raised in `lang`.
     pub fn fix_for(&self, lang: Lang) -> &'static str {
-        match (lang, self.rust) {
-            (Lang::Rust, RustNotes::Checked { fix, .. }) => fix,
+        match (lang, self.solana) {
+            (Lang::Rust | Lang::TypeScript, SolanaNotes::Checked { fix, .. }) => fix,
             _ => self.fix,
         }
     }
 
-    /// Whether the rule applies to Rust tests, directly or through the
+    /// Whether the rule applies to Solana tests, directly or through the
     /// declaration.
-    pub fn checks_rust(&self) -> bool {
-        !matches!(self.rust, RustNotes::NotChecked(_))
+    pub fn checks_solana(&self) -> bool {
+        !matches!(self.solana, SolanaNotes::NotChecked(_))
     }
 }
 
@@ -79,11 +84,13 @@ pub const RULES: &[RuleInfo] = &[
             "A role that is permissionless in the real deployment (anyone may register as a keeper). Say so in an `allow` comment with the registration path, or declare the attacker's capability in `realism.yaml`.",
             "A grant to a variable the name heuristic reads as the attacker but is not. Declare the real attacker under `attacker.identities` in `realism.yaml`; a declaration replaces the name heuristic.",
         ],
-        rust: RustNotes::Checked {
-            summary: "The harness makes the attacker's keypair a role holder: it is set as `admin` or `authority` in an instruction that initializes or reconfigures the program, given a role with `set_authority` or a `set_admin`-style call, or it is a role holder's keypair under another name.",
+        solana: SolanaNotes::Checked {
+            summary: "The harness makes the attacker's keypair a role holder: it is set as `admin` or `authority` in an instruction that initializes or reconfigures the program (a struct field in Rust, a field of `.accounts({ .. })` in Anchor TypeScript), given a role with `set_authority` or a `set_admin`-style call, or it is a role holder's keypair under another name.",
             fix: "Sign the attack with a keypair that holds no role. If the bug really needs a role, the finding is about role compromise or an unknowing admin action, and the report must argue that explicitly.",
-            bad: "let init = instruction::Initialize { admin: attacker.pubkey() };\nsend(&mut svm, &init, &[&attacker]);\nsend(&mut svm, &instruction::SetFee { bps: 10_000 }, &[&attacker]);",
-            good: "let init = instruction::Initialize { admin: admin.pubkey() };\nsend(&mut svm, &init, &[&admin]);\nsend(&mut svm, &instruction::Deposit { amount: 1 }, &[&attacker]);",
+            rust_bad: "let init = instruction::Initialize { admin: attacker.pubkey() };\nsend(&mut svm, &init, &[&attacker]);\nsend(&mut svm, &instruction::SetFee { bps: 10_000 }, &[&attacker]);",
+            rust_good: "let init = instruction::Initialize { admin: admin.pubkey() };\nsend(&mut svm, &init, &[&admin]);\nsend(&mut svm, &instruction::Deposit { amount: 1 }, &[&attacker]);",
+            ts_bad: "await program.methods.initialize().accounts({ admin: attacker.publicKey }).rpc();\nawait program.methods.setFee(new BN(10_000)).accounts({ admin: attacker.publicKey }).signers([attacker]).rpc();",
+            ts_good: "await program.methods.initialize().accounts({ admin: admin.publicKey }).signers([admin]).rpc();\nawait program.methods.deposit(new BN(1)).accounts({ user: attacker.publicKey }).signers([attacker]).rpc();",
             false_positives: &[
                 "A role field that names the attacker's own account rather than a protocol role (the `authority` of a position the attacker opens). Role fields are read only in structs whose name says they initialize or reconfigure (`Initialize`, `UpdateConfig`); rename the field or add an `allow` comment.",
                 "A role that is permissionless in the real deployment. Say so in an `allow` comment with the registration path, or declare the attacker in `realism.yaml`.",
@@ -105,11 +112,13 @@ pub const RULES: &[RuleInfo] = &[
             "A role word in an ordinary user's name (`managerOfFunds` for a user account). Rename the variable or declare it under `victim.identities`.",
             "`owner` used for an ERC-4626 share owner. Prefer `shareOwner` or `holder`, which the tool reads as a user.",
         ],
-        rust: RustNotes::Checked {
+        solana: SolanaNotes::Checked {
             summary: "A transaction in the exploit is signed by a keypair that reads as a role (admin, authority, governance, keeper, ...) or that the harness gave a role.",
             fix: "Move configuration before the attacker's first transaction. If the exploit genuinely depends on a routine privileged action, declare it in `realism.yaml` under `privileged:` with the role and the reason the attacker can count on it, and make the report say the same.",
-            bad: "send(&mut svm, &set_oracle_ix(&fake_oracle), &[&admin]);\nsend(&mut svm, &borrow_ix(&attacker.pubkey(), 1_000), &[&attacker]);",
-            good: "// The oracle is the live one; nothing privileged happens here.\nsend(&mut svm, &borrow_ix(&attacker.pubkey(), 1_000), &[&attacker]);",
+            rust_bad: "send(&mut svm, &set_oracle_ix(&fake_oracle), &[&admin]);\nsend(&mut svm, &borrow_ix(&attacker.pubkey(), 1_000), &[&attacker]);",
+            rust_good: "// The oracle is the live one; nothing privileged happens here.\nsend(&mut svm, &borrow_ix(&attacker.pubkey(), 1_000), &[&attacker]);",
+            ts_bad: "await program.methods.setOracle(fakeOracle.publicKey).accounts({ admin: admin.publicKey }).signers([admin]).rpc();\nawait program.methods.borrow(new BN(1_000)).accounts({ borrower: attacker.publicKey }).signers([attacker]).rpc();",
+            ts_good: "// The oracle is the live one; nothing privileged happens here.\nawait program.methods.borrow(new BN(1_000)).accounts({ borrower: attacker.publicKey }).signers([attacker]).rpc();",
             false_positives: &[
                 "`authority` used for a user's own authority under a bare name. Prefer `user_authority` or the person's name, which the tool reads as a user.",
                 "A keypair named for a role the program never checks. Rename it or add an `allow` comment.",
@@ -131,14 +140,16 @@ pub const RULES: &[RuleInfo] = &[
             "A contract with no access control at all, where the deployer has no extra power. The finding is still worth an `allow` comment saying so, because the triager will ask.",
             "A constructor that hands ownership to an argument that the tool does not read as privileged. Pass a variable named for the role (`owner`, `admin`) or label it.",
         ],
-        rust: RustNotes::Checked {
-            summary: "The exploit's transactions are signed only by the keys that signed the setup, usually the harness's `payer`, and by no separate attacker keypair.",
+        solana: SolanaNotes::Checked {
+            summary: "The exploit's transactions are signed only by the keys that signed the setup, usually the harness's `payer` or Anchor's `provider.wallet` (which signs every `.rpc()`), and by no separate attacker keypair.",
             fix: "Set up as one keypair, attack as another: create an `attacker` keypair, fund it, and have it sign the exploit.",
-            bad: "let (mut banks, payer, _) = program_test.start().await;\nprocess(&mut banks, &[init_pool_ix(&payer.pubkey())], &[&payer]).await;\nprocess(&mut banks, &[sweep_ix(&payer.pubkey())], &[&payer]).await;",
-            good: "process(&mut banks, &[init_pool_ix(&payer.pubkey())], &[&payer]).await;\nlet attacker = Keypair::new();\nprocess(&mut banks, &[sweep_ix(&attacker.pubkey())], &[&payer, &attacker]).await;",
+            rust_bad: "let (mut banks, payer, _) = program_test.start().await;\nprocess(&mut banks, &[init_pool_ix(&payer.pubkey())], &[&payer]).await;\nprocess(&mut banks, &[sweep_ix(&payer.pubkey())], &[&payer]).await;",
+            rust_good: "process(&mut banks, &[init_pool_ix(&payer.pubkey())], &[&payer]).await;\nlet attacker = Keypair::new();\nprocess(&mut banks, &[sweep_ix(&attacker.pubkey())], &[&payer, &attacker]).await;",
+            ts_bad: "await program.methods.initPool().accounts({ payer: provider.wallet.publicKey }).rpc();\nawait program.methods.sweep().accounts({ recipient: provider.wallet.publicKey }).rpc();",
+            ts_good: "await program.methods.initPool().accounts({ payer: provider.wallet.publicKey }).rpc();\nawait program.methods.sweep().accounts({ recipient: attacker.publicKey }).signers([attacker]).rpc();",
             false_positives: &[
                 "A program with no access control, where the setup key gains nothing. Add an `allow` comment saying so; the triager will ask.",
-                "Setup the tool does not recognise as setup (no `init`- or `create`-style instruction name, no helper named `setup` or similar), which moves the start of the exploit earlier. Put the setup in a function named `setup`.",
+                "Setup the tool does not recognise as setup (no `init`- or `create`-style instruction name, no helper named `setup` or similar, no `before` hook or test titled for setup), which moves the start of the exploit earlier. Put the setup in a function named `setup`, or in a `before` hook.",
             ],
         },
     },
@@ -156,11 +167,13 @@ pub const RULES: &[RuleInfo] = &[
         false_positives: &[
             "Writing a token balance slot of the attacker (manual funding for a token `deal` cannot handle). The rule lowers the severity when the slot expression names an attacker or user; add an `allow` comment saying it is funding.",
         ],
-        rust: RustNotes::Checked {
-            summary: "`set_account` or `add_account` writes an account of the program: a PDA, an account at a fixed address or named for protocol state, or one the test creates with the program as its owner.",
+        solana: SolanaNotes::Checked {
+            summary: "`set_account` or `add_account` (`setAccount` in TypeScript, or an account handed to bankrun's `startAnchor`) writes an account of the program: a PDA, an account at a fixed address or named for protocol state, or one the test creates with the program as its owner.",
             fix: "Reach the state through the program's own instructions. If the state exists on a live cluster, dump the account at a known slot and load it from the file. To fund the attacker, write the attacker's own accounts instead.",
-            bad: "let mut pool = svm.get_account(&pool_pda).unwrap();\npool.data[8..16].copy_from_slice(&0u64.to_le_bytes()); // zero the debt\nsvm.set_account(pool_pda, pool).unwrap();",
-            good: "// The bug: repaying 0 clears the debt.\nsend(&mut svm, &repay_ix(&attacker.pubkey(), 0), &[&attacker]);",
+            rust_bad: "let mut pool = svm.get_account(&pool_pda).unwrap();\npool.data[8..16].copy_from_slice(&0u64.to_le_bytes()); // zero the debt\nsvm.set_account(pool_pda, pool).unwrap();",
+            rust_good: "// The bug: repaying 0 clears the debt.\nsend(&mut svm, &repay_ix(&attacker.pubkey(), 0), &[&attacker]);",
+            ts_bad: "const pool = svm.getAccount(poolPda)!;\npool.data.fill(0, 8, 16); // zero the debt\nsvm.setAccount(poolPda, pool);",
+            ts_good: "// The bug: repaying 0 clears the debt.\nawait program.methods.repay(new BN(0)).accounts({ borrower: attacker.publicKey }).signers([attacker]).rpc();",
             false_positives: &[
                 "An account the test creates for itself under a protocol-sounding name, such as the attacker's own pool on a permissionless program. Rename it or add an `allow` comment.",
                 "State copied from a live cluster through a helper the tool does not recognise as a copy. Load it from a dump file, or add an `allow` comment naming the source.",
@@ -182,11 +195,13 @@ pub const RULES: &[RuleInfo] = &[
             "Etching a precompile or a chain-specific system contract the local EVM lacks. Add an `allow` comment naming it.",
             "Recreating the attacker's own historical contract at its original address, as post-incident reproductions do. Name the address for what it is (`ATTACKER_CONTRACT`, `exploitHelper`) and the tool treats it as the attacker's.",
         ],
-        rust: RustNotes::Checked {
-            summary: "A program whose name says it is a test double (mock, fake, stub, dummy) is loaded at the address of a real program: a crate's `ID` or a fixed public key.",
+        solana: SolanaNotes::Checked {
+            summary: "A program whose name says it is a test double (mock, fake, stub, dummy) is loaded at the address of a real program: a crate's `ID` or a fixed public key (`pubkey!(..)`, `new PublicKey(\"..\")`). In TypeScript this covers LiteSVM's `addProgramFromFile` and the programs handed to bankrun's `startAnchor`.",
             fix: "Run against the real program, loaded from its deployed binary. If a double is unavoidable, explain in the report why the real program can return the same values, and cite where.",
-            bad: "svm.add_program(oracle::ID, include_bytes!(\"fixtures/mock_oracle.so\"));",
-            good: "svm.add_program_from_file(oracle::ID, \"fixtures/oracle.so\").unwrap();",
+            rust_bad: "svm.add_program(oracle::ID, include_bytes!(\"fixtures/mock_oracle.so\"));",
+            rust_good: "svm.add_program_from_file(oracle::ID, \"fixtures/oracle.so\").unwrap();",
+            ts_bad: "const PYTH = new PublicKey(\"FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH\");\nsvm.addProgramFromFile(PYTH, \"fixtures/mock_pyth.so\");",
+            ts_good: "const PYTH = new PublicKey(\"FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH\");\nsvm.addProgramFromFile(PYTH, \"fixtures/pyth.so\");",
             false_positives: &[
                 "A double for a program that does not exist on the target cluster. Add an `allow` comment naming it.",
             ],
@@ -206,11 +221,13 @@ pub const RULES: &[RuleInfo] = &[
         false_positives: &[
             "A contract variable the tool classifies as protocol that is really the PoC's own helper defined elsewhere. Helpers defined in the same file as the test are recognised automatically.",
         ],
-        rust: RustNotes::Checked {
-            summary: "`set_account` or `add_account` sets the lamports or the token balance of an account of the program, such as a vault's token account.",
+        solana: SolanaNotes::Checked {
+            summary: "`set_account` or `add_account` (`setAccount` in TypeScript, or an account handed to bankrun's `startAnchor`) sets the lamports or the token balance of an account of the program, such as a vault's token account.",
             fix: "Fund the attacker's own accounts, then transfer from the attacker to the program's account. To seed liquidity, go through the program's own deposit instruction.",
-            bad: "svm.set_account(vault_tokens, token_account(&mint, &vault_pda, 1_000_000)).unwrap();",
-            good: "svm.set_account(attacker_tokens, token_account(&mint, &attacker.pubkey(), 1_000_000)).unwrap();\nsend(&mut svm, &transfer_ix(&attacker_tokens, &vault_tokens, 1_000_000), &[&attacker]);",
+            rust_bad: "svm.set_account(vault_tokens, token_account(&mint, &vault_pda, 1_000_000)).unwrap();",
+            rust_good: "svm.set_account(attacker_tokens, token_account(&mint, &attacker.pubkey(), 1_000_000)).unwrap();\nsend(&mut svm, &transfer_ix(&attacker_tokens, &vault_tokens, 1_000_000), &[&attacker]);",
+            ts_bad: "svm.setAccount(vaultTokens, { lamports: 2_039_280, data: tokenAccountData(USDC, vaultPda, 1_000_000n), owner: TOKEN_PROGRAM_ID, executable: false });",
+            ts_good: "svm.setAccount(attackerTokens, { lamports: 2_039_280, data: tokenAccountData(USDC, attacker.publicKey, 1_000_000n), owner: TOKEN_PROGRAM_ID, executable: false });\nawait program.methods.deposit(new BN(1_000_000)).accounts({ from: attackerTokens, vault: vaultTokens }).signers([attacker]).rpc();",
             false_positives: &[
                 "Seeding a pool the test creates itself on a permissionless program, where the attacker could do the same with their own funds. An `allow` comment saying so documents it.",
             ],
@@ -230,7 +247,7 @@ pub const RULES: &[RuleInfo] = &[
         false_positives: &[
             "Mocking something irrelevant to the claim, such as a gas-price oracle in a test that measures a rounding error. Add an `allow` comment saying why it does not touch the impact.",
         ],
-        rust: RustNotes::NotChecked(
+        solana: SolanaNotes::NotChecked(
             "Solana test harnesses have no cheat that makes a program answer with a value its code would not produce. Loading a test double in a real program's place is RG05.",
         ),
     },
@@ -248,13 +265,15 @@ pub const RULES: &[RuleInfo] = &[
         false_positives: &[
             "Assertions inside a helper contract the test calls externally. The tool inlines the test contract's own functions, not other contracts'. Move the check into the test.",
         ],
-        rust: RustNotes::Checked {
-            summary: "No `assert!`, `assert_eq!`, `assert_ne!`, `unwrap_err()`, `if .. { panic!() }` or validating Mollusk check runs in the exploit, and the test is not `#[should_panic]`. `.unwrap()` on a transaction does not count: it only checks that the transaction did not fail.",
+        solana: SolanaNotes::Checked {
+            summary: "No assertion runs in the exploit: in Rust `assert!`, `assert_eq!`, `assert_ne!`, `unwrap_err()`, `if .. { panic!() }` or a validating Mollusk check, and the test is not `#[should_panic]`; in TypeScript chai's `assert` and `expect`, node's `assert`, jest's `expect`, or `if (..) throw`. A transaction that succeeds (`.unwrap()`, `await ..rpc()`) does not count: it only shows the transaction did not fail.",
             fix: "Assert the impact: the attacker's gain against a baseline, the victim's loss, or the broken invariant.",
-            bad: "svm.send_transaction(exploit_tx).unwrap();\nprintln!(\"profit: {}\", svm.get_balance(&attacker.pubkey()).unwrap());",
-            good: "let before = svm.get_balance(&attacker.pubkey()).unwrap();\nsvm.send_transaction(exploit_tx).unwrap();\nassert!(svm.get_balance(&attacker.pubkey()).unwrap() > before + LAMPORTS_PER_SOL);",
+            rust_bad: "svm.send_transaction(exploit_tx).unwrap();\nprintln!(\"profit: {}\", svm.get_balance(&attacker.pubkey()).unwrap());",
+            rust_good: "let before = svm.get_balance(&attacker.pubkey()).unwrap();\nsvm.send_transaction(exploit_tx).unwrap();\nassert!(svm.get_balance(&attacker.pubkey()).unwrap() > before + LAMPORTS_PER_SOL);",
+            ts_bad: "await program.methods.withdraw(new BN(100)).accounts({ recipient: attacker.publicKey }).signers([attacker]).rpc();\nconsole.log(\"profit\", await provider.connection.getBalance(attacker.publicKey));",
+            ts_good: "const balanceBefore = await provider.connection.getBalance(attacker.publicKey);\nawait program.methods.withdraw(new BN(100)).accounts({ recipient: attacker.publicKey }).signers([attacker]).rpc();\nexpect(await provider.connection.getBalance(attacker.publicKey)).to.be.greaterThan(balanceBefore + LAMPORTS_PER_SOL);",
             false_positives: &[
-                "Assertions inside a helper the tool does not read. Only the test's own file and Rust files under `tests/` are inlined; move the check into the test.",
+                "Assertions inside a helper the tool does not read. Only the test's own file and test files in the same language under `tests/` are inlined; move the check into the test.",
             ],
         },
     },
@@ -272,11 +291,13 @@ pub const RULES: &[RuleInfo] = &[
         false_positives: &[
             "A deliberate sanity check of a test constant. Keep it if you want it, but it is not evidence; an `allow` comment documents that.",
         ],
-        rust: RustNotes::Checked {
-            summary: "An `assert!`, `assert_eq!` or `assert_ne!` compares two constants, compares an expression with itself, or asserts a literal `true`.",
+        solana: SolanaNotes::Checked {
+            summary: "An assertion (`assert!`, `assert_eq!`, `assert.equal`, `expect(..).to.equal`, ...) compares two constants, compares an expression with itself, or asserts a literal `true`.",
             fix: "Assert on state read from the program's accounts after the attack, not on values the test wrote itself.",
-            bad: "let stolen = 100 * LAMPORTS_PER_SOL;\nassert_eq!(stolen, 100 * LAMPORTS_PER_SOL);",
-            good: "assert_eq!(svm.get_balance(&attacker.pubkey()).unwrap() - before, 100 * LAMPORTS_PER_SOL);",
+            rust_bad: "let stolen = 100 * LAMPORTS_PER_SOL;\nassert_eq!(stolen, 100 * LAMPORTS_PER_SOL);",
+            rust_good: "assert_eq!(svm.get_balance(&attacker.pubkey()).unwrap() - before, 100 * LAMPORTS_PER_SOL);",
+            ts_bad: "const stolen = 100 * LAMPORTS_PER_SOL;\nassert.equal(stolen, 100 * LAMPORTS_PER_SOL);",
+            ts_good: "assert.equal((await provider.connection.getBalance(attacker.publicKey)) - balanceBefore, 100 * LAMPORTS_PER_SOL);",
             false_positives: &[
                 "A deliberate sanity check of a test constant. Keep it if you want it, but it is not evidence; an `allow` comment documents that.",
             ],
@@ -297,11 +318,13 @@ pub const RULES: &[RuleInfo] = &[
             "A directional claim that is meaningful on its own, such as \"the attacker ends with more than the vault's whole TVL\". Exact-value assertions (`assertEq`), upper bounds of zero (\"drained\") and `require` guards are already exempt; for anything else, an `allow` comment saying why the absolute value suffices.",
             "A baseline taken through a differently written expression (a local alias of the token). Read it the same way both times.",
         ],
-        rust: RustNotes::Checked {
-            summary: "A directional `assert!` (greater than, less than) checks a balance read once, after the attack: `get_balance`, a `.lamports` or `.amount` field, or a helper whose name says balance or amount.",
+        solana: SolanaNotes::Checked {
+            summary: "A directional assertion (`assert!(a > b)`, `expect(a).to.be.greaterThan(b)`, `assert.isAbove`) checks a balance read once, after the attack: `get_balance` / `getBalance`, a `.lamports` or `.amount` field, or a helper whose name says balance or amount.",
             fix: "Read the same quantity before and after, and assert on the difference.",
-            bad: "svm.send_transaction(exploit_tx).unwrap();\nassert!(token_balance(&svm, &attacker_tokens) > 0);",
-            good: "let before = token_balance(&svm, &attacker_tokens);\nsvm.send_transaction(exploit_tx).unwrap();\nassert!(token_balance(&svm, &attacker_tokens) > before);",
+            rust_bad: "svm.send_transaction(exploit_tx).unwrap();\nassert!(token_balance(&svm, &attacker_tokens) > 0);",
+            rust_good: "let before = token_balance(&svm, &attacker_tokens);\nsvm.send_transaction(exploit_tx).unwrap();\nassert!(token_balance(&svm, &attacker_tokens) > before);",
+            ts_bad: "await program.methods.withdraw(new BN(100)).accounts({ recipient: attacker.publicKey }).signers([attacker]).rpc();\nconst account = await getAccount(provider.connection, attackerTokens);\nexpect(Number(account.amount)).to.be.greaterThan(0);",
+            ts_good: "const balanceBefore = (await getAccount(provider.connection, attackerTokens)).amount;\nawait program.methods.withdraw(new BN(100)).accounts({ recipient: attacker.publicKey }).signers([attacker]).rpc();\nconst balanceAfter = (await getAccount(provider.connection, attackerTokens)).amount;\nexpect(Number(balanceAfter)).to.be.greaterThan(Number(balanceBefore));",
             false_positives: &[
                 "A baseline read through a differently written expression (a second helper, an alias). Read it the same way both times.",
                 "A directional claim that is meaningful on its own. Exact-value assertions (`assert_eq!`) and upper bounds of zero are already exempt; for anything else, an `allow` comment saying why the absolute value suffices.",
@@ -322,13 +345,15 @@ pub const RULES: &[RuleInfo] = &[
         false_positives: &[
             "A block pinned in `foundry.toml` (`fork_block_number`) or on the command line. The tool reads Solidity only; add an `allow` comment pointing at the config.",
         ],
-        rust: RustNotes::Checked {
-            summary: "The test creates an `RpcClient`, so the accounts it reads through it come from a live cluster as it is when the test runs.",
+        solana: SolanaNotes::Checked {
+            summary: "The test creates a client for a public cluster (an `RpcClient`, an anchor-client `Client`, a web3.js `Connection`), so the accounts it reads through it come from a live cluster as it is when the test runs.",
             fix: "Dump each account the PoC needs at a recorded slot (`solana account <ADDRESS> --output-file <FILE>`) and load it from the file, and say in the report why that slot is representative.",
-            bad: "let rpc = RpcClient::new(rpc_url);\nlet pool = rpc.get_account(&POOL).unwrap();\nsvm.set_account(POOL, pool).unwrap();",
-            good: "// Dumped at a recorded slot; the report says why that slot.\nprogram_test.add_account_with_file_data(POOL, POOL_LAMPORTS, vault::ID, \"pool.bin\");",
+            rust_bad: "let rpc = RpcClient::new(rpc_url);\nlet pool = rpc.get_account(&POOL).unwrap();\nsvm.set_account(POOL, pool).unwrap();",
+            rust_good: "// Dumped at a recorded slot; the report says why that slot.\nprogram_test.add_account_with_file_data(POOL, POOL_LAMPORTS, vault::ID, \"pool.bin\");",
+            ts_bad: "const mainnet = new Connection(clusterApiUrl(\"mainnet-beta\"));\nconst pool = await mainnet.getAccountInfo(POOL);\nsvm.setAccount(POOL, pool);",
+            ts_good: "// Dumped at a recorded slot; the report says why that slot.\nsvm.setAccount(POOL, JSON.parse(readFileSync(\"fixtures/pool-slot-312000000.json\", \"utf8\")));",
             false_positives: &[
-                "A client for a local validator whose URL comes from a variable or the environment. A literal `localhost` or `127.0.0.1` URL is recognised; otherwise add an `allow` comment.",
+                "A client for a local validator whose URL comes from a variable or the environment. A literal `localhost` or `127.0.0.1` URL, `Cluster::Localnet` and the provider's own `rpcEndpoint` are recognised; otherwise add an `allow` comment.",
             ],
         },
     },
@@ -344,7 +369,7 @@ pub const RULES: &[RuleInfo] = &[
         bad: "preconditions:\n  - step: attacker swaps inside the victim's deposit\n    performed_by: attacker\n    boundary: victim_transaction",
         good: "preconditions:\n  - step: attacker swaps before the victim's deposit\n    performed_by: attacker\n    boundary: own_transaction",
         false_positives: &[],
-        rust: RustNotes::Declaration,
+        solana: SolanaNotes::Declaration,
     },
     RuleInfo {
         id: "RG13",
@@ -358,7 +383,7 @@ pub const RULES: &[RuleInfo] = &[
         bad: "  - step: back-run the oracle update\n    performed_by: attacker\n    boundary: same_block",
         good: "  - step: back-run the oracle update\n    performed_by: attacker\n    boundary: same_block\n    ordering_guarantee: public mempool; update is a plain transaction the attacker can back-run with a bundle",
         false_positives: &[],
-        rust: RustNotes::Declaration,
+        solana: SolanaNotes::Declaration,
     },
     RuleInfo {
         id: "RG14",
@@ -372,7 +397,7 @@ pub const RULES: &[RuleInfo] = &[
         bad: "",
         good: "  - step: a user deposits into the empty vault\n    performed_by: victim\n    boundary: own_transaction",
         false_positives: &[],
-        rust: RustNotes::Declaration,
+        solana: SolanaNotes::Declaration,
     },
 ];
 
@@ -421,33 +446,39 @@ pub fn markdown(r: &RuleInfo) -> String {
         }
         out.push('\n');
     }
-    out.push_str("## In Rust (Solana) tests\n\n");
-    match r.rust {
-        RustNotes::Checked {
+    out.push_str("## In Solana tests (Rust and Anchor TypeScript)\n\n");
+    match r.solana {
+        SolanaNotes::Checked {
             summary,
             fix,
-            bad,
-            good,
+            rust_bad,
+            rust_good,
+            ts_bad,
+            ts_good,
             false_positives,
         } => {
             out.push_str(&format!("{summary}\n\n**How to fix it:** {fix}\n\n"));
-            out.push_str(&format!("### Fires on\n\n```rust\n{bad}\n```\n\n"));
-            out.push_str(&format!(
-                "### Does not fire on\n\n```rust\n{good}\n```\n\n"
-            ));
+            for (what, rust, ts) in [
+                ("Fires on", rust_bad, ts_bad),
+                ("Does not fire on", rust_good, ts_good),
+            ] {
+                out.push_str(&format!(
+                    "### {what}\n\n```rust\n{rust}\n```\n\n```typescript\n{ts}\n```\n\n"
+                ));
+            }
             out.push_str("### Known false-positive modes\n\n");
             for fp in false_positives {
                 out.push_str(&format!("- {fp}\n"));
             }
             out.push('\n');
         }
-        RustNotes::NotChecked(why) => out.push_str(&format!("Not checked. {why}\n\n")),
-        RustNotes::Declaration => out.push_str(
+        SolanaNotes::NotChecked(why) => out.push_str(&format!("Not checked. {why}\n\n")),
+        SolanaNotes::Declaration => out.push_str(
             "The same: the rule reads `realism.yaml`, whatever language the tests are written in.\n\n",
         ),
     }
     out.push_str(&format!(
-        "## Silencing it\n\nAdd a comment on the line, or the line above, with a reason:\n\n```solidity\n// realism-gate: allow({}) <why this is not a defect here>\n```\n\nThe comment is the same in Rust. A comment without a reason is ignored, and the output says so.\n",
+        "## Silencing it\n\nAdd a comment on the line, or the line above, with a reason:\n\n```solidity\n// realism-gate: allow({}) <why this is not a defect here>\n```\n\nThe comment is the same in Rust and TypeScript. A comment without a reason is ignored, and the output says so.\n",
         r.id
     ));
     out
@@ -476,12 +507,16 @@ mod tests {
     fn every_code_rule_documents_a_false_positive_mode() {
         for r in RULES.iter().take(11) {
             assert!(!r.false_positives.is_empty(), "{} lists none", r.id);
-            match r.rust {
-                RustNotes::Checked {
+            match r.solana {
+                SolanaNotes::Checked {
                     false_positives, ..
-                } => assert!(!false_positives.is_empty(), "{} lists none for Rust", r.id),
-                RustNotes::NotChecked(why) => assert!(!why.is_empty()),
-                RustNotes::Declaration => panic!("{} reads code, not the declaration", r.id),
+                } => assert!(
+                    !false_positives.is_empty(),
+                    "{} lists none for Solana",
+                    r.id
+                ),
+                SolanaNotes::NotChecked(why) => assert!(!why.is_empty()),
+                SolanaNotes::Declaration => panic!("{} reads code, not the declaration", r.id),
             }
         }
     }
@@ -489,7 +524,7 @@ mod tests {
     #[test]
     fn only_the_declaration_rules_are_language_neutral() {
         for r in RULES {
-            let neutral = matches!(r.rust, RustNotes::Declaration);
+            let neutral = matches!(r.solana, SolanaNotes::Declaration);
             assert_eq!(
                 neutral,
                 ["RG12", "RG13", "RG14"].contains(&r.id),

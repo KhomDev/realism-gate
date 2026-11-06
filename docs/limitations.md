@@ -55,10 +55,34 @@ A tool that checks proofs should be exact about what it does not check.
   not read for RG04 and RG06.
 - Cluster settings (`solana-test-validator --clone`, a snapshot) are
   invisible, as `foundry.toml` is for Solidity.
-- Anchor's TypeScript tests are not read; only Rust.
 - RG07 is not checked: Solana harnesses have no call mocking.
 - The precision of the Rust rules has not been measured
   ([precision](precision.md#rust-solana-tests)).
+
+## In Anchor TypeScript tests
+
+- No types are resolved, as in Rust: harness calls are recognised by method
+  and path names (`setAccount`, `.rpc()`), and the provider's wallet by the
+  name `wallet` or `provider`.
+- Only files that import a Solana package are read, and only the test's own
+  file and TypeScript files under a `tests/` or `test/` directory are inlined.
+  A helper package (`app/`, a workspace dependency) is not read.
+- Mocha's order is approximated by source order: the top level, `describe`
+  bodies, `before` hooks, every earlier test, then `beforeEach` hooks. Tests
+  created in a loop or by a function (`[..].forEach(x => it(..))`,
+  `describe.each`) are not found.
+- Whether an earlier test builds the world is read from its title's leading
+  verb (`initializes`, `creates`, `funds`, ...). A setup test with another
+  title moves the start of the exploit earlier.
+- spl-token's JavaScript helpers (`createMint`, `mintTo`, `transfer`) send
+  their own transactions; the tool sees the calls, not their signers.
+- `Anchor.toml` is not read: `[test.validator]` clones and the provider
+  cluster are invisible, as `foundry.toml` is for Solidity.
+- Assertions are chai's `assert` and `expect`, node's `assert` and jest's
+  `expect`. `should`-style assertions and custom assertion helpers outside
+  `tests/` are not recognised.
+- The precision of the TypeScript rules has not been measured
+  ([precision](precision.md#anchor-typescript-tests)).
 
 ## A clean result is not a valid PoC
 

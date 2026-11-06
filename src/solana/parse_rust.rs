@@ -37,7 +37,7 @@ pub fn parse_source(path: &str, source: &str) -> Unit {
         path: path.to_string(),
         source: source.to_string(),
         contracts: Vec::new(),
-        rust: Some(file),
+        solana: Some(file),
         errors,
     }
 }
@@ -217,16 +217,20 @@ impl Lower<'_> {
         for s in &block.stmts {
             self.stmt(s, &mut body);
         }
+        let name = sig.ident.to_string();
         Function {
-            name: sig.ident.to_string(),
+            header: format!("fn {name}()"),
+            name,
             owner,
             method,
             module: module.to_string(),
             test: has_attr(attrs, |a| matches!(a, "test" | "rstest" | "test_case")),
             should_panic: has_attr(attrs, |a| a == "should_panic"),
+            required: params.len(),
             params,
             body,
             pos: self.pos(start),
+            ..Function::default()
         }
     }
 
@@ -619,7 +623,7 @@ mod tests {
     fn parse(src: &str) -> File {
         let unit = parse_source("t.rs", src);
         assert!(unit.errors.is_empty(), "{:?}", unit.errors);
-        unit.rust.unwrap()
+        unit.solana.unwrap()
     }
 
     fn calls(e: &Expr, out: &mut Vec<String>) {
@@ -784,7 +788,7 @@ mod tests {
         let unit = parse_source("bad.rs", "fn t( {");
         assert_eq!(unit.errors.len(), 1);
         assert!(unit.errors[0].contains("(line 1"), "{:?}", unit.errors);
-        assert!(unit.rust.unwrap().functions.is_empty());
+        assert!(unit.solana.unwrap().functions.is_empty());
     }
 
     #[test]

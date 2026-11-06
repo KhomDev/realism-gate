@@ -3,7 +3,8 @@
     "id": "RG01",
     "languages": [
       "solidity",
-      "rust"
+      "rust",
+      "typescript"
     ],
     "severity": "error",
     "severity_note": "always error",
@@ -16,7 +17,8 @@
     "id": "RG02",
     "languages": [
       "solidity",
-      "rust"
+      "rust",
+      "typescript"
     ],
     "severity": "warn",
     "severity_note": "warn; silenced by a realism.yaml `privileged:` entry",
@@ -29,7 +31,8 @@
     "id": "RG03",
     "languages": [
       "solidity",
-      "rust"
+      "rust",
+      "typescript"
     ],
     "severity": "warn",
     "severity_note": "warn",
@@ -42,7 +45,8 @@
     "id": "RG04",
     "languages": [
       "solidity",
-      "rust"
+      "rust",
+      "typescript"
     ],
     "severity": "error",
     "severity_note": "error in the exploit; warn in setUp; one step lower when the slot looks like an attacker or user balance",
@@ -55,7 +59,8 @@
     "id": "RG05",
     "languages": [
       "solidity",
-      "rust"
+      "rust",
+      "typescript"
     ],
     "severity": "warn",
     "severity_note": "warn; capped below error since 0.2.0 because its measured precision is under 80% (docs/precision.md)",
@@ -68,7 +73,8 @@
     "id": "RG06",
     "languages": [
       "solidity",
-      "rust"
+      "rust",
+      "typescript"
     ],
     "severity": "error",
     "severity_note": "error in the exploit; warn in setUp",
@@ -93,7 +99,8 @@
     "id": "RG08",
     "languages": [
       "solidity",
-      "rust"
+      "rust",
+      "typescript"
     ],
     "severity": "error",
     "severity_note": "error; warn when the test logs values it never checks",
@@ -106,7 +113,8 @@
     "id": "RG09",
     "languages": [
       "solidity",
-      "rust"
+      "rust",
+      "typescript"
     ],
     "severity": "error",
     "severity_note": "error",
@@ -119,7 +127,8 @@
     "id": "RG10",
     "languages": [
       "solidity",
-      "rust"
+      "rust",
+      "typescript"
     ],
     "severity": "warn",
     "severity_note": "warn",
@@ -132,7 +141,8 @@
     "id": "RG11",
     "languages": [
       "solidity",
-      "rust"
+      "rust",
+      "typescript"
     ],
     "severity": "warn",
     "severity_note": "warn",
@@ -145,7 +155,8 @@
     "id": "RG12",
     "languages": [
       "solidity",
-      "rust"
+      "rust",
+      "typescript"
     ],
     "severity": "error",
     "severity_note": "error",
@@ -158,7 +169,8 @@
     "id": "RG13",
     "languages": [
       "solidity",
-      "rust"
+      "rust",
+      "typescript"
     ],
     "severity": "warn",
     "severity_note": "warn",
@@ -171,7 +183,8 @@
     "id": "RG14",
     "languages": [
       "solidity",
-      "rust"
+      "rust",
+      "typescript"
     ],
     "severity": "note",
     "severity_note": "note",

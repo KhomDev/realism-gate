@@ -34,8 +34,8 @@ impl fmt::Display for LoadError {
 
 impl std::error::Error for LoadError {}
 
-/// Every `.sol` and `.rs` file under `paths`, sorted, with dependency and
-/// build directories skipped. A path given explicitly is always included, even if it
+/// Every Solidity, Rust and TypeScript or JavaScript file under `paths`,
+/// sorted, with dependency and build directories skipped. A path given explicitly is always included, even if it
 /// sits inside a skipped directory.
 pub fn discover(paths: &[PathBuf]) -> Result<Vec<PathBuf>, LoadError> {
     let mut out = Vec::new();
@@ -68,11 +68,15 @@ fn walk(dir: &Path, out: &mut Vec<PathBuf>) -> Result<(), LoadError> {
                 continue;
             }
             walk(&path, out)?;
-        } else if file_type.is_file() && (name.ends_with(".sol") || name.ends_with(".rs")) {
+        } else if file_type.is_file() && is_source(&name) {
             out.push(path);
         }
     }
     Ok(())
+}
+
+fn is_source(name: &str) -> bool {
+    name.ends_with(".sol") || name.ends_with(".rs") || crate::solana::parse_ts::is_script_path(name)
 }
 
 /// The path as displayed in output: relative to `base` when it is inside it,
@@ -87,12 +91,15 @@ pub fn display_path(path: &Path, base: &Path) -> String {
 }
 
 /// Parses one source with the parser its extension calls for: `.rs` is Rust,
-/// everything else is Solidity.
-pub fn parse_any(path: &str, source: &str) -> Unit {
+/// a script is TypeScript or JavaScript, everything else is Solidity. `None`
+/// for a script that is not a Solana test: it imports no Solana package.
+pub fn parse_any(path: &str, source: &str) -> Option<Unit> {
     if path.ends_with(".rs") {
-        crate::rust::parse::parse_source(path, source)
+        Some(crate::solana::parse_rust::parse_source(path, source))
+    } else if crate::solana::parse_ts::is_script_path(path) {
+        crate::solana::parse_ts::parse_source(path, source)
     } else {
-        parse_source(path, source)
+        Some(parse_source(path, source))
     }
 }
 
@@ -154,7 +161,7 @@ impl Project {
         for file in files {
             let bytes = std::fs::read(file).map_err(|e| LoadError::Io(file.clone(), e))?;
             let source = String::from_utf8_lossy(&bytes);
-            units.push(parse_any(&display_path(file, base), &source));
+            units.extend(parse_any(&display_path(file, base), &source));
         }
         Ok(Project { units })
     }
@@ -163,7 +170,7 @@ impl Project {
         Project {
             units: sources
                 .iter()
-                .map(|(path, src)| parse_any(path, src))
+                .filter_map(|(path, src)| parse_any(path, src))
                 .collect(),
         }
     }

@@ -5,7 +5,7 @@ use crate::finding::{Finding, Severity, Suppression};
 use crate::identity::Env;
 use crate::project::Project;
 use crate::rules::{self, Lang, Raw, help};
-use crate::rust;
+use crate::solana;
 use crate::suppress::{self, Directive};
 use crate::trace;
 use regex::Regex;
@@ -218,7 +218,7 @@ pub fn analyze(
         }
     }
 
-    let declared = rust::Declared {
+    let declared = solana::Declared {
         attackers: declaration
             .map(|d| d.decl.attackers().collect())
             .unwrap_or_default(),
@@ -229,8 +229,8 @@ pub fn analyze(
             .map(|d| d.decl.victims().collect())
             .unwrap_or_default(),
     };
-    let scopes = rust::trace::Scopes::new(project);
-    for suite in rust::suites(project) {
+    let scopes = solana::trace::Scopes::new(project);
+    for suite in solana::suites(project) {
         if let Some(re) = &opts.match_contract
             && !re.is_match(&suite.name)
         {
@@ -247,8 +247,8 @@ pub fn analyze(
             {
                 continue;
             }
-            // A Rust test that drives no Solana harness is not a PoC.
-            let Some(raws) = rust::check_test(project, &scopes, &suite, test, &declared) else {
+            // A test that drives no Solana harness is not a PoC.
+            let Some(raws) = solana::check_test(project, &scopes, &suite, test, &declared) else {
                 continue;
             };
             if !counted {
@@ -257,7 +257,11 @@ pub fn analyze(
             }
             summary.tests += 1;
             for raw in raws {
-                add(raw, &suite.name, suite_file, &test.name, Lang::Rust);
+                let lang = match suite.dialect {
+                    solana::ir::Dialect::Rust => Lang::Rust,
+                    solana::ir::Dialect::TypeScript => Lang::TypeScript,
+                };
+                add(raw, &suite.name, suite_file, &test.name, lang);
             }
         }
     }

@@ -23,7 +23,7 @@ use std::process::ExitCode;
     name = "realism-gate",
     version,
     about = "Checks Foundry and Solana PoC tests for what makes a passing PoC prove less than it claims.",
-    long_about = "Checks Foundry (Solidity) and Solana (Rust) proof-of-concept tests for what \
+    long_about = "Checks Foundry (Solidity) and Solana (Rust and Anchor TypeScript) proof-of-concept tests for what \
                   makes a passing PoC prove less than it claims: privileged pranks and signers, \
                   state written with cheatcodes or set_account, assertions that cannot fail, \
                   measurements without a baseline, unpinned forks and live RPC reads.\n\n\
@@ -377,7 +377,7 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
     if report.summary.suites == 0 {
         return Err(if report.parse_errors.is_empty() {
             "no test suite found: no concrete contract with a public test* function, \
-             and no Rust test that drives a Solana harness, matched"
+             and no Rust or TypeScript test that drives a Solana harness, matched"
                 .to_string()
         } else {
             format!(
@@ -420,8 +420,8 @@ fn list_rules(format: ListFormat) -> String {
                         "severity": r.severity.as_str(),
                         "severity_note": r.severity_note,
                         "summary": r.summary,
-                        "languages": if r.checks_rust() {
-                            vec!["solidity", "rust"]
+                        "languages": if r.checks_solana() {
+                            vec!["solidity", "rust", "typescript"]
                         } else {
                             vec!["solidity"]
                         },
@@ -466,30 +466,38 @@ fn explain_text(r: &rules::RuleInfo) -> String {
             out.push_str(&format!("  - {fp}\n"));
         }
     }
-    out.push_str("\nIn Rust (Solana) tests\n");
-    match r.rust {
-        rules::RustNotes::Checked {
+    out.push_str("\nIn Solana tests (Rust and Anchor TypeScript)\n");
+    match r.solana {
+        rules::SolanaNotes::Checked {
             summary,
             fix,
-            bad,
-            good,
+            rust_bad,
+            rust_good,
+            ts_bad,
+            ts_good,
             false_positives,
         } => {
-            out.push_str(&format!("  {summary}\n  Fix: {fix}\n\n  Fires on\n"));
-            for line in bad.lines() {
-                out.push_str(&format!("    {line}\n"));
-            }
-            out.push_str("\n  Does not fire on\n");
-            for line in good.lines() {
-                out.push_str(&format!("    {line}\n"));
+            out.push_str(&format!("  {summary}\n  Fix: {fix}\n"));
+            for (what, lang, example) in [
+                ("Fires on", "Rust", rust_bad),
+                ("Fires on", "TypeScript", ts_bad),
+                ("Does not fire on", "Rust", rust_good),
+                ("Does not fire on", "TypeScript", ts_good),
+            ] {
+                out.push_str(&format!("\n  {what} ({lang})\n"));
+                for line in example.lines() {
+                    out.push_str(&format!("    {line}\n"));
+                }
             }
             out.push_str("\n  Known false-positive modes\n");
             for fp in false_positives {
                 out.push_str(&format!("    - {fp}\n"));
             }
         }
-        rules::RustNotes::NotChecked(why) => out.push_str(&format!("  Not checked. {why}\n")),
-        rules::RustNotes::Declaration => out.push_str("  The same: the rule reads realism.yaml.\n"),
+        rules::SolanaNotes::NotChecked(why) => out.push_str(&format!("  Not checked. {why}\n")),
+        rules::SolanaNotes::Declaration => {
+            out.push_str("  The same: the rule reads realism.yaml.\n")
+        }
     }
     out.push_str(&format!("\n{}\n", render::rule_url(r.id)));
     out

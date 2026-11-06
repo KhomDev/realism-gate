@@ -170,14 +170,14 @@ fn every_code_rule_has_a_bad_fixture() {
                 .any(|f| f.starts_with(&id) && f.ends_with(".sol")),
             "{id} has no Solidity fixture"
         );
-        let checks_rust = realism_gate::rules::rule(&id).unwrap().checks_rust();
-        let has_rust = files
-            .iter()
-            .any(|f| f.starts_with(&id) && f.ends_with(".rs"));
-        assert_eq!(
-            has_rust, checks_rust,
-            "{id}: a Rust fixture exists exactly when the rule checks Rust"
-        );
+        let checks_solana = realism_gate::rules::rule(&id).unwrap().checks_solana();
+        for ext in [".rs", ".ts"] {
+            let has = files.iter().any(|f| f.starts_with(&id) && f.ends_with(ext));
+            assert_eq!(
+                has, checks_solana,
+                "{id}: a {ext} fixture exists exactly when the rule checks Solana tests"
+            );
+        }
     }
 }
 
@@ -259,6 +259,86 @@ fn rust_rg10_no_baseline() {
 #[test]
 fn rust_rg11_live_rpc() {
     expect("tests/fixtures/bad/RG11_live_rpc.rs", &[("RG11", Warn, 20)]);
+}
+
+// Anchor TypeScript fixtures: the same rules, the same one-rule-per-file
+// discipline.
+
+#[test]
+fn ts_rg01_attacker_holds_privilege() {
+    expect(
+        "tests/fixtures/bad/RG01_attacker_holds_privilege.ts",
+        &[("RG01", Error, 15)],
+    );
+}
+
+#[test]
+fn ts_rg02_privileged_signer() {
+    expect(
+        "tests/fixtures/bad/RG02_privileged_signer.ts",
+        &[("RG02", Warn, 23)],
+    );
+}
+
+#[test]
+fn ts_rg03_payer_is_deployer() {
+    expect(
+        "tests/fixtures/bad/RG03_payer_is_deployer.ts",
+        &[("RG03", Warn, 14)],
+    );
+}
+
+#[test]
+fn ts_rg04_account_write() {
+    expect(
+        "tests/fixtures/bad/RG04_account_write.ts",
+        &[("RG04", Error, 22)],
+    );
+}
+
+#[test]
+fn ts_rg05_mock_program() {
+    expect(
+        "tests/fixtures/bad/RG05_mock_program.ts",
+        &[("RG05", Warn, 15)],
+    );
+}
+
+#[test]
+fn ts_rg06_token_balance_injection() {
+    expect(
+        "tests/fixtures/bad/RG06_token_balance_injection.ts",
+        &[("RG06", Warn, 21)],
+    );
+}
+
+#[test]
+fn ts_rg08_no_assertion_error_and_print_only_warning() {
+    expect(
+        "tests/fixtures/bad/RG08_no_assertion.ts",
+        &[("RG08", Error, 11), ("RG08", Warn, 15)],
+    );
+}
+
+#[test]
+fn ts_rg09_tautological_assertion() {
+    expect(
+        "tests/fixtures/bad/RG09_tautological_assertion.ts",
+        &[("RG09", Error, 17), ("RG09", Error, 18)],
+    );
+}
+
+#[test]
+fn ts_rg10_no_baseline() {
+    expect(
+        "tests/fixtures/bad/RG10_no_baseline.ts",
+        &[("RG10", Warn, 19)],
+    );
+}
+
+#[test]
+fn ts_rg11_live_rpc() {
+    expect("tests/fixtures/bad/RG11_live_rpc.ts", &[("RG11", Warn, 15)]);
 }
 
 #[test]
