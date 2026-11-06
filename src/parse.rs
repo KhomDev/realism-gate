@@ -50,6 +50,7 @@ pub fn parse_source(path: &str, source: &str) -> Unit {
         path: path.to_string(),
         source: source.to_string(),
         contracts,
+        rust: None,
         errors,
     }
 }

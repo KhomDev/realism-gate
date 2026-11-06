@@ -1,5 +1,5 @@
 name: realism-gate PoC check
-description: Flag what makes a Foundry proof of concept prove less than it claims. Static, no Rust toolchain needed.
+description: Flag what makes a Foundry or Solana proof of concept prove less than it claims. Static, no Rust toolchain needed.
 author: KhomDev
 branding:
   icon: shield
@@ -7,11 +7,11 @@ branding:
 
 inputs:
   path:
-    description: Files, directories or globs of Foundry tests, space-separated.
+    description: Files, directories or globs of Foundry (.sol) or Solana Rust (.rs) tests, space-separated. A Solana program's tests are usually in tests/.
     required: false
     default: test/
   version:
-    description: realism-gate release to run, e.g. v0.2.1. Empty means the release this action belongs to.
+    description: realism-gate release to run, e.g. v0.3.0. Empty means the release this action belongs to.
     required: false
     default: ""
   changed-only:
@@ -96,7 +96,7 @@ runs:
         RG_BINARY: ${{ inputs.binary }}
         # The release this copy of the action belongs to. tests/docs.rs keeps
         # it equal to the crate version, so `@v0` runs the newest v0 release.
-        RG_DEFAULT_VERSION: v0.2.1
+        RG_DEFAULT_VERSION: v0.3.0
       run: |
         set -euo pipefail
         if [ -n "$RG_BINARY" ]; then
@@ -242,7 +242,7 @@ runs:
             cat "$out/stderr.txt"
             echo '```'
             echo
-            echo "Paths: \`${paths[*]}\`. A path with no Foundry test is an error, not a pass."
+            echo "Paths: \`${paths[*]}\`. A path with no Foundry or Solana test is an error, not a pass."
           } > "$md"
           cat "$md" >> "$GITHUB_STEP_SUMMARY"
           echo "::error::realism-gate: $(head -n1 "$out/stderr.txt")"

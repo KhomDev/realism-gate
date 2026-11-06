@@ -39,8 +39,13 @@ cargo test
 3. Add `tests/fixtures/bad/RGxx_<slug>.t.sol` that fires exactly the new rule,
    and extend a `tests/fixtures/good/` file with the sound version. Add the
    expectation to `tests/rules.rs`.
-4. Regenerate the docs: `REALISM_GATE_BLESS=1 cargo test --test docs`.
-5. Re-measure the corpus: `cargo build --release && bash scripts/bench-corpus.sh`.
+4. If the rule checks Rust tests, add `tests/fixtures/bad/RGxx_<slug>.rs`
+   that fires exactly it, keep the `tests/fixtures/good/` Rust files clean,
+   and fill in the rule's `rust` notes in the catalog. `tests/rust.rs` runs
+   the notes' "fires on" and "does not fire on" examples and fails if either
+   does the opposite.
+5. Regenerate the docs: `REALISM_GATE_BLESS=1 cargo test --test docs`.
+6. Re-measure the corpus: `cargo build --release && bash scripts/bench-corpus.sh`.
    If the numbers move, run it with `--write` and explain the change in
    `docs/benchmark.md`.
 

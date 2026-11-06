@@ -1,4 +1,5 @@
-//! An owned, parser-independent model of a Solidity source file.
+//! An owned, parser-independent model of a Solidity source file. The Rust
+//! frontend reuses its expressions and statements ([`crate::rust::ir`]).
 //!
 //! The parser's AST borrows from an arena that lives only as long as a parse
 //! session. Rules need to look at several files at once (a test suite and the
@@ -196,7 +197,8 @@ impl Contract {
     }
 }
 
-/// One parsed file.
+/// One parsed file: a Solidity file holds contracts, a Rust file holds a
+/// [`crate::rust::ir::File`].
 #[derive(Debug, Clone)]
 pub struct Unit {
     /// The path as it is displayed: relative to the working directory where
@@ -204,6 +206,8 @@ pub struct Unit {
     pub path: String,
     pub source: String,
     pub contracts: Vec<Contract>,
+    /// The lowered Rust file, for a `.rs` source.
+    pub rust: Option<crate::rust::ir::File>,
     /// Parser diagnostics. A file with errors may still yield contracts: the
     /// parser recovers, and whatever it recovered is checked.
     pub errors: Vec<String>,

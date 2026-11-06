@@ -1,13 +1,13 @@
 [package]
 name = "realism-gate"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2024"
-description = "Static checker for Foundry PoC tests: does the proof of concept show what an unprivileged attacker can do, or only what the harness made true?"
+description = "Static checker for Foundry and Solana PoC tests: does the proof of concept show what an unprivileged attacker can do, or only what the harness made true?"
 license = "MIT"
 repository = "https://github.com/KhomDev/realism-gate"
 homepage = "https://khomdev.org/tools"
 readme = "README.md"
-keywords = ["foundry", "solidity", "security", "poc", "static-analysis"]
+keywords = ["foundry", "solana", "security", "poc", "static-analysis"]
 categories = ["command-line-utilities", "development-tools::testing"]
 rust-version = "1.95"
 # The published crate is the program and its licence, nothing else: no
@@ -25,12 +25,16 @@ path = "src/bin/rgate.rs"
 
 [dependencies]
 clap = { version = "4.6.7", features = ["derive"] }
+# Positions for the Rust parser: line, column and byte range of every span.
+proc-macro2 = { version = "1.0.107", default-features = false, features = ["span-locations"] }
 regex = "1.13.1"
 serde = { version = "1.0.229", features = ["derive"] }
 serde-saphyr = "2.0.0"
 serde_json = "1.0.154"
 # The Solidity parser written for the Foundry toolchain.
 solar-parse = "0.2.0"
+# The Rust parser used by the Rust compiler's own macro ecosystem.
+syn = { version = "2.0.119", default-features = false, features = ["full", "parsing", "printing"] }
 toml = { version = "1.2.0", default-features = false, features = ["parse", "serde"] }
 
 [profile.release]
