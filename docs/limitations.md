@@ -33,6 +33,33 @@ A tool that checks proofs should be exact about what it does not check.
 - Solidity's C3 linearization is approximated depth first. For ordinary test
   hierarchies the most derived definition is the same.
 
+## In Rust (Solana) tests
+
+- No types are resolved. Harness calls are recognised by method and path
+  names (`set_account`, `Transaction::new_signed_with_payer`); a wrapper in a
+  crate the tool does not read hides what it does. A transaction such a
+  wrapper builds and the test sends is still seen, but without its signers.
+- Only the test's own file and Rust files under a `tests/` or `test/`
+  directory are inlined. A helper crate (a dev-dependency) is not read.
+- Instructions are opaque. The tool does not decode instruction data or
+  account metas, so it does not know which accounts an instruction writes or
+  which signatures the program checks; it reads the transaction's signers.
+- Roles are read from names, `set_authority`-style calls and role fields of
+  struct literals. An instruction builder that takes the admin as a
+  positional argument (`init_ix(&attacker.pubkey())`) grants nothing the
+  tool can see.
+- Where the exploit starts is inferred from transaction and helper names
+  (see [how-it-works](how-it-works.md#rust-solana-tests)). A setup written
+  inline, with instructions not named for setup, moves it earlier.
+- Mollusk tests construct every account by design. Their account lists are
+  not read for RG04 and RG06.
+- Cluster settings (`solana-test-validator --clone`, a snapshot) are
+  invisible, as `foundry.toml` is for Solidity.
+- Anchor's TypeScript tests are not read; only Rust.
+- RG07 is not checked: Solana harnesses have no call mocking.
+- The precision of the Rust rules has not been measured
+  ([precision](precision.md#rust-solana-tests)).
+
 ## A clean result is not a valid PoC
 
 realism-gate finds known ways a PoC proves less than it claims. It cannot tell

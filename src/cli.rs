@@ -22,11 +22,12 @@ use std::process::ExitCode;
 #[command(
     name = "realism-gate",
     version,
-    about = "Checks Foundry PoC tests for what makes a passing PoC prove less than it claims.",
-    long_about = "Checks Foundry proof-of-concept tests for what makes a passing PoC prove less \
-                  than it claims: privileged pranks, state written with cheatcodes, assertions \
-                  that cannot fail, measurements without a baseline, unpinned forks.\n\n\
-                  It reads the Solidity; it never runs it and never touches the network."
+    about = "Checks Foundry and Solana PoC tests for what makes a passing PoC prove less than it claims.",
+    long_about = "Checks Foundry (Solidity) and Solana (Rust) proof-of-concept tests for what \
+                  makes a passing PoC prove less than it claims: privileged pranks and signers, \
+                  state written with cheatcodes or set_account, assertions that cannot fail, \
+                  measurements without a baseline, unpinned forks and live RPC reads.\n\n\
+                  It reads the source; it never runs it and never touches the network."
 )]
 pub struct Cli {
     #[command(subcommand)]
@@ -37,7 +38,7 @@ pub struct Cli {
 #[allow(clippy::large_enum_variant)]
 #[derive(Subcommand, Debug)]
 pub enum Command {
-    /// Check test files or directories (default: ./test if it exists, else .).
+    /// Check test files or directories (default: ./test, else ./tests, else .).
     Check(CheckArgs),
     /// List the rules.
     Rules {
@@ -62,8 +63,9 @@ pub enum Command {
 
 #[derive(clap::Args, Debug)]
 pub struct CheckArgs {
-    /// Files or directories to check. Directories are searched for .sol files;
-    /// lib/, node_modules/, out/, cache/ and hidden directories are skipped.
+    /// Files or directories to check. Directories are searched for .sol and
+    /// .rs files; lib/, node_modules/, out/, cache/, target/ and hidden
+    /// directories are skipped.
     pub paths: Vec<PathBuf>,
     /// The attacker-model declaration. Defaults to ./realism.yaml if present.
     #[arg(long, value_name = "FILE")]
@@ -88,7 +90,9 @@ pub struct CheckArgs {
     /// Only check tests whose name matches this regular expression.
     #[arg(long, value_name = "REGEX")]
     pub match_test: Option<String>,
-    /// Only check test contracts whose name matches this regular expression.
+    /// Only check test suites whose name matches this regular expression: a
+    /// Solidity test contract, or a Rust file and module (`exploit`,
+    /// `lib::tests`).
     #[arg(long, value_name = "REGEX")]
     pub match_contract: Option<String>,
     /// Also print findings silenced by an allow comment.
@@ -222,18 +226,19 @@ fn compile(re: &Option<String>, flag: &str) -> Result<Option<Regex>, String> {
 fn check(args: CheckArgs) -> Result<ExitCode, String> {
     let cwd = std::env::current_dir().map_err(|e| format!("current directory: {e}"))?;
     let paths = if args.paths.is_empty() {
-        if Path::new("test").is_dir() {
-            vec![PathBuf::from("test")]
-        } else {
-            vec![PathBuf::from(".")]
-        }
+        // Foundry keeps tests in test/, Cargo in tests/.
+        let dir = ["test", "tests"]
+            .into_iter()
+            .find(|d| Path::new(d).is_dir())
+            .unwrap_or(".");
+        vec![PathBuf::from(dir)]
     } else {
         args.paths.clone()
     };
     let files = project::discover(&paths).map_err(|e| e.to_string())?;
     if files.is_empty() {
         return Err(format!(
-            "no .sol files found under {}",
+            "no .sol or .rs files found under {}",
             paths
                 .iter()
                 .map(|p| p.display().to_string())
@@ -371,7 +376,8 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
     // Nothing checked is not the same as nothing found.
     if report.summary.suites == 0 {
         return Err(if report.parse_errors.is_empty() {
-            "no test suite found: no concrete contract with a public test* function matched"
+            "no test suite found: no concrete contract with a public test* function, \
+             and no Rust test that drives a Solana harness, matched"
                 .to_string()
         } else {
             format!(
@@ -414,6 +420,11 @@ fn list_rules(format: ListFormat) -> String {
                         "severity": r.severity.as_str(),
                         "severity_note": r.severity_note,
                         "summary": r.summary,
+                        "languages": if r.checks_rust() {
+                            vec!["solidity", "rust"]
+                        } else {
+                            vec!["solidity"]
+                        },
                         "url": render::rule_url(r.id),
                     })
                 })
@@ -454,6 +465,31 @@ fn explain_text(r: &rules::RuleInfo) -> String {
         for fp in r.false_positives {
             out.push_str(&format!("  - {fp}\n"));
         }
+    }
+    out.push_str("\nIn Rust (Solana) tests\n");
+    match r.rust {
+        rules::RustNotes::Checked {
+            summary,
+            fix,
+            bad,
+            good,
+            false_positives,
+        } => {
+            out.push_str(&format!("  {summary}\n  Fix: {fix}\n\n  Fires on\n"));
+            for line in bad.lines() {
+                out.push_str(&format!("    {line}\n"));
+            }
+            out.push_str("\n  Does not fire on\n");
+            for line in good.lines() {
+                out.push_str(&format!("    {line}\n"));
+            }
+            out.push_str("\n  Known false-positive modes\n");
+            for fp in false_positives {
+                out.push_str(&format!("    - {fp}\n"));
+            }
+        }
+        rules::RustNotes::NotChecked(why) => out.push_str(&format!("  Not checked. {why}\n")),
+        rules::RustNotes::Declaration => out.push_str("  The same: the rule reads realism.yaml.\n"),
     }
     out.push_str(&format!("\n{}\n", render::rule_url(r.id)));
     out

@@ -34,8 +34,8 @@ impl fmt::Display for LoadError {
 
 impl std::error::Error for LoadError {}
 
-/// Every `.sol` file under `paths`, sorted, with dependency and build
-/// directories skipped. A path given explicitly is always included, even if it
+/// Every `.sol` and `.rs` file under `paths`, sorted, with dependency and
+/// build directories skipped. A path given explicitly is always included, even if it
 /// sits inside a skipped directory.
 pub fn discover(paths: &[PathBuf]) -> Result<Vec<PathBuf>, LoadError> {
     let mut out = Vec::new();
@@ -68,7 +68,7 @@ fn walk(dir: &Path, out: &mut Vec<PathBuf>) -> Result<(), LoadError> {
                 continue;
             }
             walk(&path, out)?;
-        } else if file_type.is_file() && name.ends_with(".sol") {
+        } else if file_type.is_file() && (name.ends_with(".sol") || name.ends_with(".rs")) {
             out.push(path);
         }
     }
@@ -86,7 +86,18 @@ pub fn display_path(path: &Path, base: &Path) -> String {
     text.strip_prefix("./").unwrap_or(&text).to_string()
 }
 
-/// A set of parsed files that inherit from one another.
+/// Parses one source with the parser its extension calls for: `.rs` is Rust,
+/// everything else is Solidity.
+pub fn parse_any(path: &str, source: &str) -> Unit {
+    if path.ends_with(".rs") {
+        crate::rust::parse::parse_source(path, source)
+    } else {
+        parse_source(path, source)
+    }
+}
+
+/// A set of parsed files: Solidity contracts that inherit from one another,
+/// and Rust tests with the helpers they share.
 #[derive(Debug, Default)]
 pub struct Project {
     pub units: Vec<Unit>,
@@ -143,7 +154,7 @@ impl Project {
         for file in files {
             let bytes = std::fs::read(file).map_err(|e| LoadError::Io(file.clone(), e))?;
             let source = String::from_utf8_lossy(&bytes);
-            units.push(parse_source(&display_path(file, base), &source));
+            units.push(parse_any(&display_path(file, base), &source));
         }
         Ok(Project { units })
     }
@@ -152,7 +163,7 @@ impl Project {
         Project {
             units: sources
                 .iter()
-                .map(|(path, src)| parse_source(path, src))
+                .map(|(path, src)| parse_any(path, src))
                 .collect(),
         }
     }

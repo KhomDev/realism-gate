@@ -1,12 +1,14 @@
-//! realism-gate: a static checker for Foundry proof-of-concept tests.
+//! realism-gate: a static checker for proof-of-concept tests, written for
+//! Foundry (Solidity) or for Solana programs (Rust).
 //!
 //! It answers one question about a PoC: does it prove the claim from the
 //! position of an unprivileged attacker? It does not run the test. It parses
-//! the Solidity, rebuilds the order in which the test's code runs (state
+//! the source, rebuilds the order in which the test's code runs (state
 //! initializers, `setUp()`, the test, inlined helpers, callbacks), works out
-//! who sends each call, and reports the patterns that make a passing PoC prove
-//! less than it appears to: privileged pranks, state written with cheatcodes,
-//! assertions that cannot fail, and measurements without a baseline.
+//! who sends or signs each call, and reports the patterns that make a passing
+//! PoC prove less than it appears to: privileged pranks and signers, state
+//! written with cheatcodes or `set_account`, assertions that cannot fail, and
+//! measurements without a baseline. [`rust`] is the Rust frontend.
 //!
 //! The library is what the `realism-gate` and `rgate` binaries run. Its API is
 //! not yet stable; the JSON and SARIF outputs are the supported interface.
@@ -23,6 +25,7 @@ pub mod parse;
 pub mod project;
 pub mod render;
 pub mod rules;
+pub mod rust;
 pub mod suppress;
 pub mod trace;
 

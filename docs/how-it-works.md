@@ -3,7 +3,9 @@
 realism-gate never runs a test. It reads the Solidity, rebuilds what the test
 would do in the order Foundry would do it, and checks that sequence against the
 rules. This page describes each stage and, for each, what it can and cannot
-see.
+see. Rust tests for Solana programs go through the same stages with their own
+parser and vocabulary; [the last section](#rust-solana-tests) describes how
+each one differs.
 
 ## 1. Parsing
 
@@ -107,9 +109,69 @@ rule text: `realism-gate rules`, `realism-gate explain`, the SARIF rule table
 and the pages in `docs/rules/` are all generated from it, and a test fails if
 the pages drift.
 
+## Rust (Solana) tests
+
+`.rs` files are parsed with [`syn`](https://github.com/dtolnay/syn) and lowered
+into the same expression and statement model as Solidity (`src/rust/`).
+Blocks are flattened the same way: the bodies of `if`, `match`, loops and
+closures run inline, in source order. `if cond { panic!() }` counts as
+`assert!(!cond)`.
+
+**Which tests.** A function with an attribute whose last segment is `test`
+(`#[test]`, `#[tokio::test]`, `#[test_log::test]`), `#[rstest]` or
+`#[test_case]`, in any module. It is checked only if its trace drives a
+Solana harness: it builds a `ProgramTest`, `LiteSVM` or `Mollusk`, builds or
+sends a transaction, or writes, loads or airdrops to an account. A suite is
+the tests of one module of one file, named by the file stem and module path.
+
+**The trace.** As in Solidity, helper calls are inlined at the call site, up
+to eight levels deep, with recursion cut. A helper is a function in the test's
+own file, or in shared test code: any `.rs` file under a directory named
+`tests` or `test`, such as `tests/common/mod.rs`. Program source is never
+inlined; a test reaches it through transactions. A call resolves to a helper
+only when the name and the number of arguments match, and a harness method
+(`set_account`, `send_transaction`) never resolves to a fixture method of the
+same name. Each inlined parameter is bound to the caller's argument, so a
+transaction a generic `send(svm, ix, signers)` wrapper signs with `signers`
+is seen as signed by whatever the test passed.
+
+**Harness calls** are recognised by name, not type (`src/rust/harness.rs`):
+
+| Event | Calls |
+|---|---|
+| transaction, with its signers | `Transaction::new_signed_with_payer`, `Transaction::new`, `VersionedTransaction::try_new`, `tx.sign(..)`; a Mollusk `process_*` run; a `send_transaction` / `process_transaction` whose transaction was built where the trace cannot see |
+| account write | `set_account`, `add_account` |
+| account copied in | `add_account_with_file_data`, `add_account_with_base64_data`; a `set_account` whose value comes from an RPC fetch, `include_bytes!`, a file or JSON |
+| program load | `ProgramTest::new`, `add_program`, `add_program_from_file`, `add_upgradeable_program_to_genesis`, `Mollusk::new` |
+| live cluster | `RpcClient::new*`, unless the URL is a literal `localhost` or `127.0.0.1` |
+
+**Where the exploit starts.** A Solana test has no `setUp()`. The exploit
+starts at the first transaction that does not set the world up. A
+transaction sets the world up when it is sent from a helper whose name says
+so (`setup`, `init_*`, `create_*`, `TestEnv::new`, ...), or when nobody who
+reads as the attacker signs it and its instructions are named `init`,
+`initialize`, `create`, `setup`, `configure` or the like. Everything before
+it is setup, and a cheat there is reported one level lower, as in `setUp()`.
+
+**Who is who** (`src/rust/env.rs`). An account the test derives with
+`find_program_address` is the program's, whoever it describes; an associated
+token account belongs to its owner's class; a `pubkey!` or `Pubkey::from_str`
+constant is a fixed address of the protocol; then names: attacker words, the
+harness's `payer`, user words, role words (with `user_authority` and
+`attacker_owner` excluded), and protocol-state words (`vault`, `pool`,
+`config`, `market`, ...). A role is also granted by a `set_authority` or
+`set_admin`-style call, or by a role field (`admin`, `authority`, ...) in a
+struct whose name initializes or reconfigures (`Initialize`, `UpdateConfig`).
+A `realism.yaml` declaration overrides the attacker heuristic, as in Solidity.
+
+**Placement.** A finding about a transaction is placed at the call that
+sends it from the test (or from the helper the test calls), with that call as
+the evidence, rather than inside a generic `send` wrapper.
+
 ## What it never does
 
-- It never runs Solidity, compiles it, or calls `forge`.
+- It never runs Solidity, compiles it, or calls `forge`. It never builds or
+  runs Rust either, and never calls `cargo`.
 - It never opens a network connection. RPC URLs in a test are text to it.
 - It never writes anywhere except the file named by `--output` and, for
   `init`, `./realism.yaml`.

@@ -4,7 +4,8 @@ use crate::declaration::Declaration;
 use crate::finding::{Finding, Severity, Suppression};
 use crate::identity::Env;
 use crate::project::Project;
-use crate::rules::{self, Raw, help};
+use crate::rules::{self, Lang, Raw, help};
+use crate::rust;
 use crate::suppress::{self, Directive};
 use crate::trace;
 use regex::Regex;
@@ -124,7 +125,7 @@ pub fn analyze(
         ..Summary::default()
     };
 
-    let mut add = |raw: Raw, suite: &str, suite_file: &str, test: &str| {
+    let mut add = |raw: Raw, suite: &str, suite_file: &str, test: &str, lang: Lang| {
         if !opts.enabled(raw.rule) {
             return;
         }
@@ -173,7 +174,7 @@ pub fn analyze(
                 },
                 message: raw.message,
                 evidence: raw.evidence,
-                help: help(info),
+                help: help(info, lang),
                 suppressed,
                 ignored_suppression,
             },
@@ -206,13 +207,64 @@ pub fn analyze(
                 env.declared_privileged = d.decl.privileged_identities().collect();
             }
             for raw in rules::check_test(project, &suite, &tr, &env) {
-                add(raw, &suite.contract.name, suite_file, &test.name);
+                add(
+                    raw,
+                    &suite.contract.name,
+                    suite_file,
+                    &test.name,
+                    Lang::Solidity,
+                );
             }
         }
     }
+
+    let declared = rust::Declared {
+        attackers: declaration
+            .map(|d| d.decl.attackers().collect())
+            .unwrap_or_default(),
+        privileged: declaration
+            .map(|d| d.decl.privileged_identities().collect())
+            .unwrap_or_default(),
+        victims: declaration
+            .map(|d| d.decl.victims().collect())
+            .unwrap_or_default(),
+    };
+    let scopes = rust::trace::Scopes::new(project);
+    for suite in rust::suites(project) {
+        if let Some(re) = &opts.match_contract
+            && !re.is_match(&suite.name)
+        {
+            continue;
+        }
+        let suite_file = project.units[suite.unit].path.as_str();
+        if opts.excluded(suite_file) {
+            continue;
+        }
+        let mut counted = false;
+        for test in &suite.tests {
+            if let Some(re) = &opts.match_test
+                && !re.is_match(&test.name)
+            {
+                continue;
+            }
+            // A Rust test that drives no Solana harness is not a PoC.
+            let Some(raws) = rust::check_test(project, &scopes, &suite, test, &declared) else {
+                continue;
+            };
+            if !counted {
+                summary.suites += 1;
+                counted = true;
+            }
+            summary.tests += 1;
+            for raw in raws {
+                add(raw, &suite.name, suite_file, &test.name, Lang::Rust);
+            }
+        }
+    }
+
     if let Some(d) = declaration {
         for raw in d.decl.check(DECLARATION_UNIT, d.text) {
-            add(raw, "", "", "");
+            add(raw, "", "", "", Lang::Solidity);
         }
     }
 

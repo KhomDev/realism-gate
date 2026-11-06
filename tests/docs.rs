@@ -1,8 +1,9 @@
 //! Generated documentation must match the code that generates it.
 //!
-//! `docs/rules/*.md` comes from the rule catalog, and the example block in
-//! README.md comes from running the binary on `examples/vault-drain`. Run with
-//! `REALISM_GATE_BLESS=1 cargo test --test docs` to regenerate both after a
+//! `docs/rules/*.md` comes from the rule catalog, and the two example blocks
+//! in README.md come from running the binary on `examples/vault-drain`
+//! (Foundry) and `examples/solana-vault-drain` (Rust). Run with
+//! `REALISM_GATE_BLESS=1 cargo test --test docs` to regenerate them after a
 //! deliberate change.
 
 use realism_gate::rules::{RULES, catalog};
@@ -54,24 +55,32 @@ fn rule_pages_are_current() {
     );
 }
 
-const BEGIN: &str = "<!-- BEGIN:example -->";
-const END: &str = "<!-- END:example -->";
-
-#[test]
-fn readme_example_is_current() {
+/// Replaces the block between `<!-- BEGIN:{name} -->` and `<!-- END:{name} -->`
+/// in README.md with the output of `realism-gate check` run in `dir`, or
+/// checks that it already holds that output.
+fn readme_block_is_current(name: &str, dir: &str) {
+    let (begin, end_mark) = (
+        format!("<!-- BEGIN:{name} -->"),
+        format!("<!-- END:{name} -->"),
+    );
     let out = Command::new(env!("CARGO_BIN_EXE_realism-gate"))
         .args(["check", "--color", "never", "--no-declaration"])
-        .current_dir(root().join("examples/vault-drain"))
+        .current_dir(root().join(dir))
         .output()
         .unwrap();
-    assert_eq!(out.status.code(), Some(1), "the example is meant to fail");
+    assert_eq!(out.status.code(), Some(1), "{dir} is meant to fail");
     let text = String::from_utf8(out.stdout).unwrap();
-    let block = format!("{BEGIN}\n\n```text\n{}```\n\n{END}", text);
+    let block = format!("{begin}\n\n```text\n{text}```\n\n{end_mark}");
 
     let readme_path = root().join("README.md");
     let readme = norm(&std::fs::read_to_string(&readme_path).unwrap());
-    let start = readme.find(BEGIN).expect("README has an example block");
-    let end = readme.find(END).expect("README example block is closed") + END.len();
+    let start = readme
+        .find(&begin)
+        .unwrap_or_else(|| panic!("README has no {name} block"));
+    let end = readme
+        .find(&end_mark)
+        .unwrap_or_else(|| panic!("README's {name} block is not closed"))
+        + end_mark.len();
     let current = &readme[start..end];
     if bless() {
         let updated = format!("{}{}{}", &readme[..start], block, &readme[end..]);
@@ -80,8 +89,15 @@ fn readme_example_is_current() {
     }
     assert_eq!(
         current, block,
-        "README example is stale; run with REALISM_GATE_BLESS=1"
+        "README {name} block is stale; run with REALISM_GATE_BLESS=1"
     );
+}
+
+#[test]
+fn readme_examples_are_current() {
+    // One at a time: both rewrite README.md when blessing.
+    readme_block_is_current("example", "examples/vault-drain");
+    readme_block_is_current("example-rust", "examples/solana-vault-drain");
 }
 
 /// `uses: KhomDev/realism-gate@v0` must download the release it belongs to,

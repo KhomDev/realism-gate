@@ -118,3 +118,30 @@ No rule was added. See "Candidates" below.
 - *RG02: a fresh `makeAddr` key is not a role holder unless granted one.*
   One instance; it conflicts with local-deployment tests where the protocol
   is deployed with that key as owner.
+
+## Rust (Solana) tests
+
+Not measured. Every figure above is for Solidity: the Rust frontend is new in
+0.3.0, and there is no public, labelled collection of Solana PoCs comparable
+to DeFiHackLabs to measure it on. Until there is, treat a Rust finding as a
+question to answer, not a verdict.
+
+What was checked instead, before release: the frontend was run over
+[LiteSVM](https://github.com/LiteSVM/litesvm) at `c848c56` and five
+[solana-program-library](https://github.com/solana-labs/solana-program-library)
+test directories at `264ca72` (`token-lending`, `stake-pool`, `governance`,
+`token-swap` and `single-pool`, each `program/tests`):
+
+```bash
+realism-gate check <checkout> --format json --fail-on never --no-config --no-declaration
+```
+
+All 164 Rust files parsed, and 451 tests drove a harness and were checked,
+in under a second per repository. These are program test suites, not
+PoCs, so a privileged signer or a hand-built account in them is often the
+point of the test. Reading every finding found four patterns that were wrong
+on their own terms, each now fixed and pinned by a test in `tests/rust.rs`:
+a library method inlined as a fixture method of the same name, a keypair's
+`.pubkey()` read as a fixed address, an attacker's own attempt to grant
+itself a role reported as the harness granting it, and a user's
+`owner: alice.pubkey()` field read as a role.

@@ -9,7 +9,7 @@ use crate::identity::{Env, key};
 use crate::ir::{Expr, Pos};
 use crate::project::{Project, Suite};
 use crate::trace::{CallClass, Phase, Trace};
-pub use catalog::{RULES, RuleInfo, rule};
+pub use catalog::{Lang, RULES, RuleInfo, RustNotes, rule};
 
 use crate::finding::Severity;
 
@@ -170,11 +170,13 @@ pub fn snippet(text: &str, max: usize) -> String {
     }
 }
 
-/// The first sentence of a rule's fix, used as the one-line help.
-pub fn help(r: &RuleInfo) -> &'static str {
-    match r.fix.find(". ") {
-        Some(end) => &r.fix[..=end],
-        None => r.fix,
+/// The first sentence of a rule's fix for findings in `lang`, used as the
+/// one-line help.
+pub fn help(r: &RuleInfo, lang: Lang) -> &'static str {
+    let fix = r.fix_for(lang);
+    match fix.find(". ") {
+        Some(end) => &fix[..=end],
+        None => fix,
     }
 }
 
@@ -186,9 +188,16 @@ mod tests {
     fn help_is_the_first_sentence() {
         let r = rule("RG06").unwrap();
         assert_eq!(
-            help(r),
+            help(r, Lang::Solidity),
             "Fund the attacker with `deal`, then `transfer` from the attacker to the contract."
         );
+        assert_eq!(
+            help(r, Lang::Rust),
+            "Fund the attacker's own accounts, then transfer from the attacker to the program's account."
+        );
+        // A rule Rust does not check keeps its Solidity help.
+        let rg07 = rule("RG07").unwrap();
+        assert_eq!(help(rg07, Lang::Rust), help(rg07, Lang::Solidity));
     }
 
     #[test]

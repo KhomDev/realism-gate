@@ -165,10 +165,100 @@ fn every_code_rule_has_a_bad_fixture() {
     for i in 1..=11 {
         let id = format!("RG{i:02}");
         assert!(
-            files.iter().any(|f| f.starts_with(&id)),
-            "{id} has no fixture"
+            files
+                .iter()
+                .any(|f| f.starts_with(&id) && f.ends_with(".sol")),
+            "{id} has no Solidity fixture"
+        );
+        let checks_rust = realism_gate::rules::rule(&id).unwrap().checks_rust();
+        let has_rust = files
+            .iter()
+            .any(|f| f.starts_with(&id) && f.ends_with(".rs"));
+        assert_eq!(
+            has_rust, checks_rust,
+            "{id}: a Rust fixture exists exactly when the rule checks Rust"
         );
     }
+}
+
+// Rust (Solana) fixtures: each fires exactly its own rule, as the Solidity
+// ones do.
+
+#[test]
+fn rust_rg01_attacker_holds_privilege() {
+    expect(
+        "tests/fixtures/bad/RG01_attacker_holds_privilege.rs",
+        &[("RG01", Error, 19)],
+    );
+}
+
+#[test]
+fn rust_rg02_privileged_signer() {
+    expect(
+        "tests/fixtures/bad/RG02_privileged_signer.rs",
+        &[("RG02", Warn, 28)],
+    );
+}
+
+#[test]
+fn rust_rg03_payer_is_deployer() {
+    expect(
+        "tests/fixtures/bad/RG03_payer_is_deployer.rs",
+        &[("RG03", Warn, 19)],
+    );
+}
+
+#[test]
+fn rust_rg04_account_write() {
+    expect(
+        "tests/fixtures/bad/RG04_account_write.rs",
+        &[("RG04", Error, 26)],
+    );
+}
+
+#[test]
+fn rust_rg05_mock_program() {
+    expect(
+        "tests/fixtures/bad/RG05_mock_program.rs",
+        &[("RG05", Warn, 17)],
+    );
+}
+
+#[test]
+fn rust_rg06_token_balance_injection() {
+    expect(
+        "tests/fixtures/bad/RG06_token_balance_injection.rs",
+        &[("RG06", Error, 42)],
+    );
+}
+
+#[test]
+fn rust_rg08_no_assertion_error_and_print_only_warning() {
+    expect(
+        "tests/fixtures/bad/RG08_no_assertion.rs",
+        &[("RG08", Error, 21), ("RG08", Warn, 27)],
+    );
+}
+
+#[test]
+fn rust_rg09_tautological_assertion() {
+    expect(
+        "tests/fixtures/bad/RG09_tautological_assertion.rs",
+        &[("RG09", Error, 22), ("RG09", Error, 23)],
+    );
+}
+
+#[test]
+fn rust_rg10_no_baseline() {
+    expect(
+        "tests/fixtures/bad/RG10_no_baseline.rs",
+        &[("RG10", Warn, 20)],
+    );
+}
+
+#[test]
+fn rust_rg11_live_rpc() {
+    expect("tests/fixtures/bad/RG11_live_rpc.rs", &[("RG11", Warn, 20)]);
 }
 
 #[test]

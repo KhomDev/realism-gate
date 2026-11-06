@@ -1948,14 +1948,16 @@ dependencies = [
 
 [[package]]
 name = "realism-gate"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
  "clap",
+ "proc-macro2",
  "regex",
  "serde",
  "serde-saphyr",
  "serde_json",
  "solar-parse",
+ "syn 2.0.119",
  "toml",
 ]
 
