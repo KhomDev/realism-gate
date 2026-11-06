@@ -1,8 +1,8 @@
 # cargo-deny configuration.
 #
-# Six direct dependencies. The parser (solar) brings most of the graph; every
-# other addition is a supply-chain decision, so the checks are strict where
-# they can be and explicit where they cannot.
+# The three parsers (solar for Solidity, syn for Rust, oxc for TypeScript)
+# bring most of the graph; every other addition is a supply-chain decision, so
+# the checks are strict where they can be and explicit where they cannot.
 
 [graph]
 targets = [
@@ -39,6 +39,13 @@ allow = [
     "CC0-1.0",
 ]
 confidence-threshold = 0.9
+# One crate, one decision: `dragonbox_ecma` (number formatting, reached only
+# through oxc_parser -> oxc_ecmascript) is offered under
+# "Apache-2.0 WITH LLVM-exception OR BSL-1.0". The Boost licence is permissive
+# and compatible with MIT distribution; it is allowed for this crate alone.
+exceptions = [
+    { allow = ["BSL-1.0"], crate = "dragonbox_ecma" },
+]
 
 [bans]
 # The parser's graph carries a few duplicated versions it does not control.

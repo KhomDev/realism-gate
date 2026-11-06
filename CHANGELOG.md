@@ -101,6 +101,9 @@ Rust findings, and the JSON/SARIF output, are unchanged.
   bytes (+11.5%), the TypeScript parser.
 - The minimum supported Rust stays 1.95: oxc is pinned to 0.146, its last
   release that builds on it.
+- One new licence in the dependency graph: `dragonbox_ecma`, through oxc, is
+  under `Apache-2.0 WITH LLVM-exception OR BSL-1.0`. `deny.toml` allows
+  BSL-1.0 for that crate alone.
 
 ## [0.3.0] - 2026-11-06
 
