@@ -1,13 +1,13 @@
 [package]
 name = "realism-gate"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2024"
-description = "Static checker for Foundry and Solana PoC tests: does the proof of concept show what an unprivileged attacker can do, or only what the harness made true?"
+description = "Static checker for Foundry and Solana (Rust and Anchor TypeScript) PoC tests: does the proof of concept show what an unprivileged attacker can do, or only what the harness made true?"
 license = "MIT"
 repository = "https://github.com/KhomDev/realism-gate"
 homepage = "https://khomdev.org/tools"
 readme = "README.md"
-keywords = ["foundry", "solana", "security", "poc", "static-analysis"]
+keywords = ["foundry", "solana", "anchor", "security", "poc"]
 categories = ["command-line-utilities", "development-tools::testing"]
 rust-version = "1.95"
 # The published crate is the program and its licence, nothing else: no
@@ -25,6 +25,13 @@ path = "src/bin/rgate.rs"
 
 [dependencies]
 clap = { version = "4.6.7", features = ["derive"] }
+# The TypeScript parser of the Oxc toolchain, for Anchor's tests. Pinned: oxc
+# releases break their API on every minor version, and 0.146 is the last that
+# builds on the minimum supported Rust (1.95).
+oxc_allocator = "=0.146.0"
+oxc_ast = "=0.146.0"
+oxc_parser = "=0.146.0"
+oxc_span = "=0.146.0"
 # Positions for the Rust parser: line, column and byte range of every span.
 proc-macro2 = { version = "1.0.107", default-features = false, features = ["span-locations"] }
 regex = "1.13.1"

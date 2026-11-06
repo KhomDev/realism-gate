@@ -9,7 +9,7 @@ use crate::identity::{Env, key};
 use crate::ir::{Expr, Pos};
 use crate::project::{Project, Suite};
 use crate::trace::{CallClass, Phase, Trace};
-pub use catalog::{Lang, RULES, RuleInfo, RustNotes, rule};
+pub use catalog::{Lang, RULES, RuleInfo, SolanaNotes, rule};
 
 use crate::finding::Severity;
 

@@ -8,7 +8,7 @@
 //! attacker heuristic.
 
 use super::harness::{self, Event};
-use super::trace::{OpKind, Trace, is_identity_shaped, key};
+use super::trace::{Call, OpKind, Trace, is_identity_shaped, key};
 use crate::identity::{
     compact, is_attacker_name, is_grant_method, is_mock_name, is_user_name, role_word, words,
 };
@@ -20,7 +20,7 @@ use std::collections::{BTreeMap, BTreeSet};
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Class {
     /// The harness's fee payer: `payer` from `ProgramTest::start()`,
-    /// `context.payer`.
+    /// `context.payer`, or an Anchor provider's `provider.wallet`.
     Payer,
     Attacker,
     /// An ordinary user: a victim, a depositor, `alice`.
@@ -59,6 +59,7 @@ const PROTOCOL_WORDS: &[&str] = &[
 /// Calls that derive a program-derived address.
 const PDA_CALLS: &[&str] = &[
     "find_program_address",
+    "find_program_address_sync",
     "create_program_address",
     "try_find_program_address",
     "get_program_address",
@@ -95,6 +96,23 @@ const LIBRARY_CRATES: &[&str] = &[
     "memo",
 ];
 
+/// The well-known program ids `@solana/web3.js` and `@solana/spl-token`
+/// export, which are not the program under test.
+const LIBRARY_IDS: &[&str] = &[
+    "TOKEN_PROGRAM_ID",
+    "TOKEN_2022_PROGRAM_ID",
+    "ASSOCIATED_TOKEN_PROGRAM_ID",
+    "MEMO_PROGRAM_ID",
+    "BPF_LOADER_PROGRAM_ID",
+    "BPF_LOADER_UPGRADEABLE_PROGRAM_ID",
+    "SYSTEM_PROGRAM_ID",
+    "COMPUTE_BUDGET_PROGRAM_ID",
+];
+
+/// Words that name the harness's fee payer under a TypeScript provider:
+/// `provider.wallet`, `provider.publicKey`.
+const WALLET_WORDS: &[&str] = &["wallet", "provider"];
+
 /// A role assignment the harness makes.
 #[derive(Debug, Clone)]
 pub struct Grant {
@@ -126,6 +144,12 @@ fn peel_unwrap(e: &Expr) -> &Expr {
     }
     if let ExprKind::Member(base, m) = &e.kind
         && m == "0"
+    {
+        return peel_unwrap(base);
+    }
+    // TypeScript's `findProgramAddressSync(..)[0]`.
+    if let ExprKind::Index(base, idx) = &e.kind
+        && matches!(idx.as_slice(), [i] if i.text.trim() == "0")
     {
         return peel_unwrap(base);
     }
@@ -163,7 +187,7 @@ impl<'p> Env<'p> {
         let mut units: BTreeSet<usize> = trace.ops.iter().map(|op| op.unit).collect();
         units.insert(trace.unit);
         for u in units {
-            if let Some(file) = &project.units[u].rust {
+            if let Some(file) = &project.units[u].solana {
                 for (name, value) in &file.consts {
                     env.consts.entry(name.clone()).or_insert(value);
                 }
@@ -210,22 +234,27 @@ impl<'p> Env<'p> {
                 }
             }
             // `Initialize { admin: attacker.pubkey(), .. }`: a role field set
-            // in a struct that builds or reconfigures the protocol.
-            if !c.fields.is_empty() && is_configuring(&c.name) {
-                for (field, value) in c.fields {
-                    // `owner` and `authority` also say whose account it is:
-                    // `owner: alice.pubkey()` is alice's account, not a role.
-                    let holder_field = matches!(field.as_str(), "owner" | "authority");
-                    if role_of(field).is_some()
-                        && is_identity_shaped(value)
-                        && !(holder_field && env.class_of(&op.key(value)) == Class::User)
-                    {
-                        env.grants.push(Grant {
-                            grantee: op.key(value),
-                            text: format!("{field}: {}", compact(&value.text)),
-                            op: i,
-                        });
-                    }
+            // in a struct that builds or reconfigures the protocol. An Anchor
+            // builder's accounts object is named by its instruction:
+            // `program.methods.initialize().accounts({ admin: .. })`.
+            let fields: &[(String, Expr)] = if !c.fields.is_empty() && is_configuring(&c.name) {
+                c.fields
+            } else {
+                configuring_accounts(c)
+            };
+            for (field, value) in fields {
+                // `owner` and `authority` also say whose account it is:
+                // `owner: alice.pubkey()` is alice's account, not a role.
+                let holder_field = matches!(field.as_str(), "owner" | "authority");
+                if role_of(field).is_some()
+                    && is_identity_shaped(value)
+                    && !(holder_field && env.class_of(&op.key(value)) == Class::User)
+                {
+                    env.grants.push(Grant {
+                        grantee: op.key(value),
+                        text: format!("{field}: {}", compact(&value.text)),
+                        op: i,
+                    });
                 }
             }
         }
@@ -302,11 +331,13 @@ impl<'p> Env<'p> {
         if is_user_name(base) || self.declared_victims.contains(k) {
             return Class::User;
         }
+        if ws.iter().any(|w| WALLET_WORDS.contains(&w.as_str())) {
+            return Class::Payer;
+        }
         if self.programs.contains(k) {
             return Class::Program;
         }
-        let fixed = |e: &Expr| callee_name(e).is_some_and(|n| FIXED_KEY_CALLS.contains(&n));
-        if values.iter().any(|v| fixed(v)) || self.consts.get(k).is_some_and(|v| fixed(v)) {
+        if self.is_fixed(k) {
             return Class::Protocol("a fixed address".to_string());
         }
         if let Some(w) = ws.iter().find(|w| PROTOCOL_WORDS.contains(&w.as_str())) {
@@ -324,6 +355,13 @@ impl<'p> Env<'p> {
             }
         }
         Class::Unknown
+    }
+
+    /// Whether `k` is a fixed address written in the test:
+    /// `pubkey!("..")`, `Pubkey::from_str(..)`, `new PublicKey("..")`.
+    pub fn is_fixed(&self, k: &str) -> bool {
+        let fixed = |e: &Expr| callee_name(e).is_some_and(|n| FIXED_KEY_CALLS.contains(&n));
+        self.values(k).iter().any(|v| fixed(v)) || self.consts.get(k).is_some_and(|v| fixed(v))
     }
 
     /// Whether `k` was made fresh by the test: `Keypair::new()`,
@@ -391,6 +429,7 @@ impl<'p> Env<'p> {
         };
         let segs: Vec<&str> = path.split("::").collect();
         match segs.as_slice() {
+            [one] if LIBRARY_IDS.contains(one) => false,
             ["program_id"] | ["ID"] | ["id"] | ["crate", "ID"] | ["crate", "id"] => true,
             [.., krate, "ID" | "id"] => !LIBRARY_CRATES.contains(krate),
             [one] => words(one).iter().any(|w| w == "program") && !LIBRARY_CRATES.contains(one),
@@ -425,11 +464,40 @@ impl<'p> Env<'p> {
                 {
                     return true;
                 }
+                // A local assigned more than one value is a flag that changes
+                // as the test runs (`called = true` in an event callback).
                 let values = self.values(path);
-                !values.is_empty() && values.iter().all(|v| self.is_constant_depth(v, depth + 1))
+                let first = values.first().map(|v| compact(&v.text));
+                !values.is_empty()
+                    && values.iter().all(|v| {
+                        Some(compact(&v.text)) == first && self.is_constant_depth(v, depth + 1)
+                    })
             }
             _ => false,
         }
+    }
+}
+
+/// The accounts of an Anchor builder whose instruction builds or
+/// reconfigures the protocol, as an object literal:
+/// `program.methods.initialize().accounts({ admin: attacker.publicKey })`.
+fn configuring_accounts<'p>(c: &Call<'p>) -> &'p [(String, Expr)] {
+    let Some(Event::Transaction {
+        accounts: Some(accounts),
+        instructions,
+        ..
+    }) = harness::event(c)
+    else {
+        return &[];
+    };
+    let configuring = instructions
+        .iter()
+        .any(|ix| callee_name(ix).is_some_and(is_configuring));
+    match &accounts.kind {
+        ExprKind::Call {
+            callee, options, ..
+        } if configuring && matches!(&callee.kind, ExprKind::Type(t) if t.is_empty()) => options,
+        _ => &[],
     }
 }
 
@@ -458,12 +526,12 @@ fn is_configuring(name: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rust::trace::{Scopes, build};
+    use crate::solana::trace::{Scopes, build};
 
     fn with_env(src: &str, check: impl Fn(&Env<'_>)) {
         let p = Project::from_sources(&[("tests/t.rs", src)]);
         let scopes = Scopes::new(&p);
-        let file = p.units[0].rust.as_ref().unwrap();
+        let file = p.units[0].solana.as_ref().unwrap();
         let test = file.functions.iter().find(|f| f.test).unwrap();
         let trace = build(&scopes, 0, test);
         let env = Env::new(&p, &trace);
@@ -537,7 +605,7 @@ mod tests {
         "#,
             |env| {
                 let e = |s: &str| {
-                    crate::rust::parse::parse_source("x.rs", &format!("fn f() {{ {s}; }}"))
+                    crate::solana::parse_rust::parse_source("x.rs", &format!("fn f() {{ {s}; }}"))
                 };
                 for (src, want) in [
                     ("vault_program::ID", true),
@@ -548,7 +616,7 @@ mod tests {
                     ("my_program::id()", true),
                 ] {
                     let unit = e(src);
-                    let f = &unit.rust.as_ref().unwrap().functions[0];
+                    let f = &unit.solana.as_ref().unwrap().functions[0];
                     let crate::ir::StmtKind::Expr(expr) = &f.body[0].kind else {
                         panic!()
                     };
@@ -563,11 +631,11 @@ mod tests {
         with_env(
             "const AMOUNT: u64 = 5; #[test] fn test_a() { let x = 100; let y = x * 2; let z = svm.get_balance(&a); }",
             |env| {
-                let parsed = crate::rust::parse::parse_source(
+                let parsed = crate::solana::parse_rust::parse_source(
                     "x.rs",
                     "fn f() { (AMOUNT, y, LAMPORTS_PER_SOL, z, 3 + AMOUNT); }",
                 );
-                let f = &parsed.rust.as_ref().unwrap().functions[0];
+                let f = &parsed.solana.as_ref().unwrap().functions[0];
                 let crate::ir::StmtKind::Expr(e) = &f.body[0].kind else {
                     panic!()
                 };

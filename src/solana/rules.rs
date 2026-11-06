@@ -10,6 +10,7 @@
 
 use super::env::{Class, Env};
 use super::harness::Event;
+use super::ir::Dialect;
 use super::trace::{Call, CallClass, Op, OpKind, Trace, key};
 use crate::finding::Severity;
 use crate::identity::{compact, is_mock_name, words};
@@ -29,6 +30,7 @@ const SETUP_TX_WORDS: &[&str] = &[
     "bootstrap",
     "prepare",
     "fund",
+    "mint",
 ];
 
 /// One transaction in the trace.
@@ -51,18 +53,28 @@ pub struct Ctx<'p, 'a> {
 
 /// Words of every function, method and type an instruction expression
 /// names. A local standing for the whole instruction is followed to its
-/// value (`ix` assigned from `init_pool_ix(..)`); names inside the
-/// instruction's arguments are not, so `&admin` does not bring in the
+/// value (`ix` assigned from `init_pool_ix(..)`), and so are the instructions
+/// a transaction is built from (`new Transaction().add(ix)`); names inside
+/// the instruction's arguments are not, so `&admin` does not bring in the
 /// `setup()` that returned `admin`.
 fn instruction_words(env: &Env<'_>, e: &Expr, out: &mut BTreeSet<String>, follow: bool) {
     match &e.kind {
-        ExprKind::Call { callee, .. } => {
+        ExprKind::Call { callee, args, .. } => {
             let name = match &callee.kind {
                 ExprKind::Ident(p) | ExprKind::Type(p) => p.rsplit("::").next().unwrap_or(p),
                 ExprKind::Member(_, m) => m.as_str(),
                 _ => "",
             };
             out.extend(words(name));
+            if name == "add" {
+                for c in callee.children() {
+                    instruction_words(env, c, out, false);
+                }
+                for a in args {
+                    instruction_words(env, a, out, true);
+                }
+                return;
+            }
         }
         ExprKind::Ident(name) if follow => {
             for v in env.assigns.get(name).into_iter().flatten() {
@@ -92,13 +104,33 @@ impl<'p, 'a> Ctx<'p, 'a> {
             match ev {
                 Some(Event::Transaction {
                     signers,
+                    implicit,
                     instructions,
+                    accounts,
                 }) => {
                     let op = &trace.ops[i];
+                    let mut keys: Vec<String> = Vec::new();
+                    for s in signers {
+                        for k in op.keys(s) {
+                            if !keys.contains(&k) {
+                                keys.push(k);
+                            }
+                        }
+                    }
+                    // The provider wallet or client payer signs every request
+                    // as the fee payer. It authorizes the instruction only
+                    // when it is the only signer or the instruction names it.
+                    if let Some(fee_payer) = implicit {
+                        let named =
+                            accounts.is_some_and(|a| account_keys(op, a).contains(*fee_payer));
+                        if (keys.is_empty() || named) && !keys.iter().any(|k| k == fee_payer) {
+                            keys.insert(0, fee_payer.to_string());
+                        }
+                    }
                     txs.push(Tx {
                         op: i,
-                        signers: signers.map(|s| op.keys(s)).unwrap_or_default(),
-                        instructions: instructions.map(|e| op.exprs(e)).unwrap_or_default(),
+                        signers: keys,
+                        instructions: instructions.iter().flat_map(|e| op.exprs(e)).collect(),
                     });
                     built_since_send = true;
                 }
@@ -232,6 +264,30 @@ fn raw(
         message,
         evidence: snippet(evidence, 120),
     }
+}
+
+/// The identities an accounts struct or object names:
+/// `.accounts({ authority: provider.wallet.publicKey })` names `wallet`.
+fn account_keys(op: &Op<'_>, accounts: &Expr) -> BTreeSet<String> {
+    match &accounts.kind {
+        ExprKind::Call { options, .. } => options.iter().map(|(_, v)| op.key(v)).collect(),
+        _ => BTreeSet::new(),
+    }
+}
+
+/// The method as the test spells it: `setAccount` for a TypeScript
+/// `svm.setAccount(..)`, which the IR names `set_account`.
+fn written_name<'c>(c: &'c Call<'_>) -> &'c str {
+    let ExprKind::Call { callee, .. } = &c.expr.kind else {
+        return &c.name;
+    };
+    callee
+        .text
+        .rsplit(['.', ':'])
+        .next()
+        .map(str::trim)
+        .filter(|n| !n.is_empty())
+        .unwrap_or(&c.name)
 }
 
 /// RG01: the harness gives the attacker a role, or the attacker is a role
@@ -375,19 +431,39 @@ enum Shape {
     State,
 }
 
+/// Text that says an account value was copied from a recorded dump, matched
+/// without regard to case so that `loadAccount` and `load_account` agree.
 const COPY_HINTS: &[&str] = &[
     "include_bytes!",
     "fs::read",
     "read_to_string",
+    "readfile",
     "from_file",
+    "fromfile",
     "load_account",
+    "loadaccount",
     "read_account",
+    "readaccount",
     "base64",
     "serde_json",
     "from_json",
+    "json.parse",
     "snapshot",
     "dump",
 ];
+
+/// Whether `e` builds a client for a cluster: `RpcClient::new(..)`,
+/// web3.js's `new Connection(..)`.
+fn is_cluster_client(e: &Expr) -> bool {
+    let ExprKind::Call { callee, .. } = &e.kind else {
+        return false;
+    };
+    callee.as_ident().is_some_and(|p| {
+        let mut segs = p.rsplit("::");
+        let (last, owner) = (segs.next().unwrap_or(""), segs.next().unwrap_or(""));
+        last.starts_with("new") && (owner.ends_with("RpcClient") || owner == "Connection")
+    })
+}
 
 /// The account value and what it was built from, one assignment deep.
 fn account_texts<'p>(env: &Env<'p>, op: &Op<'p>, account: &'p Expr) -> Vec<&'p Expr> {
@@ -414,11 +490,18 @@ fn collect_idents(e: &Expr, out: &mut Vec<String>) {
 
 /// The struct literal or constructor call that builds an `Account`, if one
 /// of `parts` is one: `Account { .. }`, `Account::new(l, n, owner)`,
-/// `AccountSharedData::new(..)`.
+/// `AccountSharedData::new(..)`, or a TypeScript object with account fields
+/// (`{ lamports, data, owner, executable }`).
 fn account_literal<'e>(parts: &[&'e Expr]) -> Option<&'e Expr> {
     fn find(e: &Expr) -> Option<&Expr> {
-        if let ExprKind::Call { callee, .. } = &e.kind {
+        if let ExprKind::Call {
+            callee, options, ..
+        } = &e.kind
+        {
             let is_account = match &callee.kind {
+                ExprKind::Type(p) if p.is_empty() => options
+                    .iter()
+                    .any(|(n, _)| matches!(n.as_str(), "lamports" | "data" | "executable")),
                 ExprKind::Type(p) => p.ends_with("Account") || p.ends_with("AccountSharedData"),
                 ExprKind::Ident(p) => {
                     p.ends_with("Account::new") || p.ends_with("AccountSharedData::new")
@@ -452,6 +535,7 @@ fn shape(env: &Env<'_>, parts: &[&Expr]) -> Shape {
     let rpc_fetch = parts.iter().any(|p| {
         let mut calls = Vec::new();
         receivers_of(p, "get_account", &mut calls);
+        receivers_of(p, "get_account_info", &mut calls);
         calls.iter().any(|r| {
             let k = key(r);
             words(&k).iter().any(|w| w == "rpc")
@@ -460,10 +544,14 @@ fn shape(env: &Env<'_>, parts: &[&Expr]) -> Shape {
                     .get(&k)
                     .into_iter()
                     .flatten()
-                    .any(|v| compact(&v.text).contains("RpcClient::new"))
+                    .any(|v| is_cluster_client(v))
         })
     });
-    if rpc_fetch || COPY_HINTS.iter().any(|h| any(h)) {
+    let copied = texts.iter().any(|t| {
+        let t = t.to_ascii_lowercase();
+        COPY_HINTS.iter().any(|h| t.contains(h))
+    });
+    if rpc_fetch || copied {
         return Shape::Copied;
     }
     let lit = account_literal(parts);
@@ -479,12 +567,25 @@ fn shape(env: &Env<'_>, parts: &[&Expr]) -> Shape {
     for p in parts {
         callee_words(p, &mut builders);
     }
-    let is_mint = builders.contains("mint") && !builders.contains("account");
+    let is_mint = builders.contains("mint") && !builders.contains("account")
+        || ["MintLayout", "MINT_SIZE", "token::state::Mint"]
+            .iter()
+            .any(|h| any(h));
+    // An account the token program owns is a token account or a mint.
+    let token_owned = lit.and_then(|lit| field(lit, "owner")).is_some_and(|o| {
+        let t = compact(&o.text);
+        t.contains("TOKEN_PROGRAM_ID")
+            || t.contains("TOKEN_2022_PROGRAM_ID")
+            || t.starts_with("spl_token::")
+            || t.starts_with("spl_token_2022::")
+    });
     let token = builders.contains("token")
+        || token_owned
         || [
             "TokenAccount",
             "token::state::Account",
             "token_2022::state::Account",
+            "AccountLayout",
         ]
         .iter()
         .any(|h| any(h));
@@ -574,7 +675,7 @@ fn account_writes(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
             _ => continue,
         };
         let evidence = op.call().map_or(String::new(), |c| c.expr.text.clone());
-        let method = op.call().map_or("set_account", |c| c.name.as_str());
+        let method = op.call().map_or("set_account", written_name);
         match shape(env, &parts) {
             Shape::Copied | Shape::Program => {}
             s @ (Shape::TokenBalance | Shape::LamportsOnly) => {
@@ -642,6 +743,7 @@ fn code_replacement(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
         let k = op.key(id);
         let real_address = !env.is_fresh(&k)
             && (matches!(env.class_of(&k), Class::Protocol(_))
+                || env.is_fixed(&k)
                 || k.ends_with("::ID")
                 || k.ends_with("::id")
                 || compact(&id.text).ends_with("::id()"));
@@ -691,11 +793,15 @@ fn no_assertion(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
     if asserts > 0 {
         return;
     }
+    let succeeds = match ctx.trace.dialect {
+        Dialect::Rust => "`.unwrap()` on a transaction",
+        Dialect::TypeScript => "awaiting a transaction",
+    };
     let (severity, message) = if logs > 0 {
         (
             Severity::Warn,
             format!(
-                "`{}` prints {logs} value(s) but asserts none. The test passes whatever those values are; a reader has to trust the numbers. `.unwrap()` on a transaction only checks that it did not fail.",
+                "`{}` prints {logs} value(s) but asserts none. The test passes whatever those values are; a reader has to trust the numbers; {succeeds} only checks that it did not fail.",
                 test.name
             ),
         )
@@ -703,7 +809,7 @@ fn no_assertion(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
         (
             Severity::Error,
             format!(
-                "`{}` contains no assertion. It passes whatever the program does; `.unwrap()` on a transaction only checks that it did not fail.",
+                "`{}` contains no assertion. It passes whatever the program does; {succeeds} only checks that it did not fail.",
                 test.name
             ),
         )
@@ -714,7 +820,7 @@ fn no_assertion(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
         unit: ctx.trace.unit,
         pos: test.pos,
         message,
-        evidence: format!("fn {}()", test.name),
+        evidence: test.header.clone(),
     });
 }
 
@@ -737,6 +843,9 @@ fn tautology_of_pair(env: &Env<'_>, a: &Expr, b: &Expr, same_fails: bool) -> Opt
 fn tautology_of_condition(env: &Env<'_>, cond: &Expr) -> Option<String> {
     match &cond.kind {
         ExprKind::Lit(Lit::Bool(true)) => Some("the condition is the literal `true`".to_string()),
+        // `assert.ok(false)` after a call that should have thrown always
+        // fails: it is a deliberate failure, not a tautology.
+        ExprKind::Lit(Lit::Bool(false)) => None,
         ExprKind::Binary(l, op, r) if COMPARE_OPS.contains(&op.as_str()) => {
             tautology_of_pair(env, l, r, op == "!=" || op == "<" || op == ">")
         }
@@ -832,6 +941,25 @@ fn subject_of(op: &Op<'_>, env: &Env<'_>, e: &Expr, lamports: bool) -> Subject {
     Subject { who, lamports }
 }
 
+/// How a measurement is told apart from others: its text, with string
+/// arguments left out, so `balances(payer, "before")` and
+/// `balances(payer, "after")` are the same read taken twice.
+fn read_key(e: &Expr) -> String {
+    let ExprKind::Call { callee, args, .. } = &e.kind else {
+        return compact(&e.text);
+    };
+    let is_str = |a: &Expr| matches!(a.kind, ExprKind::Lit(Lit::Str(_)));
+    if !args.iter().any(is_str) {
+        return compact(&e.text);
+    }
+    let kept: Vec<String> = args
+        .iter()
+        .filter(|a| !is_str(a))
+        .map(|a| compact(&a.text))
+        .collect();
+    format!("{}({})", compact(&callee.text), kept.join(","))
+}
+
 /// The read a call makes, when its name says it measures something:
 /// `svm.get_balance(&pk)`, `token_balance(&svm, &ata)`.
 fn measure_call(op: &Op<'_>, env: &Env<'_>, e: &Expr) -> Option<(String, Subject)> {
@@ -847,7 +975,7 @@ fn measure_call(op: &Op<'_>, env: &Env<'_>, e: &Expr) -> Option<(String, Subject
         return None;
     }
     let lamports = name == "get_balance" || words(name).iter().any(|w| w == "lamports");
-    Some((compact(&e.text), subject_of(op, env, e, lamports)))
+    Some((read_key(e), subject_of(op, env, e, lamports)))
 }
 
 /// Measurements in an expression: calls whose name reads as one
@@ -888,18 +1016,29 @@ fn is_zero(e: &Expr) -> bool {
     literal_value(e) == Some(0.0)
 }
 
-/// The value of an integer literal such as `0`, `1_000_000` or `5u64`.
+/// The value of a number literal such as `0`, `1_000_000`, `5u64`, `1e9` or
+/// `10n`.
 fn literal_value(e: &Expr) -> Option<f64> {
     if !matches!(e.kind, ExprKind::Lit(Lit::Number)) {
         return None;
     }
-    let digits: String = e
-        .text
-        .chars()
-        .take_while(|c| c.is_ascii_digit() || *c == '_' || *c == '.')
-        .filter(|c| *c != '_')
-        .collect();
-    digits.parse().ok()
+    let text: String = e.text.chars().filter(|c| *c != '_').collect();
+    let mantissa_len = text
+        .find(|c: char| !(c.is_ascii_digit() || c == '.'))
+        .unwrap_or(text.len());
+    let (mantissa, rest) = text.split_at(mantissa_len);
+    let mantissa: f64 = mantissa.parse().ok()?;
+    let exponent = rest
+        .strip_prefix(['e', 'E'])
+        .map(|r| {
+            let digits: String = r
+                .chars()
+                .take_while(|c| c.is_ascii_digit() || *c == '-' || *c == '+')
+                .collect();
+            digits.parse::<i32>().unwrap_or(0)
+        })
+        .unwrap_or(0);
+    Some(mantissa * 10f64.powi(exponent))
 }
 
 /// For a directional `assert!(a > b)`, the claimed lower bound when it is a
@@ -1136,6 +1275,15 @@ fn no_baseline(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
     }
 }
 
+/// Text in a cluster URL or name that says it is the local validator.
+const LOCAL_CLUSTERS: &[&str] = &[
+    "localhost",
+    "127.0.0.1",
+    "localnet",
+    "rpcendpoint",
+    "rpc_endpoint",
+];
+
 /// RG11: the test reads the chain as it is today.
 fn live_rpc(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
     for (i, ev) in ctx.events.iter().enumerate() {
@@ -1143,10 +1291,19 @@ fn live_rpc(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
             continue;
         }
         let op = ctx.op(i);
-        // A local test validator is not a live cluster.
+        // A local test validator is not a live cluster, and neither is the
+        // endpoint the test's own provider already uses. A URL held in a
+        // local or a constant is read from its value.
         let local = op.call().and_then(|c| c.args.first()).is_some_and(|url| {
-            let text = url.text.to_ascii_lowercase();
-            text.contains("localhost") || text.contains("127.0.0.1")
+            let url = op.resolved(url);
+            let k = key(url);
+            std::iter::once(url)
+                .chain(ctx.env.assigns.get(&k).into_iter().flatten().copied())
+                .chain(ctx.env.consts.get(&k).copied())
+                .any(|e| {
+                    let text = e.text.to_ascii_lowercase();
+                    LOCAL_CLUSTERS.iter().any(|l| text.contains(l))
+                })
         });
         if local {
             continue;

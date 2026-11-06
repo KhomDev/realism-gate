@@ -201,9 +201,14 @@ fn example_rules(snippet: &str) -> Vec<&'static str> {
 /// on" one raises the rule, the "does not fire on" one does not.
 #[test]
 fn rust_examples_in_the_rule_pages_are_true() {
-    use realism_gate::rules::{RULES, RustNotes};
+    use realism_gate::rules::{RULES, SolanaNotes};
     for r in RULES {
-        let RustNotes::Checked { bad, good, .. } = r.rust else {
+        let SolanaNotes::Checked {
+            rust_bad: bad,
+            rust_good: good,
+            ..
+        } = r.solana
+        else {
             continue;
         };
         let fired = example_rules(bad);
@@ -303,6 +308,34 @@ fn an_account_owned_by_a_loaded_program_names_that_program() {
     );
 }
 
+#[test]
+fn anchor_client_requests_are_transactions_signed_by_their_signers() {
+    let src = "let program = client.program(vault::ID).unwrap();
+               program.request().accounts(vault::accounts::SetFee { admin: admin.pubkey() }).args(vault::instruction::SetFee { bps: 10_000 }).signer(&admin).send().unwrap();
+               program.request().accounts(vault::accounts::Withdraw { recipient: attacker.pubkey() }).args(vault::instruction::Withdraw { amount: 1 }).signer(&attacker).send().unwrap();
+               assert_eq!(program.account::<Vault>(vault_pda).unwrap().fees, 0);";
+    assert_eq!(example_rules(src), vec!["RG02"]);
+}
+
+#[test]
+fn an_anchor_client_for_a_public_cluster_is_live() {
+    let live = "let client = Client::new(Cluster::Mainnet, Rc::new(payer));
+assert!(true || false);";
+    assert!(example_rules(live).contains(&"RG11"));
+    let local = "let client = Client::new(Cluster::Localnet, Rc::new(payer));
+assert!(true || false);";
+    assert!(!example_rules(local).contains(&"RG11"));
+}
+
+#[test]
+fn anchor_litesvm_runs_instructions_and_its_assertions_count() {
+    let src = "let mut ctx = AnchorLiteSVM::build_with_program(vault::ID, include_bytes!(\"vault.so\"));
+               let ix = ctx.program().accounts(vault::client::accounts::SetFee { admin: admin.pubkey() }).args(vault::client::args::SetFee { bps: 10_000 }).instruction().unwrap();
+               ctx.execute_instruction(ix, &[&admin]).unwrap();
+               ctx.svm.assert_token_balance(&attacker_tokens, 0);";
+    assert_eq!(example_rules(src), vec!["RG02"]);
+}
+
 /// A scratch Cargo-style project: tests live in `tests/`.
 fn cargo_project(name: &str, files: &[(&str, &str)]) -> PathBuf {
     let dir = PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join(name);
@@ -354,7 +387,10 @@ fn plain_rust_tests_alone_are_no_test_suite() {
 fn explain_and_rules_describe_the_rust_checks() {
     let o = run(&root(), &["explain", "RG04"]);
     let out = String::from_utf8_lossy(&o.stdout);
-    assert!(out.contains("In Rust (Solana) tests"), "{out}");
+    assert!(
+        out.contains("In Solana tests (Rust and Anchor TypeScript)"),
+        "{out}"
+    );
     assert!(out.contains("svm.set_account(pool_pda, pool)"), "{out}");
     let o = run(&root(), &["explain", "RG07"]);
     assert!(String::from_utf8_lossy(&o.stdout).contains("Not checked."));
@@ -369,6 +405,9 @@ fn explain_and_rules_describe_the_rust_checks() {
             .unwrap()["languages"]
             .clone()
     };
-    assert_eq!(langs("RG04"), serde_json::json!(["solidity", "rust"]));
+    assert_eq!(
+        langs("RG04"),
+        serde_json::json!(["solidity", "rust", "typescript"])
+    );
     assert_eq!(langs("RG07"), serde_json::json!(["solidity"]));
 }

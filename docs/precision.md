@@ -145,3 +145,33 @@ a library method inlined as a fixture method of the same name, a keypair's
 `.pubkey()` read as a fixed address, an attacker's own attempt to grant
 itself a role reported as the harness granting it, and a user's
 `owner: alice.pubkey()` field read as a role.
+
+## Anchor TypeScript tests
+
+Not measured either, for the same reason: no labelled corpus of Anchor PoCs.
+The same robustness check was run before 0.4.0, over the TypeScript tests of
+[Anchor](https://github.com/coral-xyz/anchor) itself at `33868ff` (the whole checkout: its
+`tests/` suites, the TypeScript client's tests and the documentation's
+examples),
+[program-examples](https://github.com/solana-developers/program-examples) at
+`c0cafc5` (Anchor, bankrun and LiteSVM tests) and LiteSVM's own Node tests at
+`c848c56`:
+
+```bash
+realism-gate check <checkout> --format json --fail-on never --no-config --no-declaration
+```
+
+229 files import a Solana package; all parsed, and 292 tests in 118 suites
+drove a harness and were checked. Running the same checkouts also confirmed
+that the Rust results did not move: LiteSVM's and the five
+solana-program-library suites' Rust findings are identical to 0.3.0's. As
+with Rust, these are feature tests, not PoCs: an admin-signed instruction or
+a test without an assertion is often what they mean to do. Reading every
+finding found five patterns that were wrong on their own terms, each now
+fixed and pinned by a test in `tests/typescript.rs`: the provider wallet
+counted as the signer of every transaction it only paid for, `assert.ok(false)`
+after a call that should throw read as a tautology, a flag set by an event
+callback read as a constant, a `localhost` URL held in a constant read as a
+live cluster, and a helper read labelled `"Beginning"` and `"Resulting"` not
+seen as a before-and-after pair. A setup test titled `airdrop payer` is now
+read as setup too.

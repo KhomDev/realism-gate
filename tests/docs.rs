@@ -1,8 +1,9 @@
 //! Generated documentation must match the code that generates it.
 //!
-//! `docs/rules/*.md` comes from the rule catalog, and the two example blocks
-//! in README.md come from running the binary on `examples/vault-drain`
-//! (Foundry) and `examples/solana-vault-drain` (Rust). Run with
+//! `docs/rules/*.md` comes from the rule catalog, and the three example
+//! blocks in README.md come from running the binary on `examples/vault-drain`
+//! (Foundry), `examples/solana-vault-drain` (Rust) and
+//! `examples/anchor-vault-drain` (Anchor TypeScript). Run with
 //! `REALISM_GATE_BLESS=1 cargo test --test docs` to regenerate them after a
 //! deliberate change.
 
@@ -95,9 +96,10 @@ fn readme_block_is_current(name: &str, dir: &str) {
 
 #[test]
 fn readme_examples_are_current() {
-    // One at a time: both rewrite README.md when blessing.
+    // One at a time: each rewrites README.md when blessing.
     readme_block_is_current("example", "examples/vault-drain");
     readme_block_is_current("example-rust", "examples/solana-vault-drain");
+    readme_block_is_current("example-anchor", "examples/anchor-vault-drain");
 }
 
 /// `uses: KhomDev/realism-gate@v0` must download the release it belongs to,

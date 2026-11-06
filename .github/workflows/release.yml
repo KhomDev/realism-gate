@@ -1,8 +1,8 @@
 name: release
 
-# A version tag (vX.Y.Z, e.g. v0.3.0) builds every target, attests the archives,
+# A version tag (vX.Y.Z, e.g. v0.4.0) builds every target, attests the archives,
 # writes SHA256SUMS and publishes a GitHub release. A tag with a hyphen
-# (v0.3.0-rc.1) publishes a pre-release. The floating major tag `v0` is not a
+# (v0.4.0-rc.1) publishes a pre-release. The floating major tag `v0` is not a
 # version: it only moves the GitHub Action, so it does not match the filter.
 #
 # Run by hand (workflow_dispatch) it is a dry run: the same builds and

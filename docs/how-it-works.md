@@ -112,7 +112,7 @@ the pages drift.
 ## Rust (Solana) tests
 
 `.rs` files are parsed with [`syn`](https://github.com/dtolnay/syn) and lowered
-into the same expression and statement model as Solidity (`src/rust/`).
+into the same expression and statement model as Solidity (`src/solana/`).
 Blocks are flattened the same way: the bodies of `if`, `match`, loops and
 closures run inline, in source order. `if cond { panic!() }` counts as
 `assert!(!cond)`.
@@ -135,15 +135,18 @@ same name. Each inlined parameter is bound to the caller's argument, so a
 transaction a generic `send(svm, ix, signers)` wrapper signs with `signers`
 is seen as signed by whatever the test passed.
 
-**Harness calls** are recognised by name, not type (`src/rust/harness.rs`):
+**Harness calls** are recognised by name, not type (`src/solana/harness.rs`):
 
 | Event | Calls |
 |---|---|
-| transaction, with its signers | `Transaction::new_signed_with_payer`, `Transaction::new`, `VersionedTransaction::try_new`, `tx.sign(..)`; a Mollusk `process_*` run; a `send_transaction` / `process_transaction` whose transaction was built where the trace cannot see |
+| transaction, with its signers | `Transaction::new_signed_with_payer`, `Transaction::new`, `VersionedTransaction::try_new`, `tx.sign(..)`; a Mollusk `process_*` run; an anchor-client `program.request()` .. `.signer(&kp)` .. `.send()`, also signed by the client's payer; anchor-litesvm's `ctx.execute_instruction(ix, signers)`; a `send_transaction` / `process_transaction` whose transaction was built where the trace cannot see |
 | account write | `set_account`, `add_account` |
 | account copied in | `add_account_with_file_data`, `add_account_with_base64_data`; a `set_account` whose value comes from an RPC fetch, `include_bytes!`, a file or JSON |
-| program load | `ProgramTest::new`, `add_program`, `add_program_from_file`, `add_upgradeable_program_to_genesis`, `Mollusk::new` |
-| live cluster | `RpcClient::new*`, unless the URL is a literal `localhost` or `127.0.0.1` |
+| program load | `ProgramTest::new`, `add_program`, `add_program_from_file`, `add_upgradeable_program_to_genesis`, `Mollusk::new`, `AnchorLiteSVM::build_with_program` |
+| live cluster | `RpcClient::new*` and anchor-client's `Client::new`, unless the URL is `localhost` or `127.0.0.1` or the cluster `Cluster::Localnet` |
+
+An `assert_*` helper method (`svm.assert_token_balance(..)`) is an assertion;
+`assert_success()` only checks that the transaction did not fail and is not.
 
 **Where the exploit starts.** A Solana test has no `setUp()`. The exploit
 starts at the first transaction that does not set the world up. A
@@ -153,7 +156,7 @@ reads as the attacker signs it and its instructions are named `init`,
 `initialize`, `create`, `setup`, `configure` or the like. Everything before
 it is setup, and a cheat there is reported one level lower, as in `setUp()`.
 
-**Who is who** (`src/rust/env.rs`). An account the test derives with
+**Who is who** (`src/solana/env.rs`). An account the test derives with
 `find_program_address` is the program's, whoever it describes; an associated
 token account belongs to its owner's class; a `pubkey!` or `Pubkey::from_str`
 constant is a fixed address of the protocol; then names: attacker words, the
@@ -168,10 +171,82 @@ A `realism.yaml` declaration overrides the attacker heuristic, as in Solidity.
 sends it from the test (or from the helper the test calls), with that call as
 the evidence, rather than inside a generic `send` wrapper.
 
+## Anchor TypeScript tests
+
+`.ts`, `.mts`, `.cts`, `.js`, `.mjs` and `.cjs` files (not `.d.ts`) are
+parsed with [oxc](https://github.com/oxc-project/oxc), the parser of the Oxc
+JavaScript toolchain, and read only if they import a Solana package
+(`@coral-xyz/anchor`, anything under `@solana/`, `solana-bankrun`,
+`anchor-bankrun`, `litesvm`, `anchor-litesvm`), by `import` or `require`.
+Other JavaScript in the tree, a Hardhat suite or a bundler config, is not
+read and not counted.
+
+Each file is lowered into the same model as Rust (`src/solana/parse_ts.rs`),
+spelled the way the Rust harnesses spell it, so everything after the parser
+is shared with Rust:
+
+- every called name is in snake case (`svm.setAccount` is `set_account`);
+  variables and fields keep their names;
+- a call on an imported name or a class is a path call
+  (`anchor.web3.Keypair.generate()` is `anchor::web3::Keypair::generate`),
+  `new T(..)` is `T::new(..)`, `this` is `self`;
+- `kp.publicKey` is `kp.pubkey()`, `new PublicKey("..")` is a fixed address,
+  `getAssociatedTokenAddress(mint, owner)` takes the owner first as in Rust;
+- `await`, `as`, `!`, `new BN(x)`, `BigInt(x)`, `.toNumber()`, `.toString()`
+  are their operand; an object literal is a struct literal with no type name;
+- chai, node and jest assertions are `assert!`, `assert_eq!` and `assert_ne!`
+  when they compare (`expect(a).to.be.greaterThan(b)` is `assert!(a > b)`),
+  BN comparisons (`a.gt(b)`) are operators, and `if (c) throw` is
+  `assert!(!c)`; `console.log` is a log.
+
+**Which tests.** Every `it(..)`, `test(..)` and `specify(..)` callback,
+including `.only`; `.skip`, `.todo`, `xit` and `xdescribe` are not run and not
+read. A suite is a `describe` block, named by its titles (`vault > withdraw`).
+As in Rust, a test is checked only if its trace drives a Solana harness.
+
+**What runs first.** Before each test the trace walks what mocha runs before
+it: the file's top level, the enclosing `describe` bodies and their `before`
+hooks, every test above it in the file (mocha runs them in order, and the
+test inherits their state), then the `beforeEach` hooks. The hooks build the
+world. An earlier test builds the world when its title's leading verb says so
+(`it("initializes the pool")`, `it("is initialized")`, `it("funds the
+vault")`); such a test is not checked on its own when later tests build on it.
+
+**Helpers** are function declarations, functions bound to a name
+(`const send = async (..) => ..`) and class methods, in the test's file or in
+any TypeScript file under a `tests` or `test` directory. A call resolves when
+the number of arguments fits, counting defaults and rest parameters.
+
+**Harness calls:**
+
+| Event | Calls |
+|---|---|
+| transaction, with its signers | `program.methods.x(..)` .. `.rpc()`, signed by `.signers([..])` and the provider wallet; `program.rpc.x(.., { accounts, signers })`; `provider.sendAndConfirm(tx, signers)`; `sendAndConfirmTransaction(connection, tx, signers)`; `connection.sendTransaction(tx, signers)`; `tx.sign(..)` before `svm.sendTransaction(tx)` or `banksClient.processTransaction(tx)` |
+| account write | `svm.setAccount`, `context.setAccount`, each account handed to bankrun's `startAnchor` or `start` |
+| program load | `svm.addProgram`, `svm.addProgramFromFile`, each program handed to `startAnchor` or `start` |
+| airdrop | `connection.requestAirdrop`, `svm.airdrop` |
+| live cluster | `new Connection(url)`, unless the URL, or the constant holding it, is `localhost`, `127.0.0.1` or the provider's own `rpcEndpoint` |
+
+The provider wallet (`provider.wallet`, named `wallet`) signs every `.rpc()`
+and `sendAndConfirm` as the fee payer. It counts as a signer of a transaction
+only when it is the only signer or the instruction names it in its accounts:
+a wallet that is the admin and also pays for the attacker's transaction did
+not authorize it.
+
+**Who is who** is the Rust logic: a `findProgramAddressSync` result is the
+program's, an associated token account is its owner's, a
+`new PublicKey("..")` constant is a fixed address. `provider.wallet` and
+other names with `wallet` or `provider` read as the payer, after attacker
+and user names. A role is granted by a role field in the `.accounts({ .. })`
+of an instruction that initializes or reconfigures (`initialize`,
+`setConfig`, ...). `TOKEN_PROGRAM_ID` and the other spl-token and web3.js
+program constants are not the program under test.
+
 ## What it never does
 
 - It never runs Solidity, compiles it, or calls `forge`. It never builds or
-  runs Rust either, and never calls `cargo`.
+  runs Rust either, and never calls `cargo`; it never runs TypeScript, and
+  never calls `node`, `anchor` or `yarn`.
 - It never opens a network connection. RPC URLs in a test are text to it.
 - It never writes anywhere except the file named by `--output` and, for
   `init`, `./realism.yaml`.

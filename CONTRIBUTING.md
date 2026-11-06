@@ -39,11 +39,15 @@ cargo test
 3. Add `tests/fixtures/bad/RGxx_<slug>.t.sol` that fires exactly the new rule,
    and extend a `tests/fixtures/good/` file with the sound version. Add the
    expectation to `tests/rules.rs`.
-4. If the rule checks Rust tests, add `tests/fixtures/bad/RGxx_<slug>.rs`
-   that fires exactly it, keep the `tests/fixtures/good/` Rust files clean,
-   and fill in the rule's `rust` notes in the catalog. `tests/rust.rs` runs
-   the notes' "fires on" and "does not fire on" examples and fails if either
-   does the opposite.
+4. If the rule checks Solana tests, add `tests/fixtures/bad/RGxx_<slug>.rs`
+   and `tests/fixtures/bad/RGxx_<slug>.ts`, each firing exactly it, keep the
+   `tests/fixtures/good/` Rust and TypeScript files clean, and fill in the
+   rule's `solana` notes in the catalog, with a Rust and a TypeScript example
+   of each kind. `tests/rust.rs` and `tests/typescript.rs` run the notes'
+   "fires on" and "does not fire on" examples and fail if one does the
+   opposite. The Solana pipeline is in `src/solana/`: the two frontends
+   (`parse_rust.rs`, `parse_ts.rs`) lower into one model, and nothing after
+   them depends on the language.
 5. Regenerate the docs: `REALISM_GATE_BLESS=1 cargo test --test docs`.
 6. Re-measure the corpus: `cargo build --release && bash scripts/bench-corpus.sh`.
    If the numbers move, run it with `--write` and explain the change in
