@@ -4,7 +4,7 @@ This document is the technical companion to the [README](README.md). The README
 says what the tool is for; this says how the code works, where each behaviour
 lives, and which numbers are measured rather than asserted. It describes the
 tree exactly as tagged **v0.4.0**, commit `c65845bc46da0670a17fe16cf22e6911f4e7c03f`
-(the tag's annotated object, which is also `origin/main`). In one line: a
+(the commit the annotated tag `v0.4.0` dereferences to). In one line: a
 static checker that reads Foundry (Solidity) and Solana (Rust, Anchor
 TypeScript) proof-of-concept tests and flags the patterns that make a passing
 PoC prove less than it claims.
@@ -544,7 +544,7 @@ an associated token account belongs to its owner's class; then attacker
 names (unless declared attackers exist), the harness's `payer`, mock names,
 user names, `wallet`/`provider` words, loaded program ids, fixed addresses
 (`pubkey!`, `Pubkey::from_str`, `from_str_const`, `new_from_array`,
-`new_const`), the 16 protocol-state words (`vault`, `pool`, `reserve`,
+`new_const`), the 18 protocol-state words (`vault`, `pool`, `reserve`,
 `market`, `config`, ...), and aliases.
 
 Role grants come from three shapes (src/solana/env.rs:211-260): an
@@ -785,7 +785,7 @@ Everything is still read — inheritance needs the unchanged files — but only
 findings in changed files, or raised in a suite defined in one of them, are
 reported (`Options::only_files`/`in_scope`, src/engine.rs:31-49). The
 report's `changed_since` object records the ref and the file count
-(src/engine.rs:52-58, 338-344).
+(src/engine.rs:52-58, src/cli.rs:338-344).
 
 The GitHub Action resolves the base itself (action.yml:212-230): a pull
 request uses `github.event.pull_request.base.sha`, a push the `before`
@@ -808,7 +808,7 @@ action.yml:99), `changed-only` (default `true`), `fail-on` (default
 binary instead of downloading one), and the deprecated 0.1.0 names `paths`
 and `upload-sarif`, used when set.
 
-**Outputs** (10, action.yml:58-85): `exit-code`, `errors`, `warnings`,
+**Outputs** (9, action.yml:58-85): `exit-code`, `errors`, `warnings`,
 `notes`, `version`, `report` (the JSON path), `markdown`, `sarif`, and
 `comment` (`posted`, `updated`, `skipped` or `failed`).
 
@@ -847,7 +847,7 @@ finding-failed / could-not-check (action.yml:327-336).
 **Self-test**: `.github/workflows/action-selftest.yml` runs the action from
 the checkout (`uses: ./` with the `binary` input, so no release download is
 involved) on ubuntu, macOS and Windows over fixtures whose result is known,
-and asserts 17 outcome and output pairs (.github/workflows/action-selftest.yml:122-155): the
+and asserts 19 outcome and output pairs (.github/workflows/action-selftest.yml:122-155): the
 clean run succeeds with exit-code 0 and errors 0; a warn-level fixture
 passes at `fail-on error` and fails at `fail-on warn` with exit-code 1; an
 error fixture fails by default and passes with `fail-on none` while still
@@ -901,13 +901,13 @@ anyone" (eval/README.md:1-5). The inputs:
 - `eval/seed.txt`: the sampling seed `realism-gate-v0.2.0-eval-2026-11-04`.
 - `eval/samples/*.jsonl`: the flags drawn for labelling — per rule and
   corpus, at most 30, ordered by sha256(seed:id), "deterministic and does
-  not depend on any library's RNG" (eval/sample.py:15-19).
+  not depend on any library's RNG" (eval/sample.py:5-7).
 - `eval/labels/v0.2.0.jsonl`: one label per sampled flag — `true-positive`,
   `false-positive` or `unclear`, with a one-line reason.
 
 A **flag** is an active (not allow-silenced) finding; its stable id is the
 first 16 hex digits of sha256(rule|file|line|column|evidence), "so one
-label covers the same flag in both versions" (eval/flags.py:1-16).
+label covers the same flag in both versions" (eval/README.md:41-44).
 `eval/precision.py` computes precision = TP/(TP+FP) with Wilson 95%
 intervals (Z = 1.959964, eval/precision.py:43), pools per rule over the
 corpora, and enforces ruling R3: "a rule whose v0.2.0 precision is below
