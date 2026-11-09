@@ -54,49 +54,92 @@ fn cheat<'a, 'p>(op: &'a Op<'p>, names: &[&str]) -> Option<&'a Call<'p>> {
     (c.class == CallClass::Cheat && names.contains(&c.method.as_str())).then_some(c)
 }
 
-/// RG04: `vm.store` into a contract under review.
-pub fn storage_write(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
-    for op in &ctx.trace.ops {
-        let Some(c) = cheat(op, &["store"]) else {
-            continue;
-        };
-        let Some(target) = c.args.first() else {
-            continue;
-        };
+/// Names of the forge-std storage helper. A call chain that starts here and
+/// ends in `checked_write` or `write` is a storage write.
+const STDSTORE_NAMES: &[&str] = &["stdstore", "stdStorage"];
+
+/// A storage write in this op, and the address it writes, when that address
+/// is not the attacker's own.
+pub(crate) fn protocol_storage_write<'a, 'p>(
+    ctx: &Ctx<'p, '_>,
+    op: &'a Op<'p>,
+) -> Option<(&'a Call<'p>, Option<&'p Expr>, &'static str)> {
+    let c = op.call()?;
+    let method = c.method.as_str();
+    let (kind, target) = if c.class == CallClass::Cheat && method == "store" {
+        ("vm.store", c.args.first())
+    } else if method == "checked_write"
+        || (method == "write" && callee_mentions(c.expr, STDSTORE_NAMES))
+    {
+        ("stdstore", stdstore_target(c.expr))
+    } else if method == "setArbitraryStorage" || method == "setArbitraryStorageAt" {
+        ("setArbitraryStorage", c.args.first())
+    } else if method == "copyStorage" || method == "copyStorages" {
+        ("copyStorage", c.args.first())
+    } else {
+        return None;
+    };
+    if let Some(target) = target {
         let class = ctx.env.class(target);
         if is_own(&class) {
+            return None;
+        }
+    }
+    Some((c, target, kind))
+}
+
+fn callee_mentions(e: &Expr, names: &[&str]) -> bool {
+    let hit = |s: &str| names.iter().any(|n| s.eq_ignore_ascii_case(n));
+    match &e.kind {
+        ExprKind::Ident(n) => hit(n),
+        ExprKind::Member(base, m) => hit(m) || callee_mentions(base, names),
+        ExprKind::Call { callee, .. } => callee_mentions(callee, names),
+        _ => false,
+    }
+}
+
+/// The address passed to `.target(...)` in a `stdstore` chain.
+fn stdstore_target(e: &Expr) -> Option<&Expr> {
+    if let ExprKind::Call { callee, args, .. } = &e.kind {
+        if let ExprKind::Member(_, method) = &callee.kind
+            && method == "target"
+        {
+            return args.first();
+        }
+        if let Some(found) = stdstore_target(callee) {
+            return Some(found);
+        }
+    }
+    if let ExprKind::Member(base, _) = &e.kind {
+        return stdstore_target(base);
+    }
+    None
+}
+
+/// RG04: a direct storage write into a contract under review.
+///
+/// The same severity in `setUp()` and in the exploit. Moving `vm.store` into
+/// `setUp()` used to drop it to a warning, which does not fail a run.
+pub fn storage_write(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
+    for op in &ctx.trace.ops {
+        let Some((c, target, kind)) = protocol_storage_write(ctx, op) else {
             continue;
-        }
-        // The slot is usually computed into a local first:
-        // `bytes32 slot = keccak256(abi.encode(attacker, 0));`. Follow locals
-        // back two levels to see whose slot it is.
-        let mut names = Vec::new();
-        if let Some(slot) = c.args.get(1) {
-            idents(slot, &mut names);
-        }
-        for _ in 0..2 {
-            let mut more = Vec::new();
-            for n in &names {
-                for v in ctx.env.assigns.get(n).into_iter().flatten() {
-                    idents(v, &mut more);
-                }
-            }
-            names.extend(more);
-        }
-        let funding = names.iter().any(|n| {
-            matches!(
-                ctx.env.class_of(n),
-                Class::Attacker | Class::Eoa | Class::This
-            )
-        });
-        let mut severity = by_phase(op, Severity::Error, Severity::Warn);
+        };
+        let funding = kind == "vm.store" && slot_names_a_user(ctx, c);
+        let mut severity = Severity::Error;
         if funding {
             severity = lower(severity);
         }
         let detail = if funding {
-            " The slot names an attacker or user address, so this may be manual funding; say so with an allow comment."
+            " The slot names an attacker or user address, so this may be manual funding; an operator allow outside the repo under review is how to record that."
         } else {
-            " The PoC has written the state it claims to reach."
+            " The PoC has written the state it claims to reach. `setUp()` does not make the write something an attacker can do."
+        };
+        let who = target.map(key).unwrap_or_else(|| "a contract".to_string());
+        let spelled = match kind {
+            "vm.store" => "vm.store".to_string(),
+            "stdstore" => "stdstore".to_string(),
+            other => format!("`{other}`"),
         };
         out.push(Raw {
             rule: "RG04",
@@ -104,13 +147,37 @@ pub fn storage_write(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
             unit: op.unit,
             pos: op.pos,
             message: format!(
-                "vm.store writes a storage slot of `{}` {}, bypassing every check its code would make.{detail}",
-                key(target),
+                "{spelled} writes storage of `{who}` {}, bypassing every check its code would make.{detail}",
                 where_(op)
             ),
             evidence: snippet(&c.expr.text, 120),
         });
     }
+}
+
+fn slot_names_a_user(ctx: &Ctx<'_, '_>, c: &Call<'_>) -> bool {
+    // The slot is usually computed into a local first:
+    // `bytes32 slot = keccak256(abi.encode(attacker, 0));`. Follow locals
+    // back two levels to see whose slot it is.
+    let mut names = Vec::new();
+    if let Some(slot) = c.args.get(1) {
+        idents(slot, &mut names);
+    }
+    for _ in 0..2 {
+        let mut more = Vec::new();
+        for n in &names {
+            for v in ctx.env.assigns.get(n).into_iter().flatten() {
+                idents(v, &mut more);
+            }
+        }
+        names.extend(more);
+    }
+    names.iter().any(|n| {
+        matches!(
+            ctx.env.class_of(n),
+            Class::Attacker | Class::Eoa | Class::This
+        )
+    })
 }
 
 /// RG05: `vm.etch` or `deployCodeTo` over an address the protocol uses.

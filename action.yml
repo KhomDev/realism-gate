@@ -11,7 +11,7 @@ inputs:
     required: false
     default: test/
   version:
-    description: realism-gate release to run, e.g. v0.5.0. Empty means the release this action belongs to.
+    description: realism-gate release to run, e.g. v0.6.0. Empty means the release this action belongs to.
     required: false
     default: ""
   changed-only:
@@ -96,7 +96,7 @@ runs:
         RG_BINARY: ${{ inputs.binary }}
         # The release this copy of the action belongs to. tests/docs.rs keeps
         # it equal to the crate version, so `@v0` runs the newest v0 release.
-        RG_DEFAULT_VERSION: v0.5.0
+        RG_DEFAULT_VERSION: v0.6.0
       run: |
         set -euo pipefail
         if [ -n "$RG_BINARY" ]; then
@@ -229,9 +229,25 @@ runs:
           fi
         fi
 
-        # shellcheck disable=SC2206
-        extra=( $RG_ARGS )
-        "$RG_BIN" check "${paths[@]}" "${flags[@]}" "${extra[@]}" --format json --output "$report" --fail-on "$fail_on" 2> "$out/stderr.txt"
+        # `args` is operator input. Split it as shell words, without globbing,
+        # so `*` is not expanded and a quoted token stays one argument.
+        # The python program is one line: a wrapped line in this block is
+        # parsed as YAML, not as the script.
+        extra=()
+        if [ -n "$RG_ARGS" ]; then
+          if command -v python3 >/dev/null 2>&1; then
+            while IFS= read -r -d '' arg; do
+              extra+=("$arg")
+            done < <(RG_ARGS="$RG_ARGS" python3 -c 'import os,shlex,sys; [sys.stdout.buffer.write(a.encode()+b"\0") for a in shlex.split(os.environ.get("RG_ARGS") or "")]')
+          else
+            set -f
+            # shellcheck disable=SC2206
+            extra=( $RG_ARGS )
+            set +f
+          fi
+        fi
+        # Paths after `--`, so a path cannot be read as a flag.
+        "$RG_BIN" check "${flags[@]}" "${extra[@]}" --format json --output "$report" --fail-on "$fail_on" -- "${paths[@]}" 2> "$out/stderr.txt"
         status=$?
         echo "exit-code=$status" >> "$GITHUB_OUTPUT"
         if [ "$status" = 2 ]; then
@@ -253,10 +269,10 @@ runs:
         fi
         cat "$out/stderr.txt" >&2
 
-        "$RG_BIN" check "${paths[@]}" "${flags[@]}" "${extra[@]}" --format markdown --output "$md" --fail-on "$fail_on" 2>/dev/null
+        "$RG_BIN" check "${flags[@]}" "${extra[@]}" --format markdown --output "$md" --fail-on "$fail_on" -- "${paths[@]}" 2>/dev/null
         if [ "$RG_SARIF" = "true" ] || [ "$RG_UPLOAD_SARIF_OLD" = "true" ]; then
           sarif="$out/realism-gate.sarif"
-          "$RG_BIN" check "${paths[@]}" "${flags[@]}" "${extra[@]}" --format sarif --output "$sarif" --fail-on never 2>/dev/null
+          "$RG_BIN" check "${flags[@]}" "${extra[@]}" --format sarif --output "$sarif" --fail-on never -- "${paths[@]}" 2>/dev/null
           echo "sarif=$sarif" >> "$GITHUB_OUTPUT"
         fi
         # Counts for the outputs, from the stable JSON.

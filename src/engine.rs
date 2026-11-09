@@ -31,6 +31,13 @@ pub struct Options {
     /// When set, only findings in these files, or raised in a suite defined
     /// in one of them, are reported (`--changed-since`).
     pub only_files: Option<BTreeSet<String>>,
+    /// Honor `realism-gate: allow` comments in the files under review.
+    /// Default off: the repo under review cannot silence the gate. The author
+    /// switch is `--trust-inline-allows`.
+    pub trust_inline_allows: bool,
+    /// Protocol tree and commit for RG20. Absent means the citation check
+    /// does not run.
+    pub citations: Option<crate::cite::Index>,
 }
 
 impl Options {
@@ -93,6 +100,9 @@ pub struct Report {
     pub changed_since: Option<ChangedSince>,
     pub findings: Vec<Finding>,
     pub parse_errors: Vec<ParseError>,
+    /// Policy files found inside the repo under review and not applied.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub ignored_policy: Vec<String>,
 }
 
 impl Report {
@@ -146,16 +156,26 @@ pub fn analyze(
             return;
         }
         let directive = suppress::find(dirs, raw.rule, raw.pos.line);
-        let (suppressed, ignored_suppression) = match directive {
+        let (suppressed, ignored_suppression, ignored_reason) = match directive {
+            Some(d) if !opts.trust_inline_allows => (
+                None,
+                Some(d.line),
+                Some("allow comments in the repo under review are not policy".to_string()),
+            ),
             Some(d) if !d.reason.is_empty() => (
                 Some(Suppression {
                     line: d.line,
                     reason: d.reason.clone(),
                 }),
                 None,
+                None,
             ),
-            Some(d) => (None, Some(d.line)),
-            None => (None, None),
+            Some(d) => (
+                None,
+                Some(d.line),
+                Some("the allow comment gives no reason".to_string()),
+            ),
+            None => (None, None, None),
         };
         merged.insert(
             k,
@@ -177,6 +197,7 @@ pub fn analyze(
                 help: help(info, lang),
                 suppressed,
                 ignored_suppression,
+                ignored_reason,
             },
         );
     };
@@ -316,6 +337,13 @@ pub fn analyze(
         }
     }
 
+    if let Some(index) = &opts.citations {
+        for raw in crate::cite::check(project, index) {
+            let lang = Lang::Solidity;
+            add(raw, "", "", "", lang);
+        }
+    }
+
     let mut findings: Vec<Finding> = merged.into_values().collect();
     findings.sort_by(|a, b| {
         (&a.file, a.line, a.column, a.rule).cmp(&(&b.file, b.line, b.column, b.rule))
@@ -351,5 +379,6 @@ pub fn analyze(
         changed_since: None,
         findings,
         parse_errors,
+        ignored_policy: Vec::new(),
     }
 }

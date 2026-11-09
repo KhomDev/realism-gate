@@ -984,6 +984,287 @@
       }
     }
   },
+  "v0.6.0": {
+    "in_sample": {
+      "RG01": {
+        "flags": 1,
+        "labelled": 1,
+        "tp": 1,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.2065,
+          1.0
+        ],
+        "precision_if_unclear_wrong": 1.0
+      },
+      "RG02": {
+        "flags": 15,
+        "labelled": 15,
+        "tp": 15,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.7961,
+          1.0
+        ],
+        "precision_if_unclear_wrong": 1.0
+      },
+      "RG04": {
+        "flags": 11,
+        "labelled": 11,
+        "tp": 11,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.7412,
+          1.0
+        ],
+        "precision_if_unclear_wrong": 1.0
+      },
+      "RG05": {
+        "flags": 4,
+        "labelled": 4,
+        "tp": 2,
+        "fp": 2,
+        "unclear": 0,
+        "precision": 0.5,
+        "wilson95": [
+          0.15,
+          0.85
+        ],
+        "precision_if_unclear_wrong": 0.5
+      },
+      "RG08": {
+        "flags": 611,
+        "labelled": 30,
+        "tp": 30,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.8865,
+          1.0
+        ],
+        "precision_if_unclear_wrong": 1.0
+      },
+      "RG10": {
+        "flags": 2,
+        "labelled": 2,
+        "tp": 2,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.3424,
+          1.0
+        ],
+        "precision_if_unclear_wrong": 1.0
+      },
+      "RG11": {
+        "flags": 1,
+        "labelled": 1,
+        "tp": 1,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.2065,
+          1.0
+        ],
+        "precision_if_unclear_wrong": 1.0
+      },
+      "RG15": {
+        "flags": 1,
+        "labelled": 1,
+        "tp": 0,
+        "fp": 1,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ],
+        "precision_if_unclear_wrong": 0.0
+      },
+      "RG16": {
+        "flags": 1,
+        "labelled": 1,
+        "tp": 0,
+        "fp": 1,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ],
+        "precision_if_unclear_wrong": 0.0
+      },
+      "RG17": {
+        "flags": 9,
+        "labelled": 9,
+        "tp": 2,
+        "fp": 7,
+        "unclear": 0,
+        "precision": 0.2222,
+        "wilson95": [
+          0.0632,
+          0.5474
+        ],
+        "precision_if_unclear_wrong": 0.2222
+      },
+      "RG18": {
+        "flags": 2,
+        "labelled": 2,
+        "tp": 2,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.3424,
+          1.0
+        ],
+        "precision_if_unclear_wrong": 1.0
+      }
+    },
+    "later": {
+      "RG02": {
+        "flags": 1,
+        "labelled": 1,
+        "tp": 0,
+        "fp": 1,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ],
+        "precision_if_unclear_wrong": 0.0
+      },
+      "RG07": {
+        "flags": 1,
+        "labelled": 1,
+        "tp": 1,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.2065,
+          1.0
+        ],
+        "precision_if_unclear_wrong": 1.0
+      },
+      "RG08": {
+        "flags": 1,
+        "labelled": 1,
+        "tp": 1,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.2065,
+          1.0
+        ],
+        "precision_if_unclear_wrong": 1.0
+      },
+      "RG10": {
+        "flags": 1,
+        "labelled": 1,
+        "tp": 1,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.2065,
+          1.0
+        ],
+        "precision_if_unclear_wrong": 1.0
+      },
+      "RG17": {
+        "flags": 2,
+        "labelled": 2,
+        "tp": 0,
+        "fp": 2,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.6576
+        ],
+        "precision_if_unclear_wrong": 0.0
+      },
+      "RG18": {
+        "flags": 1,
+        "labelled": 1,
+        "tp": 0,
+        "fp": 1,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ],
+        "precision_if_unclear_wrong": 0.0
+      }
+    },
+    "fresh": {
+      "RG05": {
+        "flags": 1,
+        "labelled": 1,
+        "tp": 0,
+        "fp": 1,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ],
+        "precision_if_unclear_wrong": 0.0
+      },
+      "RG08": {
+        "flags": 55,
+        "labelled": 30,
+        "tp": 30,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.8865,
+          1.0
+        ],
+        "precision_if_unclear_wrong": 1.0
+      },
+      "RG11": {
+        "flags": 1,
+        "labelled": 1,
+        "tp": 1,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.2065,
+          1.0
+        ],
+        "precision_if_unclear_wrong": 1.0
+      },
+      "RG18": {
+        "flags": 7,
+        "labelled": 7,
+        "tp": 0,
+        "fp": 7,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.3543
+        ],
+        "precision_if_unclear_wrong": 0.0
+      }
+    }
+  },
   "below_floor_v0.2.0": [
     "RG02",
     "RG05"
@@ -1006,6 +1287,8 @@
     "RG15": "warn",
     "RG16": "warn",
     "RG17": "warn",
-    "RG18": "warn"
+    "RG18": "warn",
+    "RG19": "error",
+    "RG20": "error"
   }
 }

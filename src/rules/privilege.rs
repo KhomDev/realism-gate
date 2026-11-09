@@ -234,7 +234,7 @@ pub fn privileged_step_in_exploit(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
             unit: op.unit,
             pos: op.pos,
             message: format!(
-                "The exploit runs {steps} as `{k}`: {reason}. An attacker cannot sign as this address. Move it to setUp() if it is configuration, or declare it under `privileged:` in realism.yaml if the claim relies on that role acting."
+                "The exploit runs {steps} as `{k}`: {reason}. An attacker cannot sign as this address. Moving the prank into setUp() does not make it the attacker's action; a prank there next to a direct storage write is RG19. Declare the role in an operator realism.yaml outside the repo under review if the claim relies on that role acting."
             ),
             evidence: op
                 .call()
@@ -242,6 +242,65 @@ pub fn privileged_step_in_exploit(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
                 .unwrap_or_default(),
         });
     }
+}
+
+/// RG19: `setUp()` both pranks as a role and writes protocol storage.
+///
+/// A setter called as `owner` in `setUp()` is still configuration. The bypass
+/// this rule exists for is moving the exploit's owner prank and a `vm.store`
+/// (or `stdstore` / `setArbitraryStorage` / `copyStorage`) into `setUp()`,
+/// where RG02 does not look and where RG04 used to be only a warning.
+pub fn setup_hides_storage_write(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
+    let writes: Vec<usize> = ctx
+        .trace
+        .ops
+        .iter()
+        .enumerate()
+        .filter(|(_, op)| {
+            op.phase == Phase::Setup && super::injection::protocol_storage_write(ctx, op).is_some()
+        })
+        .map(|(i, _)| i)
+        .collect();
+    if writes.is_empty() {
+        return;
+    }
+    let mut pranks = Vec::new();
+    for &(i, arg) in &ctx.switches {
+        let op = &ctx.trace.ops[i];
+        if op.phase != Phase::Setup {
+            continue;
+        }
+        let k = key(arg);
+        if ctx.env.is_attacker(&k) {
+            continue;
+        }
+        if ctx.env.privileged_expr(arg).is_some() {
+            pranks.push((i, k));
+        }
+    }
+    if pranks.is_empty() {
+        return;
+    }
+    let (i, k) = &pranks[0];
+    let op = &ctx.trace.ops[*i];
+    let write = &ctx.trace.ops[writes[0]];
+    let how = write
+        .call()
+        .map(|c| snippet(&c.expr.text, 80))
+        .unwrap_or_default();
+    out.push(Raw {
+        rule: "RG19",
+        severity: Severity::Error,
+        unit: op.unit,
+        pos: op.pos,
+        message: format!(
+            "setUp() pranks as `{k}` and also writes protocol storage (`{how}`). Moving the owner prank and the storage write out of the test body hides them from the exploit rules. An attacker cannot sign as `{k}`, and cannot write that slot."
+        ),
+        evidence: op
+            .call()
+            .map(|c| snippet(&c.expr.text, 120))
+            .unwrap_or_default(),
+    });
 }
 
 /// RG03: the protocol is deployed by the test contract, which then runs the

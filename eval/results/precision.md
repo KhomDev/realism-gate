@@ -75,3 +75,15 @@ A rule that also appears above keeps its older labels; the new rules are labelle
 | Rule | flags | labelled precision |
 |---|---:|---|
 | RG18 | 7 | 0/7 = 0% [0-35] |
+
+## v0.6.0
+
+Same corpora, this tree. A row is a rule that is new or that raised a different
+number of flags than 0.5.0. Flag ids ignore severity, so a severity change alone
+does not add a row. Rules with 30 or fewer flags are labelled in full.
+
+### in_sample
+
+| Rule | flags 0.6.0 | flags 0.5.0 | labelled precision |
+|---|---:|---:|---|
+| RG04 | 11 | 7 | 11/11 = 100% [74-100] |

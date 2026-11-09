@@ -2,8 +2,9 @@
 
 `realism-gate check` never runs a test. It reads the source, rebuilds what the
 test would do, and checks that sequence against the rules. `verify-fix` is the
-one command that does run a test: it shells out to forge on a patched copy and
-requires the PoC to fail. This page describes `check`. Rust tests for Solana
+one command that does run a test: it runs forge on an unpatched copy and on a
+patched copy, and requires the PoC to pass and then fail. This page describes
+`check`. The execution command is [verify-fix](verify-fix.md). Rust tests for Solana
 programs go through the same stages with their own parser;
 [the last section](#rust-solana-tests) describes how each one differs. Move
 tests are a separate, smaller reader: `#[test]` functions and the calls in

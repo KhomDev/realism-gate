@@ -91,6 +91,7 @@ fn sarif_output_is_sarif_2_1_0() {
         "check",
         "tests/fixtures/suppress",
         "--no-declaration",
+        "--trust-inline-allows",
         "--format",
         "sarif",
     ]);
@@ -98,7 +99,7 @@ fn sarif_output_is_sarif_2_1_0() {
     assert_eq!(v["version"], "2.1.0");
     let run = &v["runs"][0];
     assert_eq!(run["tool"]["driver"]["name"], "realism-gate");
-    assert_eq!(run["tool"]["driver"]["rules"].as_array().unwrap().len(), 18);
+    assert_eq!(run["tool"]["driver"]["rules"].as_array().unwrap().len(), 20);
     let results = run["results"].as_array().unwrap();
     assert_eq!(results.len(), 2);
     let suppressed = results.iter().find(|r| r["ruleId"] == "RG11").unwrap();
@@ -220,12 +221,12 @@ fn an_invalid_declaration_exits_two() {
 fn rules_lists_every_rule() {
     let o = run(&["rules"]);
     let out = stdout(&o);
-    assert_eq!(out.lines().count(), 18);
+    assert_eq!(out.lines().count(), 20);
     assert!(out.starts_with("RG01"));
-    assert!(out.contains("RG18"));
+    assert!(out.contains("RG20"));
     let o = run(&["rules", "--format", "json"]);
     let v: serde_json::Value = serde_json::from_slice(&o.stdout).unwrap();
-    assert_eq!(v.as_array().unwrap().len(), 18);
+    assert_eq!(v.as_array().unwrap().len(), 20);
     let langs = v
         .as_array()
         .unwrap()

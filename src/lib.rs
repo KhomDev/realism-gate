@@ -15,6 +15,7 @@
 //! not yet stable; the JSON and SARIF outputs are the supported interface.
 
 pub mod changed;
+pub mod cite;
 pub mod cli;
 pub mod config;
 pub mod declaration;

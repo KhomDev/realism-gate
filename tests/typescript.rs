@@ -68,7 +68,17 @@ fn a_helper_in_a_shared_file_is_reported_at_the_call() {
 
 #[test]
 fn a_suppression_needs_a_reason_in_typescript_too() {
-    let r = report(&["tests/fixtures/ts_suppress"]);
+    let base = root();
+    let paths = vec![base.join("tests/fixtures/ts_suppress")];
+    let project = Project::load(&discover(&paths).unwrap(), &base).unwrap();
+    let r = analyze(
+        &project,
+        None,
+        &Options {
+            trust_inline_allows: true,
+            ..Options::default()
+        },
+    );
     let rg11 = r.findings.iter().find(|f| f.rule == "RG11").unwrap();
     assert!(!rg11.is_active());
     let rg09 = r.findings.iter().find(|f| f.rule == "RG09").unwrap();

@@ -115,7 +115,15 @@ pub fn tautological_assertion(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
                 .first()
                 .and_then(|cond| tautology_of_condition(ctx, cond)),
             m if m.starts_with("assert") && c.args.len() >= 2 => {
-                tautology_of_pair(ctx, &c.args[0], &c.args[1])
+                tautology_of_pair(ctx, &c.args[0], &c.args[1]).or_else(|| match m {
+                    "assertGt" | "assertGtDecimal" | "assertGe" | "assertGeDecimal" => {
+                        inflated_over_baseline(ctx, &c.args[0], &c.args[1])
+                    }
+                    "assertLt" | "assertLtDecimal" | "assertLe" | "assertLeDecimal" => {
+                        inflated_over_baseline(ctx, &c.args[1], &c.args[0])
+                    }
+                    _ => None,
+                })
             }
             _ => None,
         };
@@ -149,11 +157,75 @@ fn tautology_of_condition(ctx: &Ctx<'_, '_>, cond: &Expr) -> Option<String> {
     match &cond.kind {
         ExprKind::Lit(Lit::Bool(true)) => Some("the condition is the literal `true`".to_string()),
         ExprKind::Binary(l, op, r) if COMPARE_OPS.contains(&op.as_str()) => {
-            tautology_of_pair(ctx, l, r)
+            tautology_of_pair(ctx, l, r).or_else(|| match op.as_str() {
+                ">" | ">=" => inflated_over_baseline(ctx, l, r),
+                "<" | "<=" => inflated_over_baseline(ctx, r, l),
+                _ => None,
+            })
         }
         _ if ctx.env.is_constant(cond) => Some(format!("`{}` is a constant", compact(&cond.text))),
         _ => None,
     }
+}
+
+/// Follow plain assignments a few steps: `uint a = balance + 1` peels to
+/// `balance + 1`.
+fn peel<'p>(ctx: &Ctx<'p, '_>, e: &'p Expr, depth: usize) -> &'p Expr {
+    if depth > 4 {
+        return e;
+    }
+    let Some(name) = e.as_ident() else {
+        return e;
+    };
+    let Some(value) = ctx.env.assigns.get(name).and_then(|v| v.last()) else {
+        return e;
+    };
+    peel(ctx, value, depth + 1)
+}
+
+fn positive_literal(e: &Expr) -> Option<String> {
+    let n = literal_value(e)?;
+    (n > 0.0).then(|| compact(&e.text))
+}
+
+/// The left side of a greater-than is `value + positive`. `assertGt(balance + 1, before)`
+/// holds whenever `balance` did not fall, including when the attack did nothing.
+fn inflated_over_baseline(ctx: &Ctx<'_, '_>, greater: &Expr, lesser: &Expr) -> Option<String> {
+    let ExprKind::Binary(left, op, right) = &peel(ctx, greater, 0).kind else {
+        return None;
+    };
+    if op != "+" {
+        return None;
+    }
+    let (base, added) = if let Some(n) = positive_literal(right) {
+        (left.as_ref(), n)
+    } else {
+        let n = positive_literal(left)?;
+        (right.as_ref(), n)
+    };
+    let base = peel(ctx, base, 0);
+    let lesser_peeled = peel(ctx, lesser, 0);
+    let same =
+        compact(&base.text) == compact(&lesser_peeled.text) || same_measure(base, lesser_peeled);
+    if !same {
+        return None;
+    }
+    Some(format!(
+        "`{}` is `{}` plus {added}, so the comparison passes when that value did not fall, including when the attack changed nothing",
+        compact(&greater.text),
+        compact(&base.text)
+    ))
+}
+
+fn same_measure(a: &Expr, b: &Expr) -> bool {
+    let mut left = BTreeMap::new();
+    let mut right = BTreeMap::new();
+    reads_in(a, &mut left);
+    reads_in(b, &mut right);
+    if left.len() == 1 && right.len() == 1 {
+        return left.into_values().next() == right.into_values().next();
+    }
+    false
 }
 
 /// What a measurement reads: whose balance or state (`who`), and of which

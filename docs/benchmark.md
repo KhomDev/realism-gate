@@ -35,9 +35,9 @@ says it fires on, and how often does it fire on something it should not".
 | Test suites | 869 |
 | Tests | 886 |
 | Files the parser could not fully parse | 1 |
-| Tests with no finding at all | 259 |
-| Tests whose only finding is RG08 | 607 |
-| Tests with a finding other than RG08 | 20 in 0.2.0; 30 in 0.5.0 |
+| Tests with no finding at all | 248 |
+| Tests whose only finding is RG08 | 605 |
+| Tests with a finding other than RG08 | 20 in 0.2.0; 30 in 0.5.0; 33 in 0.6.0 |
 
 The machine-readable version is `bench/defihacklabs.json`.
 
@@ -78,8 +78,8 @@ themselves; the corpus forks real chains. RG03 still does not fire here in
 
 ### 0.5.0 counts on the same commit
 
-`bench/defihacklabs.json` is the 0.5.0 run. The historical table above is not
-rewritten. Rules that did not exist in 0.2.0:
+The historical table above is not rewritten. Rules that did not exist in 0.2.0,
+counted on this commit by 0.5.0:
 
 | Rule | Findings | Tests |
 |---|---:|---:|
@@ -88,9 +88,28 @@ rewritten. Rules that did not exist in 0.2.0:
 | RG17 unevidenced-setup | 9 | 7 |
 | RG18 revert-only | 2 | 2 |
 
-30 tests now have a finding other than RG08, up from 20. The labelled reading
+30 tests had a finding other than RG08 in 0.5.0, up from 20. The labelled reading
 of these new flags is in [precision](precision.md), not in the 0.1.0 review
 table. RG03 is still absent.
+
+### 0.6.0 counts on the same commit
+
+`bench/defihacklabs.json` is the 0.6.0 run. The summary table above matches it.
+The 0.5.0 counts were 635 tests with any finding and 30 with a finding other
+than RG08.
+
+| | 0.5.0 | 0.6.0 |
+|---|---:|---:|
+| Tests with any finding | 635 | 638 |
+| Tests with a finding other than RG08 | 30 | 33 |
+| RG04 findings | 7 (5 error, 2 warn) | 11 (10 error, 1 warn) |
+
+Four new RG04 flags are `stdstore.target(...).checked_write` of a token
+`balanceOf` slot. They are labelled in `eval/labels/v0.6.0.jsonl`. RG19 did
+not fire: no `setUp` both pranked as a role and wrote storage. The
+`balance + 1` shape of RG09 did not fire. A storage write that used to be a
+warning because it sat in `setUp` is an error now, except the one the rule
+still lowers because the slot names an attacker.
 
 What the correct findings look like, without naming the incidents:
 

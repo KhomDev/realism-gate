@@ -4,6 +4,7 @@
 //! 2 on a usage, input or declaration error.
 
 use crate::changed;
+use crate::cite;
 use crate::config::{self, Config, Level};
 use crate::declaration::{self, Declaration};
 use crate::engine::{self, ChangedSince, LoadedDeclaration, Options};
@@ -60,10 +61,11 @@ pub enum Command {
         #[arg(long)]
         force: bool,
     },
-    /// Run a PoC against a patched tree with forge and require the PoC to fail.
+    /// Run a PoC before and after a patch. The PoC must pass, then fail.
     ///
     /// Opt-in. `check` never executes a test and never calls this. Forge runs
-    /// on this machine; a fork PoC may make forge itself open a connection.
+    /// on this machine. Refuses a project with `ffi = true`, and refuses the
+    /// host unless `--sandbox` or `--allow-host` is set. See docs/verify-fix.md.
     VerifyFix(VerifyArgs),
 }
 
@@ -87,6 +89,13 @@ pub struct VerifyArgs {
     /// The project to copy when `--patch` is used. Default: the current directory.
     #[arg(long, value_name = "DIR")]
     pub root: Option<PathBuf>,
+    /// Attest that this process is confined: a container, no ffi, network
+    /// limited to a pinned RPC. Required on a host unless `--allow-host`.
+    #[arg(long, conflicts_with = "allow_host")]
+    pub sandbox: bool,
+    /// Run forge on this host anyway. Still refused when foundry.toml enables ffi.
+    #[arg(long, conflicts_with = "sandbox")]
+    pub allow_host: bool,
 }
 
 #[derive(clap::Args, Debug)]
@@ -126,6 +135,18 @@ pub struct CheckArgs {
     /// Also print findings silenced by an allow comment.
     #[arg(long)]
     pub show_suppressed: bool,
+    /// Honor `realism-gate: allow` comments in the files under review.
+    /// Off by default: the repo under review cannot silence the gate.
+    /// For the author of a PoC, not for an agent gating that PoC.
+    #[arg(long)]
+    pub trust_inline_allows: bool,
+    /// Protocol checkout. With `--target-commit`, RG20 checks that contracts,
+    /// functions and import paths the PoC cites exist at that commit.
+    #[arg(long, value_name = "DIR", requires = "target_commit")]
+    pub target: Option<PathBuf>,
+    /// Git commit of `--target` to read. The working tree is not trusted.
+    #[arg(long, value_name = "REV", requires = "target")]
+    pub target_commit: Option<String>,
     /// The configuration file. Defaults to ./realism-gate.toml if present.
     #[arg(long, value_name = "FILE")]
     pub config: Option<PathBuf>,
@@ -239,6 +260,22 @@ fn verify_fix_cmd(args: VerifyArgs) -> Result<ExitCode, String> {
         Some(p) => p,
         None => std::env::current_dir().map_err(|e| format!("current directory: {e}"))?,
     };
+    let host = if args.sandbox || sandbox_attested() {
+        verify_fix::HostPolicy::Sandbox
+    } else if args.allow_host {
+        eprintln!(
+            "realism-gate: --allow-host runs an untrusted forge project on this machine. \
+             ffi stays off. Prefer a container; see docs/verify-fix.md."
+        );
+        verify_fix::HostPolicy::AllowHost
+    } else {
+        return Err(
+            "verify-fix will not run an untrusted forge project on the host. \
+             Run it in a container (ffi off, network only to the pinned RPC) and pass --sandbox, \
+             or pass --allow-host to run here anyway. See docs/verify-fix.md."
+                .into(),
+        );
+    };
     match verify_fix::verify(&verify_fix::Request {
         poc: args.poc,
         patch: args.patch,
@@ -246,16 +283,26 @@ fn verify_fix_cmd(args: VerifyArgs) -> Result<ExitCode, String> {
         match_test: args.match_test,
         forge: args.forge,
         root,
+        host,
     }) {
         Ok(verify_fix::Outcome::FixHolds { detail }) => {
-            println!("verify-fix: PASS  the PoC failed on the patched tree");
+            println!("verify-fix: PASS  the PoC passed before the patch and failed after it");
             if !detail.trim().is_empty() {
                 println!("{detail}");
             }
             Ok(ExitCode::SUCCESS)
         }
         Ok(verify_fix::Outcome::FixDoesNotHold { detail }) => {
-            println!("verify-fix: FAIL  the PoC still passed on the patched tree");
+            println!("verify-fix: FAIL  the PoC still passed after the patch");
+            if !detail.trim().is_empty() {
+                println!("{detail}");
+            }
+            Ok(ExitCode::from(1))
+        }
+        Ok(verify_fix::Outcome::BugDoesNotReproduce { detail }) => {
+            println!(
+                "verify-fix: FAIL  the PoC did not pass before the patch, so this does not show a fix"
+            );
             if !detail.trim().is_empty() {
                 println!("{detail}");
             }
@@ -263,6 +310,12 @@ fn verify_fix_cmd(args: VerifyArgs) -> Result<ExitCode, String> {
         }
         Err(e) => Err(e.0),
     }
+}
+
+fn sandbox_attested() -> bool {
+    std::env::var("REALISM_GATE_SANDBOX").ok().as_deref() == Some("1")
+        || Path::new("/.dockerenv").is_file()
+        || Path::new("/run/.containerenv").is_file()
 }
 
 fn resolve_rules(names: &[String]) -> Result<std::collections::BTreeSet<String>, String> {
@@ -308,10 +361,28 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
     }
     let project = Project::load(&files, &cwd).map_err(|e| e.to_string())?;
 
+    let policy_root = policy_root(&cwd);
+    let mut ignored_policy = Vec::new();
     let decl_path = match (&args.declaration, args.no_declaration) {
-        (Some(p), _) => Some(p.clone()),
+        (Some(p), _) => {
+            ensure_outside(p, &policy_root, "--declaration")?;
+            Some(p.clone())
+        }
         (None, false) if Path::new(declaration::FILE_NAME).is_file() => {
-            Some(PathBuf::from(declaration::FILE_NAME))
+            let p = PathBuf::from(declaration::FILE_NAME);
+            if is_inside(&p, &policy_root) {
+                let note = format!(
+                    "{} is inside the repo under review and was not applied",
+                    declaration::FILE_NAME
+                );
+                eprintln!(
+                    "realism-gate: {note}. Pass --declaration with a file outside that tree."
+                );
+                ignored_policy.push(note);
+                None
+            } else {
+                Some(p)
+            }
         }
         _ => None,
     };
@@ -335,9 +406,23 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
     };
 
     let config_path = match (&args.config, args.no_config) {
-        (Some(p), _) => Some(p.clone()),
+        (Some(p), _) => {
+            ensure_outside(p, &policy_root, "--config")?;
+            Some(p.clone())
+        }
         (None, false) if Path::new(config::FILE_NAME).is_file() => {
-            Some(PathBuf::from(config::FILE_NAME))
+            let p = PathBuf::from(config::FILE_NAME);
+            if is_inside(&p, &policy_root) {
+                let note = format!(
+                    "{} is inside the repo under review and was not applied",
+                    config::FILE_NAME
+                );
+                eprintln!("realism-gate: {note}. Pass --config with a file outside that tree.");
+                ignored_policy.push(note);
+                None
+            } else {
+                Some(p)
+            }
         }
         _ => None,
     };
@@ -384,6 +469,14 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
         None => None,
     };
 
+    let citations = match (&args.target, &args.target_commit) {
+        (Some(dir), Some(rev)) => Some(cite::load(dir, rev).map_err(|e| {
+            format!(
+                "could not read the target at {rev}: {e}. RG20 fails closed when the pinned tree cannot be read."
+            )
+        })?),
+        _ => None,
+    };
     let opts = Options {
         only,
         skip,
@@ -392,8 +485,11 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
         severity,
         exclude,
         only_files: changed.clone(),
+        trust_inline_allows: args.trust_inline_allows,
+        citations,
     };
     let mut report = engine::analyze(&project, loaded.as_ref(), &opts);
+    report.ignored_policy = ignored_policy;
     report.config = config_path.map(|p| project::display_path(&p, &cwd));
     report.changed_since = match (&args.changed_since, &changed) {
         (Some(r), Some(files)) => Some(ChangedSince {
@@ -453,6 +549,44 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
     } else {
         ExitCode::SUCCESS
     })
+}
+
+/// The repo under review: the git toplevel of `cwd`, or `cwd` when it is not
+/// a checkout. Policy files inside it are the target's, and are not applied.
+fn policy_root(cwd: &Path) -> PathBuf {
+    let out = std::process::Command::new("git")
+        .arg("-C")
+        .arg(cwd)
+        .args(["rev-parse", "--show-toplevel"])
+        .output();
+    if let Ok(out) = out
+        && out.status.success()
+    {
+        let text = String::from_utf8_lossy(&out.stdout);
+        let text = text.trim();
+        if !text.is_empty() {
+            return PathBuf::from(text);
+        }
+    }
+    cwd.to_path_buf()
+}
+
+fn is_inside(path: &Path, root: &Path) -> bool {
+    let path = std::path::absolute(path).unwrap_or_else(|_| path.to_path_buf());
+    let root = std::path::absolute(root).unwrap_or_else(|_| root.to_path_buf());
+    path.starts_with(&root)
+}
+
+fn ensure_outside(path: &Path, root: &Path, flag: &str) -> Result<(), String> {
+    if is_inside(path, root) {
+        Err(format!(
+            "{flag} {} is inside the repo under review ({}). Policy has to live outside that tree: the repo being checked cannot turn rules off, silence a finding, or supply realism.yaml.",
+            path.display(),
+            root.display()
+        ))
+    } else {
+        Ok(())
+    }
 }
 
 fn rule_languages(r: &rules::RuleInfo) -> Vec<&'static str> {

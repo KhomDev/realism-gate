@@ -9,8 +9,12 @@ A tool that checks proofs should be exact about what it does not check.
   A role it cannot see is a role it cannot flag, and a name that merely sounds
   privileged will be flagged (`docs/rules/RG02.md` lists the known cases).
 - It does not know whether the configuration a test sets up matches the real
-  deployment. RG02 flags a privileged step in the exploit; a privileged step in
-  `setUp()` is treated as configuration and not reported at all.
+  deployment. A privileged setter alone in `setUp()` is still read as
+  configuration. A direct storage write is an error in `setUp()` and in the
+  exploit, including when it is spelled `stdstore`, `setArbitraryStorage` or
+  `copyStorage`. A privileged prank in `setUp()` next to that write is RG19.
+  RG20, when `--target` and `--target-commit` are set, checks that cited
+  names exist in that tree. It does not run the protocol.
 - It does not know whether a mocked or etched dependency behaves differently
   from the real one. RG05 and RG07 report that the PoC stopped testing the real
   thing, not that the result is wrong.
@@ -95,9 +99,11 @@ A tool that checks proofs should be exact about what it does not check.
 
 The Move reader is not a compiler. It finds `#[test]` functions and the calls in their bodies. Specs, types and control flow are not reconstructed. Sui `test_scenario` and Aptos `#[test(signer = @addr)]` are both read. The checked rules are RG01, RG02, RG06, RG08, RG10 and RG18.
 
-## `verify-fix` runs the test
+## `verify-fix` runs the test twice
 
-`check` does not. `verify-fix` is opt-in and shells out to forge on a copy of the tree or a directory you pass. A compile error is reported as a failure to run, not as a PoC that failed. Forge may open a connection if the test forks; this program still has no network code of its own.
+`check` does not. `verify-fix` is opt-in. It runs the PoC on a copy of the unpatched tree (that run has to pass) and on the patched tree (that run has to fail). A PoC that fails on both sides is not a fix. The verdict is forge's JSON plus its exit code, not a search of the log text. A compile error is a failure to run, not a failed PoC.
+
+The patch is applied inside the temp copy. Paths that are absolute or contain `..` are refused. `foundry.toml` with `ffi = true` is refused. On a host, the command refuses unless `--sandbox` (or a container / `REALISM_GATE_SANDBOX=1`) or `--allow-host`. See [verify-fix](verify-fix.md). Forge may open a connection if the test forks; this program still has no network code of its own.
 
 ## A clean result is not a valid PoC
 

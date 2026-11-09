@@ -31,7 +31,7 @@ The corpora:
 
 | File | Written by |
 |---|---|
-| `flags/<version>-<corpus>.jsonl` | `flags.py`: every active finding, with a stable id. `v0.2.0-*` is the frozen 0.2.0 record and is not regenerated. `v0.5.0-*` is this tree |
+| `flags/<version>-<corpus>.jsonl` | `flags.py`: every active finding, with a stable id. `v0.2.0-*` and `v0.5.0-*` are frozen records and are not regenerated. `v0.6.0-*` is this tree |
 | `results/precision.json`, `results/precision.md` | `precision.py` |
 | `results/rules-v0.2.0.json` | `realism-gate rules --format json` |
 | `perf/*` | `scripts/measure-perf.py`, `scripts/measure-install.sh`, `scripts/release-assets.sh` |

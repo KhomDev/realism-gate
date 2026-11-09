@@ -106,38 +106,42 @@ def main(argv: list[str]) -> int:
             row["added"] = len(added)
             per_rule[rule] = row
         result["corpora"][name] = {"files": len(corpus.files(name)), "rules": per_rule}
-    # 0.5.0 flags. Rules with 30 or fewer are labelled in full, same as the
-    # older versions. The 0.2.0 table above is left as the historical study.
-    v050 = {}
-    for name in names:
-        path = EVAL / "flags" / f"v0.5.0-{name}.jsonl"
-        if not path.is_file():
+    # Later versions. Rules with 30 or fewer flags on a corpus are labelled in
+    # full, same as the older versions. The 0.2.0 table above is the historical
+    # study. 0.5.0 and 0.6.0 are each the tree that produced those flag files.
+    for version in ("v0.5.0", "v0.6.0"):
+        loaded_version: dict = {}
+        for name in names:
+            path = EVAL / "flags" / f"{version}-{name}.jsonl"
+            if not path.is_file():
+                continue
+            mine = load(path)
+            loaded_version[name] = mine
+            by_rule: dict = defaultdict(list)
+            for f in mine:
+                by_rule[f["rule"]].append(f)
+            for rule, flags_of_rule in by_rule.items():
+                if len(flags_of_rule) <= CAP:
+                    missing += [
+                        f"{name} {version} {rule} {f['id']}"
+                        for f in flags_of_rule
+                        if f["id"] not in labels
+                    ]
+        if not loaded_version:
             continue
-        mine = load(path)
-        v050[name] = mine
-        by_rule: dict = defaultdict(list)
-        for f in mine:
-            by_rule[f["rule"]].append(f)
-        for rule, flags_of_rule in by_rule.items():
-            if len(flags_of_rule) <= CAP:
-                missing += [
-                    f"{name} v0.5.0 {rule} {f['id']}"
-                    for f in flags_of_rule
-                    if f["id"] not in labels
-                ]
+        result[version] = {}
+        for name, mine in loaded_version.items():
+            by_rule = defaultdict(list)
+            for f in mine:
+                by_rule[f["rule"]].append(f)
+            result[version][name] = {
+                rule: {"flags": len(rows), **tally([labels[f["id"]]["label"] for f in rows if f["id"] in labels])}
+                for rule, rows in sorted(by_rule.items())
+            }
     if missing:
         for m in missing:
             print(f"UNLABELLED {m}", file=sys.stderr)
         return 1
-    result["v0.5.0"] = {}
-    for name, mine in v050.items():
-        by_rule = defaultdict(list)
-        for f in mine:
-            by_rule[f["rule"]].append(f)
-        result["v0.5.0"][name] = {
-            rule: {"flags": len(rows), **tally([labels[f["id"]]["label"] for f in rows if f["id"] in labels])}
-            for rule, rows in sorted(by_rule.items())
-        }
     for rule in sorted(pooled):
         result["pooled"][rule] = {v: tally(pooled[rule][v]) for v in VERSIONS}
 
@@ -210,6 +214,26 @@ def markdown(result: dict) -> str:
                 if rule not in ("RG15", "RG16", "RG17", "RG18"):
                     continue
                 out.append(f"| {rule} | {row['flags']} | {cell(row)} |")
+            out.append("")
+    if result.get("v0.6.0"):
+        out += ["## v0.6.0", "",
+                "Same corpora, this tree. A row is a rule that is new or that raised a different",
+                "number of flags than 0.5.0. Flag ids ignore severity, so a severity change alone",
+                "does not add a row. Rules with 30 or fewer flags are labelled in full.",
+                ""]
+        prev = result.get("v0.5.0", {})
+        for name, rules in result["v0.6.0"].items():
+            rows = []
+            for rule, row in rules.items():
+                old = prev.get(name, {}).get(rule, {}).get("flags")
+                if rule in ("RG19", "RG20") or old != row["flags"]:
+                    rows.append((rule, row, old))
+            if not rows:
+                continue
+            out += [f"### {name}", "", "| Rule | flags 0.6.0 | flags 0.5.0 | labelled precision |", "|---|---:|---:|---|"]
+            for rule, row, old in rows:
+                old_s = "-" if old is None else str(old)
+                out.append(f"| {rule} | {row['flags']} | {old_s} | {cell(row)} |")
             out.append("")
     return "\n".join(out)
 

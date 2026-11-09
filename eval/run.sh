@@ -6,11 +6,11 @@
 #                                              committed files
 #
 # BEFORE_BIN is the realism-gate 0.1.0 release binary, AFTER_BIN a build of this
-# tree. The 0.1.0 flags are regenerated from BEFORE_BIN. The 0.5.0 flags are
-# regenerated from AFTER_BIN. The 0.2.0 flag files are the frozen record of
-# that version: 0.5.0 changed the rules, so this script does not regenerate
-# them. Labels live in eval/labels/. Nothing here needs the network except
-# eval/fetch.sh's first run.
+# tree. The 0.1.0 flags are regenerated from BEFORE_BIN. The 0.6.0 flags are
+# regenerated from AFTER_BIN. The 0.2.0 and 0.5.0 flag files are frozen records
+# of those versions: later versions changed the rules, so this script does not
+# regenerate them. Labels live in eval/labels/. Nothing here needs the network
+# except eval/fetch.sh's first run.
 
 set -euo pipefail
 
@@ -32,10 +32,10 @@ mkdir -p "$out/flags" "$out/results"
 
 for name in $("$py" "$root/eval/corpus.py" --names | tr -d '\r'); do
     "$py" "$root/eval/flags.py" "$before" "$name" "$out/flags/v0.1.0-$name.jsonl"
-    "$py" "$root/eval/flags.py" "$after" "$name" "$out/flags/v0.5.0-$name.jsonl"
+    "$py" "$root/eval/flags.py" "$after" "$name" "$out/flags/v0.6.0-$name.jsonl"
 done
 
-"$after" rules --format json > "$out/results/rules-v0.5.0.json"
+"$after" rules --format json > "$out/results/rules-v0.6.0.json"
 
 if [ "$mode" = "--check" ]; then
     # precision.py reads the committed flags; point it at the fresh ones.
@@ -44,10 +44,10 @@ if [ "$mode" = "--check" ]; then
     done
 fi
 "$py" "$root/eval/precision.py" "$out/results/precision.json" "$out/results/precision.md" \
-    --rules "$out/results/rules-v0.5.0.json"
+    --rules "$out/results/rules-v0.6.0.json"
 
 if [ "$mode" = "--check" ]; then
-    for f in precision.json precision.md rules-v0.5.0.json; do
+    for f in precision.json precision.md rules-v0.6.0.json; do
         diff -u --strip-trailing-cr "$root/eval/results/$f" "$out/results/$f"
     done
     echo "eval reproduces: flags, precision and the R3 check match the committed files"

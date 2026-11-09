@@ -8,6 +8,31 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-09
+
+The gate review. The checks are still a PoC-structure filter, not a validity oracle. What changed is the bypasses that filter used to miss, and the ways a repo under review could turn the filter off.
+
+### Added
+
+- **RG04** now flags `stdstore` (`checked_write` / `write`), `setArbitraryStorage` and `copyStorage` the same way as `vm.store`. A direct storage write is an error in the exploit and in `setUp()`.
+- **RG09** flags `assertGt(balance + 1, before)` and the same shape through a local. The comparison passes when the balance did not fall.
+- **RG19 `setup-hides-storage-write`.** `setUp()` pranks as a role and also writes protocol storage. Moving both out of the test body is an error.
+- **RG20 `missing-citation`.** With `--target` and `--target-commit`, import paths, contract names and called functions have to exist in that tree at that commit. The check reads git and does not run the protocol. Without those flags it does not run.
+- **`verify-fix` is two-sided.** The PoC must pass on a copy of the unpatched tree and fail on the patched tree. A PoC that fails on both sides is not reported as a fix. The verdict is forge's JSON plus its exit code.
+- Regression fixtures for each of those bypasses.
+
+### Changed
+
+- Inline `realism-gate: allow` comments are ignored unless `--trust-inline-allows`. A `realism.yaml` or `realism-gate.toml` inside the repo under review is not applied. `--declaration` and `--config` have to point outside that tree.
+- `verify-fix` refuses a patch path that is absolute or contains `..`, refuses `foundry.toml` with `ffi = true`, and refuses to run on the host unless `--sandbox` or `--allow-host`. See `docs/verify-fix.md`.
+- The MCP server rejects a `path`, `poc`, `finding` or `declaration` that starts with `-`, puts paths after `--`, and does not load config or a declaration from the working tree. Tool output is fenced as data.
+- The GitHub Action splits `args` without globbing and passes paths after `--`.
+- RG02's fix text no longer says to move a privileged prank into `setUp()`.
+
+### Not a validity oracle
+
+A clean `check` still means no known pattern fired. `verify-fix` still only compares one forge test before and after a patch.
+
 ## [0.5.0] - 2026-11-09
 
 Economic realism, less RG03 noise, Move tests, and an opt-in way to run the PoC against a patch. `check` still does not execute a test and still has no network code.
@@ -310,7 +335,8 @@ First release.
 - A pinned public-corpus benchmark (`scripts/bench-corpus.sh`,
   `bench/defihacklabs.json`, `docs/benchmark.md`), re-measured in CI.
 
-[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/KhomDev/realism-gate/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/KhomDev/realism-gate/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/KhomDev/realism-gate/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/KhomDev/realism-gate/compare/v0.2.1...v0.3.0

@@ -122,7 +122,11 @@ fn a_declaration_names_the_attacker_and_silences_the_declared_role() {
 
 #[test]
 fn allow_comments_work_in_rust_and_need_a_reason() {
-    let r = report(&["tests/fixtures/rust_suppress"], None, &Options::default());
+    let opts = Options {
+        trust_inline_allows: true,
+        ..Options::default()
+    };
+    let r = report(&["tests/fixtures/rust_suppress"], None, &opts);
     let rg11 = r.findings.iter().find(|f| f.rule == "RG11").unwrap();
     assert_eq!(
         rg11.suppressed.as_ref().unwrap().reason,

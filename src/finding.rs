@@ -60,10 +60,13 @@ pub struct Finding {
     pub help: &'static str,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub suppressed: Option<Suppression>,
-    /// Set when a suppression comment was found but ignored because it gives
-    /// no reason.
+    /// Set when a suppression comment was found but ignored.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignored_suppression: Option<u32>,
+    /// Why that comment was ignored: no reason, or the comment is inside the
+    /// repo under review and is not operator policy.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ignored_reason: Option<String>,
 }
 
 impl Finding {

@@ -147,10 +147,10 @@ pub const RULES: &[RuleInfo] = &[
         slug: "privileged-step-in-exploit",
         title: "A step in the exploit runs as a privileged address",
         severity: Severity::Warn,
-        severity_note: "warn; silenced by a realism.yaml `privileged:` entry",
+        severity_note: "warn; silenced only by an operator realism.yaml outside the repo under review",
         summary: "The test body pranks as an address that reads as a role (owner, admin, keeper, ...) or impersonates a protocol contract.",
-        why: "`vm.prank(admin)` in `setUp()` is configuration. The same line in the test body is a step of the exploit that the attacker cannot sign. Sometimes that is legitimate: a keeper harvests on a schedule, governance executes a passed proposal. Then the claim depends on that role acting, and the report has to say why the attacker can rely on it. Impersonating a protocol contract (`vm.prank(address(pool))`) is never something an attacker can do.",
-        fix: "Move configuration into `setUp()`. If the exploit genuinely depends on a routine privileged action, declare it in `realism.yaml` under `privileged:` with the role and the reason the attacker can count on it, and make the report say the same.",
+        why: "A step the exploit runs as `admin` is a step the attacker cannot sign. A setter the deployer calls in `setUp()` can be configuration of a local deployment. Moving the exploit's prank into `setUp()` to quiet this rule is not configuration: when that `setUp()` also writes storage directly, RG19 reports it. Impersonating a protocol contract (`vm.prank(address(pool))`) is never something an attacker can do.",
+        fix: "Do not hide the prank in `setUp()`. If the exploit genuinely depends on a routine privileged action, declare it under `privileged:` in an operator `realism.yaml` that lives outside the repo under review, and make the report say the same.",
         bad: "function test_drain() public {\n    vm.prank(admin);\n    vault.setOracle(address(fakeOracle));\n    vm.prank(attacker);\n    vault.borrow(1_000e18);\n}",
         good: "function test_drain() public {\n    // The oracle is the live one; nothing privileged happens here.\n    vm.prank(attacker);\n    vault.borrow(1_000e18);\n}",
         false_positives: &[
@@ -168,7 +168,7 @@ pub const RULES: &[RuleInfo] = &[
         },
         solana: SolanaNotes::Checked {
             summary: "A transaction in the exploit is signed by a keypair that reads as a role (admin, authority, governance, keeper, ...) or that the harness gave a role.",
-            fix: "Move configuration before the attacker's first transaction. If the exploit genuinely depends on a routine privileged action, declare it in `realism.yaml` under `privileged:` with the role and the reason the attacker can count on it, and make the report say the same.",
+            fix: "Do not treat a privileged signature as configuration by moving it earlier. If the exploit genuinely depends on a routine privileged action, declare it under `privileged:` in an operator `realism.yaml` outside the repo under review, and make the report say the same.",
             rust_bad: "send(&mut svm, &set_oracle_ix(&fake_oracle), &[&admin]);\nsend(&mut svm, &borrow_ix(&attacker.pubkey(), 1_000), &[&attacker]);",
             rust_good: "// The oracle is the live one; nothing privileged happens here.\nsend(&mut svm, &borrow_ix(&attacker.pubkey(), 1_000), &[&attacker]);",
             ts_bad: "await program.methods.setOracle(fakeOracle.publicKey).accounts({ admin: admin.publicKey }).signers([admin]).rpc();\nawait program.methods.borrow(new BN(1_000)).accounts({ borrower: attacker.publicKey }).signers([attacker]).rpc();",
@@ -214,11 +214,11 @@ pub const RULES: &[RuleInfo] = &[
         slug: "storage-write",
         title: "The PoC writes contract storage directly",
         severity: Severity::Error,
-        severity_note: "error in the exploit; warn in setUp; one step lower when the slot looks like an attacker or user balance",
-        summary: "`vm.store` sets a storage slot of a contract under review.",
-        why: "`vm.store` creates state without going through the code that is supposed to guard it. A PoC that writes the broken state has assumed the bug instead of reaching it. In `setUp()` it can be legitimate (seeding a mapping a fork cannot reach), which is why it is a warning there; in the exploit it is never something an attacker can do.",
+        severity_note: "error in the exploit and in setUp; one step lower when the slot looks like an attacker or user balance",
+        summary: "`vm.store`, `stdstore` `checked_write`, `setArbitraryStorage` or `copyStorage` sets storage of a contract under review.",
+        why: "A direct storage write creates state without going through the code that is supposed to guard it. A PoC that writes the broken state has assumed the bug instead of reaching it. The same write in `setUp()` is not configuration: an agent can move `vm.store` there, or spell it as `stdstore.target(...).checked_write`, `setArbitraryStorage` or `copyStorage`, and the slot is still one the attacker cannot write.",
         fix: "Reach the state through the protocol's own entry points. If a fork already holds the state, pin the block where it does. If the slot is a token balance for funding, use `deal` on the attacker instead.",
-        bad: "vm.store(address(vault), bytes32(uint256(7)), bytes32(uint256(0))); // zero the debt",
+        bad: "stdstore.target(address(vault)).sig(\"shares(address)\").with_key(attacker).checked_write(1);\nvm.store(address(vault), bytes32(uint256(7)), bytes32(uint256(0)));",
         good: "vm.prank(attacker);\nvault.repay(0); // the bug: repay(0) clears the debt",
         false_positives: &[
             "Writing a token balance slot of the attacker (manual funding for a token `deal` cannot handle). The rule lowers the severity when the slot expression names an attacker or user; add an `allow` comment saying it is funding.",
@@ -360,10 +360,10 @@ pub const RULES: &[RuleInfo] = &[
         title: "The assertion cannot fail",
         severity: Severity::Error,
         severity_note: "error",
-        summary: "An assertion compares two constants, compares an expression with itself, or asserts a literal `true`.",
-        why: "`assertEq(profit, 100e18)` where `profit = 100e18` two lines earlier is a check of the test's own arithmetic. It passes regardless of what the protocol did, so it lends the PoC a credibility it has not earned.",
-        fix: "Assert on state read from the system after the attack, not on values the test wrote itself.",
-        bad: "uint256 stolen = 100e18;\nassertEq(stolen, 100e18);",
+        summary: "An assertion compares two constants, compares an expression with itself, asserts a literal `true`, or checks `value + positive > baseline`.",
+        why: "`assertEq(profit, 100e18)` where `profit = 100e18` two lines earlier is a check of the test's own arithmetic. `assertGt(balance + 1, before)` is the same kind of empty proof: it passes when the balance did not fall, including when the attack did nothing.",
+        fix: "Assert on state read from the system after the attack, not on values the test wrote itself. A gain is `assertGt(balance, before)`, not `assertGt(balance + 1, before)`.",
+        bad: "uint256 stolen = 100e18;\nassertEq(stolen, 100e18);\nuint256 a = token.balanceOf(attacker) + 1;\nassertGt(a, before);",
         good: "assertEq(token.balanceOf(attacker) - before, 100e18);",
         false_positives: &[
             "A deliberate sanity check of a test constant. Keep it if you want it, but it is not evidence; an `allow` comment documents that.",
@@ -589,6 +589,48 @@ pub const RULES: &[RuleInfo] = &[
             "A Rust `#[should_panic]` test is not checked. Solana tests that only unwrap a transaction already trip RG08 when they assert nothing else.",
         ),
     },
+    RuleInfo {
+        id: "RG19",
+        slug: "setup-hides-storage-write",
+        title: "setUp pranks as a role and writes storage",
+        severity: Severity::Error,
+        severity_note: "error",
+        summary: "`setUp()` pranks as a privileged address and also writes protocol storage with `vm.store`, `stdstore`, `setArbitraryStorage` or `copyStorage`.",
+        why: "RG02 does not look at `setUp()`, and an older build reported `vm.store` there only as a warning. Moving the owner prank and the storage write into `setUp()` made both disappear from a run that fails on errors. A setter called as the owner, with no storage write, is still read as configuration of a local deployment. The pair is not.",
+        fix: "Reach the state through the protocol's own entry points, from the attacker. Do not move the prank and the write into `setUp()` to quiet RG02 and RG04.",
+        bad: "function setUp() public {\n    vm.prank(owner);\n    vm.store(address(vault), bytes32(uint256(1)), bytes32(uint256(0)));\n}",
+        good: "function setUp() public { vault = new Vault(owner); }\nfunction test_attack() public {\n    uint256 before = token.balanceOf(attacker);\n    vm.prank(attacker);\n    vault.withdraw(1);\n    assertGt(token.balanceOf(attacker), before);\n}",
+        false_positives: &[
+            "A fork harness that seeds one slot in `setUp()` and also pranks the owner to set a fee. The fee prank is configuration; the storage write is not, and this rule reports the pair. Split them, or record the seed in an operator allow outside the repo under review.",
+        ],
+        move_lang: MoveNotes::NotChecked(MOVE_NOT_THIS),
+        solana: SolanaNotes::NotChecked(
+            "Solana tests have no Foundry `setUp()`. A storage write of a program account is RG04 in whichever phase the test builds.",
+        ),
+    },
+    RuleInfo {
+        id: "RG20",
+        slug: "missing-citation",
+        title: "A cited contract or function is not in the pinned target",
+        severity: Severity::Error,
+        severity_note: "error; runs only when --target and --target-commit are set",
+        summary: "An import path, contract name or called function in the PoC is not present in the target tree at the pinned commit.",
+        why: "The other rules read the test. They do not open the protocol. A PoC can import `src/Vault.sol` and call `inventedDrain` when neither exists at the commit the report cites. This rule reads that tree, at that commit, and checks the names the test uses. It does not run the test and it does not decide that the bug is real.",
+        fix: "Pass `--target` as the protocol checkout and `--target-commit` as the commit the report cites. Drop citations that are not in that tree, or fix the path so it matches a file at that commit.",
+        bad: "import {Vault} from \"src/Vault.sol\";\nvault.inventedDrain();",
+        good: "import {Vault} from \"src/Vault.sol\"; // this file and withdraw() exist at the commit\nvault.withdraw(1);",
+        false_positives: &[
+            "A helper the test defines itself, or a forge-std name (`Test`, `Vm`). Those are not looked up in the target.",
+            "A function the test calls through an interface the tool could not tie to one contract. The name is then required to exist on some contract in the tree, so a shared name (`transfer`) passes and a name that exists nowhere fails.",
+            "The commit is required. Without `--target` and `--target-commit` this rule does not run, and a clean result still does not mean the citations were checked.",
+        ],
+        move_lang: MoveNotes::NotChecked(
+            "Move tests are not checked against a pinned package. The citation check reads Solidity imports and calls.",
+        ),
+        solana: SolanaNotes::NotChecked(
+            "Solana tests are not checked against a pinned program crate yet. The citation check reads Solidity.",
+        ),
+    },
 ];
 
 pub fn rule(id: &str) -> Option<&'static RuleInfo> {
@@ -689,7 +731,7 @@ pub fn markdown(r: &RuleInfo) -> String {
         MoveNotes::NotChecked(why) => out.push_str(&format!("Not checked. {why}\n\n")),
     }
     out.push_str(&format!(
-        "## Silencing it\n\nAdd a comment on the line, or the line above, with a reason:\n\n```solidity\n// realism-gate: allow({}) <why this is not a defect here>\n```\n\nThe comment is the same in Rust, TypeScript and Move. A comment without a reason is ignored, and the output says so.\n",
+        "## Silencing it\n\nAn `allow` comment in the repo under review does not silence this rule, and neither does a `realism.yaml` or `realism-gate.toml` inside that repo. Policy is an operator file outside the tree (`--declaration`, `--config`). `--trust-inline-allows` is the author switch, for a PoC you wrote and are not gating.\n\n```solidity\n// realism-gate: allow({}) <why this is not a defect here>\n```\n\nThe comment is the same in Rust, TypeScript and Move. A comment without a reason is ignored even with `--trust-inline-allows`, and the output says so.\n",
         r.id
     ));
     out
