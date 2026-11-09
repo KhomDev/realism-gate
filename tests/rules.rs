@@ -127,6 +127,34 @@ fn rg09_tautological_assertion() {
 }
 
 #[test]
+fn rg09_balance_plus_one_is_not_a_gain() {
+    expect(
+        "tests/fixtures/bad/RG09_inflated_baseline.t.sol",
+        &[("RG09", Error, 23)],
+    );
+}
+
+#[test]
+fn rg04_stdstore_set_arbitrary_and_copy_storage_fail() {
+    expect(
+        "tests/fixtures/bad/RG04_stdstore_write.t.sol",
+        &[
+            ("RG04", Error, 21),
+            ("RG04", Error, 29),
+            ("RG04", Error, 37),
+        ],
+    );
+}
+
+#[test]
+fn rg19_owner_prank_and_store_in_setup_fail() {
+    expect(
+        "tests/fixtures/bad/RG19_setup_hides_storage.t.sol",
+        &[("RG19", Error, 18), ("RG04", Error, 19)],
+    );
+}
+
+#[test]
 fn rg10_no_baseline() {
     expect(
         "tests/fixtures/bad/RG10_no_baseline.t.sol",
@@ -224,7 +252,7 @@ fn every_code_rule_has_a_bad_fixture() {
         .unwrap()
         .map(|e| e.unwrap().file_name().to_string_lossy().to_string())
         .collect();
-    for i in 1..=18 {
+    for i in 1..=20 {
         let id = format!("RG{i:02}");
         if matches!(id.as_str(), "RG12" | "RG13" | "RG14") {
             continue;
@@ -424,7 +452,11 @@ fn suppressions_need_a_reason() {
     let base = root();
     let files = discover(&[base.join("tests/fixtures/suppress")]).unwrap();
     let project = Project::load(&files, &base).unwrap();
-    let report = analyze(&project, None, &Options::default());
+    let opts = Options {
+        trust_inline_allows: true,
+        ..Options::default()
+    };
+    let report = analyze(&project, None, &opts);
     let rg11 = report.findings.iter().find(|f| f.rule == "RG11").unwrap();
     assert_eq!(
         rg11.suppressed.as_ref().unwrap().reason,
@@ -435,6 +467,21 @@ fn suppressions_need_a_reason() {
     assert_eq!(rg04.ignored_suppression, Some(22));
     assert_eq!(report.summary.suppressed, 1);
     assert_eq!(report.summary.errors, 1);
+}
+
+#[test]
+fn allow_comments_in_the_target_do_not_silence_the_gate() {
+    let base = root();
+    let files = discover(&[base.join("tests/fixtures/suppress")]).unwrap();
+    let project = Project::load(&files, &base).unwrap();
+    let report = analyze(&project, None, &Options::default());
+    assert!(report.findings.iter().all(|f| f.is_active()));
+    assert_eq!(report.summary.suppressed, 0);
+    let rg11 = report.findings.iter().find(|f| f.rule == "RG11").unwrap();
+    assert_eq!(
+        rg11.ignored_reason.as_deref(),
+        Some("allow comments in the repo under review are not policy")
+    );
 }
 
 #[test]
@@ -482,6 +529,7 @@ fn rule_selection_filters_findings() {
     };
     let report = analyze(&project, None, &opts);
     let mut rules: Vec<&str> = report.findings.iter().map(|f| f.rule).collect();
+    rules.sort();
     rules.dedup();
     assert_eq!(rules, vec!["RG04", "RG06"]);
 

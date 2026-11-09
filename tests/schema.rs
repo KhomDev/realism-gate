@@ -90,21 +90,29 @@ fn json_output_matches_the_published_schema() {
     )
     .unwrap();
     let schema: Value = serde_json::from_str(&text).unwrap();
-    // Every fixture set: findings of each rule, suppressed and ignored allow
-    // comments, a declaration, and a clean run.
-    let runs: [&[&str]; 4] = [
-        &["check", "tests/fixtures/bad", "--no-declaration"],
-        &["check", "tests/fixtures/suppress", "--no-declaration"],
-        &[
+    // Every fixture set: findings of each rule, ignored allow comments, a
+    // declaration that lives outside the repo, and a clean run.
+    let decl = std::env::temp_dir().join(format!("rg-schema-decl-{}.yaml", std::process::id()));
+    std::fs::copy(
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/declaration/realism.yaml"),
+        &decl,
+    )
+    .unwrap();
+    let decl = decl.to_str().unwrap().to_string();
+    let runs: Vec<Vec<&str>> = vec![
+        vec!["check", "tests/fixtures/bad", "--no-declaration"],
+        vec!["check", "tests/fixtures/suppress", "--no-declaration"],
+        vec![
             "check",
             "tests/fixtures/declaration",
             "--declaration",
-            "tests/fixtures/declaration/realism.yaml",
+            &decl,
         ],
-        &["check", "tests/fixtures/good", "--no-declaration"],
+        vec!["check", "tests/fixtures/good", "--no-declaration"],
     ];
     for args in runs {
-        let mut args = args.to_vec();
+        let mut args = args;
         args.extend(["--format", "json", "--fail-on", "never", "--no-config"]);
         let v = report(&args);
         let mut errors = Vec::new();

@@ -11,9 +11,16 @@ file the triager will also read.
 
 ## Where it is read from
 
-`realism-gate check` reads `./realism.yaml` if it exists, or the file named by
-`--declaration`. `--no-declaration` ignores it. `realism-gate init` writes a
-commented template.
+A `realism.yaml` inside the repo under review is not policy. `check` does not
+apply it, and it does not apply `realism-gate.toml` from that tree either.
+Pass `--declaration` and `--config` with files that live outside the tree.
+`--no-declaration` is the same as leaving it unset when the only file is inside
+the tree. `realism-gate init` still writes a template; move it out before a
+gate run if the agent under review can edit it.
+
+An inline `realism-gate: allow` comment in the PoC is ignored unless
+`--trust-inline-allows` is set. That flag is for the author of the PoC. Do not
+pass it when the PoC was written by the agent the gate is checking.
 
 One declaration applies to everything checked in that run. For a directory
 holding several unrelated PoCs, run once per PoC.

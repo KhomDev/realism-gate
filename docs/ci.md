@@ -14,7 +14,7 @@ test directory: `path: tests/`.
 That is the whole setup. The action needs no Rust or Node toolchain: it downloads the
 release binary for the runner (Linux x86-64 and arm64, macOS x86-64 and arm64,
 Windows x86-64), checks it against the release's `SHA256SUMS`, and runs it.
-`@v0` follows the newest 0.x release; pin `@v0.5.0` or a commit SHA if you
+`@v0` follows the newest 0.x release; pin `@v0.6.0` or a commit SHA if you
 want nothing to move.
 
 A complete workflow:
@@ -184,7 +184,7 @@ realism-gate check test --format sarif --output realism.sarif
 or download and check an archive:
 
 ```bash
-version=v0.5.0
+version=v0.6.0
 target=x86_64-unknown-linux-musl
 curl -fsSLO "https://github.com/KhomDev/realism-gate/releases/download/$version/realism-gate-${version#v}-$target.tar.gz"
 curl -fsSLO "https://github.com/KhomDev/realism-gate/releases/download/$version/SHA256SUMS"

@@ -4,7 +4,7 @@
 # realism-gate and draft findings with viability-gate, uploads one SARIF file,
 # and keeps a single pull-request comment.
 #
-# `uses: KhomDev/realism-gate/combined@v0.5.0` is this repository's
+# `uses: KhomDev/realism-gate/combined@v0.6.0` is this repository's
 # `combined/action.yml`. Pin a tag once you have one. Until then, a checkout
 # of this repo can use `./combined`.
 
@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: KhomDev/realism-gate/combined@v0.5.0
+      - uses: KhomDev/realism-gate/combined@v0.6.0
         with:
           path: test/
           findings: ""

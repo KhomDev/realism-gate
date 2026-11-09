@@ -148,6 +148,7 @@ pub fn check_test<'p>(
     let mut out = Vec::new();
     privilege::attacker_holds_privilege(&ctx, &mut out);
     privilege::privileged_step_in_exploit(&ctx, &mut out);
+    privilege::setup_hides_storage_write(&ctx, &mut out);
     privilege::deployer_is_attacker(&ctx, &mut out);
     injection::storage_write(&ctx, &mut out);
     injection::code_replacement(&ctx, &mut out);

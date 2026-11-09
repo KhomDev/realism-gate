@@ -26,6 +26,11 @@
       }
     },
     "declaration": { "type": ["string", "null"], "description": "Path of the realism.yaml applied." },
+    "ignored_policy": {
+      "type": "array",
+      "description": "Policy files found inside the repo under review and not applied. Added in 0.6.0. Omitted when empty.",
+      "items": { "type": "string" }
+    },
     "config": { "type": ["string", "null"], "description": "Path of the realism-gate.toml applied. Added in 0.2.0." },
     "changed_since": {
       "description": "Set with --changed-since: findings are limited to files changed since this revision. Added in 0.2.0.",
@@ -49,7 +54,7 @@
         "required": ["rule", "slug", "severity", "file", "line", "column", "suite", "tests", "message", "evidence", "help"],
         "additionalProperties": false,
         "properties": {
-          "rule": { "type": "string", "description": "RG01 .. RG18." },
+          "rule": { "type": "string", "description": "RG01 .. RG20." },
           "slug": { "type": "string" },
           "severity": { "type": "string", "enum": ["error", "warn", "note"] },
           "file": { "type": "string", "description": "Relative to the working directory, forward slashes." },
@@ -70,7 +75,8 @@
               "reason": { "type": "string" }
             }
           },
-          "ignored_suppression": { "type": "integer", "description": "Line of an allow comment ignored for lack of a reason." }
+          "ignored_suppression": { "type": "integer", "description": "Line of an allow comment that was not applied." },
+          "ignored_reason": { "type": "string", "description": "Why that comment was not applied: no reason, or it is inside the repo under review. Added in 0.6.0." }
         }
       }
     },

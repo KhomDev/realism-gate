@@ -1,8 +1,8 @@
 # realism-gate
 
-**Does your PoC show what an unprivileged attacker can actually do, or only what your harness made true?**
+**A writing and PoC-structure filter for Foundry, Solana and Move tests, plus an optional two-sided forge check. It is not a validity oracle.**
 
-For bounty hunters, contest auditors, and people hunting with an AI agent. A test can pass because the harness granted a role, dealt a balance, shipped a strategy nobody runs, or asserted a profit a fee in the same file wipes out.
+For bounty hunters, contest auditors, and people hunting with an AI agent. A test can pass because the harness granted a role, wrote storage with `stdstore` or `vm.store`, moved that write into `setUp()`, or asserted `balance + 1 > before`. realism-gate looks for those shapes. A clean result means none of them fired. It does not mean the bug is real, the citation exists, or a program pays for it.
 
 ```bash
 cargo binstall realism-gate
@@ -17,7 +17,7 @@ The test deploys a vault and then drains it as admin, with `deal` writing the va
 <!-- BEGIN:example -->
 
 ```text
-realism-gate 0.5.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 0.6.0  ·  1 file  ·  1 suite  ·  1 test
 
 test/VaultDrain.t.sol
   warn   RG11 unpinned-fork  test/VaultDrain.t.sol:17:9  VaultDrainTest::test_attackerDrainsVault
@@ -29,10 +29,12 @@ test/VaultDrain.t.sol
 
   warn   RG02 privileged-step-in-exploit  test/VaultDrain.t.sol:24:9  VaultDrainTest::test_attackerDrainsVault
          The exploit runs a step as `admin`: the name `admin` reads as the `admin` role. An
-         attacker cannot sign as this address. Move it to setUp() if it is configuration, or
-         declare it under `privileged:` in realism.yaml if the claim relies on that role acting.
+         attacker cannot sign as this address. Moving the prank into setUp() does not make it
+         the attacker's action; a prank there next to a direct storage write is RG19. Declare
+         the role in an operator realism.yaml outside the repo under review if the claim relies
+         on that role acting.
          ↳ vm.prank(admin)
-         → Move configuration into `setUp()`.
+         → Do not hide the prank in `setUp()`.
 
   error  RG06 balance-injection  test/VaultDrain.t.sol:28:9  VaultDrainTest::test_attackerDrainsVault
          deal() sets the `token` balance of `vault` (Vault) in the exploit. It transfers nothing
@@ -67,12 +69,12 @@ shows why a rule exists and how it can be wrong.
 
 ## What it does
 
-- Reads Foundry (Solidity, via solar), Solana tests (Rust via syn, Anchor TypeScript via oxc) and Move unit tests (Sui `test_scenario`, Aptos `#[test]`). It does not run them.
+- Reads Foundry (Solidity, via solar), Solana tests (Rust via syn, Anchor TypeScript via oxc) and Move unit tests (Sui `test_scenario`, Aptos `#[test]`). `check` does not run them.
 - Rebuilds the order the test runs in, including `setUp`, helpers and callbacks, and who sends each call.
-- Eighteen rules. RG01-RG14 are the privilege, injection and evidence rules. RG15-RG18 are the economic ones: profit net of costs, implausible amounts, setup with no deployment evidence, revert-only tests.
+- Twenty rules. RG01-RG14 are the privilege, injection and evidence rules. RG15-RG18 are the economic ones. RG19 flags an owner prank in `setUp()` next to a direct storage write. RG20, with `--target` and `--target-commit`, checks that cited contracts, functions and import paths exist at that commit.
 - RG03 warns only when the deployer calls something named like an access-controlled function. An ordinary local `deposit` is a note.
-- JSON, SARIF and Markdown. `realism.yaml` for the attacker model and for `deployment.evidence`.
-- `verify-fix` is the opt-in that runs forge: the PoC must fail on a patch or a `poc-patched/` tree.
+- JSON, SARIF and Markdown. An operator `realism.yaml` outside the repo under review states the attacker model and `deployment.evidence`. A file inside that repo is not applied. Inline `allow` comments are ignored unless `--trust-inline-allows`.
+- `verify-fix` is the opt-in that runs forge twice: the PoC must pass before the patch and fail after it. See [docs/verify-fix.md](docs/verify-fix.md).
 - A combined GitHub Action runs this and `vg check` and publishes one SARIF file and one PR comment. See [`examples/workflows/gates.yml`](examples/workflows/gates.yml).
 
 ## Solana
@@ -82,7 +84,7 @@ Same rule ids, same output. Rust harnesses (solana-program-test, LiteSVM, Mollus
 <!-- BEGIN:example-rust -->
 
 ```text
-realism-gate 0.5.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 0.6.0  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault_drain.rs
   warn   RG11 unpinned-fork  tests/vault_drain.rs:21:15  vault_drain::test_attacker_drains_vault
@@ -96,11 +98,11 @@ tests/vault_drain.rs
 
   warn   RG02 privileged-step-in-exploit  tests/vault_drain.rs:30:5  vault_drain::test_attacker_drains_vault
          The exploit sends a transaction signed by `admin`: the name `admin` reads as the
-         `admin` role. An attacker cannot produce that signature. Move it before the exploit if
-         it is configuration, or declare it under `privileged:` in realism.yaml if the claim
-         relies on that role acting.
+         `admin` role. An attacker cannot produce that signature. Declare the role in an
+         operator realism.yaml outside the repo under review if the claim relies on that role
+         acting.
          ↳ send(&mut svm, set_withdraw_fee_ix(&admin.pubkey(), 0), &[&admin])
-         → Move configuration before the attacker's first transaction.
+         → Do not treat a privileged signature as configuration by moving it earlier.
 
   error  RG06 balance-injection  tests/vault_drain.rs:32:5  vault_drain::test_attacker_drains_vault
          set_account sets the lamports of `vault_state` (a program-derived address) in the
@@ -130,7 +132,7 @@ shows why a rule exists and how it can be wrong.
 <!-- BEGIN:example-anchor -->
 
 ```text
-realism-gate 0.5.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 0.6.0  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault-drain.ts
   warn   RG11 unpinned-fork  tests/vault-drain.ts:13:21  vault::lets the attacker drain the vault
@@ -144,11 +146,11 @@ tests/vault-drain.ts
 
   warn   RG02 privileged-step-in-exploit  tests/vault-drain.ts:27:11  vault::lets the attacker drain the vault
          The exploit sends a transaction signed by `admin`: the name `admin` reads as the
-         `admin` role. An attacker cannot produce that signature. Move it before the exploit if
-         it is configuration, or declare it under `privileged:` in realism.yaml if the claim
-         relies on that role acting.
+         `admin` role. An attacker cannot produce that signature. Declare the role in an
+         operator realism.yaml outside the repo under review if the claim relies on that role
+         acting.
          ↳ program.methods.setWithdrawFee(new BN(0)).accounts({ admin: admin.publicKey, vaultState }).signers([admin]).rpc()
-         → Move configuration before the attacker's first transaction.
+         → Do not treat a privileged signature as configuration by moving it earlier.
 
   error  RG06 balance-injection  tests/vault-drain.ts:29:5  vault::lets the attacker drain the vault
          setAccount sets the lamports of `vaultState` (a program-derived address) in the
@@ -195,6 +197,8 @@ shows why a rule exists and how it can be wrong.
 | [RG16](docs/rules/RG16.md) `implausible-amount` | warn | a deal or mint is above the fixed bound |
 | [RG17](docs/rules/RG17.md) `unevidenced-setup` | warn | counterparty setup has no deployment evidence |
 | [RG18](docs/rules/RG18.md) `revert-only` | warn | the only assertion is a revert |
+| [RG19](docs/rules/RG19.md) `setup-hides-storage-write` | error | `setUp()` pranks as a role and writes storage |
+| [RG20](docs/rules/RG20.md) `missing-citation` | error | a cited path, contract or function is missing at `--target-commit` |
 
 `realism-gate explain RG15` prints why a rule exists and how it can be wrong. Each page under `docs/rules/` is generated from the catalog.
 
@@ -204,21 +208,23 @@ shows why a rule exists and how it can be wrong.
 realism-gate check [PATHS]...
     --format text|json|sarif|markdown
     --fail-on error|warn|note|never
-    --declaration FILE          default: ./realism.yaml
+    --declaration FILE          operator file outside the repo under review
+    --config FILE               same, for realism-gate.toml
+    --target DIR --target-commit REV
     --rules RG15,RG17
     --skip RG08
-realism-gate verify-fix --poc test/Poc.t.sol --patch fix.diff
-realism-gate verify-fix --poc test/Poc.t.sol --patched poc-patched/
+realism-gate verify-fix --sandbox --poc test/Poc.t.sol --patch fix.diff
+realism-gate verify-fix --sandbox --poc test/Poc.t.sol --patched poc-patched/
 realism-gate rules
 realism-gate explain RULE
 realism-gate init
 ```
 
-Exit status for `check`: `0` nothing at or above `--fail-on`, `1` there is, `2` the inputs could not be read. `verify-fix` exits `0` when the PoC fails on the patch, `1` when it still passes, `2` when forge did not run the test.
+Exit status for `check`: `0` nothing at or above `--fail-on`, `1` there is, `2` the inputs could not be read. `verify-fix` exits `0` when the PoC passed before the patch and failed after it, `1` when the bug did not reproduce or the PoC still passes, `2` when forge did not run the test or the project is unsafe to run.
 
 ## Limits
 
-It reads the test, not the protocol and not the chain. It does not know a function is gated when the name does not say so. It does not know the balance at a pinned block. It does not know that a README forbids the call; RG17 is silent only when `deployment.evidence` cites a source. It flattens control flow. A Move file is not type-checked. `check` never runs forge and has no network code; `verify-fix` is the command that does run forge, locally.
+It reads the test. It does not run it, except `verify-fix`, which runs forge twice under the limits in [docs/verify-fix.md](docs/verify-fix.md). It does not know a function is gated when the name does not say so. It does not know the balance at a pinned block. It does not know that a README forbids the call; RG17 is silent only when an operator `deployment.evidence` outside the repo cites a source. RG20 checks cited names only when you pass a target and a commit. It flattens control flow. A Move file is not type-checked. `check` has no network code.
 
 A clean result is not a payable finding. The full list is [docs/limitations.md](docs/limitations.md). How often a flag was right, on the corpora that were labelled, is [docs/precision.md](docs/precision.md).
 
@@ -229,7 +235,7 @@ A clean result is not a payable finding. The full list is [docs/limitations.md](
 | [rejection-taxonomy](https://github.com/KhomDev/rejection-taxonomy) | Why did findings die? |
 | [bounty-economics](https://github.com/KhomDev/bounty-economics) | Can this finding pay on this program? |
 | [viability-gate](https://github.com/KhomDev/viability-gate) | Will the write-up survive triage? |
-| **realism-gate** | **Does the PoC show what an unprivileged attacker can do?** |
+| **realism-gate** | **Does this PoC have a known structure problem?** |
 
 ## Contributing
 

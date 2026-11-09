@@ -38,7 +38,11 @@ downloaded.
 | `check_poc` | `realism-gate check --format json` | the exit code is non-zero (default `--fail-on warn`) |
 | `check_finding` | `vg check --json`, and `realism-gate` when a PoC path is passed | viability-gate says `KILL` or `HOLD`, or the PoC check is non-zero |
 
-It shells out. It does not reimplement either checker.
+It shells out. It does not reimplement either checker. A `path` that starts
+with `-` is rejected, and paths are passed after `--`, so the argument cannot
+inject `--skip`. The server passes `--no-config` and does not load a
+`realism.yaml` from the working tree. Tool output is prefixed as data, not as
+instructions.
 
 ```bash
 cargo install --path . --locked

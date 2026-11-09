@@ -200,6 +200,17 @@ author cites that README under `deployment.evidence` or the call is one of
 the names above. Those limits are also on the rule pages, under "How it can
 be wrong".
 
+## 0.6.0
+
+The 0.5.0 labels are unchanged. 0.6.0 adds four RG04 flags on the in-sample
+corpus, all `stdstore.checked_write` of a token `balanceOf` slot, labelled
+true-positive in `eval/labels/v0.6.0.jsonl` the same way the earlier
+`vm.store` of an attacker balance was. RG19 and the `balance + 1` form of
+RG09 raised nothing on the three corpora. Storage writes that 0.5.0 reported
+as warnings because they were in `setUp` are errors in 0.6.0; the flag id
+does not include severity, so those labels still apply. `eval/results/precision.md`
+has the 0.6.0 rows.
+
 ## Rust (Solana) tests
 
 Not measured. Every figure above is for Solidity: the Rust frontend is new in

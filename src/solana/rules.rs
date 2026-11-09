@@ -373,7 +373,7 @@ fn privileged_signer(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
             Severity::Warn,
             ctx.op(tx.op),
             format!(
-                "The exploit sends a transaction signed by `{signer}`: {why}. An attacker cannot produce that signature. Move it before the exploit if it is configuration, or declare it under `privileged:` in realism.yaml if the claim relies on that role acting."
+                "The exploit sends a transaction signed by `{signer}`: {why}. An attacker cannot produce that signature. Declare the role in an operator realism.yaml outside the repo under review if the claim relies on that role acting."
             ),
         ));
     }

@@ -59,27 +59,58 @@ fn pair(r: &str, s: &str) -> (String, String) {
     (r.to_string(), s.to_string())
 }
 
+fn outside_config(name: &str, body: &str) -> PathBuf {
+    let path = std::env::temp_dir().join(format!("rg-policy-{}-{name}.toml", std::process::id()));
+    std::fs::write(&path, body).unwrap();
+    path
+}
+
 #[test]
 fn config_sets_severity_and_turns_rules_off() {
     let dir = project("config");
-    std::fs::write(
-        dir.join("realism-gate.toml"),
-        "[rules]\nRG11 = \"off\"\nbalance-injection = \"warn\"\n",
-    )
-    .unwrap();
+    // A config inside the repo under review is not policy.
+    std::fs::write(dir.join("realism-gate.toml"), "[rules]\nRG06 = \"off\"\n").unwrap();
     let v = json(&dir, &[]);
+    assert!(
+        rules(&v).iter().any(|r| r.0 == "RG06"),
+        "in-tree config must not turn RG06 off: {v}"
+    );
+    assert!(v["config"].is_null());
+
+    let cfg = outside_config(
+        "config",
+        "[rules]\nRG11 = \"off\"\nbalance-injection = \"warn\"\n",
+    );
+    let cfg_s = cfg.to_str().unwrap();
+    let v = json(&dir, &["--config", cfg_s]);
     assert_eq!(rules(&v), vec![pair("RG06", "warn")]);
-    assert_eq!(v["config"], "realism-gate.toml");
+    assert!(v["config"].as_str().unwrap().contains("rg-policy-"));
     // Warn only, so the default threshold passes.
-    assert_eq!(run(&dir, &["check"]).status.code(), Some(0));
+    assert_eq!(
+        run(&dir, &["check", "--config", cfg_s]).status.code(),
+        Some(0)
+    );
 
     // Flags win: --severity replaces the level, --rules runs an "off" rule.
-    let v = json(&dir, &["--severity", "RG06=error", "--rules", "RG06,RG11"]);
+    let v = json(
+        &dir,
+        &[
+            "--config",
+            cfg_s,
+            "--severity",
+            "RG06=error",
+            "--rules",
+            "RG06,RG11",
+        ],
+    );
     assert_eq!(rules(&v), vec![pair("RG06", "error"), pair("RG11", "warn")]);
     assert_eq!(
-        run(&dir, &["check", "--severity", "RG06=error"])
-            .status
-            .code(),
+        run(
+            &dir,
+            &["check", "--config", cfg_s, "--severity", "RG06=error"]
+        )
+        .status
+        .code(),
         Some(1)
     );
 
@@ -92,8 +123,13 @@ fn config_sets_severity_and_turns_rules_off() {
 #[test]
 fn a_bad_config_is_a_usage_error() {
     let dir = project("bad-config");
+    // Inside the tree, a broken config is ignored rather than becoming a way
+    // to make the gate exit 2.
     std::fs::write(dir.join("realism-gate.toml"), "[rules]\nRG99 = \"off\"\n").unwrap();
     let o = run(&dir, &["check"]);
+    assert_ne!(o.status.code(), Some(2));
+    let cfg = outside_config("bad", "[rules]\nRG99 = \"off\"\n");
+    let o = run(&dir, &["check", "--config", cfg.to_str().unwrap()]);
     assert_eq!(o.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&o.stderr).contains("RG99"));
     let o = run(&dir, &["check", "--no-config", "--severity", "RG01=loud"]);
@@ -106,16 +142,16 @@ fn exclude_drops_files_from_config_and_flags() {
     let v = json(&dir, &["--exclude", "test/RG06*"]);
     assert_eq!(rules(&v), vec![pair("RG11", "warn")]);
     assert_eq!(v["summary"]["suites"], 1);
-    std::fs::write(
-        dir.join("realism-gate.toml"),
-        "exclude = [\"test/RG11_unpinned_fork.t.sol\"]\n",
-    )
-    .unwrap();
-    let v = json(&dir, &[]);
+    let cfg = outside_config("exclude", "exclude = [\"test/RG11_unpinned_fork.t.sol\"]\n");
+    let cfg_s = cfg.to_str().unwrap();
+    let v = json(&dir, &["--config", cfg_s]);
     assert_eq!(rules(&v), vec![pair("RG06", "error")]);
     // The flag adds to the file. Excluding every suite leaves nothing
     // checked, which is an error, not a pass.
-    let o = run(&dir, &["check", "--exclude", "test/RG06*"]);
+    let o = run(
+        &dir,
+        &["check", "--config", cfg_s, "--exclude", "test/RG06*"],
+    );
     assert_eq!(o.status.code(), Some(2));
 }
 
@@ -200,13 +236,22 @@ fn allow_without_parentheses_and_ignored_allows_are_counted() {
     );
     assert_ne!(marked, text);
     std::fs::write(&rg11, marked).unwrap();
-    let v = json(&dir, &[]);
+    let v = json(&dir, &["--trust-inline-allows"]);
     assert_eq!(v["summary"]["suppressed"], 1);
     assert_eq!(v["summary"]["suppressions_ignored"], 0);
+    // Without the author switch the comment is not policy.
+    let v = json(&dir, &[]);
+    assert_eq!(v["summary"]["suppressed"], 0);
+    assert!(v["summary"]["suppressions_ignored"].as_u64().unwrap() >= 1);
 
     let v = json(
         &root(),
-        &["tests/fixtures/suppress", "--no-declaration", "--no-config"],
+        &[
+            "tests/fixtures/suppress",
+            "--no-declaration",
+            "--no-config",
+            "--trust-inline-allows",
+        ],
     );
     assert_eq!(v["summary"]["suppressed"], 1);
     assert_eq!(v["summary"]["suppressions_ignored"], 1);
