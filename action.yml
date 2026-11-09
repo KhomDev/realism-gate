@@ -231,14 +231,14 @@ runs:
 
         # `args` is operator input. Split it as shell words, without globbing,
         # so `*` is not expanded and a quoted token stays one argument.
+        # The python program is one line: a wrapped line in this block is
+        # parsed as YAML, not as the script.
         extra=()
         if [ -n "$RG_ARGS" ]; then
           if command -v python3 >/dev/null 2>&1; then
             while IFS= read -r -d '' arg; do
               extra+=("$arg")
-            done < <(RG_ARGS="$RG_ARGS" python3 -c 'import os, shlex, sys
-for a in shlex.split(os.environ.get("RG_ARGS", "")):
-    sys.stdout.buffer.write(a.encode() + b"\0")')
+            done < <(RG_ARGS="$RG_ARGS" python3 -c 'import os,shlex,sys; [sys.stdout.buffer.write(a.encode()+b"\0") for a in shlex.split(os.environ.get("RG_ARGS") or "")]')
           else
             set -f
             # shellcheck disable=SC2206

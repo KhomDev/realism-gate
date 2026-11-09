@@ -122,9 +122,27 @@ pub fn verify(req: &Request) -> Result<Outcome, VerifyError> {
     }
 }
 
+/// `Command::new` on Windows cannot execute a `.bat` or `.cmd` (CreateProcess
+/// returns error 193). Those extensions are the test double's stand-in for a
+/// shell script. A real `forge` or `forge.exe` is launched directly.
+fn forge_command(forge: &Path) -> Command {
+    let ext = forge
+        .extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("")
+        .to_ascii_lowercase();
+    if cfg!(windows) && (ext == "bat" || ext == "cmd") {
+        let mut cmd = Command::new("cmd");
+        cmd.arg("/C").arg(forge);
+        cmd
+    } else {
+        Command::new(forge)
+    }
+}
+
 fn run_forge(req: &Request, work: &Path, label: &str) -> Result<Side, VerifyError> {
     let poc = poc_arg(&req.poc, &req.root, work);
-    let mut cmd = Command::new(&req.forge);
+    let mut cmd = forge_command(&req.forge);
     cmd.current_dir(work)
         .arg("test")
         .arg("--match-path")
@@ -602,8 +620,22 @@ mod tests {
             let mut perms = std::fs::metadata(&path).unwrap().permissions();
             perms.set_mode(0o755);
             std::fs::set_permissions(&path, perms).unwrap();
+            path
         }
-        path
+        // Windows cannot execute a shell script (error 193). The stand-in is
+        // a .bat that runs the same script under bash, which the runner has.
+        // The gate still launches a normal forge binary directly.
+        #[cfg(windows)]
+        {
+            let bat = dir.join(format!("{name}.bat"));
+            let script_name = path.file_name().unwrap().to_string_lossy();
+            std::fs::write(
+                &bat,
+                format!("@echo off\r\nbash \"%~dp0{script_name}\" %*\r\n"),
+            )
+            .unwrap();
+            bat
+        }
     }
 
     fn req(
