@@ -11,6 +11,7 @@ use crate::finding::Severity;
 use crate::project::{self, Project};
 use crate::render::{self, text::TextOptions};
 use crate::rules::{self, RULES};
+use crate::verify_fix;
 use clap::{Parser, Subcommand, ValueEnum};
 use regex::Regex;
 use std::collections::BTreeMap;
@@ -59,6 +60,33 @@ pub enum Command {
         #[arg(long)]
         force: bool,
     },
+    /// Run a PoC against a patched tree with forge and require the PoC to fail.
+    ///
+    /// Opt-in. `check` never executes a test and never calls this. Forge runs
+    /// on this machine; a fork PoC may make forge itself open a connection.
+    VerifyFix(VerifyArgs),
+}
+
+#[derive(clap::Args, Debug)]
+pub struct VerifyArgs {
+    /// The Foundry test file (`test/Poc.t.sol`).
+    #[arg(long)]
+    pub poc: PathBuf,
+    /// A unified diff applied to a copy of the project before forge runs.
+    #[arg(long, conflicts_with = "patched", value_name = "FILE")]
+    pub patch: Option<PathBuf>,
+    /// A directory that already holds the patched sources (`poc-patched/`).
+    #[arg(long, conflicts_with = "patch", value_name = "DIR")]
+    pub patched: Option<PathBuf>,
+    /// Passed to `forge test --match-test`.
+    #[arg(long, value_name = "REGEX")]
+    pub match_test: Option<String>,
+    /// The forge binary. Default: `forge` on PATH.
+    #[arg(long, default_value = "forge")]
+    pub forge: PathBuf,
+    /// The project to copy when `--patch` is used. Default: the current directory.
+    #[arg(long, value_name = "DIR")]
+    pub root: Option<PathBuf>,
 }
 
 #[derive(clap::Args, Debug)]
@@ -189,6 +217,7 @@ pub fn run(cli: Cli) -> Result<ExitCode, String> {
             }
             Ok(ExitCode::SUCCESS)
         }
+        Command::VerifyFix(args) => verify_fix_cmd(args),
         Command::Init { force } => {
             let path = Path::new(declaration::FILE_NAME);
             if path.exists() && !force {
@@ -202,6 +231,37 @@ pub fn run(cli: Cli) -> Result<ExitCode, String> {
             println!("wrote {}", declaration::FILE_NAME);
             Ok(ExitCode::SUCCESS)
         }
+    }
+}
+
+fn verify_fix_cmd(args: VerifyArgs) -> Result<ExitCode, String> {
+    let root = match args.root {
+        Some(p) => p,
+        None => std::env::current_dir().map_err(|e| format!("current directory: {e}"))?,
+    };
+    match verify_fix::verify(&verify_fix::Request {
+        poc: args.poc,
+        patch: args.patch,
+        patched_dir: args.patched,
+        match_test: args.match_test,
+        forge: args.forge,
+        root,
+    }) {
+        Ok(verify_fix::Outcome::FixHolds { detail }) => {
+            println!("verify-fix: PASS  the PoC failed on the patched tree");
+            if !detail.trim().is_empty() {
+                println!("{detail}");
+            }
+            Ok(ExitCode::SUCCESS)
+        }
+        Ok(verify_fix::Outcome::FixDoesNotHold { detail }) => {
+            println!("verify-fix: FAIL  the PoC still passed on the patched tree");
+            if !detail.trim().is_empty() {
+                println!("{detail}");
+            }
+            Ok(ExitCode::from(1))
+        }
+        Err(e) => Err(e.0),
     }
 }
 
@@ -238,7 +298,7 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
     let files = project::discover(&paths).map_err(|e| e.to_string())?;
     if files.is_empty() {
         return Err(format!(
-            "no .sol or .rs files found under {}",
+            "no .sol, .rs, .move or Solana script files found under {}",
             paths
                 .iter()
                 .map(|p| p.display().to_string())
@@ -377,7 +437,8 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
     if report.summary.suites == 0 {
         return Err(if report.parse_errors.is_empty() {
             "no test suite found: no concrete contract with a public test* function, \
-             and no Rust or TypeScript test that drives a Solana harness, matched"
+             no Rust or TypeScript test that drives a Solana harness, \
+             and no Move #[test] function, matched"
                 .to_string()
         } else {
             format!(
@@ -392,6 +453,20 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
     } else {
         ExitCode::SUCCESS
     })
+}
+
+fn rule_languages(r: &rules::RuleInfo) -> Vec<&'static str> {
+    if matches!(r.solana, rules::SolanaNotes::Declaration) {
+        return vec!["solidity", "rust", "typescript", "move"];
+    }
+    let mut langs = vec!["solidity"];
+    if r.checks_solana() {
+        langs.extend(["rust", "typescript"]);
+    }
+    if r.checks_move() {
+        langs.push("move");
+    }
+    langs
 }
 
 fn list_rules(format: ListFormat) -> String {
@@ -420,11 +495,7 @@ fn list_rules(format: ListFormat) -> String {
                         "severity": r.severity.as_str(),
                         "severity_note": r.severity_note,
                         "summary": r.summary,
-                        "languages": if r.checks_solana() {
-                            vec!["solidity", "rust", "typescript"]
-                        } else {
-                            vec!["solidity"]
-                        },
+                        "languages": rule_languages(r),
                         "url": render::rule_url(r.id),
                     })
                 })
@@ -461,7 +532,8 @@ fn explain_text(r: &rules::RuleInfo) -> String {
         }
     }
     if !r.false_positives.is_empty() {
-        out.push_str("\nKnown false-positive modes\n");
+        out.push_str("\nHow it can be wrong\n");
+        out.push_str("Known false-positive modes\n");
         for fp in r.false_positives {
             out.push_str(&format!("  - {fp}\n"));
         }
@@ -498,6 +570,13 @@ fn explain_text(r: &rules::RuleInfo) -> String {
         rules::SolanaNotes::Declaration => {
             out.push_str("  The same: the rule reads realism.yaml.\n")
         }
+    }
+    out.push_str("\nIn Move tests (Sui and Aptos)\n");
+    match r.move_lang {
+        rules::MoveNotes::Checked { summary, fix, .. } => {
+            out.push_str(&format!("  {summary}\n  Fix: {fix}\n"))
+        }
+        rules::MoveNotes::NotChecked(why) => out.push_str(&format!("  Not checked. {why}\n")),
     }
     out.push_str(&format!("\n{}\n", render::rule_url(r.id)));
     out

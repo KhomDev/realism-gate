@@ -77,7 +77,10 @@ def main(argv: list[str]) -> int:
     if len(argv) not in (3, 5):
         print(__doc__, file=sys.stderr)
         return 2
-    labels = {l["id"]: l for l in load(EVAL / "labels" / "v0.2.0.jsonl")}
+    labels = {}
+    for path in sorted((EVAL / "labels").glob("*.jsonl")):
+        for row in load(path):
+            labels[row["id"]] = row
     names = list(corpus.pins())
     result: dict = {"floor": FLOOR, "corpora": {}, "pooled": {}}
     missing = []
@@ -103,10 +106,38 @@ def main(argv: list[str]) -> int:
             row["added"] = len(added)
             per_rule[rule] = row
         result["corpora"][name] = {"files": len(corpus.files(name)), "rules": per_rule}
+    # 0.5.0 flags. Rules with 30 or fewer are labelled in full, same as the
+    # older versions. The 0.2.0 table above is left as the historical study.
+    v050 = {}
+    for name in names:
+        path = EVAL / "flags" / f"v0.5.0-{name}.jsonl"
+        if not path.is_file():
+            continue
+        mine = load(path)
+        v050[name] = mine
+        by_rule: dict = defaultdict(list)
+        for f in mine:
+            by_rule[f["rule"]].append(f)
+        for rule, flags_of_rule in by_rule.items():
+            if len(flags_of_rule) <= CAP:
+                missing += [
+                    f"{name} v0.5.0 {rule} {f['id']}"
+                    for f in flags_of_rule
+                    if f["id"] not in labels
+                ]
     if missing:
         for m in missing:
             print(f"UNLABELLED {m}", file=sys.stderr)
         return 1
+    result["v0.5.0"] = {}
+    for name, mine in v050.items():
+        by_rule = defaultdict(list)
+        for f in mine:
+            by_rule[f["rule"]].append(f)
+        result["v0.5.0"][name] = {
+            rule: {"flags": len(rows), **tally([labels[f["id"]]["label"] for f in rows if f["id"] in labels])}
+            for rule, rows in sorted(by_rule.items())
+        }
     for rule in sorted(pooled):
         result["pooled"][rule] = {v: tally(pooled[rule][v]) for v in VERSIONS}
 
@@ -167,6 +198,19 @@ def markdown(result: dict) -> str:
         out.append(f"| {rule} | {cell(row['v0.1.0'])} | {cell(row['v0.2.0'])} |")
     out += ["", f"Below the {result['floor']:.0%} floor in v0.2.0 on some corpus: "
             f"{', '.join(result['below_floor_v0.2.0']) or 'none'}.", ""]
+    if result.get("v0.5.0"):
+        out += ["## v0.5.0", "",
+                "Every active flag of this tree. Rules with 30 or fewer flags are labelled in full.",
+                "A rule that also appears above keeps its older labels; the new rules are labelled in",
+                "`eval/labels/v0.5.0.jsonl`. RG03 raised nothing on these three corpora.",
+                ""]
+        for name, rules in result["v0.5.0"].items():
+            out += [f"### {name}", "", "| Rule | flags | labelled precision |", "|---|---:|---|"]
+            for rule, row in rules.items():
+                if rule not in ("RG15", "RG16", "RG17", "RG18"):
+                    continue
+                out.append(f"| {rule} | {row['flags']} | {cell(row)} |")
+            out.append("")
     return "\n".join(out)
 
 

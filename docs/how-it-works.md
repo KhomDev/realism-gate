@@ -1,11 +1,15 @@
 # How realism-gate works
 
-realism-gate never runs a test. It reads the Solidity, rebuilds what the test
-would do in the order Foundry would do it, and checks that sequence against the
-rules. This page describes each stage and, for each, what it can and cannot
-see. Rust tests for Solana programs go through the same stages with their own
-parser and vocabulary; [the last section](#rust-solana-tests) describes how
-each one differs.
+`realism-gate check` never runs a test. It reads the source, rebuilds what the
+test would do, and checks that sequence against the rules. `verify-fix` is the
+one command that does run a test: it shells out to forge on a patched copy and
+requires the PoC to fail. This page describes `check`. Rust tests for Solana
+programs go through the same stages with their own parser;
+[the last section](#rust-solana-tests) describes how each one differs. Move
+tests are a separate, smaller reader: `#[test]` functions and the calls in
+their bodies, checked for a privileged signer or admin cap, a test-only mint
+paid to the attacker, a missing assertion, a missing baseline, and an
+`expected_failure` with no `assert!`.
 
 ## 1. Parsing
 

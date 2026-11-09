@@ -119,6 +119,87 @@ No rule was added. See "Candidates" below.
   One instance; it conflicts with local-deployment tests where the protocol
   is deployed with that key as owner.
 
+## 0.5.0
+
+The 0.1.0 / 0.2.0 tables above are unchanged. They were not re-labelled.
+0.5.0 adds four rules and changes RG03's severity. The new flags were
+labelled by one reader, the same way as the 0.2.0 set, and are in
+`eval/labels/v0.5.0.jsonl`. `eval/results/precision.md` has the table.
+What follows is what that table says, and the RG03 count that is not in it
+because the rule raised nothing on these corpora.
+
+### RG03, before and after
+
+On the three pinned corpora RG03 raised **0** flags in 0.2.0 and **0** in
+0.5.0 (no warning, no note). Fork reproductions do not leave the test
+contract as the sender of a call on a contract it deployed.
+
+The noise the change is for is local deployment. On the six review PoCs in
+`tests/fixtures/review/` (the files an external review ran, where 0.4.0
+reported RG03 nine times, all on the ordinary `new Protocol()` pattern):
+
+| | Warnings | Notes |
+|---|---:|---:|
+| 0.4.0 (every non-read call the deployer makes) | 9 | 0 |
+| 0.5.0 (warning only when the call is named like an access-controlled function) | 0 | 9 |
+
+All nine are the same lines. None of them calls `sweep`, `set*`, `pause`, or
+another name the rule treats as gated. The run that fails on warnings no
+longer fails for those nine. The note is still emitted, so the pattern is
+visible.
+
+That 9-to-0 is a count of severity changes on one set of files, not a
+precision. Those files were in hand while the severity split was written.
+
+### The new rules, labelled
+
+Precision is TP / (TP + FP) on every flag, because none of these rules raised
+more than 30. The bracket is the Wilson 95% interval. One reader. Pending a
+second.
+
+| Rule | in_sample (891) | later (70 new files) | fresh (57) |
+|---|---|---|---|
+| RG15 profit-ignores-costs | 0/1 = 0% [0-79] | — | — |
+| RG16 implausible-amount | 0/1 = 0% [0-79] | — | — |
+| RG17 unevidenced-setup | 2/9 = 22% [6-55] | 0/2 = 0% [0-66] | — |
+| RG18 revert-only | 2/2 = 100% [34-100] | 0/1 = 0% [0-79] | 0/7 = 0% [0-35] |
+
+All four ship as warnings. RG17 and RG18 are under 80% once the corpora are
+pooled (RG17 is 2 of 11, RG18 is 2 of 10). Release ruling R3 would have
+forbidden shipping either as an error. They are not errors.
+
+What the wrong flags were:
+
+- **RG15.** One flag. A helper computes `amountInWithFee` for an AMM quote.
+  The asserted profit is a token balance, which is already net of that fee.
+  The rule saw a computed fee and a profit that does not subtract it.
+- **RG16.** One flag. `this.mint(type(uint256).max)` mints the attacker's own
+  token. The max mint is the exploit. The bound cannot tell an attacker-minted
+  token from a forged balance of someone else's.
+- **RG17.** Nine of eleven flags are the attacker's own contract
+  (`MaliciousToken`, an exploit helper) whose name matches a stand-in. Two
+  are a bridge the test constructs and labels local. Those two are the
+  pattern the rule is for. The nine are the attacker deploying their own
+  contract, which an attacker can do.
+- **RG18.** On the fresh corpus every flag is a teaching test whose claim is
+  the revert (a fixed path, or a denial of service). On the hack corpus, two
+  flags are real: the impact is only logged, and the only assertion is a
+  revert about something else. One later flag is a negative control whose
+  claim is the revert.
+
+### What 0.5.0 still does not catch on its own
+
+A postmortem profit that depends on a maker strategy nobody deploys is
+RG17 only when the test calls `ship`, `dock` or `push`, or deploys a type
+named like a strategy or a hook. A strategy built as raw bytecode and shipped
+through a call of another name is not seen. A fee that wipes the profit is
+RG15 only when the test says so, in a computed fee variable or in the words
+"fee drag" / "must not profit" / "under fee". A comment that mislabels a unit
+is not RG16. A call the protocol's README forbids is not visible unless the
+author cites that README under `deployment.evidence` or the call is one of
+the names above. Those limits are also on the rule pages, under "How it can
+be wrong".
+
 ## Rust (Solana) tests
 
 Not measured. Every figure above is for Solidity: the Rust frontend is new in

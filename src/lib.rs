@@ -22,6 +22,8 @@ pub mod engine;
 pub mod finding;
 pub mod identity;
 pub mod ir;
+pub mod mcp;
+pub mod move_lang;
 pub mod parse;
 pub mod project;
 pub mod render;
@@ -29,6 +31,7 @@ pub mod rules;
 pub mod solana;
 pub mod suppress;
 pub mod trace;
+pub mod verify_fix;
 
 pub use engine::{Options, Report, analyze};
 pub use finding::{Finding, Severity};

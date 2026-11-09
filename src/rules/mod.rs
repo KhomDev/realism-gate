@@ -4,12 +4,13 @@ pub mod catalog;
 mod evidence;
 mod injection;
 mod privilege;
+mod realism;
 
 use crate::identity::{Env, key};
 use crate::ir::{Expr, Pos};
 use crate::project::{Project, Suite};
 use crate::trace::{CallClass, Phase, Trace};
-pub use catalog::{Lang, RULES, RuleInfo, SolanaNotes, rule};
+pub use catalog::{Lang, MoveNotes, RULES, RuleInfo, SolanaNotes, rule};
 
 use crate::finding::Severity;
 
@@ -156,6 +157,10 @@ pub fn check_test<'p>(
     evidence::tautological_assertion(&ctx, &mut out);
     evidence::no_baseline(&ctx, &mut out);
     evidence::unpinned_fork(&ctx, &mut out);
+    realism::profit_ignores_costs(&ctx, &mut out);
+    realism::implausible_amount(&ctx, &mut out);
+    realism::unevidenced_setup(&ctx, &mut out);
+    realism::revert_only(&ctx, &mut out);
     out
 }
 

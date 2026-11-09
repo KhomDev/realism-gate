@@ -27,6 +27,10 @@ pub struct Declaration {
     pub privileged: Vec<PrivilegedStep>,
     #[serde(default)]
     pub preconditions: Vec<Precondition>,
+    /// Real deployments or documented configurations the harness claims to
+    /// reproduce. RG17 is silent for a contract or actor named here.
+    #[serde(default)]
+    pub deployment: Deployment,
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Deserialize)]
@@ -52,6 +56,31 @@ pub struct PrivilegedStep {
     pub identity: String,
     pub role: String,
     pub reason: String,
+}
+
+/// Evidence that a contract or an actor in the test matches a real
+/// deployment or a documented user. `source` is required: an evidence entry
+/// with nothing a reader can check is not evidence.
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Deployment {
+    #[serde(default)]
+    pub evidence: Vec<DeploymentEvidence>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DeploymentEvidence {
+    /// The contract or actor, as written in the test (`aqua`, `maker`).
+    pub name: String,
+    /// A real deployment address, when there is one.
+    #[serde(default)]
+    pub address: Option<String>,
+    /// The configuration the test claims to reproduce.
+    #[serde(default)]
+    pub config: Option<String>,
+    /// Where a reader can check the claim: a doc path, a block, a config file.
+    pub source: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -131,6 +160,19 @@ impl Declaration {
                 )));
             }
         }
+        for e in &decl.deployment.evidence {
+            if e.name.trim().is_empty() {
+                return Err(DeclarationError(
+                    "deployment.evidence entry has an empty name".to_string(),
+                ));
+            }
+            if e.source.trim().is_empty() {
+                return Err(DeclarationError(format!(
+                    "deployment evidence for `{}` has an empty source; the source is what a reader checks",
+                    e.name
+                )));
+            }
+        }
         Ok(decl)
     }
 
@@ -145,6 +187,11 @@ impl Declaration {
 
     pub fn privileged_identities(&self) -> impl Iterator<Item = String> + '_ {
         self.privileged.iter().map(|p| canonical(&p.identity))
+    }
+
+    /// Names covered by `deployment.evidence`, in canonical form.
+    pub fn deployment_names(&self) -> impl Iterator<Item = String> + '_ {
+        self.deployment.evidence.iter().map(|e| canonical(&e.name))
     }
 
     /// RG12-RG14. `unit` is the index the declaration's findings are filed
@@ -263,6 +310,18 @@ preconditions: []
 #  - step: a user deposits into the empty vault
 #    performed_by: victim
 #    boundary: own_transaction
+
+# Evidence that a contract or actor in the test matches a real deployment or
+# a documented user. Without an entry, RG17 flags setup the test performs for
+# a counterparty (a shipped strategy, a dock, a push, a stand-in contract).
+# An entry silences that finding for `name`. Write what is true: the triager
+# reads this next to the report. The tool does not check the address.
+deployment:
+  evidence: []
+#  - name: vault
+#    address: "0x0000000000000000000000000000000000000001"
+#    config: "fee = 30 bps, as in docs/deployment.md"
+#    source: "docs/deployment.md, the pinned fork block"
 "#;
 
 #[cfg(test)]
@@ -284,6 +343,20 @@ mod tests {
             "version: 1\npreconditions:\n  - step: x\n    performed_by: wizard\n    boundary: own_transaction\n"
         )
         .is_err());
+    }
+
+    #[test]
+    fn deployment_evidence_needs_a_source() {
+        let err = Declaration::parse(
+            "version: 1\ndeployment:\n  evidence:\n    - name: vault\n      source: \"  \"\n",
+        )
+        .unwrap_err();
+        assert!(err.0.contains("empty source"), "{}", err.0);
+        let d = Declaration::parse(
+            "version: 1\ndeployment:\n  evidence:\n    - name: \"address(vault)\"\n      address: \"0x1\"\n      config: fee=30\n      source: docs/deployment.md\n",
+        )
+        .unwrap();
+        assert_eq!(d.deployment_names().collect::<Vec<_>>(), vec!["vault"]);
     }
 
     #[test]

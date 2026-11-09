@@ -84,6 +84,21 @@ A tool that checks proofs should be exact about what it does not check.
 - The precision of the TypeScript rules has not been measured
   ([precision](precision.md#anchor-typescript-tests)).
 
+## Economic rules (RG15-RG18)
+
+- RG15 cannot see a fee the test never mentions. A token balance is often already net of a pool fee. The rule fires when the test computes a cost and the profit assertion ignores it, or when another test in the same file asserts the flow loses money under a fee.
+- RG16 does not read the chain. The bounds are fixed (10^30 raw units anywhere, 10^27 on a pinned fork). A deal under the bound can still be far larger than the pinned block, and a comment that mislabels a unit is not detectable.
+- RG17 does not read a protocol's documentation. It flags `ship`, `dock`, `push` and a stand-in deployment when `deployment.evidence` does not cover them. A citation is trusted, not checked. A local `new Protocol()` by itself is not this rule.
+- RG18 cannot tell a revert that locks funds from a revert that locks nothing, unless the test asserts the balance.
+
+## Move tests
+
+The Move reader is not a compiler. It finds `#[test]` functions and the calls in their bodies. Specs, types and control flow are not reconstructed. Sui `test_scenario` and Aptos `#[test(signer = @addr)]` are both read. The checked rules are RG01, RG02, RG06, RG08, RG10 and RG18.
+
+## `verify-fix` runs the test
+
+`check` does not. `verify-fix` is opt-in and shells out to forge on a copy of the tree or a directory you pass. A compile error is reported as a failure to run, not as a PoC that failed. Forge may open a connection if the test forks; this program still has no network code of its own.
+
 ## A clean result is not a valid PoC
 
 realism-gate finds known ways a PoC proves less than it claims. It cannot tell

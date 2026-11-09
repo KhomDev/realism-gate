@@ -151,6 +151,68 @@ fn rg11_unpinned_fork() {
 }
 
 #[test]
+fn rg03_ordinary_local_deployment_is_a_note() {
+    expect(
+        "tests/fixtures/bad/RG03_ordinary_deploy_is_a_note.t.sol",
+        &[("RG03", Note, 22)],
+    );
+}
+
+#[test]
+fn rg15_profit_ignores_fee() {
+    expect(
+        "tests/fixtures/bad/RG15_profit_ignores_fee.t.sol",
+        &[("RG15", Warn, 21)],
+    );
+}
+
+#[test]
+fn rg16_implausible_amount() {
+    expect(
+        "tests/fixtures/bad/RG16_implausible_amount.t.sol",
+        &[("RG16", Warn, 13), ("RG16", Warn, 19), ("RG16", Warn, 24)],
+    );
+}
+
+#[test]
+fn rg17_unevidenced_setup() {
+    expect(
+        "tests/fixtures/bad/RG17_unevidenced_setup.t.sol",
+        &[("RG17", Warn, 22)],
+    );
+}
+
+#[test]
+fn rg18_revert_only() {
+    expect(
+        "tests/fixtures/bad/RG18_revert_only.t.sol",
+        &[("RG18", Warn, 18)],
+    );
+}
+
+#[test]
+fn deployment_evidence_silences_rg17() {
+    let base = root();
+    let dir = base.join("tests/fixtures/bad");
+    // The declaration names `aqua`, which is the contract the setup call is on.
+    let yaml = "version: 1\ndeployment:\n  evidence:\n    - name: aqua\n      source: the pinned deployment, docs/pool.md\n";
+    let files = discover(&[dir.join("RG17_unevidenced_setup.t.sol")]).unwrap();
+    let project = Project::load(&files, &base).unwrap();
+    let decl = Declaration::parse(yaml).unwrap();
+    let loaded = LoadedDeclaration {
+        decl: &decl,
+        path: "realism.yaml".to_string(),
+        text: yaml,
+    };
+    let report = analyze(&project, Some(&loaded), &Options::default());
+    let rules: Vec<&str> = report.active().map(|f| f.rule).collect();
+    assert!(
+        !rules.contains(&"RG17"),
+        "evidence should silence RG17, got {rules:?}"
+    );
+}
+
+#[test]
 fn every_good_fixture_is_clean() {
     let got = run(&["tests/fixtures/good"], None);
     assert!(got.is_empty(), "{got:?}");
@@ -162,8 +224,11 @@ fn every_code_rule_has_a_bad_fixture() {
         .unwrap()
         .map(|e| e.unwrap().file_name().to_string_lossy().to_string())
         .collect();
-    for i in 1..=11 {
+    for i in 1..=18 {
         let id = format!("RG{i:02}");
+        if matches!(id.as_str(), "RG12" | "RG13" | "RG14") {
+            continue;
+        }
         assert!(
             files
                 .iter()

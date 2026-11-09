@@ -37,7 +37,7 @@ says it fires on, and how often does it fire on something it should not".
 | Files the parser could not fully parse | 1 |
 | Tests with no finding at all | 259 |
 | Tests whose only finding is RG08 | 607 |
-| Tests with a finding other than RG08 | 20 |
+| Tests with a finding other than RG08 | 20 in 0.2.0; 30 in 0.5.0 |
 
 The machine-readable version is `bench/defihacklabs.json`.
 
@@ -73,7 +73,24 @@ replaces this review is in `eval/` and `docs/precision.md`.
 
 RG03, RG06, RG07 and RG09 did not fire anywhere in the corpus. That is
 expected for RG03 and RG06, which are about harnesses that deploy the protocol
-themselves; the corpus forks real chains.
+themselves; the corpus forks real chains. RG03 still does not fire here in
+0.5.0, as a warning or as a note.
+
+### 0.5.0 counts on the same commit
+
+`bench/defihacklabs.json` is the 0.5.0 run. The historical table above is not
+rewritten. Rules that did not exist in 0.2.0:
+
+| Rule | Findings | Tests |
+|---|---:|---:|
+| RG15 profit-ignores-costs | 1 | 1 |
+| RG16 implausible-amount | 1 | 1 |
+| RG17 unevidenced-setup | 9 | 7 |
+| RG18 revert-only | 2 | 2 |
+
+30 tests now have a finding other than RG08, up from 20. The labelled reading
+of these new flags is in [precision](precision.md), not in the 0.1.0 review
+table. RG03 is still absent.
 
 What the correct findings look like, without naming the incidents:
 

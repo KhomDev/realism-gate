@@ -98,7 +98,7 @@ fn sarif_output_is_sarif_2_1_0() {
     assert_eq!(v["version"], "2.1.0");
     let run = &v["runs"][0];
     assert_eq!(run["tool"]["driver"]["name"], "realism-gate");
-    assert_eq!(run["tool"]["driver"]["rules"].as_array().unwrap().len(), 14);
+    assert_eq!(run["tool"]["driver"]["rules"].as_array().unwrap().len(), 18);
     let results = run["results"].as_array().unwrap();
     assert_eq!(results.len(), 2);
     let suppressed = results.iter().find(|r| r["ruleId"] == "RG11").unwrap();
@@ -217,14 +217,28 @@ fn an_invalid_declaration_exits_two() {
 }
 
 #[test]
-fn rules_lists_all_fourteen() {
+fn rules_lists_every_rule() {
     let o = run(&["rules"]);
     let out = stdout(&o);
-    assert_eq!(out.lines().count(), 14);
+    assert_eq!(out.lines().count(), 18);
     assert!(out.starts_with("RG01"));
+    assert!(out.contains("RG18"));
     let o = run(&["rules", "--format", "json"]);
     let v: serde_json::Value = serde_json::from_slice(&o.stdout).unwrap();
-    assert_eq!(v.as_array().unwrap().len(), 14);
+    assert_eq!(v.as_array().unwrap().len(), 18);
+    let langs = v
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|r| r["id"] == "RG01")
+        .unwrap();
+    assert!(
+        langs["languages"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|l| l == "move")
+    );
 }
 
 #[test]

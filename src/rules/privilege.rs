@@ -60,6 +60,61 @@ pub fn is_read_method(method: &str) -> bool {
         || method.chars().all(|c| !c.is_ascii_lowercase())
 }
 
+/// Methods whose names say they are gated: an owner sweep, a setter, a
+/// pause, an upgrade. A local `new Vault()` followed by `deposit` is the
+/// ordinary test harness; `sweep` from that same sender is the deployer
+/// using a privilege. The name is all a static read can see.
+pub fn is_access_controlled_method(method: &str) -> bool {
+    if method.is_empty() || is_read_method(method) {
+        return false;
+    }
+    let lower = method.to_ascii_lowercase();
+    const EXACT: &[&str] = &[
+        "sweep",
+        "rescue",
+        "recover",
+        "pause",
+        "unpause",
+        "upgrade",
+        "upgradeto",
+        "upgradetoandcall",
+        "kill",
+        "shutdown",
+        "migrate",
+        "authorize",
+        "emergencywithdraw",
+        "withdrawfees",
+        "collectfees",
+        "transferownership",
+        "renounceownership",
+        "changeadmin",
+    ];
+    if EXACT.contains(&lower.as_str()) {
+        return true;
+    }
+    const PREFIXES: &[&str] = &[
+        "set",
+        "update",
+        "configure",
+        "grant",
+        "revoke",
+        "renounce",
+        "pause",
+        "unpause",
+        "upgrade",
+        "emergency",
+        "rescue",
+        "admin",
+    ];
+    if PREFIXES
+        .iter()
+        .any(|p| lower.starts_with(p) && lower.len() > p.len())
+    {
+        return true;
+    }
+    crate::identity::role_word(method).is_some()
+}
+
 /// Whether the grant at op `i` is made by someone with the power to grant:
 /// a privileged address or a protocol contract the harness impersonates, or
 /// the test contract on a contract it deployed itself. A grant the attacker
@@ -244,8 +299,11 @@ pub fn deployer_is_attacker(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
     if owned.is_empty() {
         return;
     }
-    let mut first: Option<usize> = None;
-    let mut count = 0;
+    let mut ordinary: Option<usize> = None;
+    let mut ordinary_count = 0usize;
+    let mut privileged: Option<usize> = None;
+    let mut privileged_count = 0usize;
+    let mut privileged_methods: BTreeSet<String> = BTreeSet::new();
     let mut targets: BTreeSet<String> = BTreeSet::new();
     for (i, op) in ops.iter().enumerate() {
         if op.phase != Phase::Test {
@@ -260,29 +318,52 @@ pub fn deployer_is_attacker(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
         if !owned.contains_key(&rk) || !matches!(ctx.senders[i], Some(Sender::This)) {
             continue;
         }
-        count += 1;
         targets.insert(rk);
-        first.get_or_insert(i);
+        if is_access_controlled_method(&c.method) {
+            privileged_count += 1;
+            privileged_methods.insert(c.method.clone());
+            privileged.get_or_insert(i);
+        } else {
+            ordinary_count += 1;
+            ordinary.get_or_insert(i);
+        }
     }
-    let Some(i) = first else { return };
     let names: Vec<String> = targets
         .iter()
         .map(|t| format!("`{t}` ({})", owned[t]))
         .collect();
-    let calls = if count == 1 {
-        "1 call".to_string()
+    let Some(i) = privileged.or(ordinary) else {
+        return;
+    };
+    // A warning only when the deployer-sender actually calls something whose
+    // name says it is gated. Everything else is the normal local deployment
+    // and is a note, so a tree of `new Protocol()` harnesses does not fail
+    // a run that fails on warnings.
+    let (severity, message) = if privileged_count > 0 {
+        let methods: Vec<&str> = privileged_methods.iter().map(String::as_str).collect();
+        (
+            Severity::Warn,
+            format!(
+                "{privileged_count} access-controlled call(s) ({}) run as the test contract, which deployed {} and still holds whatever its constructor gave the deployer. The PoC proves the deployer can make that call. Attack from a separate address.",
+                methods.join(", "),
+                names.join(", ")
+            ),
+        )
     } else {
-        format!("{count} calls")
+        (
+            Severity::Note,
+            format!(
+                "{ordinary_count} call(s) in the exploit run as the test contract, which deployed {}. None of them is named like an access-controlled function, so this is the ordinary local-deployment pattern, not evidence the attacker used a privilege. It is a note. Attack from a separate address if one of those calls is in fact gated.",
+                names.join(", ")
+            ),
+        )
     };
     out.push(Raw {
         rule: "RG03",
-        severity: Severity::Warn,
+        severity,
         unit: ops[i].unit,
         pos: ops[i].pos,
-        message: format!(
-            "{calls} in the exploit run as the test contract, which deployed {} and still holds whatever its constructor gave the deployer. If any of them is access-controlled, the PoC proves the deployer can make it. Attack from a separate address.",
-            names.join(", ")
-        ),
+        message,
         evidence: ops[i]
             .call()
             .map(|c| snippet(&c.expr.text, 120))

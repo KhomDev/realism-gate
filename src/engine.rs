@@ -205,6 +205,7 @@ pub fn analyze(
                 env.declared_attackers = d.decl.attackers().collect();
                 env.declared_victims = d.decl.victims().collect();
                 env.declared_privileged = d.decl.privileged_identities().collect();
+                env.deployment_evidence = d.decl.deployment_names().collect();
             }
             for raw in rules::check_test(project, &suite, &tr, &env) {
                 add(
@@ -262,6 +263,49 @@ pub fn analyze(
                     solana::ir::Dialect::TypeScript => Lang::TypeScript,
                 };
                 add(raw, &suite.name, suite_file, &test.name, lang);
+            }
+        }
+    }
+
+    for (unit_index, unit) in project.units.iter().enumerate() {
+        let Some(file) = &unit.move_file else {
+            continue;
+        };
+        if file.tests.is_empty() {
+            continue;
+        }
+        let suite_name = if file.module.is_empty() {
+            unit.path
+                .rsplit('/')
+                .next()
+                .unwrap_or(&unit.path)
+                .trim_end_matches(".move")
+                .to_string()
+        } else {
+            file.module.clone()
+        };
+        if let Some(re) = &opts.match_contract
+            && !re.is_match(&suite_name)
+        {
+            continue;
+        }
+        if opts.excluded(&unit.path) {
+            continue;
+        }
+        let mut counted = false;
+        for test in &file.tests {
+            if let Some(re) = &opts.match_test
+                && !re.is_match(&test.name)
+            {
+                continue;
+            }
+            if !counted {
+                summary.suites += 1;
+                counted = true;
+            }
+            summary.tests += 1;
+            for raw in crate::move_lang::check_test(unit_index, test) {
+                add(raw, &suite_name, &unit.path, &test.name, Lang::Move);
             }
         }
     }

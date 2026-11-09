@@ -1,0 +1,254 @@
+name: realism-gate and viability-gate
+description: Run realism-gate on PoC tests and viability-gate (`vg check`) on draft findings, and publish one SARIF file and one pull-request comment.
+author: KhomDev
+branding:
+  icon: shield
+  color: gray-dark
+
+inputs:
+  path:
+    description: Foundry, Solana or Move tests for realism-gate. Empty skips the PoC check.
+    required: false
+    default: test/
+  findings:
+    description: Draft finding files for `vg check`, space-separated. Empty skips viability-gate.
+    required: false
+    default: ""
+  rg-version:
+    description: realism-gate release to download. Empty uses this action's release.
+    required: false
+    default: ""
+  vg-version:
+    description: viability-gate release to download.
+    required: false
+    default: "v0.5.0"
+  fail-on:
+    description: realism-gate threshold (none, note, warn, error). The job also fails when vg reports KILL.
+    required: false
+    default: warn
+  comment:
+    description: Keep one pull-request comment, edited in place.
+    required: false
+    default: "true"
+  sarif:
+    description: Upload the merged SARIF to code scanning.
+    required: false
+    default: "true"
+  github-token:
+    description: Token for the comment and the release downloads.
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  sarif:
+    description: Path of the merged SARIF file.
+    value: ${{ steps.merge.outputs.sarif }}
+  markdown:
+    description: Path of the combined summary.
+    value: ${{ steps.merge.outputs.markdown }}
+  rg-exit-code:
+    description: realism-gate's exit code, or empty when the PoC check was skipped.
+    value: ${{ steps.rg.outputs.exit-code }}
+  vg-outcome:
+    description: The worst viability-gate outcome seen (KILL, HOLD, INCOMPLETE, CLEAR), or empty.
+    value: ${{ steps.vg.outputs.outcome }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install realism-gate
+      id: rg-install
+      if: inputs.path != ''
+      shell: bash
+      env:
+        RG_VERSION: ${{ inputs.rg-version }}
+        RG_ACTION_REF: ${{ github.action_ref }}
+        RG_DEFAULT_VERSION: v0.5.0
+      run: |
+        set -euo pipefail
+        version="${RG_VERSION}"
+        if [ -z "$version" ]; then
+          if [[ "$RG_ACTION_REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-.].*)?$ ]]; then
+            version="$RG_ACTION_REF"
+          else
+            version="$RG_DEFAULT_VERSION"
+          fi
+        fi
+        case "$version" in v*) ;; *) version="v$version" ;; esac
+        case "${RUNNER_OS}-${RUNNER_ARCH}" in
+          Linux-X64) target=x86_64-unknown-linux-musl; ext=tar.gz ;;
+          Linux-ARM64) target=aarch64-unknown-linux-musl; ext=tar.gz ;;
+          macOS-X64) target=x86_64-apple-darwin; ext=tar.gz ;;
+          macOS-ARM64) target=aarch64-apple-darwin; ext=tar.gz ;;
+          Windows-X64) target=x86_64-pc-windows-msvc; ext=zip ;;
+          *) echo "::error::no realism-gate build for ${RUNNER_OS}-${RUNNER_ARCH}"; exit 1 ;;
+        esac
+        name="realism-gate-${version#v}-$target"
+        base="https://github.com/KhomDev/realism-gate/releases/download/$version"
+        dir="$RUNNER_TEMP/realism-gate"
+        mkdir -p "$dir" && cd "$dir"
+        curl -fsSL --retry 3 -o "$name.$ext" "$base/$name.$ext"
+        curl -fsSL --retry 3 -o SHA256SUMS "$base/SHA256SUMS"
+        grep " ./$name.$ext\$" SHA256SUMS | sed 's# \./# #' > check.txt
+        if command -v sha256sum >/dev/null 2>&1; then sha256sum -c check.txt; else shasum -a 256 -c check.txt; fi
+        if [ "$ext" = zip ]; then unzip -q -o "$name.zip"; bin="$dir/$name/realism-gate.exe"; else tar xzf "$name.tar.gz"; bin="$dir/$name/realism-gate"; fi
+        echo "bin=$bin" >> "$GITHUB_OUTPUT"
+
+    - name: Install viability-gate
+      id: vg-install
+      if: inputs.findings != ''
+      shell: bash
+      env:
+        VG_VERSION: ${{ inputs.vg-version }}
+      run: |
+        set -euo pipefail
+        version="$VG_VERSION"
+        case "$version" in v*) ;; *) version="v$version" ;; esac
+        case "${RUNNER_OS}-${RUNNER_ARCH}" in
+          Linux-X64) target=x86_64-unknown-linux-gnu; ext=tar.gz ;;
+          Linux-ARM64) target=aarch64-unknown-linux-gnu; ext=tar.gz ;;
+          macOS-X64) target=x86_64-apple-darwin; ext=tar.gz ;;
+          macOS-ARM64) target=aarch64-apple-darwin; ext=tar.gz ;;
+          Windows-X64) target=x86_64-pc-windows-msvc; ext=zip ;;
+          *) echo "::error::no viability-gate build for ${RUNNER_OS}-${RUNNER_ARCH}"; exit 1 ;;
+        esac
+        name="viability-gate-${version#v}-$target"
+        base="https://github.com/KhomDev/viability-gate/releases/download/$version"
+        dir="$RUNNER_TEMP/viability-gate"
+        mkdir -p "$dir" && cd "$dir"
+        curl -fsSL --retry 3 -o "$name.$ext" "$base/$name.$ext"
+        curl -fsSL --retry 3 -o SHA256SUMS "$base/SHA256SUMS"
+        grep " ./$name.$ext\$" SHA256SUMS | sed 's# \./# #' > check.txt
+        if command -v sha256sum >/dev/null 2>&1; then sha256sum -c check.txt; else shasum -a 256 -c check.txt; fi
+        if [ "$ext" = zip ]; then unzip -q -o "$name.zip"; bin="$dir/$name/vg.exe"; else tar xzf "$name.tar.gz"; bin="$dir/$name/vg"; fi
+        echo "bin=$bin" >> "$GITHUB_OUTPUT"
+
+    - name: Run realism-gate
+      id: rg
+      if: inputs.path != ''
+      shell: bash
+      env:
+        RG_BIN: ${{ steps.rg-install.outputs.bin }}
+        RG_PATH: ${{ inputs.path }}
+        RG_FAIL_ON: ${{ inputs.fail-on }}
+      run: |
+        set +e -o pipefail
+        out="$RUNNER_TEMP/gates"
+        mkdir -p "$out"
+        case "$RG_FAIL_ON" in
+          none|never) fail_on=never ;;
+          note|warn|error) fail_on="$RG_FAIL_ON" ;;
+          *) echo "::error::fail-on must be none, note, warn or error"; exit 2 ;;
+        esac
+        "$RG_BIN" check $RG_PATH --format sarif --output "$out/rg.sarif" --fail-on never
+        "$RG_BIN" check $RG_PATH --format json --output "$out/rg.json" --fail-on "$fail_on"
+        status=$?
+        echo "exit-code=$status" >> "$GITHUB_OUTPUT"
+        echo "sarif=$out/rg.sarif" >> "$GITHUB_OUTPUT"
+        exit 0
+
+    - name: Run viability-gate
+      id: vg
+      if: inputs.findings != ''
+      shell: bash
+      env:
+        VG_BIN: ${{ steps.vg-install.outputs.bin }}
+        VG_FINDINGS: ${{ inputs.findings }}
+      run: |
+        set +e -o pipefail
+        out="$RUNNER_TEMP/gates"
+        mkdir -p "$out"
+        # shellcheck disable=SC2086
+        "$VG_BIN" check $VG_FINDINGS --json > "$out/vg.json"
+        status=$?
+        echo "exit-code=$status" >> "$GITHUB_OUTPUT"
+        echo "json=$out/vg.json" >> "$GITHUB_OUTPUT"
+        outcome=$(python3 - "$out/vg.json" <<'PY'
+        import json, sys
+        data = json.load(open(sys.argv[1]))
+        rows = data if isinstance(data, list) else [data]
+        rank = {"CLEAR": 0, "INCOMPLETE": 1, "HOLD": 2, "KILL": 3}
+        worst = ""
+        best = -1
+        for row in rows:
+            o = str(row.get("outcome", ""))
+            if rank.get(o, -1) > best:
+                best = rank[o]
+                worst = o
+        print(worst)
+        PY
+        )
+        echo "outcome=$outcome" >> "$GITHUB_OUTPUT"
+        exit 0
+
+    - name: Merge
+      id: merge
+      shell: bash
+      env:
+        RG_SARIF: ${{ steps.rg.outputs.sarif }}
+        VG_JSON: ${{ steps.vg.outputs.json }}
+      run: |
+        set -euo pipefail
+        out="$RUNNER_TEMP/gates"
+        mkdir -p "$out"
+        rg="${RG_SARIF:-}"
+        vg="${VG_JSON:-}"
+        [ -n "$rg" ] || printf '%s\n' '{"version":"2.1.0","runs":[]}' > "$out/rg.sarif"
+        [ -n "$rg" ] || rg="$out/rg.sarif"
+        [ -n "$vg" ] || printf '%s\n' '[]' > "$out/vg.json"
+        [ -n "$vg" ] || vg="$out/vg.json"
+        python3 "$GITHUB_ACTION_PATH/merge_reports.py" "$rg" "$vg" "$out/merged.sarif" "$out/summary.md"
+        echo "sarif=$out/merged.sarif" >> "$GITHUB_OUTPUT"
+        echo "markdown=$out/summary.md" >> "$GITHUB_OUTPUT"
+        cat "$out/summary.md" >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Comment on the pull request
+      if: inputs.comment == 'true' && github.event.pull_request.number != ''
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        MD: ${{ steps.merge.outputs.markdown }}
+        REPO: ${{ github.repository }}
+        PR: ${{ github.event.pull_request.number }}
+        HEAD: ${{ github.event.pull_request.head.repo.full_name }}
+        MARKER: "<!-- realism-viability job=${{ github.job }} -->"
+      run: |
+        set +e -o pipefail
+        if [ -n "$HEAD" ] && [ "$HEAD" != "$REPO" ]; then
+          echo "fork pull request; comment skipped" >> "$GITHUB_STEP_SUMMARY"
+          exit 0
+        fi
+        body="$(dirname "$MD")/comment.md"
+        { echo "$MARKER"; cat "$MD"; } > "$body"
+        id=$(gh api --paginate "repos/$REPO/issues/$PR/comments" \
+          --jq ".[] | select(.body | startswith(\"$MARKER\")) | .id" 2>/dev/null | head -n1)
+        if [ -n "$id" ]; then
+          gh api --method PATCH "repos/$REPO/issues/comments/$id" -F "body=@$body" >/dev/null || true
+        else
+          gh api --method POST "repos/$REPO/issues/$PR/comments" -F "body=@$body" >/dev/null || true
+        fi
+        exit 0
+
+    - name: Upload SARIF
+      if: inputs.sarif == 'true'
+      uses: github/codeql-action/upload-sarif@v4
+      with:
+        sarif_file: ${{ steps.merge.outputs.sarif }}
+        category: realism-viability
+
+    - name: Result
+      shell: bash
+      env:
+        RG_STATUS: ${{ steps.rg.outputs.exit-code }}
+        VG_OUTCOME: ${{ steps.vg.outputs.outcome }}
+      run: |
+        set -euo pipefail
+        if [ "${RG_STATUS:-0}" != "0" ] && [ -n "${RG_STATUS}" ]; then
+          echo "::error::realism-gate: a finding at or above fail-on"
+          exit 1
+        fi
+        if [ "$VG_OUTCOME" = "KILL" ]; then
+          echo "::error::viability-gate: KILL"
+          exit 1
+        fi
+        echo "gates: pass"

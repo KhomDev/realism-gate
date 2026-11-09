@@ -206,8 +206,10 @@ pub struct Unit {
     pub path: String,
     pub source: String,
     pub contracts: Vec<Contract>,
-    /// The lowered Rust file, for a `.rs` source.
+    /// The lowered Rust or TypeScript file, for a Solana test.
     pub solana: Option<crate::solana::ir::File>,
+    /// A Move test module, for a `.move` source.
+    pub move_file: Option<crate::move_lang::File>,
     /// Parser diagnostics. A file with errors may still yield contracts: the
     /// parser recovers, and whatever it recovered is checked.
     pub errors: Vec<String>,

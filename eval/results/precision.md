@@ -47,3 +47,31 @@ v0.1.0 flags that v0.2.0 no longer raises, by label.
 | RG11 | 2/2 = 100% [34-100] | 2/2 = 100% [34-100] |
 
 Below the 80% floor in v0.2.0 on some corpus: RG02, RG05.
+
+## v0.5.0
+
+Every active flag of this tree. Rules with 30 or fewer flags are labelled in full.
+A rule that also appears above keeps its older labels; the new rules are labelled in
+`eval/labels/v0.5.0.jsonl`. RG03 raised nothing on these three corpora.
+
+### in_sample
+
+| Rule | flags | labelled precision |
+|---|---:|---|
+| RG15 | 1 | 0/1 = 0% [0-79] |
+| RG16 | 1 | 0/1 = 0% [0-79] |
+| RG17 | 9 | 2/9 = 22% [6-55] |
+| RG18 | 2 | 2/2 = 100% [34-100] |
+
+### later
+
+| Rule | flags | labelled precision |
+|---|---:|---|
+| RG17 | 2 | 0/2 = 0% [0-66] |
+| RG18 | 1 | 0/1 = 0% [0-79] |
+
+### fresh
+
+| Rule | flags | labelled precision |
+|---|---:|---|
+| RG18 | 7 | 0/7 = 0% [0-35] |

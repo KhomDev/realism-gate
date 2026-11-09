@@ -403,17 +403,56 @@ fn deployer_is_attacker(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
         }
         let op = ctx.op(tx.op);
         let names: Vec<String> = tx.signers.iter().map(|s| format!("`{s}`")).collect();
-        out.push(tx_raw(
-            "RG03",
-            Severity::Warn,
-            op,
-            format!(
-                "This exploit transaction is signed only by {}, which also signed the transactions that set the protocol up. If setting up gave that key any authority, the PoC proves what the deployer can do. Sign the exploit with a separate attacker keypair.",
-                names.join(" and ")
-            ),
-        ));
+        let instruction_text: String = tx
+            .instructions
+            .iter()
+            .map(|e| e.text.as_str())
+            .collect::<Vec<_>>()
+            .join(" ");
+        let gated = instruction_looks_gated(&instruction_text);
+        let (severity, message) = if gated {
+            (
+                Severity::Warn,
+                format!(
+                    "This exploit transaction is signed only by {}, which also signed the transactions that set the protocol up, and the instruction is named like an access-controlled call. If setting up gave that key any authority, the PoC proves what the deployer can do. Sign the exploit with a separate attacker keypair.",
+                    names.join(" and ")
+                ),
+            )
+        } else {
+            (
+                Severity::Note,
+                format!(
+                    "This exploit transaction is signed only by {}, which also signed setup. The instruction is not named like an access-controlled call, so this is the ordinary single-payer harness, not evidence the attacker used a privilege. It is a note. Sign the exploit with a separate attacker keypair if the instruction is in fact gated.",
+                    names.join(" and ")
+                ),
+            )
+        };
+        out.push(tx_raw("RG03", severity, op, message));
         return;
     }
+}
+
+/// Instruction text that reads as gated: `sweep_ix`, `set_fee`, `admin_withdraw`.
+fn instruction_looks_gated(text: &str) -> bool {
+    let lower = text.to_ascii_lowercase();
+    const NEEDLES: &[&str] = &[
+        "sweep",
+        "rescue",
+        "pause",
+        "unpause",
+        "upgrade",
+        "admin",
+        "authority",
+        "owner",
+        "set_",
+        "setfee",
+        "set_fee",
+        "grant",
+        "revoke",
+        "migrate",
+        "emergency",
+    ];
+    NEEDLES.iter().any(|n| lower.contains(n))
 }
 
 /// What an account value written with `set_account` is made of.
