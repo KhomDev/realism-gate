@@ -76,7 +76,10 @@ fn walk(dir: &Path, out: &mut Vec<PathBuf>) -> Result<(), LoadError> {
 }
 
 fn is_source(name: &str) -> bool {
-    name.ends_with(".sol") || name.ends_with(".rs") || crate::solana::parse_ts::is_script_path(name)
+    name.ends_with(".sol")
+        || name.ends_with(".rs")
+        || name.ends_with(".move")
+        || crate::solana::parse_ts::is_script_path(name)
 }
 
 /// The path as displayed in output: relative to `base` when it is inside it,
@@ -96,10 +99,24 @@ pub fn display_path(path: &Path, base: &Path) -> String {
 pub fn parse_any(path: &str, source: &str) -> Option<Unit> {
     if path.ends_with(".rs") {
         Some(crate::solana::parse_rust::parse_source(path, source))
+    } else if path.ends_with(".move") {
+        Some(parse_move(path, source))
     } else if crate::solana::parse_ts::is_script_path(path) {
         crate::solana::parse_ts::parse_source(path, source)
     } else {
         Some(parse_source(path, source))
+    }
+}
+
+fn parse_move(path: &str, source: &str) -> Unit {
+    let file = crate::move_lang::parse_source(source);
+    Unit {
+        path: path.to_string(),
+        source: source.to_string(),
+        contracts: Vec::new(),
+        solana: None,
+        move_file: Some(file),
+        errors: Vec::new(),
     }
 }
 

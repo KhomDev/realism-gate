@@ -3,7 +3,7 @@
 This document is the technical companion to the [README](README.md). The README
 says what the tool is for; this says how the code works, where each behaviour
 lives, and which numbers are measured rather than asserted. It describes the
-tree exactly as tagged **v0.4.0**, commit `c65845bc46da0670a17fe16cf22e6911f4e7c03f`
+tree exactly as tagged **v0.4.0**, commit `c65845bc46da0670a17fe16cf22e6911f4e7c03f`. 0.5.0 adds RG15-RG18, the RG03 note, Move tests, `verify-fix` and the MCP server; those are in the changelog, not in the line numbers below.
 (the commit the annotated tag `v0.4.0` dereferences to). In one line: a
 static checker that reads Foundry (Solidity) and Solana (Rust, Anchor
 TypeScript) proof-of-concept tests and flags the patterns that make a passing

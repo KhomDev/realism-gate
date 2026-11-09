@@ -11,7 +11,7 @@ inputs:
     required: false
     default: test/
   version:
-    description: realism-gate release to run, e.g. v0.4.0. Empty means the release this action belongs to.
+    description: realism-gate release to run, e.g. v0.5.0. Empty means the release this action belongs to.
     required: false
     default: ""
   changed-only:
@@ -96,7 +96,7 @@ runs:
         RG_BINARY: ${{ inputs.binary }}
         # The release this copy of the action belongs to. tests/docs.rs keeps
         # it equal to the crate version, so `@v0` runs the newest v0 release.
-        RG_DEFAULT_VERSION: v0.4.0
+        RG_DEFAULT_VERSION: v0.5.0
       run: |
         set -euo pipefail
         if [ -n "$RG_BINARY" ]; then

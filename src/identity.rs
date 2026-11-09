@@ -320,6 +320,8 @@ pub struct Env<'p> {
     pub declared_attackers: BTreeSet<String>,
     pub declared_privileged: BTreeSet<String>,
     pub declared_victims: BTreeSet<String>,
+    /// Contract and actor names covered by `deployment.evidence`.
+    pub deployment_evidence: BTreeSet<String>,
 }
 
 impl<'p> Env<'p> {

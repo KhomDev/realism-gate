@@ -51,6 +51,7 @@ pub fn parse_source(path: &str, source: &str) -> Unit {
         source: source.to_string(),
         contracts,
         solana: None,
+        move_file: None,
         errors,
     }
 }

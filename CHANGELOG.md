@@ -8,6 +8,27 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-09
+
+Economic realism, less RG03 noise, Move tests, and an opt-in way to run the PoC against a patch. `check` still does not execute a test and still has no network code.
+
+### Added
+
+- **RG15 `profit-ignores-costs`.** A profit assertion that does not subtract a fee, slippage or gas cost the test itself computes, or that a sibling test shows disappears once a fee applies.
+- **RG16 `implausible-amount`.** `deal` / `mint` of at least 10^30 raw units, or at least 10^27 on a fork pinned to a block. The bounds are fixed. The chain is not read.
+- **RG17 `unevidenced-setup`.** `ship`, `dock`, `push`, or a stand-in deployment, with no `deployment.evidence` entry in `realism.yaml` for that contract or actor. `source` is required. The tool does not read protocol docs.
+- **RG18 `revert-only`.** The only assertion is `vm.expectRevert`, or a Move `#[expected_failure]` with no `assert!`.
+- **Move tests** (Sui `test_scenario` and Aptos `#[test(signer)]`): RG01, RG02, RG06, RG08, RG10, RG18. Not a compiler.
+- **`verify-fix`.** Opt-in. Applies a patch to a copy of the tree, or uses a patched directory, runs `forge test`, and requires the PoC to fail. A compile error is not a failed PoC.
+- **Combined action** (`combined/action.yml`) that runs realism-gate and `vg check`, writes one SARIF file and one pull-request comment. Example workflow in `examples/workflows/gates.yml`.
+- **Agent integration.** `skills/realism-gate/SKILL.md` and `realism-gate-mcp` (`check_poc`, `check_finding`). Install notes in `docs/agents.md`.
+- A vhs tape at `docs/demo.tape`.
+
+### Changed
+
+- **RG03** is a warning only when the deployer (or the Solana setup key) calls something named like an access-controlled function. The same pattern on an ordinary call is a note. On the six review PoCs that used to raise 9 RG03 warnings, all 9 are now notes.
+- `deployment.evidence` in `realism.yaml` (version stays 1). An entry silences RG17 for that name.
+
 ## [0.4.0] - 2026-11-06
 
 Anchor. realism-gate now checks Anchor's TypeScript proof-of-concept tests,
@@ -289,7 +310,8 @@ First release.
 - A pinned public-corpus benchmark (`scripts/bench-corpus.sh`,
   `bench/defihacklabs.json`, `docs/benchmark.md`), re-measured in CI.
 
-[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/KhomDev/realism-gate/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/KhomDev/realism-gate/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/KhomDev/realism-gate/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/KhomDev/realism-gate/compare/v0.2.0...v0.2.1

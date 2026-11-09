@@ -1,56 +1,23 @@
 # realism-gate
 
-[![ci](https://github.com/KhomDev/realism-gate/actions/workflows/ci.yml/badge.svg)](https://github.com/KhomDev/realism-gate/actions/workflows/ci.yml)
-[![license: MIT](https://img.shields.io/badge/license-MIT-informational.svg)](LICENSE)
+**Does your PoC show what an unprivileged attacker can actually do, or only what your harness made true?**
 
-**A static checker for proof-of-concept tests, for Foundry (Solidity) and
-for Solana programs (Rust, and Anchor's TypeScript). It asks one question: does this PoC show what an
-unprivileged attacker can do, or only what the harness made true?**
-
-A PoC that passes `forge test` can still prove nothing. The exploit step runs
-under `vm.prank(admin)`. The "donation" is a `deal()` that overwrites the
-vault's balance. The broken state is written with `vm.store`. The profit check
-is `assertGt(balance, 0)` on an address that already held tokens. A Solana PoC
-fails the same ways: the exploit transaction is signed by the admin keypair,
-the vault's balance is written with `set_account`, the pool is read from a
-live RPC. Each of these passes locally and fails triage, and each is visible
-in the test's source.
-
-realism-gate reads the source, rebuilds the order the test runs in, works out
-who sends or signs every call, and reports those patterns with the line, the
-reason and the fix.
-
-- **Reads, never runs.** No compilation, no `forge`, no `anchor test`, no RPC. Your PoC never
-  leaves the machine; the binary has no network code (CI checks the dependency
-  graph and the source).
-- **A real parser.** It uses [solar](https://github.com/paradigmxyz/solar), the
-  Solidity parser built for the Foundry toolchain,
-  [syn](https://github.com/dtolnay/syn) for Rust and
-  [oxc](https://github.com/oxc-project/oxc) for TypeScript, not regular
-  expressions. It follows inheritance, `super.setUp()`, modifiers, internal
-  helpers and flash-loan callbacks; in a Solana test it follows the test's
-  helpers and shared test files, with each helper's parameters bound to what
-  the caller passed, and in a mocha suite the hooks and the tests that run
-  first.
-- **Every finding can be argued with.** Each rule documents why it exists and
-  how it can be wrong. A finding is silenced with a comment that must give a
-  reason.
+For bounty hunters, contest auditors, and people hunting with an AI agent. A test can pass because the harness granted a role, dealt a balance, shipped a strategy nobody runs, or asserted a profit a fee in the same file wipes out.
 
 ```bash
-realism-gate check test/     # Foundry
-realism-gate check tests/    # a Solana program's Rust or Anchor TypeScript tests
+cargo binstall realism-gate
 ```
 
-## What it looks like
+From this commit, before a release exists: `cargo install --git https://github.com/KhomDev/realism-gate --locked`.
 
-This is real output. `tests/docs.rs` regenerates it from
-[`examples/vault-drain`](examples/vault-drain/test/VaultDrain.t.sol) and fails
-if the README has drifted.
+## Before and after
+
+The test deploys a vault and then drains it as admin, with `deal` writing the vault's balance and no before-value:
 
 <!-- BEGIN:example -->
 
 ```text
-realism-gate 0.4.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 0.5.0  ·  1 file  ·  1 suite  ·  1 test
 
 test/VaultDrain.t.sol
   warn   RG11 unpinned-fork  test/VaultDrain.t.sol:17:9  VaultDrainTest::test_attackerDrainsVault
@@ -90,35 +57,32 @@ shows why a rule exists and how it can be wrong.
 
 <!-- END:example -->
 
-## Solana programs (Rust and Anchor TypeScript)
+`tests/docs.rs` regenerates that block from [`examples/vault-drain`](examples/vault-drain/test/VaultDrain.t.sol). A clean result means none of the patterns fired. It does not mean the bug is real or that a program pays for it.
 
-Solana tests are checked with the same rule ids, the same output and the same
-`allow` comments:
+## Who it is for
 
-- **Rust:** tests written with [solana-program-test](https://crates.io/crates/solana-program-test),
-  [LiteSVM](https://github.com/LiteSVM/litesvm),
-  [Mollusk](https://github.com/anza-xyz/mollusk),
-  [anchor-client](https://crates.io/crates/anchor-client) or
-  [anchor-litesvm](https://crates.io/crates/anchor-litesvm). A `#[test]` is
-  checked when it drives one of those harnesses; other Rust tests in the tree
-  are skipped.
-- **TypeScript:** Anchor's mocha or jest tests, the ones `anchor test` runs,
-  with the Anchor client (`program.methods.x().signers([..]).rpc()`),
-  web3.js, [bankrun](https://github.com/kevinheavey/solana-bankrun) or
-  LiteSVM. Only files that import a Solana package are read, so a Hardhat
-  suite in the same tree is left alone. `describe` bodies, `before` hooks and
-  the tests above a test run first, as mocha runs them; a test titled for
-  setup (`it("is initialized")`) is the next test's setup, not a PoC of its
-  own.
+- A bounty hunter about to submit a PoC.
+- A contest auditor whose test deploys the protocol locally.
+- An agent that drafts findings. The [skill](skills/realism-gate/SKILL.md) and [`realism-gate-mcp`](docs/agents.md) run this check, and `vg check` from [viability-gate](https://github.com/KhomDev/viability-gate), before the report is written.
 
-This is real output for
-[`examples/solana-vault-drain`](examples/solana-vault-drain/tests/vault_drain.rs),
-regenerated by `tests/docs.rs` like the one above:
+## What it does
+
+- Reads Foundry (Solidity, via solar), Solana tests (Rust via syn, Anchor TypeScript via oxc) and Move unit tests (Sui `test_scenario`, Aptos `#[test]`). It does not run them.
+- Rebuilds the order the test runs in, including `setUp`, helpers and callbacks, and who sends each call.
+- Eighteen rules. RG01-RG14 are the privilege, injection and evidence rules. RG15-RG18 are the economic ones: profit net of costs, implausible amounts, setup with no deployment evidence, revert-only tests.
+- RG03 warns only when the deployer calls something named like an access-controlled function. An ordinary local `deposit` is a note.
+- JSON, SARIF and Markdown. `realism.yaml` for the attacker model and for `deployment.evidence`.
+- `verify-fix` is the opt-in that runs forge: the PoC must fail on a patch or a `poc-patched/` tree.
+- A combined GitHub Action runs this and `vg check` and publishes one SARIF file and one PR comment. See [`examples/workflows/gates.yml`](examples/workflows/gates.yml).
+
+## Solana
+
+Same rule ids, same output. Rust harnesses (solana-program-test, LiteSVM, Mollusk, anchor-client, anchor-litesvm) and Anchor's mocha or jest tests.
 
 <!-- BEGIN:example-rust -->
 
 ```text
-realism-gate 0.4.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 0.5.0  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault_drain.rs
   warn   RG11 unpinned-fork  tests/vault_drain.rs:21:15  vault_drain::test_attacker_drains_vault
@@ -163,13 +127,10 @@ shows why a rule exists and how it can be wrong.
 
 <!-- END:example-rust -->
 
-The same PoC in Anchor TypeScript, run on bankrun
-([`examples/anchor-vault-drain`](examples/anchor-vault-drain/tests/vault-drain.ts)):
-
 <!-- BEGIN:example-anchor -->
 
 ```text
-realism-gate 0.4.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 0.5.0  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault-drain.ts
   warn   RG11 unpinned-fork  tests/vault-drain.ts:13:21  vault::lets the attacker drain the vault
@@ -214,230 +175,65 @@ shows why a rule exists and how it can be wrong.
 
 <!-- END:example-anchor -->
 
-| Rule | In a Solana test, fires when |
-|---|---|
-| RG01 | an instruction that initializes or reconfigures the program makes the attacker `admin` or `authority` (a struct field, or a field of `.accounts({ .. })`), or `set_authority` hands it a role |
-| RG02 | an exploit transaction is signed by a keypair that reads as a role or was given one |
-| RG03 | the exploit is signed only by the key that set the program up, usually `payer` or `provider.wallet` |
-| RG04 | `set_account` / `setAccount`, `add_account` or bankrun's `startAnchor` writes an account of the program: a PDA, a fixed address, one it owns |
-| RG05 | a mock program is loaded at a real program's address |
-| RG06 | the same writes set the lamports or token balance of an account of the program |
-| RG07 | not checked: Solana harnesses have no call mocking |
-| RG08 | the test asserts nothing; a transaction that succeeds (`.unwrap()`, `await ..rpc()`) is not an assertion |
-| RG09 | an assertion (`assert_eq!`, `assert.equal`, `expect(..).to.equal`) cannot fail |
-| RG10 | a gain is asserted on a balance read only after the attack |
-| RG11 | the test reads accounts from a live cluster through an `RpcClient`, an anchor-client `Client` or a web3.js `Connection` |
-| RG12-RG14 | the same as for Solidity: they read `realism.yaml` |
-
-The exploit starts at the first transaction that does not set the world up (a
-setup helper or hook, or an `init`/`create` instruction nobody who reads as
-the attacker signs); a write before it is a warning, after it an error.
-Anchor's provider wallet signs every `.rpc()` as the fee payer; it counts as
-a signer only when it is the only one or the instruction names it. Each rule
-page has a Solana section with its fix, Rust and TypeScript examples and the
-ways it can be wrong, and [docs/how-it-works.md](docs/how-it-works.md#rust-solana-tests)
-describes the frontends. The Solana rules are new (Rust in 0.3.0, TypeScript
-in 0.4.0) and their precision has not been measured yet; see
-[docs/precision.md](docs/precision.md#rust-solana-tests).
-
-## Install
-
-With [cargo-binstall](https://github.com/cargo-bins/cargo-binstall), a
-prebuilt binary in seconds, no Rust toolchain needed:
-
-```bash
-cargo binstall realism-gate
-```
-
-Or download a release archive for Linux (static musl), macOS or Windows, and
-check it against the release's checksums and build provenance:
-
-```bash
-gh release download --repo KhomDev/realism-gate --pattern '*x86_64-unknown-linux-musl*' --pattern SHA256SUMS
-sha256sum -c SHA256SUMS --ignore-missing
-tar xzf realism-gate-*-x86_64-unknown-linux-musl.tar.gz
-```
-
-In GitHub Actions, one step (details in [docs/ci.md](docs/ci.md)):
-
-```yaml
-- uses: KhomDev/realism-gate@v0
-  with:
-    path: test/
-```
-
-From source with Rust 1.95 or newer:
-
-```bash
-cargo install realism-gate --locked
-```
-
-Two binaries are installed, `realism-gate` and the short `rgate`. They are the
-same program.
-
 ## The rules
 
 | Rule | Severity | Fires when |
 |---|---|---|
-| [RG01](docs/rules/RG01.md) `attacker-holds-privilege` | error | the harness grants the attacker a role, or the attacker *is* the owner |
-| [RG02](docs/rules/RG02.md) `privileged-step-in-exploit` | warn | the test body pranks as an owner, admin, keeper, or a protocol contract |
-| [RG03](docs/rules/RG03.md) `deployer-is-attacker` | warn | the test deploys the protocol and then attacks it as the deployer |
-| [RG04](docs/rules/RG04.md) `storage-write` | error | `vm.store` writes a slot of a contract under review |
-| [RG05](docs/rules/RG05.md) `code-replacement` | warn | `vm.etch` or `deployCodeTo` replaces a dependency's code |
+| [RG01](docs/rules/RG01.md) `attacker-holds-privilege` | error | the harness grants the attacker a role |
+| [RG02](docs/rules/RG02.md) `privileged-step-in-exploit` | warn | the exploit pranks as a role or a protocol contract |
+| [RG03](docs/rules/RG03.md) `deployer-is-attacker` | warn, or note | the deployer calls the protocol; warn only if the call looks access-controlled |
+| [RG04](docs/rules/RG04.md) `storage-write` | error | `vm.store` writes a contract under review |
+| [RG05](docs/rules/RG05.md) `code-replacement` | warn | `vm.etch` replaces a dependency |
 | [RG06](docs/rules/RG06.md) `balance-injection` | error | `deal()` writes a protocol contract's balance |
-| [RG07](docs/rules/RG07.md) `mocked-call` | warn | `vm.mockCall` makes a dependency return a value it would not |
-| [RG08](docs/rules/RG08.md) `no-assertion` | error | the test asserts nothing (warn if it only logs) |
-| [RG09](docs/rules/RG09.md) `tautological-assertion` | error | an assertion compares constants or an expression with itself |
-| [RG10](docs/rules/RG10.md) `no-baseline` | warn | a gain is asserted on a value read only after the attack |
+| [RG07](docs/rules/RG07.md) `mocked-call` | warn | `vm.mockCall` invents a return value |
+| [RG08](docs/rules/RG08.md) `no-assertion` | error | the test asserts nothing |
+| [RG09](docs/rules/RG09.md) `tautological-assertion` | error | an assertion cannot fail |
+| [RG10](docs/rules/RG10.md) `no-baseline` | warn | a gain is asserted with no before-value |
 | [RG11](docs/rules/RG11.md) `unpinned-fork` | warn | a fork has no block number |
-| [RG12](docs/rules/RG12.md) `attacker-in-foreign-transaction` | error | the declaration puts an attacker step inside the victim's transaction |
-| [RG13](docs/rules/RG13.md) `unordered-same-block` | warn | a same-block step has no ordering mechanism |
-| [RG14](docs/rules/RG14.md) `dependent-precondition` | note | the attack depends on a victim, a role or a third party acting |
+| [RG12](docs/rules/RG12.md)–[RG14](docs/rules/RG14.md) | error / warn / note | `realism.yaml` boundaries and dependent preconditions |
+| [RG15](docs/rules/RG15.md) `profit-ignores-costs` | warn | asserted profit ignores a cost the test measures |
+| [RG16](docs/rules/RG16.md) `implausible-amount` | warn | a deal or mint is above the fixed bound |
+| [RG17](docs/rules/RG17.md) `unevidenced-setup` | warn | counterparty setup has no deployment evidence |
+| [RG18](docs/rules/RG18.md) `revert-only` | warn | the only assertion is a revert |
 
-Severities are graded by phase: a cheat in `setUp()` is usually configuration
-and is reported one level lower than the same cheat in the exploit.
-`realism-gate explain RG06` prints a rule's full page.
+`realism-gate explain RG15` prints why a rule exists and how it can be wrong. Each page under `docs/rules/` is generated from the catalog.
 
 ## Usage
 
 ```text
-realism-gate check [PATHS]...      default: ./test, else ./tests, else .
+realism-gate check [PATHS]...
     --format text|json|sarif|markdown
-                                   json and sarif are the stable interfaces
-    --output FILE
-    --fail-on error|warn|note|never   default: error
-    --rules RG04,RG06              run only these
-    --skip RG08                    skip these
-    --severity RG05=error          set a rule's level (error|warn|note|off)
-    --exclude 'test/legacy/**'     do not check or report these paths
-    --changed-since origin/main    only report findings in changed files
-    --match-test REGEX
-    --match-contract REGEX         a Solidity contract, a Rust file and module,
-                                   or a TypeScript describe block
-    --declaration FILE             default: ./realism.yaml if present
-    --no-declaration
-    --config FILE                  default: ./realism-gate.toml if present
-    --no-config
-    --show-suppressed
-realism-gate rules [--format json]
-realism-gate explain RULE [--markdown]
-realism-gate init                  write a realism.yaml template
+    --fail-on error|warn|note|never
+    --declaration FILE          default: ./realism.yaml
+    --rules RG15,RG17
+    --skip RG08
+realism-gate verify-fix --poc test/Poc.t.sol --patch fix.diff
+realism-gate verify-fix --poc test/Poc.t.sol --patched poc-patched/
+realism-gate rules
+realism-gate explain RULE
+realism-gate init
 ```
 
-Exit status: `0` no active finding at or above `--fail-on`; `1` there is one;
-`2` usage, input, configuration or declaration error, or no test suite found
-at all. The JSON format is described by
-[docs/output-schema.json](docs/output-schema.json).
+Exit status for `check`: `0` nothing at or above `--fail-on`, `1` there is, `2` the inputs could not be read. `verify-fix` exits `0` when the PoC fails on the patch, `1` when it still passes, `2` when forge did not run the test.
 
-### Configuration
+## Limits
 
-An optional `realism-gate.toml` next to where you run it:
+It reads the test, not the protocol and not the chain. It does not know a function is gated when the name does not say so. It does not know the balance at a pinned block. It does not know that a README forbids the call; RG17 is silent only when `deployment.evidence` cites a source. It flattens control flow. A Move file is not type-checked. `check` never runs forge and has no network code; `verify-fix` is the command that does run forge, locally.
 
-```toml
-exclude = ["test/legacy/**"]   # not checked, not reported
-
-[rules]
-RG11 = "off"                   # error | warn | note | off
-RG05 = "error"
-```
-
-Flags override it: `--rules` runs a rule the file turns off, `--severity`
-replaces a level, `--exclude` adds patterns.
-
-### Only what changed
-
-`--changed-since REF` still reads every file (inheritance needs them) but
-reports only findings in files that differ from `REF`, including uncommitted
-and untracked ones. It runs the local `git`; it never fetches.
-
-### Silencing a finding
-
-```solidity
-// realism-gate: allow(RG11) the block is pinned in foundry.toml
-vm.createSelectFork("mainnet");
-```
-
-The same comment works in Rust and TypeScript.
-
-`// realism-gate: allow RG11 <reason>` (no parentheses) works too. The comment
-applies to its own line and the next one. It must give a reason; a bare
-`allow(RG11)` is ignored, and the output counts it (`suppressions_ignored`). Silenced findings
-stay in the JSON and SARIF output, marked as suppressed.
-
-### Declaring the attacker model
-
-The rules infer who is who from names and data flow. When that inference is
-wrong, or when the attack depends on someone else acting, say so in
-`realism.yaml`:
-
-```yaml
-version: 1
-attacker:
-  identities: [mallet]
-privileged:
-  - identity: keeper
-    role: keeper
-    reason: harvest() runs on a schedule from a public keeper network
-preconditions:
-  - step: deposit right before the harvest
-    performed_by: attacker
-    boundary: same_block
-    ordering_guarantee: public mempool; the attacker back-runs the keeper
-```
-
-A declaration replaces the name heuristics, silences RG02 for declared roles,
-and enables the boundary rules RG12-RG14. See
-[docs/declaration.md](docs/declaration.md).
-
-## Measured on public corpora
-
-On the 886 tests of [DeFiHackLabs](https://github.com/SunWeb3Sec/DeFiHackLabs)
-at a pinned commit (reproductions of real exploits, not bounty submissions):
-
-- **611 tests (69.0%) assert nothing.** 595 log values a reader has to trust.
-- **20 tests** have a finding beyond that.
-- The whole corpus is analysed in under a second on a laptop
-  ([eval/perf](eval/perf)).
-
-For v0.2.0 a sample of every rule's flags was labelled by reading the source
-around each one, on that corpus, on 70 files added to it later, and on a
-second corpus never used for tuning. Most rules were right on every labelled
-flag. Two were not: RG10 was right on 2 of 5 in-sample flags in 0.1.0 (the
-fix brings it to 2 of 2, at the cost of one true positive on the later
-files), and RG05 is right on 2 of 5 overall, so it is now a warning, never an
-error. Small counts carry wide intervals, and nothing here measures recall.
-The tables, the intervals and what the numbers do not cover:
-[docs/precision.md](docs/precision.md). Everything is regenerated and compared
-in CI.
-
-## What it cannot tell you
-
-It reads the test, not the protocol: it does not know the deployed contract's
-access control, only what the test says about it. It does not see
-`foundry.toml`. It flattens control flow. In a Solana test it resolves no
-types: harness calls are recognised by name, helpers outside the test's file
-and `tests/` are not read, and `Anchor.toml` is not read. A clean result means no known defect
-pattern was found, not that the PoC is valid, the bug is real, or the program
-pays for it. The full list is in [docs/limitations.md](docs/limitations.md),
-and how each stage works is in [docs/how-it-works.md](docs/how-it-works.md).
+A clean result is not a payable finding. The full list is [docs/limitations.md](docs/limitations.md). How often a flag was right, on the corpora that were labelled, is [docs/precision.md](docs/precision.md).
 
 ## Related
 
-I build these as one independent researcher, around a single question: why do
-security findings not get paid?
-
 | Repository | Question |
 |---|---|
-| [rejection-taxonomy](https://github.com/KhomDev/rejection-taxonomy) | Why did findings die, and which gate would have caught each? |
-| [bounty-economics](https://github.com/KhomDev/bounty-economics) | Can this finding pay at all on this program? |
+| [rejection-taxonomy](https://github.com/KhomDev/rejection-taxonomy) | Why did findings die? |
+| [bounty-economics](https://github.com/KhomDev/bounty-economics) | Can this finding pay on this program? |
 | [viability-gate](https://github.com/KhomDev/viability-gate) | Will the write-up survive triage? |
-| **realism-gate** | **Does the PoC prove what the write-up claims?** |
+| **realism-gate** | **Does the PoC show what an unprivileged attacker can do?** |
 
 ## Contributing
 
-The most useful contribution is a false positive or false negative reduced to
-a synthetic test. See [CONTRIBUTING.md](CONTRIBUTING.md). Do not attach a PoC
-for a live, unfixed finding anywhere in this repository.
+A false positive or a false negative, reduced to a synthetic test. See [CONTRIBUTING.md](CONTRIBUTING.md). Do not attach a PoC for a live, unfixed finding.
 
 ## License
 

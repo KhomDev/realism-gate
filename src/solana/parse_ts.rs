@@ -109,6 +109,7 @@ pub fn parse_source(path: &str, source: &str) -> Option<Unit> {
         source: source.to_string(),
         contracts: Vec::new(),
         solana: Some(file),
+        move_file: None,
         errors,
     })
 }

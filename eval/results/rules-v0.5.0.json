@@ -1,0 +1,253 @@
+[
+  {
+    "id": "RG01",
+    "languages": [
+      "solidity",
+      "rust",
+      "typescript",
+      "move"
+    ],
+    "severity": "error",
+    "severity_note": "always error",
+    "slug": "attacker-holds-privilege",
+    "summary": "The harness grants the attacker identity a role, or makes the attacker the address a privileged getter returns.",
+    "title": "The attacker holds a privileged role",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG01.md"
+  },
+  {
+    "id": "RG02",
+    "languages": [
+      "solidity",
+      "rust",
+      "typescript",
+      "move"
+    ],
+    "severity": "warn",
+    "severity_note": "warn; silenced by a realism.yaml `privileged:` entry",
+    "slug": "privileged-step-in-exploit",
+    "summary": "The test body pranks as an address that reads as a role (owner, admin, keeper, ...) or impersonates a protocol contract.",
+    "title": "A step in the exploit runs as a privileged address",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG02.md"
+  },
+  {
+    "id": "RG03",
+    "languages": [
+      "solidity",
+      "rust",
+      "typescript"
+    ],
+    "severity": "warn",
+    "severity_note": "warn when a call is named like an access-controlled function; note for any other call the deployer makes",
+    "slug": "deployer-is-attacker",
+    "summary": "The test contract deploys the code under review and then calls it without changing sender. A warning means one of those calls is named like an access-controlled function. A note means the calls are ordinary and this is the local-deployment pattern.",
+    "title": "The exploit runs as the contract that deployed the protocol",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG03.md"
+  },
+  {
+    "id": "RG04",
+    "languages": [
+      "solidity",
+      "rust",
+      "typescript"
+    ],
+    "severity": "error",
+    "severity_note": "error in the exploit; warn in setUp; one step lower when the slot looks like an attacker or user balance",
+    "slug": "storage-write",
+    "summary": "`vm.store` sets a storage slot of a contract under review.",
+    "title": "The PoC writes contract storage directly",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG04.md"
+  },
+  {
+    "id": "RG05",
+    "languages": [
+      "solidity",
+      "rust",
+      "typescript"
+    ],
+    "severity": "warn",
+    "severity_note": "warn; capped below error since 0.2.0 because its measured precision is under 80% (docs/precision.md)",
+    "slug": "code-replacement",
+    "summary": "`vm.etch` or `deployCodeTo` puts different bytecode at an address the protocol uses.",
+    "title": "The PoC replaces deployed code",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG05.md"
+  },
+  {
+    "id": "RG06",
+    "languages": [
+      "solidity",
+      "rust",
+      "typescript",
+      "move"
+    ],
+    "severity": "error",
+    "severity_note": "error in the exploit; warn in setUp",
+    "slug": "balance-injection",
+    "summary": "`deal` or `vm.deal` writes tokens or ether into a contract under review.",
+    "title": "The PoC sets a protocol contract's balance",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG06.md"
+  },
+  {
+    "id": "RG07",
+    "languages": [
+      "solidity"
+    ],
+    "severity": "warn",
+    "severity_note": "warn",
+    "slug": "mocked-call",
+    "summary": "`vm.mockCall` or `vm.mockCallRevert` makes a contract return a value its code would not.",
+    "title": "The PoC mocks a dependency's return value",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG07.md"
+  },
+  {
+    "id": "RG08",
+    "languages": [
+      "solidity",
+      "rust",
+      "typescript",
+      "move"
+    ],
+    "severity": "error",
+    "severity_note": "error; warn when the test logs values it never checks",
+    "slug": "no-assertion",
+    "summary": "No `assert*`, `require`, `vm.expect*` or `fail` runs in the test, its helpers or its callbacks.",
+    "title": "The test asserts nothing",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG08.md"
+  },
+  {
+    "id": "RG09",
+    "languages": [
+      "solidity",
+      "rust",
+      "typescript"
+    ],
+    "severity": "error",
+    "severity_note": "error",
+    "slug": "tautological-assertion",
+    "summary": "An assertion compares two constants, compares an expression with itself, or asserts a literal `true`.",
+    "title": "The assertion cannot fail",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG09.md"
+  },
+  {
+    "id": "RG10",
+    "languages": [
+      "solidity",
+      "rust",
+      "typescript",
+      "move"
+    ],
+    "severity": "warn",
+    "severity_note": "warn",
+    "slug": "no-baseline",
+    "summary": "A directional assertion (greater than, less than) checks a balance or state read that happens once, after the attack. Nothing records what it was before.",
+    "title": "The impact is measured without a before-value",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG10.md"
+  },
+  {
+    "id": "RG11",
+    "languages": [
+      "solidity",
+      "rust",
+      "typescript"
+    ],
+    "severity": "warn",
+    "severity_note": "warn",
+    "slug": "unpinned-fork",
+    "summary": "`vm.createSelectFork(url)` or `vm.createFork(url)` without a block number, and no later `vm.rollFork`.",
+    "title": "The fork is not pinned to a block",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG11.md"
+  },
+  {
+    "id": "RG12",
+    "languages": [
+      "solidity",
+      "rust",
+      "typescript",
+      "move"
+    ],
+    "severity": "error",
+    "severity_note": "error",
+    "slug": "attacker-in-foreign-transaction",
+    "summary": "realism.yaml declares a precondition the attacker performs with `boundary: victim_transaction`.",
+    "title": "An attacker step is declared inside someone else's transaction",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG12.md"
+  },
+  {
+    "id": "RG13",
+    "languages": [
+      "solidity",
+      "rust",
+      "typescript",
+      "move"
+    ],
+    "severity": "warn",
+    "severity_note": "warn",
+    "slug": "unordered-same-block",
+    "summary": "realism.yaml declares an attacker step with `boundary: same_block` and no `ordering_guarantee`.",
+    "title": "A same-block step has no ordering guarantee",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG13.md"
+  },
+  {
+    "id": "RG14",
+    "languages": [
+      "solidity",
+      "rust",
+      "typescript",
+      "move"
+    ],
+    "severity": "note",
+    "severity_note": "note",
+    "slug": "dependent-precondition",
+    "summary": "realism.yaml declares a precondition performed by the victim, a privileged role or a third party.",
+    "title": "The attack depends on another party acting",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG14.md"
+  },
+  {
+    "id": "RG15",
+    "languages": [
+      "solidity"
+    ],
+    "severity": "warn",
+    "severity_note": "warn",
+    "slug": "profit-ignores-costs",
+    "summary": "An assertion of attacker profit (a value named profit, gain, extracted, proceeds or pnl) does not subtract a fee, slippage or gas cost that the same test computes, or a sibling test shows that the same flow loses money once a fee applies.",
+    "title": "The asserted profit is not net of a cost the test itself measures",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG15.md"
+  },
+  {
+    "id": "RG16",
+    "languages": [
+      "solidity"
+    ],
+    "severity": "warn",
+    "severity_note": "warn",
+    "slug": "implausible-amount",
+    "summary": "`deal`, `vm.deal` or `mint` moves at least 10^30 raw units (or `type(uint256).max`), or, on a fork pinned to a block, at least 10^27 raw units.",
+    "title": "A dealt or minted amount is implausible",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG16.md"
+  },
+  {
+    "id": "RG17",
+    "languages": [
+      "solidity"
+    ],
+    "severity": "warn",
+    "severity_note": "warn; silenced for a name listed under deployment.evidence",
+    "slug": "unevidenced-setup",
+    "summary": "The test deploys a stand-in (a strategy, a malicious target, a hook) or calls `ship`, `dock` or `push` on a protocol contract, and `deployment.evidence` in realism.yaml does not name that contract or that actor.",
+    "title": "The test builds a counterparty the evidence does not cover",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG17.md"
+  },
+  {
+    "id": "RG18",
+    "languages": [
+      "solidity",
+      "move"
+    ],
+    "severity": "warn",
+    "severity_note": "warn",
+    "slug": "revert-only",
+    "summary": "Every assertion in the test is `vm.expectRevert` (or, in Move, the test is `#[expected_failure]` and contains no `assert!`). Nothing checks a balance, a profit, or a stuck value.",
+    "title": "The only assertion is that a call reverts",
+    "url": "https://github.com/KhomDev/realism-gate/blob/main/docs/rules/RG18.md"
+  }
+]

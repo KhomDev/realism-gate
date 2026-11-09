@@ -41,6 +41,13 @@ preconditions:
     boundary: own_transaction     # own_transaction | victim_transaction | same_block
                                   # | callback_from_victim_call | external_trigger
     ordering_guarantee: ""        # required in practice for attacker + same_block
+
+deployment:
+  evidence:
+    - name: vault                  # contract or actor, as written in the test
+      address: "0x0000000000000000000000000000000000000001"
+      config: "fee = 30 bps"
+      source: "docs/deployment.md at the pinned block"
 ```
 
 Unknown keys, unknown enum values, a version other than 1 and a privileged
@@ -58,6 +65,7 @@ Identities are written as they appear in the test. `address(x)` and
 | `victim.identities` | Treated as ordinary user accounts. |
 | `privileged` | RG02 is silent for these identities. The entry is the claim that the exploit may rely on that role acting, and the reason is why. |
 | `preconditions` | Read by RG12, RG13 and RG14. |
+| `deployment.evidence` | Silences RG17 for that contract or actor. `source` is required. The address and config are recorded for the reader; the tool does not check them. |
 
 ## The boundary rules
 

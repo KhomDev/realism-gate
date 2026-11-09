@@ -1,6 +1,6 @@
 [package]
 name = "realism-gate"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2024"
 description = "Static checker for Foundry and Solana (Rust and Anchor TypeScript) PoC tests: does the proof of concept show what an unprivileged attacker can do, or only what the harness made true?"
 license = "MIT"
@@ -22,6 +22,10 @@ path = "src/bin/realism-gate.rs"
 [[bin]]
 name = "rgate"
 path = "src/bin/rgate.rs"
+
+[[bin]]
+name = "realism-gate-mcp"
+path = "src/bin/realism-gate-mcp.rs"
 
 [dependencies]
 clap = { version = "4.6.7", features = ["derive"] }

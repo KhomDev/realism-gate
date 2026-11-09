@@ -49,7 +49,7 @@
         "required": ["rule", "slug", "severity", "file", "line", "column", "suite", "tests", "message", "evidence", "help"],
         "additionalProperties": false,
         "properties": {
-          "rule": { "type": "string", "description": "RG01 .. RG14." },
+          "rule": { "type": "string", "description": "RG01 .. RG18." },
           "slug": { "type": "string" },
           "severity": { "type": "string", "enum": ["error", "warn", "note"] },
           "file": { "type": "string", "description": "Relative to the working directory, forward slashes." },

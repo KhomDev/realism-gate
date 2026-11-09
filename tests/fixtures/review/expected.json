@@ -1,0 +1,173 @@
+{
+  "note": "Active findings on the review PoCs. RG03 is a note: the same nine deployer calls used to be warnings.",
+  "findings": [
+    {
+      "file": "AquaDockPoC.t.sol",
+      "rule": "RG03",
+      "severity": "note",
+      "line": 124
+    },
+    {
+      "file": "AquaDockPoC.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 124
+    },
+    {
+      "file": "AquaDockPoC.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 152
+    },
+    {
+      "file": "AquaDockPoC.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 174
+    },
+    {
+      "file": "AquaDockPoC.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 178
+    },
+    {
+      "file": "AquaDockPoC.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 212
+    },
+    {
+      "file": "AquaDockPoC.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 214
+    },
+    {
+      "file": "AquaDockPoC.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 256
+    },
+    {
+      "file": "AquaDockPoC.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 271
+    },
+    {
+      "file": "AquaDockPoC.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 278
+    },
+    {
+      "file": "AquaDockPoC.t.sol",
+      "rule": "RG02",
+      "severity": "warn",
+      "line": 283
+    },
+    {
+      "file": "DirectPushRacePoC.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 79
+    },
+    {
+      "file": "DirectPushRacePoC.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 134
+    },
+    {
+      "file": "DirectPushRacePoC.t.sol",
+      "rule": "RG03",
+      "severity": "note",
+      "line": 137
+    },
+    {
+      "file": "ExtructionRegisterIntegrity.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 115
+    },
+    {
+      "file": "ExtructionRegisterIntegrity.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 160
+    },
+    {
+      "file": "ExtructionRegisterIntegrity.t.sol",
+      "rule": "RG03",
+      "severity": "note",
+      "line": 191
+    },
+    {
+      "file": "ExtructionRegisterIntegrity.t.sol",
+      "rule": "RG03",
+      "severity": "note",
+      "line": 221
+    },
+    {
+      "file": "Poc02TakerFundsStranded.t.sol",
+      "rule": "RG10",
+      "severity": "warn",
+      "line": 162
+    },
+    {
+      "file": "Poc04ExtructionDrain.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 63
+    },
+    {
+      "file": "Poc04ExtructionDrain.t.sol",
+      "rule": "RG03",
+      "severity": "note",
+      "line": 99
+    },
+    {
+      "file": "Poc04ExtructionDrain.t.sol",
+      "rule": "RG03",
+      "severity": "note",
+      "line": 163
+    },
+    {
+      "file": "Poc04ExtructionDrain.t.sol",
+      "rule": "RG03",
+      "severity": "note",
+      "line": 191
+    },
+    {
+      "file": "Poc04ExtructionDrain.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 270
+    },
+    {
+      "file": "PocReplay.t.sol",
+      "rule": "RG17",
+      "severity": "warn",
+      "line": 169
+    },
+    {
+      "file": "PocReplay.t.sol",
+      "rule": "RG03",
+      "severity": "note",
+      "line": 218
+    },
+    {
+      "file": "PocReplay.t.sol",
+      "rule": "RG15",
+      "severity": "warn",
+      "line": 240
+    },
+    {
+      "file": "PocReplay.t.sol",
+      "rule": "RG03",
+      "severity": "note",
+      "line": 261
+    }
+  ]
+}
