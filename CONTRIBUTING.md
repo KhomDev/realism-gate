@@ -61,3 +61,11 @@ cargo clippy --all-targets --all-features -- -D warnings
 cargo test
 python scripts/check_hygiene.py
 ```
+
+## Releasing
+
+Releases follow [RELEASING.md](RELEASING.md): patch releases for fixes, at
+most one minor per week, a named milestone and a changelog entry for a minor,
+and a published tag is never moved. A version tag is created only after the
+release workflow's dry run (`gh workflow run release.yml --ref main`) passes
+every job, including the install tests on Linux, macOS and Windows.

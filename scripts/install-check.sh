@@ -46,6 +46,39 @@ name="realism-gate-$version-$target"
 now() { "$py" -c 'import time; print(time.time())'; }
 start="$(now)"
 
+# Every binary Cargo.toml declares, read from the file so a new one cannot be
+# forgotten here. cargo-binstall installs all of them and aborts the download
+# when the archive lacks one ("bin realism-gate-mcp is not found"), which is
+# what broke the 0.6.0 release: the archive shipped two of three binaries.
+declared_bins() {
+    bash "$root/scripts/declared-bins.sh"
+}
+
+# assert_bins DIR: DIR holds a directory named $name with the archive's
+# contents; every declared binary has to be there.
+assert_bins() {
+    local dir="$1" bin missing=""
+    for bin in $(declared_bins); do
+        if [ ! -f "$dir/$name/$bin$exe" ]; then missing="$missing $bin"; fi
+    done
+    if [ -n "$missing" ]; then
+        echo "::error::$dir/$name is missing declared binaries:$missing (cargo-binstall requires all of them)" >&2
+        exit 1
+    fi
+}
+
+# assert_installed BINDIR: after an install, every declared binary is present.
+assert_installed() {
+    local dir="$1" bin missing=""
+    for bin in $(declared_bins); do
+        if [ ! -f "$dir/$bin$exe" ]; then missing="$missing $bin"; fi
+    done
+    if [ -n "$missing" ]; then
+        echo "::error::the install into $dir is missing declared binaries:$missing" >&2
+        exit 1
+    fi
+}
+
 from_archive() {
     local dir="$1"
     (
@@ -56,6 +89,7 @@ from_archive() {
         if command -v sha256sum >/dev/null 2>&1; then sha256sum -c check.txt; else shasum -a 256 -c check.txt; fi
         if [ "$ext" = zip ]; then unzip -q "$name.zip"; else tar xzf "$name.tar.gz"; fi
     )
+    assert_bins "$work"
     bin="$work/$name/realism-gate$exe"
 }
 
@@ -76,6 +110,7 @@ case "$mode" in
         # third-party binary cache, would hide a broken release.
         cargo binstall realism-gate --version "$version" --no-confirm --force \
             --strategies crate-meta-data --root "$work/root"
+        assert_installed "$work/root/bin"
         bin="$work/root/bin/realism-gate$exe"
         ;;
     binstall-mirror)
@@ -116,6 +151,7 @@ case "$mode" in
         cargo binstall --manifest-path "$work/crate/Cargo.toml" realism-gate --no-confirm --force \
             --strategies crate-meta-data --no-discover-github-token \
             --root-certificates "$tls/ca.pem" --root "$work/root"
+        assert_installed "$work/root/bin"
         bin="$work/root/bin/realism-gate$exe"
         ;;
     *)

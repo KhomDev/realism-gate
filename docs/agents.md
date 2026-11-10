@@ -49,6 +49,9 @@ cargo install --path . --locked
 # binaries: realism-gate, rgate, realism-gate-mcp
 ```
 
+The release archives and `cargo binstall realism-gate` install all three
+binaries; the MCP server is `realism-gate-mcp`.
+
 `REALISM_GATE_BIN` and `VG_BIN` override the binaries. Otherwise the server
 looks next to its own executable, then on `PATH`. `vg` is
 [viability-gate](https://github.com/KhomDev/viability-gate).

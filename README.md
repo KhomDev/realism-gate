@@ -17,7 +17,7 @@ The test deploys a vault and then drains it as admin, with `deal` writing the va
 <!-- BEGIN:example -->
 
 ```text
-realism-gate 0.6.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 0.6.1  ·  1 file  ·  1 suite  ·  1 test
 
 test/VaultDrain.t.sol
   warn   RG11 unpinned-fork  test/VaultDrain.t.sol:17:9  VaultDrainTest::test_attackerDrainsVault
@@ -84,7 +84,7 @@ Same rule ids, same output. Rust harnesses (solana-program-test, LiteSVM, Mollus
 <!-- BEGIN:example-rust -->
 
 ```text
-realism-gate 0.6.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 0.6.1  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault_drain.rs
   warn   RG11 unpinned-fork  tests/vault_drain.rs:21:15  vault_drain::test_attacker_drains_vault
@@ -132,7 +132,7 @@ shows why a rule exists and how it can be wrong.
 <!-- BEGIN:example-anchor -->
 
 ```text
-realism-gate 0.6.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 0.6.1  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault-drain.ts
   warn   RG11 unpinned-fork  tests/vault-drain.ts:13:21  vault::lets the attacker drain the vault
@@ -240,6 +240,8 @@ A clean result is not a payable finding. The full list is [docs/limitations.md](
 ## Contributing
 
 A false positive or a false negative, reduced to a synthetic test. See [CONTRIBUTING.md](CONTRIBUTING.md). Do not attach a PoC for a live, unfixed finding.
+
+Releases follow [RELEASING.md](RELEASING.md): patch releases for fixes, at most one minor per week, and a mandatory dry run of the release workflow before a tag.
 
 ## License
 

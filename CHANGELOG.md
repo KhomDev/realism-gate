@@ -8,6 +8,43 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-10
+
+A packaging patch. 0.6.0 was tagged and its release workflow failed, so no
+0.6.0 GitHub release exists; 0.6.1 ships the same checker with the archive
+fixed. The v0.6.0 tag is not moved or deleted.
+
+### Fixed
+
+- **The release archives carry all three declared binaries.** 0.6.0's archives
+  contained `realism-gate` and `rgate` but not `realism-gate-mcp`. The release
+  run [42700992290](https://github.com/KhomDev/realism-gate/actions/runs/42700992290)
+  passed `verify`, all five `build` jobs and `checksums`, then failed all three
+  `install test` jobs with
+  `cargo-binstall: ERROR resolve: When resolving realism-gate bin realism-gate-mcp is not found`;
+  `publish the release` was skipped. `cargo binstall` installs every binary
+  a crate declares, so an archive missing one is not installable. The build
+  step now reads the binary list from `Cargo.toml` (`scripts/declared-bins.sh`)
+  and packages every entry.
+- **The install check asserts the binaries.** `scripts/install-check.sh` reads
+  the same list from `Cargo.toml` and fails the run if an archive, or an
+  install from it, is missing a declared binary. A dry run of the release
+  workflow now catches this class of failure before a tag.
+- The release notes said "Two binaries". They now name all three.
+
+### Added
+
+- **[RELEASING.md](RELEASING.md)**: the published cadence and compatibility
+  policy. Patch releases for fixes only; at most one minor per week; a minor
+  needs a named milestone and a changelog entry; the 1.0 criteria; the
+  mandatory `workflow_dispatch` dry run before a tag; a published tag is
+  never moved. Linked from the README and CONTRIBUTING.
+
+### Changed
+
+- `action.yml` and `combined/action.yml` default to `v0.6.1`, so `@v0` runs
+  this release. `tests/docs.rs` keeps that equal to the crate version.
+
 ## [0.6.0] - 2026-11-09
 
 The gate review. The checks are still a PoC-structure filter, not a validity oracle. What changed is the bypasses that filter used to miss, and the ways a repo under review could turn the filter off.
@@ -335,7 +372,8 @@ First release.
 - A pinned public-corpus benchmark (`scripts/bench-corpus.sh`,
   `bench/defihacklabs.json`, `docs/benchmark.md`), re-measured in CI.
 
-[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/KhomDev/realism-gate/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/KhomDev/realism-gate/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/KhomDev/realism-gate/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/KhomDev/realism-gate/compare/v0.3.0...v0.4.0

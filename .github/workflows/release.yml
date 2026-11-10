@@ -9,6 +9,7 @@ name: release
 # archives, then an install test on Linux, macOS and Windows, through the
 # plain archives and through cargo-binstall's metadata against a local mirror
 # of the release layout. A dry run creates no tag, no release, no attestation.
+# It is mandatory before a version tag: see RELEASING.md.
 #
 # Nothing here publishes to crates.io. The crate name is claimed permanently
 # and the action is irreversible, so `cargo publish` is a separate, manual step.
@@ -120,8 +121,15 @@ jobs:
           mkdir -p "dist/$name"
           ext=""
           if [ "$ARCHIVE" = "zip" ]; then ext=".exe"; fi
-          cp "target/$TARGET/release/realism-gate$ext" "dist/$name/"
-          cp "target/$TARGET/release/rgate$ext" "dist/$name/"
+          # Every binary Cargo.toml declares. cargo-binstall installs all of
+          # them, and it fails a download when one is missing from the archive
+          # ("bin realism-gate-mcp is not found"), so the list is read from
+          # Cargo.toml rather than written out again here.
+          bins=$(bash scripts/declared-bins.sh)
+          test "$(printf '%s\n' "$bins" | grep -c .)" = "$(grep -c '^\[\[bin\]\]' Cargo.toml)"
+          for bin in $bins; do
+            cp "target/$TARGET/release/$bin$ext" "dist/$name/"
+          done
           cp README.md LICENSE CHANGELOG.md "dist/$name/"
           cd dist
           if [ "$ARCHIVE" = "zip" ]; then
@@ -244,8 +252,10 @@ jobs:
               sha256sum -c SHA256SUMS --ignore-missing
               gh attestation verify <archive> --repo KhomDev/realism-gate
 
-          Two binaries are included, `realism-gate` and `rgate`. They are the
-          same program. Linux builds are static (musl).
+          Three binaries are included: `realism-gate` (the checker), `rgate`
+          (the same program under a short name) and `realism-gate-mcp` (the MCP
+          server). `cargo binstall` installs all three. Linux builds are static
+          (musl).
           EOF
 
       - name: Create the release
