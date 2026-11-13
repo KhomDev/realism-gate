@@ -1,0 +1,2369 @@
+{
+  "schema": "realism-gate.claims.results/v1",
+  "generated_by": "eval/claims/run.py",
+  "date": "2026-11-13",
+  "corpus": {
+    "pairs": 120,
+    "population": 603,
+    "seed": "rg-claims-2026-11-12",
+    "pairs_sha256": "82b726174b2c6fa0f041728963ad30b9f0110dd8ed8277be262f41e7785f5503",
+    "labels_sha256": "3c9bf7dda17483c2fb25436691b3134973d0a43ba3f5effb4369d3e1e8f3a180",
+    "pair_labels": {
+      "not_checkable": 4,
+      "not_shown": 92,
+      "shown": 24
+    },
+    "field_labels": {
+      "amount:not_checkable": 120,
+      "attacker:not_checkable": 2,
+      "attacker:shown": 118,
+      "impact:not_checkable": 4,
+      "impact:not_shown": 92,
+      "impact:shown": 24
+    },
+    "report_coverage": {
+      "incident_record": 120,
+      "fetched_writeup": 0,
+      "note": "the report file is rendered from the public incident record; linked write-ups are pointers"
+    }
+  },
+  "tool": {
+    "path": "realism-gate\\target\\debug\\realism-gate.exe",
+    "version": "realism-gate 1.0.0",
+    "sha256": "06eb73f29b9eddf267f024dd14bfb5c79e45c774bbdf178a13b354c3e2a600de"
+  },
+  "frozen": {
+    "seed": "rg-claims-2026-11-12",
+    "pairs_sha256": "82b726174b2c6fa0f041728963ad30b9f0110dd8ed8277be262f41e7785f5503",
+    "labels_sha256": "3c9bf7dda17483c2fb25436691b3134973d0a43ba3f5effb4369d3e1e8f3a180",
+    "heldout_opened": true,
+    "harness_sha256": "5786af49cbb46bc5d367636e16410e1c2e6f318607ed706b6eff563f338ee864"
+  },
+  "measurements": {
+    "impact": {
+      "flagged": 91,
+      "agree": 90,
+      "precision": 0.989,
+      "wilson95": [
+        0.9404,
+        0.9981
+      ],
+      "tool_flagged_label_shown": 1,
+      "shown_by_tool_label_gap": 2,
+      "status": "measured"
+    },
+    "attacker": {
+      "flagged": 120,
+      "agree": 0,
+      "precision": 0.0,
+      "wilson95": [
+        0.0,
+        0.031
+      ],
+      "tool_flagged_label_shown": 120,
+      "shown_by_tool_label_gap": 0,
+      "status": "not_interpretable",
+      "reason": "the rubric labels identity by address-literal presence; realism-gate checks whether the PoC uses that identity to drive the call. The 0.0 is the disagreement rate of a deliberately weak label, not a tool error rate; re-label identity by caller binding before using this field."
+    }
+  },
+  "per_pair": [
+    {
+      "id": "defihacklabs:src/test/2017-07/Parity_first_hack_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2021-05/Spartan_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2022-07/Audius_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2022-08/NomadBridge_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "not_checkable",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2022-08/Qixi_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2022-08/ReaperFarm_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2022-10/ATK_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2022-10/HPAY_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2022-10/RES_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2022-10/RabbyWallet_SwapRouter_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2022-10/Templedao_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-01/BEVO_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-01/Upswing_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-05/NOON_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "not_checkable",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-06/Pawnfi_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-06/SHIDO_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-06/UN_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-06/VINU_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-07/ArcadiaFi_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-07/AzukiDAO_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_checkable",
+          "counted": true,
+          "agree": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-07/Bao_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-07/Civfund_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-07/Libertify_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-07/Palmswap_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-08/CurveBurner_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-08/EarningFram_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-08/Exactly_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-09/0x0DEX_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-09/DAppSocial_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-09/FloorDAO_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-09/XSDWETHpool_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-10/Astrid_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-10/Hopelend_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-10/MaestroRouter2_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-10/ZS_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-11/3913_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-11/AIS_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-11/EHX_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-11/MetaLend_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-11/ShibaToken_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-11/SwampFinance_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-11/XAI_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-12/BEARNDAO_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2023-12/UnverifiedContr_0x431abb_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-02/BlueberryProtocol_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-02/DN404_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-02/MINER_bsc_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-02/Zoomer_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-03/ETHFIN_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-03/GHT_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-03/Woofi_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-04/BNBX_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-04/HedgeyFinance_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-04/PikeFinance_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "not_shown",
+          "counted": false,
+          "missed_evidence_gap": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-05/RedKeysCoin_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-06/INcufi_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-06/Velocore_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-06/YYS_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-07/DoughFina_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-07/GAX_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-07/Lifiprotocol_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-08/COCO_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-08/unverified_667d_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-09/PLN_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-09/PestoToken_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-09/Shezmu_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-09/unverified_766a_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-09/unverified_a89f_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-10/AIZPTToken_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-10/MorphoBlue_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-11/Ak1111_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-11/DeltaPrime_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-11/RPP_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2024-12/JHY_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-01/JPulsepot_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-02/Bybit_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-02/GMT7_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-02/HegicOptions_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-02/HenloKart_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-02/unverified_35bc_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-03/BBXToken_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-03/OneInchFusionV1SettlementHack.sol_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-03/PTM_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-04/BTNFT_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-04/ImpermaxV3_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-04/flylong_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-04/multitransferswap_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-05/Dumbo_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-05/KRCToken_pair_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-05/unverified_91a1_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-06/MetaPool_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-06/PegaBall_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-06/unverified_8490_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-07/ActivePoolScrvUsdUrgentRedemption_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-07/ActivePoolUrgentRedemption_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-07/AvaxBIFKNPair_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-07/BoJLeverageMarket_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-07/FPC_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-07/MulticallWithETH_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-07/SWAPPStaking_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "not_shown",
+          "counted": false,
+          "missed_evidence_gap": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-07/VDS_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-08/0x8d2e_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-08/ArbitrumBaseSwapper_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-08/EquilibriaEPendle_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-08/EverValueCoin_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-08/MyCoinMaster_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2025-08/SizeCredit_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2026-01/makina_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2026-02/XDKRecycle_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2026-03/AlkemiEarn_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2026-03/WhalebitOracleManipulation_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2026-04/giddyvaultv3_compound_auth_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2026-04/unverified_a152_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "not_checkable",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2026-05/AROS_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2026-05/DxSale_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "not_shown",
+          "label": "not_shown",
+          "counted": true,
+          "agree": true
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2026-05/MAPProtocol_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "not_checkable",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2026-05/SQTokenStaking_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2026-05/WUSD_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "not_checkable",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2026-06/TOPBPool_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    },
+    {
+      "id": "defihacklabs:src/test/2026-07/edel-xstock_exp.sol",
+      "outcome": "incomplete",
+      "claim_binding": "structured",
+      "fields": {
+        "impact": {
+          "tool": "shown",
+          "label": "shown",
+          "counted": false,
+          "missed_evidence_gap": false
+        },
+        "attacker": {
+          "tool": "not_shown",
+          "label": "shown",
+          "counted": true,
+          "agree": false
+        }
+      }
+    }
+  ],
+  "agreement": null,
+  "fixtures": {
+    "present": true,
+    "rows": [
+      "R-034",
+      "R-035",
+      "R-036"
+    ],
+    "status": "not_run",
+    "why": "the three rows are private-log inputs and are not part of the public export; the public repository holds only their ids and the expected status"
+  },
+  "not_claimed": [
+    "not a measurement of the tool's full rule set: only claim binding is scored here",
+    "not truth: the labels say whether the PoC source structurally evidences the claim, not whether the incident happened",
+    "the claim source is the public incident record (DeFiHackLabs header), not the full linked write-up",
+    "amount claims are not scored: the record states a fiat loss, the PoC asserts token balances",
+    "the 3 rejection-row fixtures need private inputs and are not scored from this repository"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "frozen_at": "written by eval/claims/run.py --split dev",
+  "date": "2026-11-13",
+  "seed": "rg-claims-2026-11-12",
+  "pairs_sha256": "82b726174b2c6fa0f041728963ad30b9f0110dd8ed8277be262f41e7785f5503",
+  "labels_sha256": "3c9bf7dda17483c2fb25436691b3134973d0a43ba3f5effb4369d3e1e8f3a180",
+  "harness_sha256": "c7680e78f2be409029ade27406ad5f2a6bb1a8b5366d27bb362be09e31d04743"
+}

@@ -92,7 +92,39 @@ R3 changes nothing. Its interval [0-79] is one data point.
 
 No rule was added. See "Candidates" below.
 
+## Claim binding
+
+Measured for 1.0.0 on 120 public PoC + incident-record pairs (DeFiHackLabs
+@2c99b56, pointers and labels only, fetched by script); 91 flagged rows.
+Corpus, rubric and freeze: [eval/claims](../eval/claims/REPORT.md). Mechanical
+rubric frozen before the held-out split was opened; one reader.
+
+| Claim field | Precision | n | Wilson 95% |
+|---|---:|---:|---|
+| impact | 98.9% | 91 | [94.0-99.8] |
+
+Caveats, from the same report:
+
+- **The attacker field is NOT interpretable.** The rubric labels identity by
+  address-literal presence while the tool checks how the caller is bound, so
+  no attacker precision is claimed. The label defect is published, not hidden.
+- **`amount` is NOT CHECKABLE by design.** The record states a fiat loss; the
+  PoC asserts token balances. All 120 amount rows are not checkable.
+- **Two rows are a recall cost, not precision.** The tool marked
+  PikeFinance_exp.sol and SWAPPStaking_exp.sol `shown` while the rubric sees no
+  evidence. They are not in the precision ratio, so 98.9% is not an upper bound
+  on correctness; re-read them before quoting it. One further row (AzukiDAO)
+  was flagged not shown against a label gap, also outside the ratio.
+- **The three rejection-row fixtures (R-034/35/36)** are pointers plus expected
+  status only; their inputs are private and not in this repo.
+
+This is the only claim-binding number; do not publish others.
+
 ## What this does not measure
+
+- **Claim binding beyond the impact field.** The 1.0.0 number above is one
+  field on one corpus; attacker identity is marked not interpretable and the
+  amount field is not checkable by design.
 
 - **Recall.** Nothing here says how many real problems the rules miss. That
   needs PoCs labelled as defective whether or not a rule fired, which this

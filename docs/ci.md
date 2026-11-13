@@ -3,7 +3,7 @@
 ## GitHub Action
 
 ```yaml
-- uses: KhomDev/realism-gate@v0
+- uses: KhomDev/realism-gate@v1
   with:
     path: test/
 ```
@@ -14,8 +14,9 @@ test directory: `path: tests/`.
 That is the whole setup. The action needs no Rust or Node toolchain: it downloads the
 release binary for the runner (Linux x86-64 and arm64, macOS x86-64 and arm64,
 Windows x86-64), checks it against the release's `SHA256SUMS`, and runs it.
-`@v0` follows the newest 0.x release; pin `@v0.6.1` or a commit SHA if you
-want nothing to move.
+`@v1` follows the newest 1.x release; pin `@v1.0.0` or a commit SHA if you
+want nothing to move. (The `v0` tag keeps pointing at the last 0.x release;
+it is not moved backwards.)
 
 A complete workflow:
 
@@ -32,9 +33,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: KhomDev/realism-gate@v0
+      - uses: KhomDev/realism-gate@v1
         with:
           path: test/
+```
+
+To also bind the report's claims to the PoC, add the finding. The claim table
+is printed in the job log; the JSON report and the evidence card carry it in
+machine-readable form.
+
+```yaml
+      - uses: KhomDev/realism-gate@v1
+        with:
+          path: test/
+          report: findings/rain-usdr.md
+          card: "true"
 ```
 
 What it does on every run:
@@ -44,20 +57,23 @@ What it does on every run:
   hidden marker and edited in place on every push;
 - by default reports only findings in files the pull request changes
   (everything is still read, so inherited `setUp()` code is understood);
-- fails the job on a finding at or above `fail-on`.
+- fails the job on a finding at or above `fail-on`, on a `CONTRADICTED` claim, or when the claims were inferred.
 
 ### Inputs
 
 | Input | Default | Meaning |
 |---|---|---|
 | `path` | `test/` | Files, directories or globs, space-separated. |
-| `version` | this action's release | realism-gate release to download, e.g. `v0.6.1`. |
+| `version` | this action's release | realism-gate release to download, e.g. `v1.0.0`. |
 | `changed-only` | `true` | Report only findings in files changed by the PR (or the push). |
 | `fail-on` | `error` | `none`, `note`, `warn` or `error`. |
 | `comment` | `true` | Keep one PR comment with the results. |
 | `sarif` | `false` | Also upload SARIF to code scanning (needs `security-events: write`). |
 | `declaration` | `""` | A `realism.yaml`; empty means `./realism.yaml` if present. |
-| `args` | `""` | Extra arguments for `realism-gate check`, e.g. `--config ci/realism-gate.toml`. |
+| `report` | `""` | Path to the finding. Enables the claim table in the log and the evidence card. |
+| `claims` | `""` | A `claims.yaml`. Empty means `claims.yaml` next to the report, then the report's front matter, then heuristics (labelled inferred). |
+| `card` | `false` | Write the evidence card (Markdown and JSON) into the run's output directory; needs `report` or `claims`. |
+| `args` | `""` | Extra arguments for `realism-gate check`, e.g. `--config ci/realism-gate.toml` or `--no-fail-on-claims`. |
 | `github-token` | `github.token` | Used for the comment and to fetch the base commit. |
 | `binary` | `""` | For testing the action: run this binary instead of downloading one. |
 
@@ -65,11 +81,21 @@ What it does on every run:
 
 ### Outputs
 
-`exit-code` (0 clean, 1 findings at or above `fail-on`, 2 could not check),
-`errors`, `warnings`, `notes`, `version`, `report` (JSON path), `markdown`,
-`sarif`, and `comment` (`posted`, `updated`, `skipped`, `failed`). They are
-set when the action fails the job too; read them from a step that runs
-anyway (`if: always()`, or `continue-on-error: true` on the action).
+`exit-code` (0 clean, 1 a finding at or above `fail-on` or a claims failure,
+2 could not check), `errors`, `warnings`, `notes`, `version`, `report` (JSON
+path), `markdown`, `sarif`, `comment` (`posted`, `updated`, `skipped`,
+`failed`), and — when `report` or `claims` is set — `claim-binding`
+(`structured`/`inferred`) and `claims-outcome` (`shown`/`incomplete`/
+`contradicted`). With `card: true`, `card` and `card-json` are the evidence
+card's two paths. They are set when the action fails the job too; read them
+from a step that runs anyway (`if: always()`, or `continue-on-error: true` on
+the action).
+
+The PR comment and the job summary use the Markdown format, which is the rule
+findings. The claim table is printed in the job log, is in the JSON report
+(`claims`), and is the evidence card when `card` is on. A claim failure does
+set the exit code even when `fail-on: none`; add `--no-fail-on-claims` to
+`args` only if the workflow scores the table itself.
 
 ### When there is nothing to check
 
@@ -110,7 +136,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: rg
-        uses: KhomDev/realism-gate@v0
+        uses: KhomDev/realism-gate@v1
         with:
           path: test/
           comment: "false"
@@ -184,7 +210,7 @@ realism-gate check test --format sarif --output realism.sarif
 or download and check an archive:
 
 ```bash
-version=v0.6.1
+version=v1.0.0
 target=x86_64-unknown-linux-musl
 curl -fsSLO "https://github.com/KhomDev/realism-gate/releases/download/$version/realism-gate-${version#v}-$target.tar.gz"
 curl -fsSLO "https://github.com/KhomDev/realism-gate/releases/download/$version/SHA256SUMS"
@@ -193,18 +219,33 @@ tar xzf "realism-gate-${version#v}-$target.tar.gz"
 "./realism-gate-${version#v}-$target/realism-gate" check test --changed-since origin/main
 ```
 
-Exit status: 0 when no active finding reaches `--fail-on`, 1 when one does, 2
-on a usage, input, configuration or declaration error. A run that finds no
-test suite at all (nothing parsed, nothing matched `--match-contract`, or
-everything excluded) exits 2 rather than reporting a clean result.
+Exit status: 0 when no active finding reaches `--fail-on`, no claim is
+`CONTRADICTED` and the binding is structured; 1 when a finding reaches
+`--fail-on`, **or** a claim is `CONTRADICTED`, **or** the claims were inferred;
+2 on a usage, input, configuration or declaration error. `--fail-on` does not
+suppress a claim failure, and `--no-fail-on-claims` is the escape hatch. A run
+that finds no test suite at all (nothing parsed, nothing matched
+`--match-contract`, or everything excluded) exits 2 rather than reporting a
+clean result.
 
 ## Formats
 
 - `--format json` (schema 1): described field by field in
   [output-schema.json](output-schema.json), which the test suite checks real
-  output against. Fields are only added within a schema version.
+  output against. Fields are only added within a schema version. With
+  `--report`, two optional fields are added: `claims` (schema
+  `realism-gate.claims/v1`, binding, source, outcome, four counts, and one
+  row per claim field with `status` in `shown`/`not_shown`/`contradicted`/
+  `not_checkable`) and `claim_binding` (`structured` or `inferred`). See
+  [claims.md](claims.md#what-the-json-says).
 - `--format sarif`: SARIF 2.1.0 with the full rule table, `inSource`
   suppressions for allowed findings, and a stable `partialFingerprints` entry
-  so code scanning tracks a finding across commits.
+  so code scanning tracks a finding across commits. Claims are not SARIF
+  results: a SARIF alert points at a file and line and says the code is wrong,
+  while a claim row says the report's evidence is or is not in the PoC. The
+  JSON report and the [evidence card](evidence-card.md) are where claims go.
+- `--card FILE` / `--card-json FILE`: the evidence card, Markdown and schema
+  `realism-gate.card/v1`. It needs `--report` or `--claims`. See
+  [evidence-card.md](evidence-card.md).
 - `--format markdown`: what the action posts. For people; may change.
 - `--format text`: for people. It may change between releases; do not parse it.

@@ -3,8 +3,10 @@
 //! Exit codes: 0 when no active finding reaches `--fail-on`, 1 when one does,
 //! 2 on a usage, input or declaration error.
 
+use crate::bind;
 use crate::changed;
 use crate::cite;
+use crate::claims;
 use crate::config::{self, Config, Level};
 use crate::declaration::{self, Declaration};
 use crate::engine::{self, ChangedSince, LoadedDeclaration, Options};
@@ -29,7 +31,9 @@ use std::process::ExitCode;
                   makes a passing PoC prove less than it claims: privileged pranks and signers, \
                   state written with cheatcodes or set_account, assertions that cannot fail, \
                   measurements without a baseline, unpinned forks and live RPC reads.\n\n\
-                  It reads the source; it never runs it and never touches the network."
+                  It reads the source; it never runs it and never touches the network.\n\n\
+                  With `--report` it also reads the finding's claims and prints a claim table: what \
+                  the PoC shows, what it does not, and what contradicts it."
 )]
 pub struct Cli {
     #[command(subcommand)]
@@ -67,6 +71,20 @@ pub enum Command {
     /// on this machine. Refuses a project with `ffi = true`, and refuses the
     /// host unless `--sandbox` or `--allow-host` is set. See docs/verify-fix.md.
     VerifyFix(VerifyArgs),
+    /// Write a commented claims template from a finding's headings and citations.
+    InitClaims(InitClaimsArgs),
+}
+
+#[derive(clap::Args, Debug)]
+pub struct InitClaimsArgs {
+    /// The finding to read the headings and the cited names from.
+    pub finding: PathBuf,
+    /// Where to write it. Default: claims.yaml next to the finding.
+    #[arg(long, value_name = "FILE")]
+    pub out: Option<PathBuf>,
+    /// Overwrite an existing file.
+    #[arg(long)]
+    pub force: bool,
 }
 
 #[derive(clap::Args, Debug)]
@@ -164,6 +182,25 @@ pub struct CheckArgs {
     /// (committed, staged, unstaged or untracked). Everything is still read.
     #[arg(long, value_name = "REF")]
     pub changed_since: Option<String>,
+    /// The finding to read claims from. Prints the claim table after the
+    /// findings: CLAIM / EVIDENCE / STATUS.
+    #[arg(long, value_name = "FILE")]
+    pub report: Option<PathBuf>,
+    /// A claims.yaml (schema realism-gate.claims/v1). Default: claims.yaml
+    /// next to --report, then a front-matter block in it, then heuristics,
+    /// which are labelled inferred.
+    #[arg(long, value_name = "FILE")]
+    pub claims: Option<PathBuf>,
+    /// Write the evidence card (Markdown) to this file.
+    #[arg(long, value_name = "FILE")]
+    pub card: Option<PathBuf>,
+    /// Write the evidence card (JSON) to this file.
+    #[arg(long, value_name = "FILE")]
+    pub card_json: Option<PathBuf>,
+    /// Do not exit non-zero for a CONTRADICTED claim or an inferred binding.
+    /// The table still prints, and the JSON still says what it says.
+    #[arg(long)]
+    pub no_fail_on_claims: bool,
     #[arg(long, value_enum, default_value_t = ColorChoice::Auto)]
     pub color: ColorChoice,
 }
@@ -239,6 +276,7 @@ pub fn run(cli: Cli) -> Result<ExitCode, String> {
             Ok(ExitCode::SUCCESS)
         }
         Command::VerifyFix(args) => verify_fix_cmd(args),
+        Command::InitClaims(args) => init_claims_cmd(args),
         Command::Init { force } => {
             let path = Path::new(declaration::FILE_NAME);
             if path.exists() && !force {
@@ -310,6 +348,75 @@ fn verify_fix_cmd(args: VerifyArgs) -> Result<ExitCode, String> {
         }
         Err(e) => Err(e.0),
     }
+}
+
+fn init_claims_cmd(args: InitClaimsArgs) -> Result<ExitCode, String> {
+    let text = std::fs::read_to_string(&args.finding)
+        .map_err(|e| format!("{}: {e}", args.finding.display()))?;
+    let out = match &args.out {
+        Some(p) => p.clone(),
+        None => args
+            .finding
+            .parent()
+            .unwrap_or_else(|| Path::new("."))
+            .join(claims::FILE_NAME),
+    };
+    if out.exists() && !args.force {
+        return Err(format!(
+            "{} already exists; pass --force to overwrite it",
+            out.display()
+        ));
+    }
+    let source = args
+        .finding
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_else(|| args.finding.display().to_string());
+    std::fs::write(&out, claims::init::template(&text, &source))
+        .map_err(|e| format!("{}: {e}", out.display()))?;
+    println!("wrote {}", out.display());
+    Ok(ExitCode::SUCCESS)
+}
+
+/// The command a reader runs to reproduce a card. Paths are quoted when they
+/// contain a space, so the line stays copy-pasteable on a shell.
+fn rerun_command(args: &CheckArgs, paths: &[PathBuf]) -> String {
+    fn quote(s: &str) -> String {
+        if s.chars()
+            .all(|c| c.is_ascii_alphanumeric() || "/._-:,=".contains(c))
+        {
+            s.to_string()
+        } else {
+            format!("'{}'", s.replace('\'', "'\\''"))
+        }
+    }
+    let mut parts = vec!["realism-gate".to_string(), "check".to_string()];
+    for p in paths {
+        parts.push(quote(&p.display().to_string()));
+    }
+    if let Some(p) = &args.report {
+        parts.push("--report".to_string());
+        parts.push(quote(&p.display().to_string()));
+    }
+    // --claims is repeated only when it was given: with --report alone the
+    // sibling claims.yaml is discovered, and naming the report as the claims
+    // file would make the card's own command fail.
+    if let Some(p) = &args.claims {
+        parts.push("--claims".to_string());
+        parts.push(quote(&p.display().to_string()));
+    }
+    if let Some(t) = &args.target {
+        parts.push("--target".to_string());
+        parts.push(quote(&t.display().to_string()));
+    }
+    if let Some(c) = &args.target_commit {
+        parts.push("--target-commit".to_string());
+        parts.push(quote(c));
+    }
+    if args.no_fail_on_claims {
+        parts.push("--no-fail-on-claims".to_string());
+    }
+    parts.join(" ")
 }
 
 fn sandbox_attested() -> bool {
@@ -486,7 +593,7 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
         exclude,
         only_files: changed.clone(),
         trust_inline_allows: args.trust_inline_allows,
-        citations,
+        citations: citations.clone(),
     };
     let mut report = engine::analyze(&project, loaded.as_ref(), &opts);
     report.ignored_policy = ignored_policy;
@@ -498,6 +605,31 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
         }),
         _ => None,
     };
+
+    // The report's prose, read once: the claim table comes from it and the
+    // evidence card hashes it.
+    let report_text = match &args.report {
+        Some(path) => {
+            Some(std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?)
+        }
+        None => None,
+    };
+    let loaded_claims = claims::resolve(args.report.as_deref(), args.claims.as_deref(), &cwd)?;
+    if let Some(loaded) = &loaded_claims {
+        let table = bind::bind(
+            &project,
+            &report,
+            loaded,
+            citations.as_ref(),
+            decl.as_ref(),
+            &opts,
+        );
+        report.claim_binding = Some(loaded.binding);
+        report.claims = Some(table);
+    }
+    if (args.card.is_some() || args.card_json.is_some()) && loaded_claims.is_none() {
+        return Err("--card needs --report or --claims: there is no claim table to publish".into());
+    }
 
     let to_terminal = args.output.is_none() && std::io::stdout().is_terminal();
     let color = match args.color {
@@ -512,6 +644,7 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
                 color,
                 show_suppressed: args.show_suppressed,
                 fail_on: args.fail_on.level(),
+                no_fail_on_claims: args.no_fail_on_claims,
             },
         ),
         Format::Json => render::json::render(&report),
@@ -529,6 +662,41 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
         }
     }
 
+    if let (Some(path), Some(loaded), Some(table)) = (&args.card, &loaded_claims, &report.claims) {
+        let text = render::card::markdown(&render::card::Input {
+            project: &project,
+            table,
+            claims: loaded,
+            report_text: report_text.as_deref(),
+            report_path: args
+                .report
+                .as_ref()
+                .map(|p| project::display_path(p, &cwd))
+                .as_deref(),
+            target_commit: citations.as_ref().map(|i| i.commit.as_str()),
+            rerun: rerun_command(&args, &paths),
+        });
+        std::fs::write(path, text).map_err(|e| format!("{}: {e}", path.display()))?;
+    }
+    if let (Some(path), Some(loaded), Some(table)) =
+        (&args.card_json, &loaded_claims, &report.claims)
+    {
+        let text = render::card::json(&render::card::Input {
+            project: &project,
+            table,
+            claims: loaded,
+            report_text: report_text.as_deref(),
+            report_path: args
+                .report
+                .as_ref()
+                .map(|p| project::display_path(p, &cwd))
+                .as_deref(),
+            target_commit: citations.as_ref().map(|i| i.commit.as_str()),
+            rerun: rerun_command(&args, &paths),
+        });
+        std::fs::write(path, text).map_err(|e| format!("{}: {e}", path.display()))?;
+    }
+
     // Nothing checked is not the same as nothing found.
     if report.summary.suites == 0 {
         return Err(if report.parse_errors.is_empty() {
@@ -543,8 +711,14 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
             )
         });
     }
-    let failed = args.fail_on.level().is_some_and(|l| report.fails(l));
-    Ok(if failed {
+    let rule_failed = args.fail_on.level().is_some_and(|l| report.fails(l));
+    // A contradicted claim is a defect in the report, not a rule severity:
+    // --fail-on does not suppress it. An inferred binding is not a pass
+    // either. --no-fail-on-claims is the documented escape hatch, for a
+    // corpus run that scores the statuses instead of the exit code.
+    let claims_failed =
+        !args.no_fail_on_claims && report.claims.as_ref().is_some_and(|t| t.fails());
+    Ok(if rule_failed || claims_failed {
         ExitCode::from(1)
     } else {
         ExitCode::SUCCESS

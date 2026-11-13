@@ -629,9 +629,24 @@ mod tests {
         {
             let bat = dir.join(format!("{name}.bat"));
             let script_name = path.file_name().unwrap().to_string_lossy();
+            // Neither bash on PATH is guaranteed to read a Windows path: on a
+            // machine with WSL, `bash` is the Linux one and `C:/` does not
+            // exist there. Git for Windows' bash reads a forward-slash path,
+            // so it is preferred when installed, and the wrapper rewrites its
+            // own directory to forward slashes. The working directory the gate
+            // set is kept: a script may depend on `$PWD`.
+            let bash = [
+                "C:\\Program Files\\Git\\bin\\bash.exe",
+                "C:\\Program Files\\Git\\usr\\bin\\bash.exe",
+            ]
+            .into_iter()
+            .find(|p| Path::new(p).is_file())
+            .unwrap_or("bash");
             std::fs::write(
                 &bat,
-                format!("@echo off\r\nbash \"%~dp0{script_name}\" %*\r\n"),
+                format!(
+                    "@echo off\r\nset \"d=%~dp0\"\r\nset \"d=%d:\\=/%\"\r\n\"{bash}\" \"%d%{script_name}\" %*\r\n"
+                ),
             )
             .unwrap();
             bat

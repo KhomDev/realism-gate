@@ -1,7 +1,7 @@
 //! The rules, and the machinery they share.
 
 pub mod catalog;
-mod evidence;
+pub(crate) mod evidence;
 mod injection;
 mod privilege;
 mod realism;
@@ -66,7 +66,9 @@ impl<'p> Ctx<'p, '_> {
 /// external call or deployment; a persistent one lasts until it is stopped or
 /// replaced. Each phase starts as the test contract, which is how Foundry runs
 /// `setUp()`, the test, and a callback the protocol triggers.
-fn replay_senders<'p>(trace: &Trace<'p>) -> (Vec<Option<Sender<'p>>>, Vec<(usize, &'p Expr)>) {
+pub(crate) fn replay_senders<'p>(
+    trace: &Trace<'p>,
+) -> (Vec<Option<Sender<'p>>>, Vec<(usize, &'p Expr)>) {
     let mut senders = vec![None; trace.ops.len()];
     let mut switches = Vec::new();
     let mut once: Option<&'p Expr> = None;

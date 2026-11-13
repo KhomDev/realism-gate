@@ -1,0 +1,19 @@
+# Pinned public inputs for the realism-gate claim-binding precision corpus.
+#
+# Network is used by fetch.py only, and only to check out a pinned commit of
+# these public repositories. run.py is offline. The committed files are the
+# pointers (this file), the pair manifest (pairs.yaml), the labels
+# (labels.yaml) and the results. No PoC source and no write-up text is
+# committed; both live in eval/cache/ (gitignored).
+version: 1
+seed: "rg-claims-2026-11-12"
+
+corpora:
+  - id: defihacklabs-in-sample
+    role: poc
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test
+    dir: eval/claims/cache/defihacklabs
+    fallback_dir: ../clean-realism-gate/.corpus/defihacklabs   # relative to realism-gate/
+    terms: "Apache-2.0 (LICENSE in the repository). PoCs are vendored only into eval/cache/, never committed; this repository commits pointers and derived labels."

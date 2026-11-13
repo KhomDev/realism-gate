@@ -1,0 +1,68 @@
+{
+  "schema": "realism-gate.card/v1",
+  "tool": "realism-gate",
+  "version": "1.0.0",
+  "rule_set_sha256": "ae1794ca39ec715946fe9623e0218fab9352bf418466dc03a5ed9f2a18657ef3",
+  "poc_sha256": "646772314298b3700b4b0577834b6e7df98fe145e39416fd1ec385439df29515",
+  "report_sha256": "0b5fba2ac3b7fa8271ac68bcf91f6fa927b3d156b9adba881bc649d4cb3c8f71",
+  "claims_sha256": "8b5bc392845c08e8aca58a39f7c8483d9b47f04c538349fbed0af71f2be6d629",
+  "claims_source": "claims.yaml",
+  "claim_binding": "structured",
+  "target_commit": "5172ee079348b6f56469b148c3808857e1d4d892",
+  "rerun": "realism-gate check test --report finding.md --target .target-repo --target-commit 5172ee079348b6f56469b148c3808857e1d4d892",
+  "signed_by": "nothing: every field is a hash of a file named here, or a value the rerun command reproduces",
+  "claims": {
+    "schema": "realism-gate.claims/v1",
+    "binding": "structured",
+    "source": "claims.yaml",
+    "outcome": "shown",
+    "shown": 6,
+    "not_shown": 1,
+    "contradicted": 0,
+    "not_checkable": 0,
+    "rows": [
+      {
+        "field": "attacker",
+        "claim": "any user, no role",
+        "evidence": "`alice` (makeAddr(\"alice\")) sends the exploit in test_psmDepositBlocked; no role, no prank as protocol (RG01-RG03 clean)",
+        "status": "shown"
+      },
+      {
+        "field": "impact",
+        "claim": "other:distributeSurplus reverts with ReserveBackingShortfall (revenue halted) and PSM.sellStable reverts with CeilingExceeded (on-ramp denial)",
+        "evidence": "vm.expectRevert(BalanceSheet.ReserveBackingShortfall.selector) in test_shadowDrawBlocksDistribution; vm.expectRevert(PegStabilityModule.CeilingExceeded.selector) in test_psmDepositBlocked; negative control test_healthyDistribution_shipsSurplus acts without the setup and does not revert",
+        "status": "shown"
+      },
+      {
+        "field": "asset",
+        "claim": "USDR",
+        "evidence": "`assertEq(drawn, locked)` in test_shadowDrawBlocksDistribution compares two quantities of `USDR`",
+        "status": "shown"
+      },
+      {
+        "field": "amount",
+        "claim": "the drawn USDR equals the locked stablecoins, so the position is capital-neutral",
+        "evidence": "`assertEq(drawn, locked)` in test_shadowDrawBlocksDistribution compares the two quantities the claim is about",
+        "status": "shown"
+      },
+      {
+        "field": "preconditions",
+        "claim": "no privileged role; no oracle or price movement; no keeper and no off-chain trigger",
+        "evidence": "`no privileged role`: RG01-RG03 clean; `no oracle or price movement`: no fork, RPC or chain read in the PoC; `no keeper and no off-chain trigger`: every exploit step is the same sender's own call",
+        "status": "shown"
+      },
+      {
+        "field": "cited",
+        "claim": "src/VaultEngine.sol:open, src/VaultEngine.sol:frob, src/BalanceSheet.sol:distributeSurplus, src/PSM.sol:sellStable",
+        "evidence": "all 4 cited names are in the target tree (RG20 clean)",
+        "status": "shown"
+      },
+      {
+        "field": "fix",
+        "claim": "restrict vaults on fee-exempt stable collateral to the PSM",
+        "evidence": "not run: `check` never applies a patch. Run `realism-gate verify-fix` on the patch and quote its verdict",
+        "status": "not_shown"
+      }
+    ]
+  }
+}

@@ -8,6 +8,22 @@ It is not a validity oracle. A pass means the named test went from passing to
 failing under forge. It does not mean the patch is correct, complete, or the
 only way to fix the bug.
 
+## Flags
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--poc FILE` | required | the Foundry test to run |
+| `--patch FILE` | — | a unified diff applied to a copy of the project before forge runs |
+| `--patched DIR` | — | a directory that already holds the patched sources; conflicts with `--patch` |
+| `--match-test REGEX` | — | passed to `forge test --match-test` |
+| `--forge PATH` | `forge` on `PATH` | the forge binary to run; name the full path when a wrapper or a version manager hides it |
+| `--root DIR` | the current directory | the project to copy when `--patch` is used. With `--patched`, the unpatched side is the project in the current directory |
+| `--sandbox` | off | attest that this process is confined (container, `ffi` off, network only to the pinned RPC); conflicts with `--allow-host` |
+| `--allow-host` | off | run forge on this host anyway; `ffi = true` is still refused |
+
+`--forge` and `--root` change which binary and which tree are used; they do not
+change the verdict rule. The same two runs, pass before the patch and fail
+after it, decide the result.
 ## Both sides
 
 1. Copy the project and run `forge test --json` on that copy. The PoC must

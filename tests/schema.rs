@@ -100,7 +100,7 @@ fn json_output_matches_the_published_schema() {
     )
     .unwrap();
     let decl = decl.to_str().unwrap().to_string();
-    let runs: Vec<Vec<&str>> = vec![
+    let mut runs: Vec<Vec<&str>> = vec![
         vec!["check", "tests/fixtures/bad", "--no-declaration"],
         vec!["check", "tests/fixtures/suppress", "--no-declaration"],
         vec![
@@ -110,13 +110,40 @@ fn json_output_matches_the_published_schema() {
             &decl,
         ],
         vec!["check", "tests/fixtures/good", "--no-declaration"],
+        // The claim table: structured, from the acceptance fixture.
+        vec![
+            "check",
+            "examples/rain-usdr/test",
+            "--report",
+            "examples/rain-usdr/finding.md",
+            "--no-declaration",
+            "--no-fail-on-claims",
+        ],
     ];
-    for args in runs {
-        let mut args = args;
+    // Inferred claims: the same report, with no claims.yaml beside it.
+    let dir = std::env::temp_dir().join(format!("rg-schema-claims-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    std::fs::copy(
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/rain-usdr/finding.md"),
+        dir.join("finding.md"),
+    )
+    .unwrap();
+    let inferred_report = dir.join("finding.md").to_str().unwrap().to_string();
+    runs.push(vec![
+        "check",
+        "examples/rain-usdr/test",
+        "--report",
+        &inferred_report,
+        "--no-declaration",
+        "--no-fail-on-claims",
+    ]);
+    for args in &runs {
+        let mut args = args.clone();
         args.extend(["--format", "json", "--fail-on", "never", "--no-config"]);
         let v = report(&args);
         let mut errors = Vec::new();
         validate(&schema, &v, "$", &mut errors);
         assert!(errors.is_empty(), "{args:?}: {errors:#?}");
     }
+    std::fs::remove_dir_all(&dir).ok();
 }

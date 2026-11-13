@@ -103,6 +103,12 @@ pub struct Report {
     /// Policy files found inside the repo under review and not applied.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub ignored_policy: Vec<String>,
+    /// The claim table, when `--report` or `--claims` was given. Added in 1.0.0.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub claims: Option<crate::claims::Table>,
+    /// How the claims were read: `structured` or `inferred`. Added in 1.0.0.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub claim_binding: Option<crate::claims::Binding>,
 }
 
 impl Report {
@@ -380,5 +386,7 @@ pub fn analyze(
         findings,
         parse_errors,
         ignored_policy: Vec::new(),
+        claims: None,
+        claim_binding: None,
     }
 }

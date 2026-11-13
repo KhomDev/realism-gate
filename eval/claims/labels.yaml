@@ -1,0 +1,732 @@
+version: 1
+schema: realism-gate.claims.labels/v1
+seed: rg-claims-2026-11-12
+rubric: 'Frozen mechanical rubric in eval/claims/label.py. It labels structural evidence
+  in the PoC source (balance assertion for impact, attacker address literal for identity),
+  not the truth of the claim. Pair labels: shown, not_shown, not_checkable, contradicted.
+  amount is not_checkable by design: the incident record states a fiat loss, a fork
+  PoC asserts token balances.'
+rubric_version: 1
+pairs:
+  defihacklabs:src/test/2017-07/Parity_first_hack_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2021-05/Spartan_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2022-07/Audius_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2022-08/NomadBridge_exp.sol:
+    attacker: not_checkable
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2022-08/Qixi_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2022-08/ReaperFarm_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2022-10/ATK_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2022-10/HPAY_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2022-10/RES_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2022-10/RabbyWallet_SwapRouter_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2022-10/Templedao_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-01/BEVO_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-01/Upswing_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-05/NOON_exp.sol:
+    attacker: not_checkable
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-06/Pawnfi_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-06/SHIDO_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-06/UN_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-06/VINU_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-07/ArcadiaFi_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-07/AzukiDAO_exp.sol:
+    attacker: shown
+    impact: not_checkable
+    amount: not_checkable
+    pair: not_checkable
+    rubric_version: 1
+  defihacklabs:src/test/2023-07/Bao_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-07/Civfund_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-07/Libertify_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-07/Palmswap_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-08/CurveBurner_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-08/EarningFram_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-08/Exactly_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-09/0x0DEX_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-09/DAppSocial_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-09/FloorDAO_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-09/XSDWETHpool_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-10/Astrid_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-10/Hopelend_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-10/MaestroRouter2_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-10/ZS_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-11/3913_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-11/AIS_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-11/EHX_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-11/MetaLend_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-11/ShibaToken_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-11/SwampFinance_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-11/XAI_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-12/BEARNDAO_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2023-12/UnverifiedContr_0x431abb_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-02/BlueberryProtocol_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-02/DN404_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-02/MINER_bsc_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-02/Zoomer_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-03/ETHFIN_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-03/GHT_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-03/Woofi_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-04/BNBX_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-04/HedgeyFinance_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-04/PikeFinance_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-05/RedKeysCoin_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-06/INcufi_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-06/Velocore_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-06/YYS_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-07/DoughFina_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-07/GAX_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-07/Lifiprotocol_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-08/COCO_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-08/unverified_667d_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-09/PLN_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-09/PestoToken_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-09/Shezmu_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-09/unverified_766a_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-09/unverified_a89f_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-10/AIZPTToken_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-10/MorphoBlue_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-11/Ak1111_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-11/DeltaPrime_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-11/RPP_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2024-12/JHY_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-01/JPulsepot_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-02/Bybit_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-02/GMT7_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-02/HegicOptions_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-02/HenloKart_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-02/unverified_35bc_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-03/BBXToken_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-03/OneInchFusionV1SettlementHack.sol_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-03/PTM_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-04/BTNFT_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-04/ImpermaxV3_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-04/flylong_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-04/multitransferswap_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-05/Dumbo_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-05/KRCToken_pair_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-05/unverified_91a1_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-06/MetaPool_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-06/PegaBall_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-06/unverified_8490_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-07/ActivePoolScrvUsdUrgentRedemption_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-07/ActivePoolUrgentRedemption_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-07/AvaxBIFKNPair_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-07/BoJLeverageMarket_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-07/FPC_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-07/MulticallWithETH_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-07/SWAPPStaking_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-07/VDS_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-08/0x8d2e_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-08/ArbitrumBaseSwapper_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-08/EquilibriaEPendle_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-08/EverValueCoin_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-08/MyCoinMaster_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2025-08/SizeCredit_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2026-01/makina_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2026-02/XDKRecycle_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2026-03/AlkemiEarn_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2026-03/WhalebitOracleManipulation_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2026-04/giddyvaultv3_compound_auth_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2026-04/unverified_a152_exp.sol:
+    attacker: shown
+    impact: not_checkable
+    amount: not_checkable
+    pair: not_checkable
+    rubric_version: 1
+  defihacklabs:src/test/2026-05/AROS_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2026-05/DxSale_exp.sol:
+    attacker: shown
+    impact: not_shown
+    amount: not_checkable
+    pair: not_shown
+    rubric_version: 1
+  defihacklabs:src/test/2026-05/MAPProtocol_exp.sol:
+    attacker: shown
+    impact: not_checkable
+    amount: not_checkable
+    pair: not_checkable
+    rubric_version: 1
+  defihacklabs:src/test/2026-05/SQTokenStaking_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2026-05/WUSD_exp.sol:
+    attacker: shown
+    impact: not_checkable
+    amount: not_checkable
+    pair: not_checkable
+    rubric_version: 1
+  defihacklabs:src/test/2026-06/TOPBPool_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+  defihacklabs:src/test/2026-07/edel-xstock_exp.sol:
+    attacker: shown
+    impact: shown
+    amount: not_checkable
+    pair: shown
+    rubric_version: 1
+reader_sample: []
+agreement: null

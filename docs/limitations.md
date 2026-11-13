@@ -105,13 +105,69 @@ The Move reader is not a compiler. It finds `#[test]` functions and the calls in
 
 The patch is applied inside the temp copy. Paths that are absolute or contain `..` are refused. `foundry.toml` with `ffi = true` is refused. On a host, the command refuses unless `--sandbox` (or a container / `REALISM_GATE_SANDBOX=1`) or `--allow-host`. See [verify-fix](verify-fix.md). Forge may open a connection if the test forks; this program still has no network code of its own.
 
+## Claims and binding
+
+`--report` binds a report's claims to the PoC. What that cannot do, field by
+field:
+
+- **Heuristic extraction is deliberately small.** With no `claims.yaml` and no
+  front-matter block, it reads backticked identifiers, the first heading's
+  impact verb, and "any user"/"unprivileged"/role words. A claim phrased any
+  other way is not found, the binding is labelled **inferred**, and an
+  inferred run exits non-zero however good the rows look. Write the block.
+- **A claim it cannot parse is `NOT CHECKABLE`, not wrong.** An
+  `impact: other:<text>` that names neither a revert nor a value movement, a
+  `precondition` whose words match no class, and an `attacker: role:<NAME>`
+  all have no predicate. A triager sees `NOT CHECKABLE` and has to read the
+  argument; the tool does not supply one.
+- **`attacker: role:<NAME>` is never shown.** The test cannot prove an
+  outside attacker holds a protocol role. State the role in `realism.yaml`
+  and argue it in the report.
+- **An asset has to be named in the PoC or in `cited`.** The predicate is a
+  name match over the PoC source and the `cited` list; an asset the PoC calls
+  something else is `NOT CHECKABLE`, and a name match with no value assertion
+  is `NOT SHOWN`.
+- **An amount has to be measured.** Equality between two quantities, or a
+  read before the exploit and a read after it. A loss figure in prose is not
+  an amount the tool can check.
+- **A revert impact needs a negative control.** `freeze`/`halt`/`dos` are
+  shown only when a sibling test in the same suite performs the same external
+  call without the exploit, asserts success and does not expect a revert.
+  Without it the revert may have nothing to do with the exploit: `NOT SHOWN`.
+- **Contradictions inherit the rule heuristics.** `any-user` is contradicted
+  by `RG01`/`RG02` or by a sender the identity reader thinks is privileged.
+  Those are the same name-and-label guesses the rules use, so a false positive
+  there becomes a `CONTRADICTED` claim here. Read the evidence column.
+- **Citations need a git target.** `cited` is `NOT CHECKABLE` without
+  `--target DIR --target-commit REV`; the working tree is not trusted, and a
+  target that is not a git checkout fails closed (`RG20`).
+- **`fix` is never shown by `check`.** `check` never applies a patch. Until
+  `verify-fix` is run on the patch and its verdict quoted, the fix row is
+  open.
+- **`severity` is accepted but not bound.** The tool records it so a report's
+  claim round-trips, and does not judge it.
+- **The table is not a verdict.** A `SHOWN` row means the evidence the
+  predicate looks for is present. It does not mean the bug is real, that the
+  claim is the interesting one, that the severity is right, or that a program
+  pays. It is not a duplicate check and it is not a validity oracle.
+- **A non-fix `NOT SHOWN` row does not, by itself, set exit 1.** The outcome
+  says `INCOMPLETE`; the exit status is reserved for a contradiction, an
+  inferred binding and `--fail-on`. Gate on `claims.outcome` in the JSON if
+  every claim has to be shown.
+- **Claim-binding precision is measured for one field.** [Precision](precision.md#claim-binding)
+  publishes impact (drain) at 98.9%, n=91 flagged rows, Wilson 95%
+  [94.0-99.8], on 120 public PoC + incident-record pairs. The attacker field
+  is not interpretable with that corpus's labels, `amount` is not checkable by
+  design, and no overall-outcome or recall number is claimed.
+
 ## A clean result is not a valid PoC
 
 realism-gate finds known ways a PoC proves less than it claims. It cannot tell
 you that the bug is real, that the impact is what the report says, that the
 program pays for it, or that nobody reported it first. A PoC with zero findings
 can still be wrong, and a PoC with findings can still be right once the author
-has justified each one.
+has justified each one. The same is true of a claim table: `SHOWN` rows mean
+the predicates found their evidence, not that the finding is sound.
 
-For the other half of that question (whether a written finding survives
-triage), see [viability-gate](https://github.com/KhomDev/viability-gate).
+For the other half of that question (whether a finding is new, in scope and
+payable), see [priorart](https://github.com/KhomDev/priorart).

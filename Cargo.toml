@@ -1,6 +1,6 @@
 [package]
 name = "realism-gate"
-version = "0.6.1"
+version = "1.0.0"
 edition = "2024"
 description = "Static checker for Foundry and Solana (Rust and Anchor TypeScript) PoC tests: does the proof of concept show what an unprivileged attacker can do, or only what the harness made true?"
 license = "MIT"

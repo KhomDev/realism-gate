@@ -1,8 +1,11 @@
-//! A small MCP server: `check_poc` and `check_finding`.
+//! A small MCP server: `check_poc` and `check_claims`.
 //!
-//! The server speaks MCP over stdio (Content-Length framing) and shells out
-//! to `realism-gate` and `vg`. It does not embed either checker. A test
-//! passes a runner so the protocol can be checked without those binaries.
+//! The server speaks MCP over stdio (Content-Length framing) and shells out to
+//! `realism-gate`. It does not embed the checker. A test passes a runner so
+//! the protocol can be checked without the binary.
+//!
+//! There is no `check_finding` and no viability-gate call: the two tools are
+//! independent, so neither can be a runtime dependency of the other.
 
 use serde_json::{Value, json};
 use std::io::{BufRead, Write};
@@ -13,8 +16,8 @@ pub struct Ran {
     pub stderr: String,
 }
 
-/// What `check_poc` and `check_finding` shell out through.
-type Runner<'a> = dyn FnMut(&str, &[String]) -> Result<Ran, String> + 'a;
+/// What the tools shell out through: one program, `realism-gate`.
+type Runner<'a> = dyn FnMut(&[String]) -> Result<Ran, String> + 'a;
 
 /// Handle one JSON-RPC message. `None` for a notification, which has no id
 /// and gets no response.
@@ -59,16 +62,18 @@ fn tools() -> Vec<Value> {
             }
         }),
         json!({
-            "name": "check_finding",
-            "description": "Run viability-gate (`vg check`) on a draft finding, and realism-gate on a PoC when one is given. isError on a KILL or HOLD outcome, or on a PoC finding at or above warn.",
+            "name": "check_claims",
+            "description": "Bind a finding's claims to its PoC and return the claim table. The report may carry the claims in claims.yaml, in a front-matter block, or not at all (then they are inferred). isError when a claim is contradicted or the binding is only inferred.",
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "finding": { "type": "string", "description": "Path to the draft finding (markdown)." },
-                    "poc": { "type": "string", "description": "Optional PoC test to check with realism-gate." },
-                    "declaration": { "type": "string" }
+                    "report": { "type": "string", "description": "Path to the finding (markdown)." },
+                    "claims": { "type": "string", "description": "Optional claims.yaml. Default: next to the report, then its front matter, then inferred." },
+                    "poc": { "type": "string", "description": "Optional PoC file or directory. Default: the checker's own discovery (./test, ./tests, .)." },
+                    "declaration": { "type": "string", "description": "Path to realism.yaml." },
+                    "fail_on": { "type": "string", "enum": ["error", "warn", "note", "never"], "description": "Rule threshold. Default never: the claim table decides isError." }
                 },
-                "required": ["finding"]
+                "required": ["report"]
             }
         }),
     ]
@@ -82,13 +87,37 @@ fn call(params: &Value, run: &mut Runner<'_>) -> Result<Value, String> {
     let args = params.get("arguments").cloned().unwrap_or(json!({}));
     let (text, is_error) = match name {
         "check_poc" => check_poc(&args, run)?,
-        "check_finding" => check_finding(&args, run)?,
+        "check_claims" => check_claims(&args, run)?,
         other => return Err(format!("unknown tool `{other}`")),
     };
     Ok(json!({
         "content": [{ "type": "text", "text": text }],
         "isError": is_error
     }))
+}
+
+/// The flags every tool passes: a repository under review does not get to
+/// supply policy, and a declaration is loaded only when the caller names one.
+fn base_args(fail_on: &str) -> Vec<String> {
+    vec![
+        "check".into(),
+        "--format".into(),
+        "json".into(),
+        "--fail-on".into(),
+        fail_on.into(),
+        "--no-config".into(),
+    ]
+}
+
+fn push_declaration(args: &Value, argv: &mut Vec<String>) -> Result<(), String> {
+    match args.get("declaration").and_then(Value::as_str) {
+        Some(d) => {
+            argv.push("--declaration".into());
+            argv.push(positional("declaration", d)?);
+        }
+        None => argv.push("--no-declaration".into()),
+    }
+    Ok(())
 }
 
 fn check_poc(args: &Value, run: &mut Runner<'_>) -> Result<(String, bool), String> {
@@ -104,27 +133,42 @@ fn check_poc(args: &Value, run: &mut Runner<'_>) -> Result<(String, bool), Strin
             .unwrap_or("warn"),
     )?;
     // Flags first, then `--`, then the path. A path is never parsed as a
-    // flag, so `--skip=RG01` cannot be smuggled in as `path`. Config and a
-    // declaration that the caller did not name are not loaded: the repo
-    // under review does not get to supply policy. The CLI still rejects a
-    // declaration that sits inside that repo.
-    let mut argv = vec![
-        "check".into(),
-        "--format".into(),
-        "json".into(),
-        "--fail-on".into(),
-        fail_on.into(),
-        "--no-config".into(),
-    ];
-    if let Some(d) = args.get("declaration").and_then(Value::as_str) {
-        argv.push("--declaration".into());
-        argv.push(positional("declaration", d)?);
-    } else {
-        argv.push("--no-declaration".into());
-    }
+    // flag, so `--skip=RG01` cannot be smuggled in as `path`.
+    let mut argv = base_args(fail_on);
+    push_declaration(args, &mut argv)?;
     argv.push("--".into());
     argv.push(path);
-    let ran = run("realism-gate", &argv)?;
+    let ran = run(&argv)?;
+    Ok((fence(&text_of(&ran)), ran.code != 0))
+}
+
+fn check_claims(args: &Value, run: &mut Runner<'_>) -> Result<(String, bool), String> {
+    let report = positional(
+        "report",
+        args.get("report")
+            .and_then(Value::as_str)
+            .ok_or("check_claims needs report")?,
+    )?;
+    // The claim table decides isError, so rule findings do not: --fail-on
+    // never. A contradicted claim or an inferred binding still exits non-zero.
+    let fail_on = fail_on_value(
+        args.get("fail_on")
+            .and_then(Value::as_str)
+            .unwrap_or("never"),
+    )?;
+    let mut argv = base_args(fail_on);
+    push_declaration(args, &mut argv)?;
+    argv.push("--report".into());
+    argv.push(report);
+    if let Some(claims) = args.get("claims").and_then(Value::as_str) {
+        argv.push("--claims".into());
+        argv.push(positional("claims", claims)?);
+    }
+    if let Some(poc) = args.get("poc").and_then(Value::as_str) {
+        argv.push("--".into());
+        argv.push(positional("poc", poc)?);
+    }
+    let ran = run(&argv)?;
     Ok((fence(&text_of(&ran)), ran.code != 0))
 }
 
@@ -173,72 +217,6 @@ fn fence(text: &str) -> String {
     )
 }
 
-fn check_finding(args: &Value, run: &mut Runner<'_>) -> Result<(String, bool), String> {
-    let finding = positional(
-        "finding",
-        args.get("finding")
-            .and_then(Value::as_str)
-            .ok_or("check_finding needs finding")?,
-    )?;
-    let vg = run(
-        "vg",
-        &["check".into(), "--json".into(), "--".into(), finding],
-    )?;
-    let mut text = format!("# viability-gate\n{}", vg.stdout);
-    if !vg.stderr.trim().is_empty() {
-        text.push('\n');
-        text.push_str(&vg.stderr);
-    }
-    let mut is_error = vg.code != 0 || outcome_blocks(&vg.stdout);
-    if let Some(poc) = args.get("poc").and_then(Value::as_str) {
-        let poc = positional("poc", poc)?;
-        let mut argv = vec![
-            "check".into(),
-            "--format".into(),
-            "json".into(),
-            "--fail-on".into(),
-            "warn".into(),
-            "--no-config".into(),
-        ];
-        if let Some(d) = args.get("declaration").and_then(Value::as_str) {
-            argv.push("--declaration".into());
-            argv.push(positional("declaration", d)?);
-        } else {
-            argv.push("--no-declaration".into());
-        }
-        argv.push("--".into());
-        argv.push(poc);
-        let rg = run("realism-gate", &argv)?;
-        text.push_str("\n# realism-gate\n");
-        text.push_str(&rg.stdout);
-        if rg.code != 0 {
-            is_error = true;
-        }
-    }
-    Ok((fence(&text), is_error))
-}
-
-/// KILL and HOLD are the outcomes that should stop a report. CLEAR and
-/// INCOMPLETE are not, by themselves, a failed tool call: INCOMPLETE means a
-/// gate had no input, which the text already says.
-fn outcome_blocks(stdout: &str) -> bool {
-    let Ok(v) = serde_json::from_str::<Value>(stdout.trim()) else {
-        return stdout.contains("\"outcome\": \"KILL\"")
-            || stdout.contains("\"outcome\": \"HOLD\"");
-    };
-    let reports = if v.is_array() {
-        v.as_array().cloned().unwrap()
-    } else {
-        vec![v]
-    };
-    reports.iter().any(|r| {
-        matches!(
-            r.get("outcome").and_then(Value::as_str),
-            Some("KILL" | "HOLD")
-        )
-    })
-}
-
 /// Read one MCP frame from `input`. Also accepts a bare JSON line, which is
 /// what the unit tests write.
 pub fn read_frame(input: &mut dyn BufRead) -> Result<Option<Value>, String> {
@@ -257,7 +235,6 @@ pub fn read_frame(input: &mut dyn BufRead) -> Result<Option<Value>, String> {
             .trim()
             .parse()
             .map_err(|_| format!("bad content-length: {line}"))?;
-        // The blank line that ends the headers.
         let mut blank = String::new();
         loop {
             blank.clear();
@@ -299,28 +276,19 @@ pub fn write_frame(output: &mut dyn Write, msg: &Value) -> Result<(), String> {
 mod tests {
     use super::*;
 
-    fn scripted(program: &str) -> Ran {
-        let stdout = if program == "vg" {
-            r#"{"outcome":"KILL","viability_score":40}"#.to_string()
-        } else {
-            r#"{"summary":{"errors":1}}"#.to_string()
-        };
-        Ran {
+    fn scripted(run: &mut Vec<Vec<String>>, args: &[String]) -> Result<Ran, String> {
+        run.push(args.to_vec());
+        Ok(Ran {
             code: 1,
-            stdout,
+            stdout: r#"{"claims":{"binding":"inferred"}}"#.to_string(),
             stderr: String::new(),
-        }
+        })
     }
 
     #[test]
     fn initialize_and_list() {
-        let calls = std::cell::RefCell::new(Vec::new());
-        let mut run = |program: &str, args: &[String]| {
-            calls
-                .borrow_mut()
-                .push((program.to_string(), args.to_vec()));
-            Ok(scripted(program))
-        };
+        let mut calls = Vec::new();
+        let mut run = |args: &[String]| scripted(&mut calls, args);
         let msg = json!({"jsonrpc":"2.0","id":1,"method":"initialize","params":{}});
         let out = dispatch(&msg, &mut run).unwrap();
         assert_eq!(out["result"]["serverInfo"]["name"], "realism-gate");
@@ -332,18 +300,13 @@ mod tests {
             .iter()
             .map(|t| t["name"].as_str().unwrap())
             .collect();
-        assert_eq!(names, vec!["check_poc", "check_finding"]);
+        assert_eq!(names, vec!["check_poc", "check_claims"]);
     }
 
     #[test]
     fn check_poc_shells_out_and_a_finding_is_an_error() {
-        let calls = std::cell::RefCell::new(Vec::new());
-        let mut run = |program: &str, args: &[String]| {
-            calls
-                .borrow_mut()
-                .push((program.to_string(), args.to_vec()));
-            Ok(scripted(program))
-        };
+        let mut calls = Vec::new();
+        let mut run = |args: &[String]| scripted(&mut calls, args);
         let msg = json!({
             "jsonrpc": "2.0",
             "id": 3,
@@ -352,79 +315,105 @@ mod tests {
         });
         let out = dispatch(&msg, &mut run).unwrap();
         assert_eq!(out["result"]["isError"], true);
-        let calls = calls.borrow();
-        assert_eq!(calls[0].0, "realism-gate");
-        assert!(calls[0].1.iter().any(|a| a == "test/Poc.t.sol"));
-        assert!(calls[0].1.iter().any(|a| a == "warn"));
-        let dash = calls[0].1.iter().position(|a| a == "--").unwrap();
-        assert!(
-            calls[0]
-                .1
-                .iter()
-                .skip(dash + 1)
-                .any(|a| a == "test/Poc.t.sol")
-        );
-        assert!(calls[0].1.iter().any(|a| a == "--no-config"));
-        assert!(calls[0].1.iter().any(|a| a == "--no-declaration"));
+        assert_eq!(calls.len(), 1);
+        let args = &calls[0];
+        assert!(args.iter().any(|a| a == "test/Poc.t.sol"));
+        assert!(args.iter().any(|a| a == "warn"));
+        let dash = args.iter().position(|a| a == "--").unwrap();
+        assert!(args.iter().skip(dash + 1).any(|a| a == "test/Poc.t.sol"));
+        assert!(args.iter().any(|a| a == "--no-config"));
+        assert!(args.iter().any(|a| a == "--no-declaration"));
+    }
+
+    #[test]
+    fn check_claims_passes_the_report_and_the_optional_poc() {
+        let mut calls = Vec::new();
+        let mut run = |args: &[String]| scripted(&mut calls, args);
+        let msg = json!({
+            "jsonrpc": "2.0",
+            "id": 4,
+            "method": "tools/call",
+            "params": {
+                "name": "check_claims",
+                "arguments": {
+                    "report": "finding.md",
+                    "claims": "claims.yaml",
+                    "poc": "test/Poc.t.sol"
+                }
+            }
+        });
+        let out = dispatch(&msg, &mut run).unwrap();
+        assert_eq!(out["result"]["isError"], true);
+        let args = &calls[0];
+        assert!(args.iter().any(|a| a == "finding.md"));
+        assert!(args.iter().any(|a| a == "claims.yaml"));
+        let report_at = args.iter().position(|a| a == "--report").unwrap();
+        assert_eq!(args[report_at + 1], "finding.md");
+        let claims_at = args.iter().position(|a| a == "--claims").unwrap();
+        assert_eq!(args[claims_at + 1], "claims.yaml");
+        // Rule findings do not decide isError: the claim table does.
+        let fail_at = args.iter().position(|a| a == "--fail-on").unwrap();
+        assert_eq!(args[fail_at + 1], "never");
+        let dash = args.iter().position(|a| a == "--").unwrap();
+        assert_eq!(args[dash + 1], "test/Poc.t.sol");
+        let text = out["result"]["content"][0]["text"].as_str().unwrap();
+        assert!(text.starts_with("The following is tool output"), "{text}");
+    }
+
+    #[test]
+    fn check_claims_without_a_poc_passes_no_path() {
+        let mut calls = Vec::new();
+        let mut run = |args: &[String]| scripted(&mut calls, args);
+        let msg = json!({
+            "jsonrpc": "2.0",
+            "id": 5,
+            "method": "tools/call",
+            "params": { "name": "check_claims", "arguments": { "report": "finding.md" } }
+        });
+        dispatch(&msg, &mut run).unwrap();
+        assert!(!calls[0].iter().any(|a| a == "--"));
+        assert!(!calls[0].iter().any(|a| a == "--claims"));
     }
 
     #[test]
     fn a_path_that_is_a_flag_does_not_run_and_is_not_a_pass() {
-        let calls = std::cell::RefCell::new(Vec::new());
-        let mut run = |program: &str, args: &[String]| {
-            calls
-                .borrow_mut()
-                .push((program.to_string(), args.to_vec()));
+        let mut calls = Vec::new();
+        let mut run = |args: &[String]| {
+            calls.push(args.to_vec());
             Ok(Ran {
                 code: 0,
                 stdout: r#"{"summary":{"errors":0}}"#.into(),
                 stderr: String::new(),
             })
         };
-        let msg = json!({
-            "jsonrpc": "2.0",
-            "id": 9,
-            "method": "tools/call",
-            "params": {
-                "name": "check_poc",
-                "arguments": { "path": "--skip=RG01,RG04,RG06,RG08" }
-            }
-        });
-        let out = dispatch(&msg, &mut run).unwrap();
-        assert!(out.get("error").is_some(), "{out}");
-        assert!(calls.borrow().is_empty(), "the checker was not run");
-    }
-
-    #[test]
-    fn check_finding_runs_both_and_kill_is_an_error() {
-        let calls = std::cell::RefCell::new(Vec::new());
-        let mut run = |program: &str, args: &[String]| {
-            calls
-                .borrow_mut()
-                .push((program.to_string(), args.to_vec()));
-            Ok(scripted(program))
-        };
-        let msg = json!({
-            "jsonrpc": "2.0",
-            "id": 4,
-            "method": "tools/call",
-            "params": {
-                "name": "check_finding",
-                "arguments": { "finding": "finding.md", "poc": "test/Poc.t.sol" }
-            }
-        });
-        let out = dispatch(&msg, &mut run).unwrap();
-        assert_eq!(out["result"]["isError"], true);
-        let calls = calls.borrow();
-        assert_eq!(calls[0].0, "vg");
-        assert_eq!(calls[1].0, "realism-gate");
-        let text = out["result"]["content"][0]["text"].as_str().unwrap();
-        assert!(text.contains("KILL"), "{text}");
+        for (tool, arguments) in [
+            ("check_poc", json!({ "path": "--skip=RG01,RG04" })),
+            (
+                "check_claims",
+                json!({ "report": "finding.md", "claims": "--skip=RG01" }),
+            ),
+        ] {
+            let msg = json!({
+                "jsonrpc": "2.0",
+                "id": 9,
+                "method": "tools/call",
+                "params": { "name": tool, "arguments": arguments }
+            });
+            let out = dispatch(&msg, &mut run).unwrap();
+            assert!(out.get("error").is_some(), "{out}");
+        }
+        assert!(calls.is_empty(), "the checker was not run");
     }
 
     #[test]
     fn a_notification_gets_no_response() {
-        let mut run = |_program: &str, _args: &[String]| Ok(scripted("realism-gate"));
+        let mut run = |_args: &[String]| {
+            Ok(Ran {
+                code: 0,
+                stdout: String::new(),
+                stderr: String::new(),
+            })
+        };
         let msg = json!({"jsonrpc":"2.0","method":"notifications/initialized"});
         assert!(dispatch(&msg, &mut run).is_none());
     }

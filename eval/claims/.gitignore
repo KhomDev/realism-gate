@@ -1,0 +1,3 @@
+# Fetched corpora and generated report/claim files are inputs, not deliverables.
+cache/
+out/

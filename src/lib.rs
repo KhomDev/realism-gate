@@ -14,8 +14,10 @@
 //! The library is what the `realism-gate` and `rgate` binaries run. Its API is
 //! not yet stable; the JSON and SARIF outputs are the supported interface.
 
+pub mod bind;
 pub mod changed;
 pub mod cite;
+pub mod claims;
 pub mod cli;
 pub mod config;
 pub mod declaration;
