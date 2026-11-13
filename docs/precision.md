@@ -99,9 +99,15 @@ Measured for 1.0.0 on 120 public PoC + incident-record pairs (DeFiHackLabs
 Corpus, rubric and freeze: [eval/claims](../eval/claims/REPORT.md). Mechanical
 rubric frozen before the held-out split was opened; one reader.
 
-| Claim field | Precision | n | Wilson 95% |
-|---|---:|---:|---|
-| impact | 98.9% | 91 | [94.0-99.8] |
+| Claim field | Build | Precision | n | Wilson 95% |
+|---|---|---:|---:|---|
+| impact | first 1.0.0 build (`d994e0cb`), before any fix | **91.0%** | 100 | [83.8-95.2] |
+| impact | released 1.0.0 (`06eb73f2`), after fixing the nine misses this set exposed | 98.9% | 91 | [94.0-99.8] |
+
+**Read the first row as the out-of-sample number.** The nine misses (profit
+computed into a local before the assertion) were found on this same 120-pair
+set and then fixed, so the 98.9% is measured on data that shaped the fix. It is
+in-sample. A fresh held-out set is the only way to replace the 91.0%.
 
 Caveats, from the same report:
 
@@ -118,7 +124,7 @@ Caveats, from the same report:
 - **The three rejection-row fixtures (R-034/35/36)** are pointers plus expected
   status only; their inputs are private and not in this repo.
 
-This is the only claim-binding number; do not publish others.
+Quote both rows, or the first one; never the 98.9% alone.
 
 **Release provenance.** The measurement was made on the 1.0.0 feature tree that
 was released as tag `v1.0.0`, commit

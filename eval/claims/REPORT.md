@@ -96,8 +96,9 @@ tool flagged, as in docs/precision.md.
 
 The previous 1.0.0 build (sha d994e0cb) measured 91/100 = 91.0% [83.8%, 95.2%];
 the difference is entirely the nine profit-local misses that rg-core fixed.
-Only one claim-binding number should be published, and it is the 98.9% above
-with its interval and n.
+The 91.0% is the out-of-sample number: the nine misses were found on this set
+and then fixed, so the 98.9% is in-sample. Publish both, or the 91.0%; never the
+98.9% alone.
 
 **attacker: raw 0/120 disagreements, NOT a precision number.** See the label
 defect above. The tool's own evidence is concrete ('... appears as a claim but
