@@ -387,7 +387,7 @@ It reads the test. It does not run it, except `verify-fix`, which runs forge twi
 
 A claim table is narrower than the bug. Binding cannot confirm a role the test does not grant, an asset the PoC never names, an amount stated only in prose, a precondition it has no words for, or a citation without a target commit. The `fix` row is always open until you run `verify-fix`. And the inferred fallback reads only backticked identifiers, the headline's impact verb and the words "any user"/"unprivileged"/role names; everything else is `NOT CHECKABLE`, and an inferred run is never a pass.
 
-A clean result is not a payable finding. The full list is [docs/limitations.md](docs/limitations.md#claims-and-binding). How often a flag was right, on the corpora that were labelled, is [docs/precision.md](docs/precision.md); the claim-binding number (impact, 98.9% on 91 flagged rows, Wilson 95% [94.0-99.8]) and its caveats are [there](docs/precision.md#claim-binding).
+A clean result is not a payable finding. The full list is [docs/limitations.md](docs/limitations.md#claims-and-binding). How often a flag was right, on the corpora that were labelled, is [docs/precision.md](docs/precision.md); the claim-binding numbers (impact: 91.0% on the first build, n=100, Wilson 95% [83.8-95.2]; 98.9% after fixing the misses that the same set exposed, so in-sample) and their caveats are [there](docs/precision.md#claim-binding).
 
 ## Related
 

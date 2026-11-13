@@ -8,6 +8,15 @@ may change in any minor release.
 
 ## [Unreleased]
 
+### Changed
+
+- **Claim-binding precision is quoted with its out-of-sample number first.**
+  `docs/precision.md`, `docs/limitations.md`, the README and
+  `eval/claims/REPORT.md` now state 91.0% (n=100, [83.8-95.2]) for the first
+  1.0.0 build, before the nine misses this corpus exposed were fixed, next to
+  the 98.9% (n=91) measured afterwards on the same pairs. The 1.0.0 entry below
+  quoted only the second number. No code change.
+
 ## [1.0.0] - 2026-11-13
 
 The claim release. `check` still reads the test; with `--report` it now reads

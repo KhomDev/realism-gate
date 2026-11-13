@@ -155,8 +155,10 @@ field:
   inferred binding and `--fail-on`. Gate on `claims.outcome` in the JSON if
   every claim has to be shown.
 - **Claim-binding precision is measured for one field.** [Precision](precision.md#claim-binding)
-  publishes impact (drain) at 98.9%, n=91 flagged rows, Wilson 95%
-  [94.0-99.8], on 120 public PoC + incident-record pairs. The attacker field
+  publishes impact (drain) at 91.0% (n=100, Wilson 95% [83.8-95.2]) on the
+  first build, and 98.9% (n=91, [94.0-99.8]) after fixing the misses that the
+  same 120 public PoC + incident-record pairs exposed, so the second number is
+  in-sample. The attacker field
   is not interpretable with that corpus's labels, `amount` is not checkable by
   design, and no overall-outcome or recall number is claimed.
 
