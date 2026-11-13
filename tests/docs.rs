@@ -173,7 +173,7 @@ fn with_target<T>(f: impl FnOnce(&str, &str) -> T) -> T {
 fn target_repo() -> (String, String) {
     let dir = root().join("examples/rain-usdr/.target-repo");
     let _ = std::fs::remove_dir_all(&dir);
-    copy_dir(&root().join("examples/rain-usdr/target"), &dir);
+    copy_dir(&root().join("examples/rain-usdr/protocol"), &dir);
     assert!(git(&dir, &["init", "-q"]).status.success());
     assert!(git(&dir, &["add", "-A"]).status.success());
     let commit = git(

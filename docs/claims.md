@@ -255,7 +255,8 @@ treating a table as evidence.
 `examples/rain-usdr/` is the RAIN-USDR case study
 ([khomdev.org](https://khomdev.org/record/rain-usdr-shadow-vaults/)) reduced to a runnable fixture: the finding, a structured
 [`claims.yaml`](../examples/rain-usdr/claims.yaml), a Foundry test with the
-four behaviours, and the cited contracts as plain source. The cited contracts
+four behaviours, and the cited contracts as plain source in
+[`examples/rain-usdr/protocol/`](../examples/rain-usdr/protocol). The cited contracts
 have to be in a git tree for `cited` to bind, so the fixture ships a script
 that builds one at a fixed path with a fixed identity and fixed dates:
 

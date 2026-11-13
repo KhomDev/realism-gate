@@ -23,7 +23,9 @@ dir="$here/.target-repo"
 
 rm -rf "$dir"
 mkdir -p "$dir"
-cp -R "$here/target/." "$dir/"
+# `protocol/`, not `target/`: the repository gitignores build output named
+# target, so a fixture kept there would be missing from a fresh checkout.
+cp -R "$here/protocol/." "$dir/"
 
 cd "$dir"
 git init -q

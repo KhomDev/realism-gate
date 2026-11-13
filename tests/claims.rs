@@ -73,7 +73,9 @@ fn copy_dir(from: &Path, to: &Path) {
 /// dates. Returns the directory and the commit.
 fn target_repo() -> (PathBuf, String) {
     let dir = scratch("target");
-    copy_dir(&fixture().join("target"), &dir);
+    // `protocol/`, not `target/`: the repository gitignores build output
+    // named target, and a fixture that is not in the checkout is not a fixture.
+    copy_dir(&fixture().join("protocol"), &dir);
     let git = |args: &[&str]| {
         Command::new("git")
             .args(args)
