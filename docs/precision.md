@@ -120,6 +120,12 @@ Caveats, from the same report:
 
 This is the only claim-binding number; do not publish others.
 
+**Release provenance.** The measurement was made on the 1.0.0 feature tree that
+was released as tag `v1.0.0`, commit
+`11703a31a7a0fde11d02062222bab152e0d89f5e` (debug binary `06eb73f2…`,
+`eval/claims/results.json`). The tag is the durable provenance; the debug hash
+identifies the measured build, and a release-profile binary hashes differently.
+
 ## What this does not measure
 
 - **Claim binding beyond the impact field.** The 1.0.0 number above is one
