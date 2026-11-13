@@ -140,6 +140,31 @@ fn forge_command(forge: &Path) -> Command {
     }
 }
 
+// On Windows, executing a script that another test thread wrote a moment earlier
+// can fail with a sharing violation (os error 32); Linux has the same shape as
+// ETXTBSY (26). Only the parallel test suite can open that window, so the retry
+// is compiled into test builds; a released binary keeps the single attempt.
+#[cfg(test)]
+fn output_with_retry(cmd: &mut Command) -> std::io::Result<std::process::Output> {
+    let mut last = None;
+    for _ in 0..10 {
+        match cmd.output() {
+            Ok(out) => return Ok(out),
+            Err(e) if matches!(e.raw_os_error(), Some(26) | Some(32)) => {
+                std::thread::sleep(std::time::Duration::from_millis(20));
+                last = Some(e);
+            }
+            Err(e) => return Err(e),
+        }
+    }
+    Err(last.expect("a retryable error was recorded"))
+}
+
+#[cfg(not(test))]
+fn output_with_retry(cmd: &mut Command) -> std::io::Result<std::process::Output> {
+    cmd.output()
+}
+
 fn run_forge(req: &Request, work: &Path, label: &str) -> Result<Side, VerifyError> {
     let poc = poc_arg(&req.poc, &req.root, work);
     let mut cmd = forge_command(&req.forge);
@@ -154,7 +179,7 @@ fn run_forge(req: &Request, work: &Path, label: &str) -> Result<Side, VerifyErro
     if let Some(name) = &req.match_test {
         cmd.arg("--match-test").arg(name);
     }
-    let output = cmd.output().map_err(|e| {
+    let output = output_with_retry(&mut cmd).map_err(|e| {
         VerifyError(format!(
             "could not run {}: {e}. verify-fix needs forge on PATH, or --forge.",
             req.forge.display()
