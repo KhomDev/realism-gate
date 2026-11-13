@@ -6,9 +6,11 @@ fixture `realism-gate check --report` is tested against. It is the one run the
 row is `NOT SHOWN` because `check` never applies a patch.**
 
 Source: `content/20-case-study-rain-usdr.md` in the launch workspace. The
-contracts under `target/` are a minimal stand-in tree, not the audited
+contracts under `protocol/` are a minimal stand-in tree, not the audited
 protocol: they exist so the cited names can be checked at a pinned commit and
-so the four behaviours are readable.
+so the four behaviours are readable. The directory is not called `target/`
+because this repository gitignores build output by that name, and a fixture
+that is missing from a fresh checkout is not a fixture.
 
 ## Files
 
@@ -17,8 +19,8 @@ so the four behaviours are readable.
 | `finding.md` | the report: summary, root cause, impact, PoC, fix |
 | `claims.yaml` | the same claims as data, schema `realism-gate.claims/v1` |
 | `test/ShadowVault.t.sol` | the PoC: four tests, no fork, no RPC, no state injection |
-| `target/` | the minimal cited tree: `VaultEngine`, `BalanceSheet`, `PSM`, a stablecoin mock |
-| `make-target-repo.sh` | builds `target/` into a throwaway git repo at `.target-repo/` |
+| `protocol/` | the minimal cited tree: `VaultEngine`, `BalanceSheet`, `PSM`, a stablecoin mock |
+| `make-target-repo.sh` | builds `protocol/` into a throwaway git repo at `.target-repo/` |
 | `card.md`, `card.json` | the golden evidence card this run writes |
 
 ## The four tests

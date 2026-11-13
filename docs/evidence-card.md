@@ -57,7 +57,8 @@ first. See [limitations](limitations.md#claims-and-binding).
 
 The fixture is [`examples/rain-usdr`](../examples/rain-usdr): the case
 study's report, its [`claims.yaml`](../examples/rain-usdr/claims.yaml), a
-Foundry test with the four behaviours, and the cited contracts as source. The
+Foundry test with the four behaviours, and the cited contracts as source in
+[`examples/rain-usdr/protocol/`](../examples/rain-usdr/protocol). The
 cited row needs a git tree, so the fixture ships a script that builds one at a
 fixed relative path with a fixed identity and fixed dates; the commit id is
 the same on every run.
