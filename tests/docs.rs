@@ -8,7 +8,7 @@
 //! deliberate change.
 
 use realism_gate::rules::{RULES, catalog};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 fn root() -> PathBuf {
@@ -94,12 +94,204 @@ fn readme_block_is_current(name: &str, dir: &str) {
     );
 }
 
+/// Replaces, or checks, the block between `<!-- BEGIN:{name} -->` and
+/// `<!-- END:{name} -->` in README.md.
+fn replace_block(name: &str, block: &str) {
+    let (begin, end_mark) = (
+        format!("<!-- BEGIN:{name} -->"),
+        format!("<!-- END:{name} -->"),
+    );
+    let readme_path = root().join("README.md");
+    let readme = norm(&std::fs::read_to_string(&readme_path).unwrap());
+    let start = readme
+        .find(&begin)
+        .unwrap_or_else(|| panic!("README has no {name} block"));
+    let end = readme
+        .find(&end_mark)
+        .unwrap_or_else(|| panic!("README's {name} block is not closed"))
+        + end_mark.len();
+    let current = &readme[start..end];
+    if bless() {
+        let updated = format!("{}{}{}", &readme[..start], block, &readme[end..]);
+        std::fs::write(&readme_path, updated).unwrap();
+        return;
+    }
+    assert_eq!(
+        current, block,
+        "README {name} block is stale; run with REALISM_GATE_BLESS=1"
+    );
+}
+
 #[test]
 fn readme_examples_are_current() {
     // One at a time: each rewrites README.md when blessing.
     readme_block_is_current("example", "examples/vault-drain");
     readme_block_is_current("example-rust", "examples/solana-vault-drain");
     readme_block_is_current("example-anchor", "examples/anchor-vault-drain");
+}
+
+fn copy_dir(from: &Path, to: &Path) {
+    std::fs::create_dir_all(to).unwrap();
+    for entry in std::fs::read_dir(from).unwrap() {
+        let entry = entry.unwrap();
+        let path = entry.path();
+        let dest = to.join(entry.file_name());
+        if path.is_dir() {
+            copy_dir(&path, &dest);
+        } else {
+            std::fs::copy(&path, &dest).unwrap();
+        }
+    }
+}
+
+fn git(dir: &Path, args: &[&str]) -> std::process::Output {
+    Command::new("git")
+        .args(args)
+        .current_dir(dir)
+        .env("GIT_AUTHOR_DATE", "2026-11-12T00:00:00+00:00")
+        .env("GIT_COMMITTER_DATE", "2026-11-12T00:00:00+00:00")
+        .env("GIT_AUTHOR_NAME", "realism-gate fixture")
+        .env("GIT_AUTHOR_EMAIL", "fixture@example.invalid")
+        .env("GIT_COMMITTER_NAME", "realism-gate fixture")
+        .env("GIT_COMMITTER_EMAIL", "fixture@example.invalid")
+        .output()
+        .expect("git runs")
+}
+
+/// Runs `f` with the fixture's target repo, serialised: two tests build and
+/// read `examples/rain-usdr/.target-repo`, and cargo runs tests in parallel.
+fn with_target<T>(f: impl FnOnce(&str, &str) -> T) -> T {
+    static LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    let _guard = LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    let (dir, sha) = target_repo();
+    f(&dir, &sha)
+}
+
+/// Build the acceptance fixture's target tree as a git repo at the path
+/// `make-target-repo.sh` uses, so the generated examples and the golden card
+/// run the same command a reader runs. Returns `(relative dir, commit)`.
+fn target_repo() -> (String, String) {
+    let dir = root().join("examples/rain-usdr/.target-repo");
+    let _ = std::fs::remove_dir_all(&dir);
+    copy_dir(&root().join("examples/rain-usdr/target"), &dir);
+    assert!(git(&dir, &["init", "-q"]).status.success());
+    assert!(git(&dir, &["add", "-A"]).status.success());
+    let commit = git(
+        &dir,
+        &["commit", "-q", "-m", "RAIN-USDR target tree (fixture)"],
+    );
+    assert!(
+        commit.status.success(),
+        "git commit failed: {}",
+        String::from_utf8_lossy(&commit.stderr)
+    );
+    let out = git(&dir, &["rev-parse", "HEAD"]);
+    let sha = String::from_utf8_lossy(&out.stdout).trim().to_string();
+    (".target-repo".to_string(), sha)
+}
+
+/// The command that regenerates the claims block, exactly as a reader runs it.
+fn claims_args(target: &str, commit: &str) -> Vec<String> {
+    vec![
+        "check".into(),
+        "test".into(),
+        "--report".into(),
+        "finding.md".into(),
+        "--target".into(),
+        target.into(),
+        "--target-commit".into(),
+        commit.into(),
+        "--no-config".into(),
+        "--no-declaration".into(),
+        "--color".into(),
+        "never".into(),
+    ]
+}
+
+fn run_claims(extra: &[&str], expected: i32) -> String {
+    with_target(|target, commit| {
+        let mut args = claims_args(target, commit);
+        args.extend(extra.iter().map(|s| s.to_string()));
+        let out = Command::new(env!("CARGO_BIN_EXE_realism-gate"))
+            .args(&args)
+            .current_dir(root().join("examples/rain-usdr"))
+            .env("NO_COLOR", "1")
+            .output()
+            .unwrap();
+        assert_eq!(
+            out.status.code(),
+            Some(expected),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        String::from_utf8(out.stdout).unwrap()
+    })
+}
+
+/// The claims example in README.md is the RAIN-USDR acceptance run.
+#[test]
+fn readme_claims_example_is_current() {
+    let text = run_claims(&[], 0);
+    let block = format!(
+        "<!-- BEGIN:example-claims -->\n\n```text\n{text}```\n\n<!-- END:example-claims -->"
+    );
+    replace_block("example-claims", &block);
+}
+
+/// The golden evidence card in examples/rain-usdr is the card the acceptance
+/// run writes. docs/evidence-card.md quotes it.
+#[test]
+fn the_golden_card_is_current() {
+    with_target(the_golden_card_at);
+}
+
+fn the_golden_card_at(target: &str, commit: &str) {
+    let card_dir = root().join("examples/rain-usdr");
+    let bless = bless();
+    let out_dir = if bless {
+        card_dir.clone()
+    } else {
+        let dir = std::env::temp_dir().join(format!("rg-card-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
+    };
+    let mut args = claims_args(target, commit);
+    args.extend([
+        "--card".to_string(),
+        out_dir.join("card.md").display().to_string(),
+        "--card-json".to_string(),
+        out_dir.join("card.json").display().to_string(),
+    ]);
+    let out = Command::new(env!("CARGO_BIN_EXE_realism-gate"))
+        .args(&args)
+        .current_dir(&card_dir)
+        .env("NO_COLOR", "1")
+        .output()
+        .unwrap();
+    assert_eq!(out.status.code(), Some(0));
+    for name in ["card.md", "card.json"] {
+        let generated = std::fs::read_to_string(out_dir.join(name)).unwrap();
+        let path = card_dir.join(name);
+        if bless {
+            std::fs::write(&path, &generated).unwrap();
+            continue;
+        }
+        let have = std::fs::read_to_string(&path).unwrap_or_else(|_| {
+            panic!(
+                "{} is missing; run with REALISM_GATE_BLESS=1",
+                path.display()
+            )
+        });
+        assert_eq!(
+            norm(&have),
+            norm(&generated),
+            "{} is stale; run with REALISM_GATE_BLESS=1",
+            path.display()
+        );
+    }
+    if !bless {
+        let _ = std::fs::remove_dir_all(&out_dir);
+    }
 }
 
 /// `uses: KhomDev/realism-gate@v0` must download the release it belongs to,

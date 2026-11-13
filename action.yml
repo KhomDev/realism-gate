@@ -34,6 +34,18 @@ inputs:
     description: Path to a realism.yaml. Empty means ./realism.yaml if it exists.
     required: false
     default: ""
+  report:
+    description: Path to the finding report. Enables the claim table (printed in the log) and, with `card`, the evidence card.
+    required: false
+    default: ""
+  claims:
+    description: Path to a claims.yaml (schema realism-gate.claims/v1). Empty means claims.yaml next to the report, then a front-matter block, then heuristics, which are labelled inferred.
+    required: false
+    default: ""
+  card:
+    description: Write an evidence card (Markdown and JSON) into the run's output directory. Needs `report` or `claims`.
+    required: false
+    default: "false"
   args:
     description: Extra arguments for `realism-gate check`.
     required: false
@@ -80,6 +92,18 @@ outputs:
   sarif:
     description: Path of the SARIF report, when `sarif` is on.
     value: ${{ steps.run.outputs.sarif }}
+  card:
+    description: Path of the evidence card Markdown, when `card` is on.
+    value: ${{ steps.run.outputs.card }}
+  card-json:
+    description: Path of the evidence card JSON (realism-gate.card/v1), when `card` is on.
+    value: ${{ steps.run.outputs.card-json }}
+  claim-binding:
+    description: structured or inferred, when a report or claims file was checked.
+    value: ${{ steps.run.outputs.claim-binding }}
+  claims-outcome:
+    description: shown, incomplete or contradicted, when a report or claims file was checked.
+    value: ${{ steps.run.outputs.claims-outcome }}
   comment:
     description: "posted, updated, skipped, or failed: what happened to the PR comment."
     value: ${{ steps.comment.outputs.result }}
@@ -95,8 +119,8 @@ runs:
         RG_ACTION_REF: ${{ github.action_ref }}
         RG_BINARY: ${{ inputs.binary }}
         # The release this copy of the action belongs to. tests/docs.rs keeps
-        # it equal to the crate version, so `@v0` runs the newest v0 release.
-        RG_DEFAULT_VERSION: v0.6.1
+        # it equal to the crate version, so `@v1` runs the newest v1 release.
+        RG_DEFAULT_VERSION: v1.0.0
       run: |
         set -euo pipefail
         if [ -n "$RG_BINARY" ]; then
@@ -161,6 +185,9 @@ runs:
         RG_SARIF: ${{ inputs.sarif }}
         RG_UPLOAD_SARIF_OLD: ${{ inputs.upload-sarif }}
         RG_DECLARATION: ${{ inputs.declaration }}
+        RG_REPORT: ${{ inputs.report }}
+        RG_CLAIMS: ${{ inputs.claims }}
+        RG_CARD: ${{ inputs.card }}
         RG_ARGS: ${{ inputs.args }}
         RG_EVENT: ${{ github.event_name }}
         RG_PR_BASE: ${{ github.event.pull_request.base.sha }}
@@ -207,6 +234,24 @@ runs:
 
         flags=()
         if [ -n "$RG_DECLARATION" ]; then flags+=(--declaration "$RG_DECLARATION"); fi
+        if [ -n "$RG_REPORT" ]; then flags+=(--report "$RG_REPORT"); fi
+        if [ -n "$RG_CLAIMS" ]; then flags+=(--claims "$RG_CLAIMS"); fi
+
+        # The evidence card needs a claim table, so it needs report or claims.
+        card_flags=()
+        if [ "$RG_CARD" = "true" ]; then
+          if [ -n "$RG_REPORT" ] || [ -n "$RG_CLAIMS" ]; then
+            card="$out/card.md"
+            card_json="$out/card.json"
+            card_flags=(--card "$card" --card-json "$card_json")
+            {
+              echo "card=$card"
+              echo "card-json=$card_json"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::card: true needs the report or claims input; no card written"
+          fi
+        fi
 
         # changed-only: compare with the PR base, or the commit before a push.
         if [ "$RG_CHANGED_ONLY" = "true" ]; then
@@ -247,7 +292,7 @@ runs:
           fi
         fi
         # Paths after `--`, so a path cannot be read as a flag.
-        "$RG_BIN" check "${flags[@]}" "${extra[@]}" --format json --output "$report" --fail-on "$fail_on" -- "${paths[@]}" 2> "$out/stderr.txt"
+        "$RG_BIN" check "${flags[@]}" "${extra[@]}" "${card_flags[@]}" --format json --output "$report" --fail-on "$fail_on" -- "${paths[@]}" 2> "$out/stderr.txt"
         status=$?
         echo "exit-code=$status" >> "$GITHUB_OUTPUT"
         if [ "$status" = 2 ]; then
@@ -265,6 +310,8 @@ runs:
           echo "errors=0" >> "$GITHUB_OUTPUT"
           echo "warnings=0" >> "$GITHUB_OUTPUT"
           echo "notes=0" >> "$GITHUB_OUTPUT"
+          echo "claim-binding=" >> "$GITHUB_OUTPUT"
+          echo "claims-outcome=" >> "$GITHUB_OUTPUT"
           exit 0
         fi
         cat "$out/stderr.txt" >&2
@@ -280,6 +327,17 @@ runs:
           n=$(grep -m1 "\"$level\":" "$report" | tr -dc '0-9')
           echo "$level=${n:-0}" >> "$GITHUB_OUTPUT"
         done
+        # Claim binding, from the same JSON. Empty when no report was checked.
+        binding=""
+        outcome=""
+        if [ -n "$RG_REPORT" ] || [ -n "$RG_CLAIMS" ]; then
+          binding=$(grep -m1 '"claim_binding":' "$report" | sed 's/.*"claim_binding": *"\([^"]*\)".*/\1/')
+          outcome=$(grep -m1 '"outcome":' "$report" | sed 's/.*"outcome": *"\([^"]*\)".*/\1/')
+        fi
+        {
+          echo "claim-binding=$binding"
+          echo "claims-outcome=$outcome"
+        } >> "$GITHUB_OUTPUT"
         cat "$md" >> "$GITHUB_STEP_SUMMARY"
         # Also print the findings in the log, for people reading it there.
         "$RG_BIN" check "${paths[@]}" "${flags[@]}" "${extra[@]}" --color always --fail-on never 2>/dev/null || true
@@ -347,6 +405,6 @@ runs:
       run: |
         case "$RG_STATUS" in
           0) echo "realism-gate: pass" ;;
-          1) echo "::error::realism-gate: a finding at or above fail-on; see the job summary"; exit 1 ;;
+          1) echo "::error::realism-gate: a finding at or above fail-on, a contradicted claim, or an inferred claim binding; see the job summary"; exit 1 ;;
           *) echo "::error::realism-gate could not check the given path (exit ${RG_STATUS:-unknown})"; exit 2 ;;
         esac

@@ -8,31 +8,54 @@ the fix for the first problem; the mandatory dry run is the fix for the second.
 
 ## Cadence
 
-- **Patch** (`0.x.y` to `0.x.y+1`): fixes only. A bug fix, a documentation
+- **Patch** (`1.x.y` to `1.x.y+1`): fixes only. A bug fix, a documentation
   correction, a packaging or CI fix. No new rules, no new flags, no changed
   defaults, no output changes beyond the fix. A patch may ship as soon as CI is
   green; it does not need a milestone.
-- **Minor** (`0.x` to `0.x+1.0`): new rules, new flags, changed defaults, new
+- **Minor** (`1.x` to `1.x+1.0`): new rules, new flags, changed defaults, new
   output fields, a raised MSRV. **At most one minor per week.** A minor needs a
   named milestone (a GitHub milestone, or a named section in the changelog) and
   a changelog entry that says what changed and what did not.
 - **No release without a reason.** A version number is not an announcement. If
   nothing user-visible changed, do not tag; batch the change into the next
   release.
-- **1.0** is earned, not scheduled. It requires all of: the JSON and SARIF
-  output (schema 1) unchanged across at least two minor releases; a documented
-  precision record on the public corpora for the rules that ship as errors; and
-  no incompatible change to the CLI flags, exit codes or action inputs for two
-  minors. Until then the version stays 0.x.
+- **1.0** is earned, not scheduled. 1.0.0 shipped when its five criteria
+  were met (see below). The same rule applies to 2.0: it is earned by the
+  compatibility record, not by a date.
+
+## The 1.0 criteria
+
+All five have to hold before 1.0.0 is tagged. They are the plan's section 1.4
+list, in substance:
+
+1. **The JSON schema is v1 and stable.** `realism-gate.report/v1` keeps
+   `schema: 1`; fields are only added, never removed or redefined. SARIF for
+   rule findings is unchanged.
+2. **Rule ids are stable.** RG01-RG20 keep their ids, slugs, severities and
+   meanings across the release. A 1.x release may add a rule, but never
+   renumber or re-grade an existing one without a major version and a
+   changelog entry that says which ids moved.
+3. **Claim-binding precision is published.** `docs/precision.md` carries the
+   measured number with its n and Wilson interval, generated from
+   `eval/claims/results.json`. An unmeasured field is named as unmeasured, not
+   left out.
+4. **crates.io equals the GitHub release.** The version on crates.io is the
+   one the GitHub release and the archives carry; a release is not done while
+   `cargo install realism-gate` gets an older version.
+5. **The Action tag is `v1`.** After the release exists, the floating `v1`
+   tag is moved to it, so `uses: KhomDev/realism-gate@v1` runs 1.x. The `v0`
+   tag stays where it is: the last 0.x release.
 
 ## Compatibility policy
 
-Stable within 0.x, and only changed in a minor with a changelog entry:
+Stable within 1.x, and only changed in a minor with a changelog entry:
 
 - the JSON and SARIF output schema 1: fields may be added, not removed or
   renamed, and `schema` stays `1`;
-- the exit codes: `0` nothing at or above `--fail-on`, `1` there is, `2` the
-  inputs could not be read;
+- the exit codes: `0` nothing at or above `--fail-on`, no claim contradicted,
+  and a structured binding; `1` a finding at or above `--fail-on`, a
+  `CONTRADICTED` claim, or an inferred binding; `2` the inputs could not be
+  read;
 - existing CLI flags and their meanings, and the action inputs;
 - the archive names and layout, and the `[package.metadata.binstall]` metadata
   that `cargo binstall` reads;
@@ -52,19 +75,20 @@ next minor; both the deprecation and the removal are in the changelog.
 re-pointed. A bad release is superseded by a new patch, and the changelog says
 which release it supersedes and why.
 
-The one exception is `v0`, the floating major tag for the GitHub Action.
-`uses: KhomDev/realism-gate@v0` has to run the newest 0.x release, so after a
-0.x release is published and verified, `v0` is force-updated to that release's
+The one exception is `v1`, the floating major tag for the GitHub Action.
+`uses: KhomDev/realism-gate@v1` has to run the newest 1.x release, so after a
+1.x release is published and verified, `v1` is force-updated to that release's
 commit:
 
 ```bash
-git tag -f -a v0 -m "v0: floating major tag, now vX.Y.Z" <commit>
-git push --force origin v0
+git tag -f -a v1 -m "v1: floating major tag, now vX.Y.Z" <commit>
+git push --force origin v1
 ```
 
-`v0` is not a version tag: the release workflow only triggers on `vX.Y.Z`, so
+`v1` is not a version tag: the release workflow only triggers on `vX.Y.Z`, so
 moving it publishes nothing. It is updated last, after the release exists, and
-never moved backwards.
+never moved backwards. The old `v0` tag stays on the last 0.x release and is
+not moved again.
 
 ## The dry run is mandatory before a tag
 
@@ -94,32 +118,47 @@ Run from a clean checkout of `main`.
 2. `cargo clippy --all-targets --all-features -- -D warnings`
 3. `cargo test --locked`
 4. `python scripts/check_hygiene.py`
-5. Bump the version in `Cargo.toml` (`Cargo.lock` follows), in
-   `action.yml` and `combined/action.yml` (`RG_DEFAULT_VERSION`), and in any
-   doc that pins a version. `tests/docs.rs` fails if `action.yml` disagrees
-   with the crate version.
-6. Add the changelog entry under the new version and move the `[Unreleased]`
+5. **Check the precision page against its results.** If the claims code, the
+   claims corpus or the eval harness changed, re-run and confirm the page:
+   ```bash
+   python eval/claims/run.py --check
+   ```
+   `docs/precision.md` must quote `eval/claims/results.json` (the number, its
+   n and its Wilson interval) and must not publish any other claim-binding
+   number. A 1.0 release with an unmeasured or stale claims page is not
+   tagged.
+6. Bump the version in `Cargo.toml` (`Cargo.lock` follows), in `action.yml`
+   (`RG_DEFAULT_VERSION`), and in any doc that pins a version. `tests/docs.rs`
+   fails if `action.yml` disagrees with the crate version.
+7. Add the changelog entry under the new version and move the `[Unreleased]`
    comparison link.
-7. If the README examples or rule pages changed:
-   `REALISM_GATE_BLESS=1 cargo test --test docs`.
-8. Commit, push `main`, and wait for CI to be green.
-9. Run the dry run above and wait for every job, including the three install
-   tests, to pass.
-10. Create the annotated tag and push it:
+8. If the README examples, the claims block or the golden card changed:
+   `REALISM_GATE_BLESS=1 cargo test --test docs`, then `cargo test --test docs`
+   without the variable to prove the blocks are current.
+9. Commit, push `main`, and wait for CI to be green.
+10. Run the dry run above and wait for every job, including the three install
+    tests, to pass.
+11. Create the annotated tag and push it:
     ```bash
     git tag -a vX.Y.Z -m "realism-gate X.Y.Z"
     git push origin vX.Y.Z
     ```
-11. Wait for the tag-triggered run. Confirm the release has five archives and
+12. Wait for the tag-triggered run. Confirm the release has five archives and
     `SHA256SUMS`, and that the notes are the changelog section:
     ```bash
     gh run watch
     gh release view vX.Y.Z
     scripts/release-assets.sh vX.Y.Z
     ```
-12. `cargo publish` is a separate, manual step; it is not part of the release
-    workflow. After it, `verify-release.yml` installs the published release
-    from crates.io, from the archives and through the action.
+13. `cargo publish` is a separate, manual step; it is not part of the release
+    workflow. A release is not done while crates.io is behind: after
+    publishing, `verify-release.yml` installs the published release from
+    crates.io, from the archives and through the action.
+14. Move the floating Action tag to the release, and only then:
+    ```bash
+    git tag -f -a v1 -m "v1: floating major tag, now vX.Y.Z" <commit>
+    git push --force origin v1
+    ```
 
 ## What the release workflow does
 

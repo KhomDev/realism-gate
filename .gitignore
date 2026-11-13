@@ -14,6 +14,9 @@ realism-report*.sarif
 # --- benchmark checkouts (fetched by scripts/bench-corpus.sh) ---------------
 /.corpus/
 
+# --- the throwaway git repo examples/rain-usdr/make-target-repo.sh builds ----
+/examples/rain-usdr/.target-repo/
+
 # --- secrets -----------------------------------------------------------------
 .env
 .env.*

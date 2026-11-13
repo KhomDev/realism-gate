@@ -1,0 +1,47 @@
+# The three realism-gate-killed rows of the rejection log, as regression
+# fixtures for realism-gate 1.0.
+#
+# Source: clean-rejection-taxonomy-0.6.0/data/rejections.json (v0.6.0 public
+# export; data CC BY 4.0). Rows whose earliest_gate is REALISM, found by
+# filtering that file: R-034, R-035, R-036.
+#
+# Expected, from CONSOLIDATION-PLAN section 1.4: each killed row must produce
+# CONTRADICTED or NOT SHOWN when its finding and PoC are supplied.
+#
+# The finding texts are private and are NOT in this repository (the public
+# export carries taxonomy columns only). So the fixtures are pointers plus the
+# expected status: a private input directory can be passed with --private-dir
+# when the owner runs them locally. This repository cannot and does not claim
+# that the current tool reproduces them; the run status is recorded below.
+version: 1
+schema: realism-gate.claims.fixtures/v1
+source: "clean-rejection-taxonomy-0.6.0/data/rejections.json"
+status: "not_run"
+why_not_run: >-
+  the three rows are private-log inputs and are not part of the public export;
+  the public repository holds only their ids and the expected status
+rows:
+  - id: R-034
+    family_id: F-034
+    bug_family: access_control
+    mechanism_class: key_binding_missing
+    earliest_gate: REALISM
+    triage_class: intentional_design
+    expected_claim_status: contradicted_or_not_shown
+    input: private
+  - id: R-035
+    family_id: F-035
+    bug_family: accounting
+    mechanism_class: accounting_bias_direction
+    earliest_gate: REALISM
+    triage_class: intentional_design
+    expected_claim_status: contradicted_or_not_shown
+    input: private
+  - id: R-036
+    family_id: F-036
+    bug_family: config
+    mechanism_class: config_dependent
+    earliest_gate: REALISM
+    triage_class: intentional_design
+    expected_claim_status: contradicted_or_not_shown
+    input: private

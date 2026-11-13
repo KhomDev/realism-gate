@@ -47,6 +47,41 @@
         }
       ]
     },
+    "claims": {
+      "type": "object",
+      "description": "The claim table, present only with --report or --claims. Added in 1.0.0. docs/claims.md is the predicate table.",
+      "required": ["schema", "binding", "source", "outcome", "shown", "not_shown", "contradicted", "not_checkable", "rows"],
+      "additionalProperties": false,
+      "properties": {
+        "schema": { "type": "string", "enum": ["realism-gate.claims/v1"] },
+        "binding": { "type": "string", "enum": ["structured", "inferred"], "description": "structured: claims.yaml or a front-matter block. inferred: extracted from the report's prose; never a pass." },
+        "source": { "type": "string", "description": "Where the claims came from: a path, 'front matter of <path>', or '<path> (inferred)'." },
+        "outcome": { "type": "string", "enum": ["shown", "incomplete", "contradicted"] },
+        "shown": { "type": "integer" },
+        "not_shown": { "type": "integer" },
+        "contradicted": { "type": "integer" },
+        "not_checkable": { "type": "integer" },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["field", "claim", "evidence", "status"],
+            "additionalProperties": false,
+            "properties": {
+              "field": { "type": "string", "enum": ["attacker", "impact", "asset", "amount", "preconditions", "cited", "fix"] },
+              "claim": { "type": "string", "description": "What the finding claims for this field." },
+              "evidence": { "type": "string", "description": "What in the PoC was looked at, in the PoC's own words." },
+              "status": { "type": "string", "enum": ["shown", "not_shown", "contradicted", "not_checkable"] }
+            }
+          }
+        }
+      }
+    },
+    "claim_binding": {
+      "type": "string",
+      "enum": ["structured", "inferred"],
+      "description": "Mirrors claims.binding at the top level. Added in 1.0.0."
+    },
     "findings": {
       "type": "array",
       "items": {

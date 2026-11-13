@@ -39,7 +39,7 @@ const MEASURE_PREFIXES: &[&str] = &[
     "userinfo",
 ];
 
-fn is_measure(method: &str) -> bool {
+pub(crate) fn is_measure(method: &str) -> bool {
     let lower = method.to_ascii_lowercase();
     MEASURE_PREFIXES.iter().any(|p| lower.starts_with(p))
 }
@@ -231,16 +231,16 @@ fn same_measure(a: &Expr, b: &Expr) -> bool {
 /// What a measurement reads: whose balance or state (`who`), and of which
 /// asset (`"ether"` for `.balance`, else the contract the read is made on).
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct Subject {
-    who: String,
-    asset: String,
+pub(crate) struct Subject {
+    pub(crate) who: String,
+    pub(crate) asset: String,
 }
 
 const ETHER: &str = "ether";
 
 /// Measurement reads inside an expression: calls to value-reading methods and
 /// `.balance` member reads. Maps the read's canonical text to its subject.
-fn reads_in(e: &Expr, out: &mut BTreeMap<String, Subject>) {
+pub(crate) fn reads_in(e: &Expr, out: &mut BTreeMap<String, Subject>) {
     match &e.kind {
         ExprKind::Call { callee, args, .. } => {
             if let ExprKind::Member(receiver, m) = &callee.kind

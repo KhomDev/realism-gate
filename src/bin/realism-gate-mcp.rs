@@ -1,7 +1,9 @@
 //! MCP stdio server. See `src/mcp.rs` for the tools.
 //!
-//! Binaries: `REALISM_GATE_BIN` and `VG_BIN`, else a sibling of this
-//! executable, else `realism-gate` and `vg` on `PATH`.
+//! The binary is `REALISM_GATE_BIN` when set, else a sibling of this
+//! executable, else `realism-gate` on `PATH`. There is no second tool to
+//! find: the two questions (does the proof prove the claim, is it new) are
+//! separate programs with no pin between them.
 
 use realism_gate::mcp::{self, Ran};
 use std::io::{BufRead, Write};
@@ -29,8 +31,8 @@ fn main() {
     }
 }
 
-fn shell_out(program: &str, args: &[String]) -> Result<Ran, String> {
-    let bin = resolve(program);
+fn shell_out(args: &[String]) -> Result<Ran, String> {
+    let bin = resolve();
     let output = Command::new(&bin)
         .args(args)
         .output()
@@ -42,21 +44,21 @@ fn shell_out(program: &str, args: &[String]) -> Result<Ran, String> {
     })
 }
 
-fn resolve(program: &str) -> PathBuf {
-    let env_key = match program {
-        "vg" => "VG_BIN",
-        _ => "REALISM_GATE_BIN",
-    };
-    if let Some(p) = std::env::var_os(env_key) {
+fn resolve() -> PathBuf {
+    if let Some(p) = std::env::var_os("REALISM_GATE_BIN") {
         return PathBuf::from(p);
     }
     if let Ok(exe) = std::env::current_exe()
         && let Some(dir) = exe.parent()
     {
-        let sibling = dir.join(program);
+        let sibling = dir.join("realism-gate");
+        if sibling.is_file() {
+            return sibling;
+        }
+        let sibling = dir.join("realism-gate.exe");
         if sibling.is_file() {
             return sibling;
         }
     }
-    PathBuf::from(program)
+    PathBuf::from("realism-gate")
 }

@@ -9,6 +9,9 @@ pub struct TextOptions {
     pub color: bool,
     pub show_suppressed: bool,
     pub fail_on: Option<Severity>,
+    /// `--no-fail-on-claims`: the claim table is printed, but it does not
+    /// decide the exit status.
+    pub no_fail_on_claims: bool,
 }
 
 struct Paint {
@@ -37,6 +40,15 @@ impl Paint {
     fn bold(&self, s: &str) -> String {
         self.wrap("1", s)
     }
+    fn claim_status(&self, s: crate::claims::Status) -> String {
+        use crate::claims::Status;
+        match s {
+            Status::Shown => self.wrap("1;32", s.label()),
+            Status::NotShown => self.wrap("1;33", s.label()),
+            Status::Contradicted => self.wrap("1;31", s.label()),
+            Status::NotCheckable => self.dim(s.label()),
+        }
+    }
 }
 
 fn plural(n: usize, one: &str, many: &str) -> String {
@@ -45,6 +57,76 @@ fn plural(n: usize, one: &str, many: &str) -> String {
     } else {
         format!("{n} {many}")
     }
+}
+
+/// Word-wraps `text` into chunks of at most `width` columns. A word longer
+/// than the width gets its own line rather than being cut.
+fn chunks(text: &str, width: usize) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    let mut line = String::new();
+    for word in text.split_whitespace() {
+        if !line.is_empty() && line.chars().count() + 1 + word.chars().count() > width {
+            out.push(std::mem::take(&mut line));
+        }
+        if !line.is_empty() {
+            line.push(' ');
+        }
+        line.push_str(word);
+    }
+    if !line.is_empty() {
+        out.push(line);
+    }
+    if out.is_empty() {
+        out.push(String::new());
+    }
+    out
+}
+
+fn columns(cells: &[(String, usize)]) -> String {
+    let mut line = String::new();
+    for (i, (text, width)) in cells.iter().enumerate() {
+        if i > 0 {
+            line.push_str("  ");
+        }
+        if *width > 0 {
+            line.push_str(&format!("{text:<width$}", width = *width));
+        } else {
+            line.push_str(text);
+        }
+    }
+    line.trim_end().to_string() + "\n"
+}
+
+/// The claim table: CLAIM / EVIDENCE / STATUS, one row per claim field.
+pub fn claims_table(table: &crate::claims::Table, color: bool) -> String {
+    const CLAIM_W: usize = 30;
+    const EVIDENCE_W: usize = 44;
+    let p = Paint { on: color };
+    let mut out = String::new();
+    out.push_str(&columns(&[
+        ("CLAIM".to_string(), CLAIM_W),
+        ("EVIDENCE".to_string(), EVIDENCE_W),
+        ("STATUS".to_string(), 0),
+    ]));
+    for row in &table.rows {
+        let claim = chunks(&row.claim, CLAIM_W);
+        let evidence = chunks(&row.evidence, EVIDENCE_W);
+        let height = claim.len().max(evidence.len());
+        for i in 0..height {
+            let c = claim.get(i).cloned().unwrap_or_default();
+            let e = evidence.get(i).cloned().unwrap_or_default();
+            if i == 0 {
+                out.push_str(&columns(&[
+                    (c, CLAIM_W),
+                    (e, EVIDENCE_W),
+                    (p.claim_status(row.status), 0),
+                ]));
+            } else {
+                out.push_str(&columns(&[(c, CLAIM_W), (e, EVIDENCE_W)]));
+            }
+        }
+    }
+    out
 }
 
 /// Wraps `text` at `width` columns, indenting every line by `indent` spaces.
@@ -180,6 +262,21 @@ pub fn render(report: &Report, opts: TextOptions) -> String {
         out.push('\n');
     }
 
+    if let Some(t) = &report.claims {
+        out.push_str(&format!(
+            "{}  {}  ·  {}\n",
+            p.bold("CLAIMS"),
+            t.source,
+            t.binding.as_str()
+        ));
+        out.push_str(&claims_table(t, opts.color));
+        out.push_str(&format!(
+            "{}  {}\n\n",
+            p.bold("CLAIMS"),
+            p.bold(&t.verdict())
+        ));
+    }
+
     out.push_str(&format!(
         "{}  {}  ·  {}  ·  {}  ·  {} suppressed\n",
         p.bold("SUMMARY"),
@@ -188,16 +285,36 @@ pub fn render(report: &Report, opts: TextOptions) -> String {
         plural(s.notes, "note", "notes"),
         s.suppressed
     ));
+    // The exit status is the rule threshold or the claim table, whichever
+    // fails first. Saying PASS on a run that exits 1 because a claim is
+    // contradicted would be the one lie a checker cannot afford.
+    let claims_fail = !opts.no_fail_on_claims && report.claims.as_ref().is_some_and(|t| t.fails());
+    let claim_reason = report.claims.as_ref().and_then(|t| match t.outcome {
+        crate::claims::Outcome::Contradicted => {
+            Some(format!("{} claim(s) contradicted", t.contradicted))
+        }
+        _ if t.binding == crate::claims::Binding::Inferred => Some("claims inferred".to_string()),
+        _ => None,
+    });
     if let Some(level) = opts.fail_on {
-        let verdict = if report.fails(level) {
+        let rule_fail = report.fails(level);
+        let verdict = if rule_fail || claims_fail {
             p.wrap("1;31", "FAIL")
         } else {
             p.wrap("1;32", "PASS")
         };
+        let reason = match (&claim_reason, claims_fail) {
+            (Some(reason), true) => format!("claims: {reason}"),
+            _ => format!("fails on {} and above", level.as_str()),
+        };
+        out.push_str(&format!("{}   {verdict}  ({reason})\n", p.bold("RESULT")));
+    } else if claims_fail {
+        // --fail-on never still cannot hide a contradicted claim.
+        let verdict = p.wrap("1;31", "FAIL");
+        let reason = claim_reason.unwrap_or_else(|| "claims".to_string());
         out.push_str(&format!(
-            "{}   {verdict}  (fails on {} and above)\n",
-            p.bold("RESULT"),
-            level.as_str()
+            "{}   {verdict}  (claims: {reason})\n",
+            p.bold("RESULT")
         ));
     }
     out.push('\n');

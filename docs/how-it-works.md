@@ -1,10 +1,12 @@
 # How realism-gate works
 
 `realism-gate check` never runs a test. It reads the source, rebuilds what the
-test would do, and checks that sequence against the rules. `verify-fix` is the
-one command that does run a test: it runs forge on an unpatched copy and on a
-patched copy, and requires the PoC to pass and then fail. This page describes
-`check`. The execution command is [verify-fix](verify-fix.md). Rust tests for Solana
+test would do, and checks that sequence against the rules. With `--report` it
+also reads the finding and binds the finding's claims to what the PoC shows.
+`verify-fix` is the one command that does run a test: it runs forge on an
+unpatched copy and on a patched copy, and requires the PoC to pass and then
+fail. This page describes `check`, including the [claim table](#claims-and-binding).
+The execution command is [verify-fix](verify-fix.md). Rust tests for Solana
 programs go through the same stages with their own parser;
 [the last section](#rust-solana-tests) describes how each one differs. Move
 tests are a separate, smaller reader: `#[test]` functions and the calls in
@@ -114,6 +116,61 @@ rule text: `realism-gate rules`, `realism-gate explain`, the SARIF rule table
 and the pages in `docs/rules/` are all generated from it, and a test fails if
 the pages drift.
 
+## Claims and binding
+
+`check` is about the PoC on its own. A PoC can be clean and still prove less
+than the report says, so `--report` reads the finding too and prints a
+[claim table](claims.md) after the findings. Nothing is executed and there is
+no score.
+
+**Where the claims come from.** In order: `--claims FILE`; a `claims.yaml`
+next to `--report`; a YAML front-matter block at the top of the report; then
+heuristics over the prose. The first three are *structured* — one row per
+field the author wrote, and a field left out is not claimed. The fourth is the
+fallback: it reads only backticked identifiers (`cited`), the first heading's
+impact verb, and the words "any user" / "unprivileged" / a role name for
+`attacker`. Everything else comes back empty. A run bound that way is labelled
+**inferred**, prints one row per field (missing ones as `(not stated)`), and
+exits non-zero: an inferred binding is never a pass.
+
+**How a field is bound.** Each field has one predicate, built from what the
+rules already computed. The predicate table in [claims.md](claims.md#the-predicate-table)
+is the full list; in one line each:
+
+- `attacker`: the sender the trace replayed for the exploit's calls, through
+  `identity.rs`. A role used to reach the exploit contradicts `any-user`; a
+  `role:<NAME>` claim is `NOT CHECKABLE` because the test cannot prove an
+  outsider holds it.
+- `impact`: `drain`/`mis-accounting` need an assertion that reads a measured
+  value; `freeze`/`halt`/`dos` need `expectRevert` **and** a sibling test that
+  performs the same call without the setup and succeeds (the negative
+  control). A revert is not evidence that value moved.
+- `asset`: the PoC names the asset and an assertion reads a value of it.
+- `amount`: an equality between two quantities, or a value read before and
+  after the exploit.
+- `preconditions`: each entry is classified by its words (privilege, chain
+  state, timing, public entry) and checked against the same rules; an
+  unrecognised entry is `NOT CHECKABLE`.
+- `cited`: every name resolves in the target tree at `--target-commit`,
+  through `RG20`'s reader. Without a target, `NOT CHECKABLE`.
+- `fix`: always `NOT SHOWN` under `check`; `verify-fix` is what runs a patch.
+
+**Then the table.** Four statuses — `SHOWN`, `NOT SHOWN`, `CONTRADICTED`,
+`NOT CHECKABLE` — counts, and a top line (`CONTRADICTED` / `INCOMPLETE` /
+`COMPLETE`). A `CONTRADICTED` claim and an inferred binding set exit 1,
+whatever `--fail-on` says; `--no-fail-on-claims` is the escape hatch. The
+exact exit table is in [claims.md](claims.md#exit-codes).
+
+**The evidence card.** `--card` and `--card-json` write the table with the
+tool version, the rule-set hash, the PoC's sha256, the report's sha256, the
+claims' sha256, the target commit and the rerun command. It is signed by
+nothing; a reader reproduces the table and hashes the files. The fields and a
+golden card are in [evidence-card.md](evidence-card.md).
+
+Binding reads only the report text, the PoC source and the target git tree.
+It does not read the chain, the network, or the protocol's documentation, and
+it does not run the PoC. What that leaves unprovable is in
+[limitations](limitations.md#claims-and-binding).
 ## Rust (Solana) tests
 
 `.rs` files are parsed with [`syn`](https://github.com/dtolnay/syn) and lowered

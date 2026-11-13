@@ -1,0 +1,2573 @@
+version: 1
+schema: realism-gate.claims.pairs/v1
+note: Pointers and claim fields only. Each pair is one public PoC plus the incident
+  record in its header that states the claim. No PoC text and no write-up text is
+  stored here; both are fetched into eval/cache/.
+seed: rg-claims-2026-11-12
+sampling:
+  population: 603
+  rule: sort by sha256(seed + ':' + id), take the first N, then sort by id
+  n: 120
+claim_source:
+  kind: defihacklabs-header
+  fields:
+  - Total Lost
+  - Attacker
+  - Analysis links
+  report_render: run.py renders each record into a report file; the linked write-ups
+    are pointers, not vendored
+pairs:
+- id: defihacklabs:src/test/2017-07/Parity_first_hack_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2017-07/Parity_first_hack_exp.sol
+    sha256: 1645e8188843a129161860ec74ad67d08f3c0e8bb409d0c0db81c85b37b25dd0
+  period: 2017-07
+  incident:
+    name: Parity_first_hack
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 153,037 ETH (~$30M)
+    attacker_address: '0xB3764761E297D6f121e79C32A65829Cd1dDb4D32'
+    attack_tx: https://etherscan.io/tx/0x9dbf0326a03a2a3719c27be4fa69aacc9857fd231a8d9dcaede4bb083def75ec
+    analyses: []
+  claim:
+    attacker: address:0xB3764761E297D6f121e79C32A65829Cd1dDb4D32
+    impact: drain
+    asset: ETH
+    amount: '153037'
+    amount_text: 153,037 ETH (~$30M)
+- id: defihacklabs:src/test/2021-05/Spartan_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2021-05/Spartan_exp.sol
+    sha256: cb28fb054c1d136045e97538109556db25f969dbd8f2e4343243e9e73815321c
+  period: 2021-05
+  incident:
+    name: Spartan
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: $30.5M
+    attacker_address: '0x3b6e77722e2bbe97c1cfa337b42c0939aeb83671'
+    attack_tx: https://explorer.phalcon.xyz/tx/bsc/0xb64ae25b0d836c25d115a9368319902c972a0215bd108ae17b1b9617dfb93af8?line=0
+    analyses:
+    - https://explorer.phalcon.xyz/tx/bsc/0xb64ae25b0d836c25d115a9368319902c972a0215bd108ae17b1b9617dfb93af8?line=0
+    - https://medium.com/amber-group/exploiting-spartan-protocols-lp-share-calculation-flaws-391437855e74
+    - https://rekt.news/spartan-rekt/
+  claim:
+    attacker: address:0x3b6e77722e2bbe97c1cfa337b42c0939aeb83671
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: $30.5M
+- id: defihacklabs:src/test/2022-07/Audius_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2022-07/Audius_exp.sol
+    sha256: 4879b777efa9b242238f2d4c7173d180b911c7b2b911fcaf5872d1e26bf959ce
+  period: 2022-07
+  incident:
+    name: Audius
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 704 ETH (~ 1,080,000 US$)
+    attacker_address: '0xa0c7bd318d69424603cbf91e9969870f21b8ab4c'
+    attack_tx: https://etherscan.io/tx/0xfefd829e246002a8fd061eede7501bccb6e244a9aacea0ebceaecef5d877a984
+    analyses:
+    - https://twitter.com/1nf0s3cpt/status/1551050841146400768
+    - https://twitter.com/AudiusProject/status/1551000725169180672
+    - https://twitter.com/BeosinAlert/status/1551041795735408641
+    - https://twitter.com/CertiKAlert/status/1551020421532770305
+    - https://twitter.com/MistTrack_io/status/1551204726661734400
+  claim:
+    attacker: address:0xa0c7bd318d69424603cbf91e9969870f21b8ab4c
+    impact: drain
+    asset: ETH
+    amount: '704'
+    amount_text: 704 ETH (~ 1,080,000 US$)
+- id: defihacklabs:src/test/2022-08/NomadBridge_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2022-08/NomadBridge_exp.sol
+    sha256: 463178e66723def1681ebf68a1de34a8f1e368626a85751165765205a3b4af90
+  period: 2022-08
+  incident:
+    name: NomadBridge
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~152M US$
+    attacker_address: null
+    attack_tx: null
+    analyses:
+    - https://twitter.com/0xfoobar/status/1554269062653411334
+    - https://twitter.com/BeosinAlert/status/1554303803218083842
+    - https://twitter.com/BlockSecTeam/status/1554335271964987395
+    - https://twitter.com/CertiKAlert/status/1554305088037978113
+    - https://twitter.com/paradigmeng420/status/1554249610574450688
+    - https://twitter.com/samczsun/status/1554252024723546112
+  claim:
+    attacker: null
+    impact: drain
+    asset: null
+    amount: '152'
+    amount_text: ~152M US$
+- id: defihacklabs:src/test/2022-08/Qixi_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2022-08/Qixi_exp.sol
+    sha256: 38d8037be92df014404ae2eb8cbc7633d5d613e714f5be69aa6f1860c9e48ebf
+  period: 2022-08
+  incident:
+    name: Qixi
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~6.8 BNB
+    attacker_address: '0x2723e1f6a9a3cd003fd395cc46882e4573cb249f'
+    attack_tx: https://app.blocksec.com/explorer/tx/bsc/0x16be4fe1c8fcab578fcb999cbc40885ba0d4ba9f3782a67bd215fb56dc579062
+    analyses:
+    - https://app.blocksec.com/explorer/tx/bsc/0x16be4fe1c8fcab578fcb999cbc40885ba0d4ba9f3782a67bd215fb56dc579062
+    - https://x.com/8olidity/status/1555366421693345792
+  claim:
+    attacker: address:0x2723e1f6a9a3cd003fd395cc46882e4573cb249f
+    impact: drain
+    asset: BNB
+    amount: '6.8'
+    amount_text: ~6.8 BNB
+- id: defihacklabs:src/test/2022-08/ReaperFarm_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2022-08/ReaperFarm_exp.sol
+    sha256: e1f536ab1cf1aaaaaeb330dab0b253bf4569f067497a126eda1b37b4be9d2a6f
+  period: 2022-08
+  incident:
+    name: ReaperFarm
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~1.7M US$
+    attacker_address: '0x5636e55e4a72299a0f194c001841e2ce75bb527a'
+    attack_tx: https://ftmscan.com/tx/0xc92ls9f3b9312ff26be0adb1c3ff832dbdafdcbcaad33d002744effd515e53c9d5
+    analyses:
+    - https://twitter.com/BeosinAlert/status/1554476940593340421
+    - https://twitter.com/Reaper_Farm/status/1554500909740302337
+  claim:
+    attacker: address:0x5636e55e4a72299a0f194c001841e2ce75bb527a
+    impact: drain
+    asset: null
+    amount: '1.7'
+    amount_text: ~1.7M US$
+- id: defihacklabs:src/test/2022-10/ATK_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2022-10/ATK_exp.sol
+    sha256: 9a8c5518f149dd7221d24805848bc7a36d777ba80c81de3b41f04713d8d4b32c
+  period: 2022-10
+  incident:
+    name: ATK
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~127K BUSDT
+    attacker_address: '0x3DF6cd58716d22855aFb3B828F82F10708AfbB4f'
+    attack_tx: https://bscscan.com/tx/0xb181e88e6b37ee9986f2a57aefb94779402fdb928654aa7c1dda5138b90d0e14
+    analyses:
+    - https://twitter.com/BlockSecTeam/status/1580095325200474112
+    - https://www.certik.com/resources/blog/1YsQo8TnxCvwalqvtkFLtC-journey-of-awakening-incident-analysis
+  claim:
+    attacker: address:0x3DF6cd58716d22855aFb3B828F82F10708AfbB4f
+    impact: drain
+    asset: null
+    amount: '127'
+    amount_text: ~127K BUSDT
+- id: defihacklabs:src/test/2022-10/HPAY_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2022-10/HPAY_exp.sol
+    sha256: 3e762c8d2194bbdcb0da5837566b7bb48edbbf8936c74fcff32e2d1d45acbd25
+  period: 2022-10
+  incident:
+    name: HPAY
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~115 BNB
+    attacker_address: '0xaB74FBd735Cd2ED826b64e0F850a890930A91094'
+    attack_tx: null
+    analyses: []
+  claim:
+    attacker: address:0xaB74FBd735Cd2ED826b64e0F850a890930A91094
+    impact: drain
+    asset: BNB
+    amount: '115'
+    amount_text: ~115 BNB
+- id: defihacklabs:src/test/2022-10/RES_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2022-10/RES_exp.sol
+    sha256: 53c70c902127c5b09ec6a5bfc1d775ad5df7ec83601f3d12b84ed56c5107940f
+  period: 2022-10
+  incident:
+    name: RES
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 290,671 USDT
+    attacker_address: '0x986b2e2a1cf303536138d8ac762447500fd781c6'
+    attack_tx: https://bscscan.com/tx/0xe59fa48212c4ee716c03e648e04f0ca390f4a4fc921a890fded0e01afa4ba96d
+    analyses:
+    - https://quillaudits.medium.com/res-token-290k-flash-loan-exploit-quillaudits-9300657fff7b
+    - https://twitter.com/BlockSecTeam/status/1578120337509662721
+    - https://x.com/AnciliaInc/status/1578119778446680064
+  claim:
+    attacker: address:0x986b2e2a1cf303536138d8ac762447500fd781c6
+    impact: drain
+    asset: USDT
+    amount: '290671'
+    amount_text: 290,671 USDT
+- id: defihacklabs:src/test/2022-10/RabbyWallet_SwapRouter_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2022-10/RabbyWallet_SwapRouter_exp.sol
+    sha256: 82376f2299acbeddbefebf4018a4f4061b3a88878b403268425fdc49cb405f19
+  period: 2022-10
+  incident:
+    name: RabbyWallet_SwapRouter
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~200,000 US$
+    attacker_address: '0xb687550842a24d7fbc6aad238fd7e0687ed59d55'
+    attack_tx: null
+    analyses:
+    - https://twitter.com/BeosinAlert/status/1579856733178331139
+    - https://twitter.com/Rabby_io/status/1579833969566449666
+    - https://twitter.com/SlowMist_Team/status/1579839744128978945
+    - https://twitter.com/Supremacy_CA/status/1579813933669486592
+  claim:
+    attacker: address:0xb687550842a24d7fbc6aad238fd7e0687ed59d55
+    impact: drain
+    asset: null
+    amount: '200000'
+    amount_text: ~200,000 US$
+- id: defihacklabs:src/test/2022-10/Templedao_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2022-10/Templedao_exp.sol
+    sha256: c48ef11a25b02cbb0d1b2e4b183f1486bbe33eb4a36683e6c04882d36b4eec18
+  period: 2022-10
+  incident:
+    name: Templedao
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: $~2.3M
+    attacker_address: '0x9c9fb3100a2a521985f0c47de3b4598dafd25b01'
+    attack_tx: https://etherscan.io/tx/0x8c3f442fc6d640a6ff3ea0b12be64f1d4609ea94edd2966f42c01cd9bdcf04b5
+    analyses:
+    - https://rekt.news/templedao-rekt/
+    - https://twitter.com/BlockSecTeam/status/1579843881893769222
+    - https://twitter.com/FrankResearcher/status/1579840347647414272
+    - https://twitter.com/spreekaway/status/1579836562338361345
+  claim:
+    attacker: address:0x9c9fb3100a2a521985f0c47de3b4598dafd25b01
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: $~2.3M
+- id: defihacklabs:src/test/2023-01/BEVO_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-01/BEVO_exp.sol
+    sha256: 44ccef14135adf4a2e4dd0312082ceec46bf50b6c8d5511b02629582deba783f
+  period: 2023-01
+  incident:
+    name: BEVO
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 144 BNB
+    attacker_address: '0x68fa774685154d3d22dec195bc77d53f0261f9fd'
+    attack_tx: https://bscscan.com/tx/0xb97502d3976322714c828a890857e776f25c79f187a32e2d548dda1c315d2a7d
+    analyses:
+    - https://twitter.com/QuillAudits/status/1620377951836708865
+  claim:
+    attacker: address:0x68fa774685154d3d22dec195bc77d53f0261f9fd
+    impact: drain
+    asset: BNB
+    amount: '144'
+    amount_text: 144 BNB
+- id: defihacklabs:src/test/2023-01/Upswing_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-01/Upswing_exp.sol
+    sha256: 9fe2f88e4bbe5f1d04342a75549413fcd7e2c661d614dd8d2c167544e0f745a2
+  period: 2023-01
+  incident:
+    name: Upswing
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~22 ETH
+    attacker_address: '0xceed34f03a3e607cc04c2d0441c7386b190d7cf4'
+    attack_tx: https://etherscan.io/tx/0x4b3df6e9c68ae482c71a02832f7f599ff58ff877ec05fed0abd95b31d2d7d912
+    analyses:
+    - https://twitter.com/QuillAudits/status/1615634917802807297
+  claim:
+    attacker: address:0xceed34f03a3e607cc04c2d0441c7386b190d7cf4
+    impact: drain
+    asset: ETH
+    amount: '22'
+    amount_text: ~22 ETH
+- id: defihacklabs:src/test/2023-05/NOON_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-05/NOON_exp.sol
+    sha256: f740ac9917011330b5410bbba8c0b1bf29c1c5e6fe90e03a2c9326cd3df91baf
+  period: 2023-05
+  incident:
+    name: NOON
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~2K USD$
+    attacker_address: null
+    attack_tx: null
+    analyses:
+    - https://twitter.com/hexagate_/status/1663501545105702912
+  claim:
+    attacker: null
+    impact: drain
+    asset: null
+    amount: '2'
+    amount_text: ~2K USD$
+- id: defihacklabs:src/test/2023-06/Pawnfi_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-06/Pawnfi_exp.sol
+    sha256: cb5b7da1f2c8b8a591a26084a13a324f19195e0f72b80db44ce994141b3b3115
+  period: 2023-06
+  incident:
+    name: Pawnfi
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$820K
+    attacker_address: '0x8f7370d5d461559f24b83ba675b4c7e2fdb514cc'
+    attack_tx: https://etherscan.io/tx/0x8d3036371ccf27579d3cb3d4b4b71e99334cae8d7e8088247517ec640c7a59a5
+    analyses:
+    - https://blog.solidityscan.com/pawnfi-hack-analysis-38ac9160cbb4
+  claim:
+    attacker: address:0x8f7370d5d461559f24b83ba675b4c7e2fdb514cc
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$820K
+- id: defihacklabs:src/test/2023-06/SHIDO_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-06/SHIDO_exp.sol
+    sha256: df03b05f3aefb85d6abcec0b460b9f44ba7c22ebdd871afe51a94a3ef4919610
+  period: 2023-06
+  incident:
+    name: SHIDO
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~230K US$
+    attacker_address: '0x69810917928b80636178b1bb011c746efe61770d'
+    attack_tx: https://bscscan.com/tx/0x72f8dd2bcfe2c9fbf0d933678170417802ac8a0d8995ff9a56bfbabe3aa712d6
+    analyses:
+    - https://twitter.com/AnciliaInc/status/1672382613473083393
+    - https://twitter.com/Phalcon_xyz/status/1672473343734480896
+  claim:
+    attacker: address:0x69810917928b80636178b1bb011c746efe61770d
+    impact: drain
+    asset: null
+    amount: '230'
+    amount_text: ~230K US$
+- id: defihacklabs:src/test/2023-06/UN_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-06/UN_exp.sol
+    sha256: 48706e5aabae02bba2957ba1260d7d969d5760e283adead77be1b6a31342298a
+  period: 2023-06
+  incident:
+    name: UN
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~26K USD$
+    attacker_address: '0xf84efa8a9f7e68855cf17eaac9c2f97a9d131366'
+    attack_tx: https://bscscan.com/tx/0xff5515268d53df41d407036f547b206e288b226989da496fda367bfeb31c5b8b
+    analyses:
+    - https://twitter.com/MetaTrustAlert/status/1667041877428932608
+  claim:
+    attacker: address:0xf84efa8a9f7e68855cf17eaac9c2f97a9d131366
+    impact: drain
+    asset: null
+    amount: '26'
+    amount_text: ~26K USD$
+- id: defihacklabs:src/test/2023-06/VINU_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-06/VINU_exp.sol
+    sha256: 5c53d697250ec4f38185fd55cda5b83524cc129e89218e030faf69414345a308
+  period: 2023-06
+  incident:
+    name: VINU
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~6k USD$
+    attacker_address: '0x9748c8540a5f752ba747f1203ac13dae789033de'
+    attack_tx: https://etherscan.io/tx/0xaf46a42fe1ed7193b25c523723dc047c7500e50a00ecb7bbb822d665adb3e1f3
+    analyses:
+    - https://twitter.com/hexagate_/status/1666051854386511873?cxt=HHwWgoC24bPVgJ8uAAAA
+  claim:
+    attacker: address:0x9748c8540a5f752ba747f1203ac13dae789033de
+    impact: drain
+    asset: null
+    amount: '6'
+    amount_text: ~6k USD$
+- id: defihacklabs:src/test/2023-07/ArcadiaFi_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-07/ArcadiaFi_exp.sol
+    sha256: a9ecd2f1ba73d0d48504f8c0aff0cb8429b05f33b3d0d53cc6a92628c7c16265
+  period: 2023-07
+  incident:
+    name: ArcadiaFi
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~400K USD$
+    attacker_address: '0xd3641c912a6a4c30338787e3c464420b561a9467'
+    attack_tx: https://optimistic.etherscan.io/tx/0xca7c1a0fde444e1a68a8c2b8ae3fb76ec384d1f7ae9a50d26f8bfdd37c7a0afe
+    analyses:
+    - https://arcadiafinance.medium.com/post-mortem-72e9d24a79b0
+    - https://twitter.com/Phalcon_xyz/status/1678250590709899264
+    - https://twitter.com/peckshield/status/1678265212770693121
+  claim:
+    attacker: address:0xd3641c912a6a4c30338787e3c464420b561a9467
+    impact: drain
+    asset: null
+    amount: '400'
+    amount_text: ~400K USD$
+- id: defihacklabs:src/test/2023-07/AzukiDAO_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-07/AzukiDAO_exp.sol
+    sha256: 6695ac16d144e3dfff2d50abbe60f2ef7edfb7d58dc45f97a706ad02ba716b7d
+  period: 2023-07
+  incident:
+    name: AzukiDAO
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$69K
+    attacker_address: '0x85d231c204b82915c909a05847cca8557164c75e'
+    attack_tx: https://etherscan.io/tx/0x6233c9315dd3b6a6fcc7d653f4dca6c263e684a76b4ad3d93595e3b8e8714d34
+    analyses:
+    - https://twitter.com/sharkteamorg/status/1676892088930271232
+  claim:
+    attacker: address:0x85d231c204b82915c909a05847cca8557164c75e
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$69K
+- id: defihacklabs:src/test/2023-07/Bao_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-07/Bao_exp.sol
+    sha256: 6c4458677d00a2ffe5b2146c7137eaf643faecc198912f734832d12c72d50df7
+  period: 2023-07
+  incident:
+    name: Bao
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~46K USD$
+    attacker_address: '0x00693a01221a5e93fb872637e3a9391ef5f48300'
+    attack_tx: https://etherscan.io/tx/0xdd7dd68cd879d07cfc2cb74606baa2a5bf18df0e3bda9f6b43f904f4f7bbdfc1
+    analyses:
+    - https://twitter.com/PeckShieldAlert/status/1676224397248454657
+  claim:
+    attacker: address:0x00693a01221a5e93fb872637e3a9391ef5f48300
+    impact: drain
+    asset: null
+    amount: '46'
+    amount_text: ~46K USD$
+- id: defihacklabs:src/test/2023-07/Civfund_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-07/Civfund_exp.sol
+    sha256: ae8d35a41158ae4a8e3a23fd694759a8c8482b0ce30396c05997defe187e7d5e
+  period: 2023-07
+  incident:
+    name: Civfund
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~165K USD$
+    attacker_address: '0xc0ccff0b981b419e6e47560c3659c5f0b00e4985'
+    attack_tx: https://etherscan.io/tx/0xc42fc0e22a0f60cc299be80eb0c0ddce83c21c14a3dddd8430628011c3e20d6b
+    analyses:
+    - https://twitter.com/BeosinAlert/status/1677548773269213184
+    - https://twitter.com/HypernativeLabs/status/1677529544062803969
+  claim:
+    attacker: address:0xc0ccff0b981b419e6e47560c3659c5f0b00e4985
+    impact: drain
+    asset: null
+    amount: '165'
+    amount_text: ~165K USD$
+- id: defihacklabs:src/test/2023-07/Libertify_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-07/Libertify_exp.sol
+    sha256: b8e200996279ce7459e5cbb1838577f9e2a18acb6bb52a743e9dfa0278c96c95
+  period: 2023-07
+  incident:
+    name: Libertify
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~452K USD$
+    attacker_address: '0xfd2d3ffb05ad00e61e3c8d8701cb9036b7a16d02'
+    attack_tx: https://polygonscan.com/tx/0x7320accea0ef1d7abca8100c82223533b624c82d3e8d445954731495d4388483
+    analyses:
+    - https://twitter.com/Phalcon_xyz/status/1678694679767031809
+    - https://twitter.com/peckshield/status/1678688731908411393
+  claim:
+    attacker: address:0xfd2d3ffb05ad00e61e3c8d8701cb9036b7a16d02
+    impact: drain
+    asset: null
+    amount: '452'
+    amount_text: ~452K USD$
+- id: defihacklabs:src/test/2023-07/Palmswap_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-07/Palmswap_exp.sol
+    sha256: 8122296d685a13241a01a13f0967e5ad4c531982b3fd8210e2b3ebb7866b8853
+  period: 2023-07
+  incident:
+    name: Palmswap
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$900K
+    attacker_address: '0xf84efa8a9f7e68855cf17eaac9c2f97a9d131366'
+    attack_tx: https://bscscan.com/tx/0x62dba55054fa628845fecded658ff5b1ec1c5823f1a5e0118601aa455a30eac9
+    analyses:
+    - https://twitter.com/BlockSecTeam/status/1683680026766737408
+  claim:
+    attacker: address:0xf84efa8a9f7e68855cf17eaac9c2f97a9d131366
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$900K
+- id: defihacklabs:src/test/2023-08/CurveBurner_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-08/CurveBurner_exp.sol
+    sha256: 88eb5718763031fbd684956465f01a653b63b85fe27f46194a590b43b0e30768
+  period: 2023-08
+  incident:
+    name: CurveBurner
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$36k USD$
+    attacker_address: '0xccc526e2433db1eebb9cbf6acd7f03a19408278c'
+    attack_tx: https://etherscan.io/tx/0xd493c73397952049644c531309df3dd4134bf3db1e64eb6f0b68b016ee0bffde
+    analyses:
+    - https://medium.com/@Hypernative/exotic-culinary-hypernative-systems-caught-a-unique-sandwich-attack-against-curve-finance-6d58c32e436b
+  claim:
+    attacker: address:0xccc526e2433db1eebb9cbf6acd7f03a19408278c
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$36k USD$
+- id: defihacklabs:src/test/2023-08/EarningFram_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-08/EarningFram_exp.sol
+    sha256: 3a7ca558af0b4fe4aa7e72120706d13f609e116f55c45480314726df8fc8b27f
+  period: 2023-08
+  incident:
+    name: EarningFram
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~286K USD$
+    attacker_address: '0xee4b3dd20902fa3539706f25005fa51d3b7bdf1b'
+    attack_tx: https://etherscan.io/tx/0x6e6e556a5685980317cb2afdb628ed4a845b3cbd1c98bdaffd0561cb2c4790fa
+    analyses:
+    - https://twitter.com/Phalcon_xyz/status/1689182459269644288
+  claim:
+    attacker: address:0xee4b3dd20902fa3539706f25005fa51d3b7bdf1b
+    impact: drain
+    asset: null
+    amount: '286'
+    amount_text: ~286K USD$
+- id: defihacklabs:src/test/2023-08/Exactly_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-08/Exactly_exp.sol
+    sha256: 0a2d1ba5e386b84c197cc2ef6341d16249a6b9796f4fb0470a3c769fde738b05
+  period: 2023-08
+  incident:
+    name: Exactly
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$7M USD$
+    attacker_address: '0x3747dbbcb5c07786a4c59883e473a2e38f571af9'
+    attack_tx: https://optimistic.etherscan.io/tx/0x3d6367de5c191204b44b8a5cf975f257472087a9aadc59b5d744ffdef33a520e
+    analyses:
+    - https://medium.com/@exactly_protocol/exactly-protocol-incident-post-mortem-b4293d97e3ed
+    - https://twitter.com/BlockSecTeam/status/1692533280971936059
+  claim:
+    attacker: address:0x3747dbbcb5c07786a4c59883e473a2e38f571af9
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$7M USD$
+- id: defihacklabs:src/test/2023-09/0x0DEX_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-09/0x0DEX_exp.sol
+    sha256: 127ee183f88c7d643790a1b194fee4db08fb3b158defb628a0e6efd51d8fd7c9
+  period: 2023-09
+  incident:
+    name: 0x0DEX
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$61K
+    attacker_address: '0xcf28e9b8aa557616bc24cc9557ffa7fa2c013d53'
+    attack_tx: https://explorer.phalcon.xyz/tx/eth/0x00b375f8e90fc54c1345b33c686977ebec26877e2c8cac165429927a6c9bdbec
+    analyses:
+    - https://explorer.phalcon.xyz/tx/eth/0x00b375f8e90fc54c1345b33c686977ebec26877e2c8cac165429927a6c9bdbec
+  claim:
+    attacker: address:0xcf28e9b8aa557616bc24cc9557ffa7fa2c013d53
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$61K
+- id: defihacklabs:src/test/2023-09/DAppSocial_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-09/DAppSocial_exp.sol
+    sha256: ed6a1e17c7e34b76f96a824427600385abc32125c657787147c194bf258bbd9e
+  period: 2023-09
+  incident:
+    name: DAppSocial
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$16K
+    attacker_address: '0x7d9bc45a9abda926a7ce63f78759dbfa9ed72e26'
+    attack_tx: https://etherscan.io/tx/0xbd72bccec6dd824f8cac5d9a3a2364794c9272d7f7348d074b580e3c6e44312e
+    analyses:
+    - https://twitter.com/DecurityHQ/status/1698064511230464310
+  claim:
+    attacker: address:0x7d9bc45a9abda926a7ce63f78759dbfa9ed72e26
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$16K
+- id: defihacklabs:src/test/2023-09/FloorDAO_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-09/FloorDAO_exp.sol
+    sha256: 364fd3edb1aae38a59294068cdd80f8a1f216dd61ceddc6ec36d7e9aed2dc395
+  period: 2023-09
+  incident:
+    name: FloorDAO
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~40 eth
+    attacker_address: '0x4453aed57c23a50d887a42ad0cd14ff1b819c750'
+    attack_tx: https://explorer.phalcon.xyz/tx/eth/0x1274b32d4dfacd2703ad032e8bd669a83f012dde9d27ed92e4e7da0387adafe4
+    analyses:
+    - https://explorer.phalcon.xyz/tx/eth/0x1274b32d4dfacd2703ad032e8bd669a83f012dde9d27ed92e4e7da0387adafe4
+    - https://medium.com/floordao/floor-post-mortem-incident-summary-september-5-2023-e054a2d5afa4
+    - https://twitter.com/PeckShieldAlert/status/1698962105058361392
+  claim:
+    attacker: address:0x4453aed57c23a50d887a42ad0cd14ff1b819c750
+    impact: drain
+    asset: ETH
+    amount: '40'
+    amount_text: ~40 eth
+- id: defihacklabs:src/test/2023-09/XSDWETHpool_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-09/XSDWETHpool_exp.sol
+    sha256: a45246118d82b33d90fed684de737e7cd9fa710d50729c2d5f522fc3d62fb74e
+  period: 2023-09
+  incident:
+    name: XSDWETHpool
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~ 56.9 BNB
+    attacker_address: '0x506eebd8d6061202a8e8fc600bb3d5d41f475ee1'
+    attack_tx: https://bscscan.com/tx/0xbdf76f22c41fe212f07e24ca7266d436ef4517dc1395077fabf8125ebe304442
+    analyses:
+    - https://twitter.com/CertiKAlert/status/1706765042916450781
+  claim:
+    attacker: address:0x506eebd8d6061202a8e8fc600bb3d5d41f475ee1
+    impact: drain
+    asset: BNB
+    amount: '56.9'
+    amount_text: ~ 56.9 BNB
+- id: defihacklabs:src/test/2023-10/Astrid_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-10/Astrid_exp.sol
+    sha256: 0b6d41898fa318a13a587c1d7c1543b7551a60dc1435e98d4351dc2b5a78a716
+  period: 2023-10
+  incident:
+    name: Astrid
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~228591 USD$
+    attacker_address: '0x792ec27874e1f614e757a1ae49d00ef5b2c73959'
+    attack_tx: https://etherscan.io/tx/0x8af9b5fb3e2e3df8659ffb2e0f0c1f4c90d5a80f4f6fccef143b823ce673fb60
+    analyses:
+    - https://twitter.com/Phalcon_xyz/status/1718454835966775325
+  claim:
+    attacker: address:0x792ec27874e1f614e757a1ae49d00ef5b2c73959
+    impact: drain
+    asset: null
+    amount: '228591'
+    amount_text: ~228591 USD$
+- id: defihacklabs:src/test/2023-10/Hopelend_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-10/Hopelend_exp.sol
+    sha256: 02f3d21fbf13fada1981b8c3601ef2f74699bdcacb43aa469fc0d0278ccf2778
+  period: 2023-10
+  incident:
+    name: Hopelend
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$825000 US$
+    attacker_address: '0xA8Bbb3742f299B183190a9B079f1C0db8924145b'
+    attack_tx: https://etherscan.io/tx/0x1a7ee0a7efc70ed7429edef069a1dd001fbff378748d91f17ab1876dc6d10392
+    analyses:
+    - https://lunaray.medium.com/deep-dive-into-hopelend-hack-5962e8b55d3f
+  claim:
+    attacker: address:0xA8Bbb3742f299B183190a9B079f1C0db8924145b
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$825000 US$
+- id: defihacklabs:src/test/2023-10/MaestroRouter2_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-10/MaestroRouter2_exp.sol
+    sha256: 527167eded2d6a3d618c5c5ac51c4711a0c6e5623a4820c7ffa86d6798b17771
+  period: 2023-10
+  incident:
+    name: MaestroRouter2
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~280 ETH
+    attacker_address: '0xce6397e53c13ff2903ffe8735e478d31e648a2c6'
+    attack_tx: https://etherscan.io/tx/0xc087fbd68b9349b71838982e789e204454bfd00eebf9c8e101574376eb990d92
+    analyses:
+    - https://twitter.com/BeosinAlert/status/1717013965203804457
+    - https://twitter.com/Phalcon_xyz/status/1717014871836098663
+  claim:
+    attacker: address:0xce6397e53c13ff2903ffe8735e478d31e648a2c6
+    impact: drain
+    asset: ETH
+    amount: '280'
+    amount_text: ~280 ETH
+- id: defihacklabs:src/test/2023-10/ZS_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-10/ZS_exp.sol
+    sha256: b245b9551eb2552eb3af69daec7a18f5952bd2d5e56b7dfa718d7e3a5f7ec338
+  period: 2023-10
+  incident:
+    name: ZS
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$14K
+    attacker_address: '0x7ccf451d3c48c8bb747f42f29a0cde4209ff863e'
+    attack_tx: https://app.blocksec.com/explorer/tx/bsc/0xe2e87090f47c82eed3697297763edfad8e9689d2da7a4325541087d77432f54f
+    analyses:
+    - https://app.blocksec.com/explorer/tx/bsc/0xbc88aa6057f9da6f88e28bc908baad111ae7545e69fb0c90fbdfd485c9e72192
+    - https://app.blocksec.com/explorer/tx/bsc/0xe2e87090f47c82eed3697297763edfad8e9689d2da7a4325541087d77432f54f
+    - https://x.com/MetaSec_xyz/status/1711189697534513327
+  claim:
+    attacker: address:0x7ccf451d3c48c8bb747f42f29a0cde4209ff863e
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$14K
+- id: defihacklabs:src/test/2023-11/3913_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-11/3913_exp.sol
+    sha256: 5cb067b71b45e80f40cc05d4b14ead4a1c7a150564bc6647466364ca9c351b77
+  period: 2023-11
+  incident:
+    name: '3913'
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~31,354 USD$
+    attacker_address: '0xb29f18b89e56cc0151c7c17de0625a21018d8ae7'
+    attack_tx: https://bscscan.com/tx/0xb29f18b89e56cc0151c7c17de0625a21018d8ae7
+    analyses: []
+  claim:
+    attacker: address:0xb29f18b89e56cc0151c7c17de0625a21018d8ae7
+    impact: drain
+    asset: null
+    amount: '31354'
+    amount_text: ~31,354 USD$
+- id: defihacklabs:src/test/2023-11/AIS_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-11/AIS_exp.sol
+    sha256: 148dd0c634f0f62b58b45b2d3c820ab51a97ac01660a3a5e2f41c6c7d2a6f641
+  period: 2023-11
+  incident:
+    name: AIS
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$61k
+    attacker_address: '0x84f37F6cC75cCde5fE9bA99093824A11CfDc329D'
+    attack_tx: https://bscscan.com/tx/0x0be817b6a522a111e06293435c233dab6576d7437d0e148b45efcf7ab8a10de0
+    analyses:
+    - https://twitter.com/Phalcon_xyz/status/1729861048004391306
+  claim:
+    attacker: address:0x84f37F6cC75cCde5fE9bA99093824A11CfDc329D
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$61k
+- id: defihacklabs:src/test/2023-11/EHX_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-11/EHX_exp.sol
+    sha256: 8fce20504ce74a9a5f5d4377dfb7e44adeb58162b792666643988a76cb4f0689
+  period: 2023-11
+  incident:
+    name: EHX
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: Unclear
+    attacker_address: '0xddaaedcf226729def824cc5c14382c5980844d1f'
+    attack_tx: https://app.blocksec.com/explorer/tx/bsc/0x8b528372b743b4b8c4eb0904c96529482653187c19e13afaa22f3ba4e08fbfbb
+    analyses:
+    - https://app.blocksec.com/explorer/tx/bsc/0x8b528372b743b4b8c4eb0904c96529482653187c19e13afaa22f3ba4e08fbfbb
+    - https://x.com/MetaSec_xyz/status/1724691996638618086
+  claim:
+    attacker: address:0xddaaedcf226729def824cc5c14382c5980844d1f
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: Unclear
+- id: defihacklabs:src/test/2023-11/MetaLend_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-11/MetaLend_exp.sol
+    sha256: 0d31a6b54f4da34705955a6e9cb1f71e03819a94bc83ecf25671749e1c39a134
+  period: 2023-11
+  incident:
+    name: MetaLend
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$4K
+    attacker_address: '0x0c06340f5024c114fe196fcb38e42d20ab00f6eb'
+    attack_tx: https://app.blocksec.com/explorer/tx/eth/0x4c684fb2618c29743531dec9253ede1b757bda0b323dc2f305e3b50ab1773da7
+    analyses:
+    - https://app.blocksec.com/explorer/tx/eth/0x4c684fb2618c29743531dec9253ede1b757bda0b323dc2f305e3b50ab1773da7
+    - https://x.com/MetaSec_xyz/status/1728424965257691173
+  claim:
+    attacker: address:0x0c06340f5024c114fe196fcb38e42d20ab00f6eb
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$4K
+- id: defihacklabs:src/test/2023-11/ShibaToken_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-11/ShibaToken_exp.sol
+    sha256: dd42c6b5b6987f8d7abe1c18984e242c113925b8e3cb16682a5f0ba58f080aa7
+  period: 2023-11
+  incident:
+    name: ShibaToken
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$31K
+    attacker_address: '0xb9bdc2537c6f4b587a5c81a67e7e3a4e6ddda189'
+    attack_tx: https://explorer.phalcon.xyz/tx/bsc/0x75a26224da9faf37c2b3a4a634a096af7fec561f631a02c93e11e4a19d159477
+    analyses:
+    - https://explorer.phalcon.xyz/tx/bsc/0x75a26224da9faf37c2b3a4a634a096af7fec561f631a02c93e11e4a19d159477
+  claim:
+    attacker: address:0xb9bdc2537c6f4b587a5c81a67e7e3a4e6ddda189
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$31K
+- id: defihacklabs:src/test/2023-11/SwampFinance_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-11/SwampFinance_exp.sol
+    sha256: 4e2388701194b038e26e4857507073f769d8d0d09dc36deef7c59d92dfc64482
+  period: 2023-11
+  incident:
+    name: SwampFinance
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: Unclear
+    attacker_address: '0xfe2105e1317dfd6ed3887bf7882977c03cfebb7c'
+    attack_tx: https://app.blocksec.com/explorer/tx/bsc/0x13e75878a21af9a9b2207f5d9e18f19a43083a9ffbac36df5a7d4d67a52c164f
+    analyses:
+    - https://app.blocksec.com/explorer/tx/bsc/0x13e75878a21af9a9b2207f5d9e18f19a43083a9ffbac36df5a7d4d67a52c164f
+    - https://x.com/MetaSec_xyz/status/1720373044517208261
+  claim:
+    attacker: address:0xfe2105e1317dfd6ed3887bf7882977c03cfebb7c
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: Unclear
+- id: defihacklabs:src/test/2023-11/XAI_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-11/XAI_exp.sol
+    sha256: 88a8f7ef347e6939d97316a8754558c515f1f8397fb4b90012cfbc48f346acf7
+  period: 2023-11
+  incident:
+    name: XAI
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: Unclear
+    attacker_address: '0xea75aec151f968b8de3789ca201a2a3a7faeefba'
+    attack_tx: https://app.blocksec.com/explorer/tx/bsc/0x2b251e456c434992b9ac7ec56dc166550c4cd7db3adefbf7eb3ab91cef55f9bf
+    analyses:
+    - https://app.blocksec.com/explorer/tx/bsc/0x2b251e456c434992b9ac7ec56dc166550c4cd7db3adefbf7eb3ab91cef55f9bf
+    - https://x.com/MetaSec_xyz/status/1724683082064855455
+  claim:
+    attacker: address:0xea75aec151f968b8de3789ca201a2a3a7faeefba
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: Unclear
+- id: defihacklabs:src/test/2023-12/BEARNDAO_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-12/BEARNDAO_exp.sol
+    sha256: 67cc8efffcf51f498f0e17e98f4e5be07032aed86546e32f47dad799a6d7c6df
+  period: 2023-12
+  incident:
+    name: BEARNDAO
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$769K
+    attacker_address: '0xce27b195fa6de27081a86b98b64f77f5fb328dd5'
+    attack_tx: https://explorer.phalcon.xyz/tx/bsc/0x51913be3f31d5ddbfc77da789e5f9653ed6b219a52772309802226445a1edd5f
+    analyses:
+    - https://explorer.phalcon.xyz/tx/bsc/0x51913be3f31d5ddbfc77da789e5f9653ed6b219a52772309802226445a1edd5f
+    - https://twitter.com/AnciliaInc/status/1732159377749180646
+  claim:
+    attacker: address:0xce27b195fa6de27081a86b98b64f77f5fb328dd5
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$769K
+- id: defihacklabs:src/test/2023-12/UnverifiedContr_0x431abb_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2023-12/UnverifiedContr_0x431abb_exp.sol
+    sha256: ed3e861c83aeb1fc346f3bc07b45390de74cf456a693207c3f3257df771ab917
+  period: 2023-12
+  incident:
+    name: UnverifiedContr_0x431abb
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$500K
+    attacker_address: '0xa9edec4496bd013dac805fb221edefc53cbfaf05'
+    attack_tx: https://explorer.phalcon.xyz/tx/bsc/0xbeea4ff215b15870e22ed0e4d36ccd595974ffd55c3d75dad2230196cc379a52
+    analyses:
+    - https://explorer.phalcon.xyz/tx/bsc/0xb650e9f4b9eb023ea65b55ca4d088323e3d5bda377880dedb149a7fd3fd5c15f
+    - https://explorer.phalcon.xyz/tx/bsc/0xbeea4ff215b15870e22ed0e4d36ccd595974ffd55c3d75dad2230196cc379a52
+    - https://twitter.com/Phalcon_xyz/status/1730625352953901123
+  claim:
+    attacker: address:0xa9edec4496bd013dac805fb221edefc53cbfaf05
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$500K
+- id: defihacklabs:src/test/2024-02/BlueberryProtocol_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-02/BlueberryProtocol_exp.sol
+    sha256: c725d550e5e42ad11e25cf6b8ab4ce927d0fe15deca4e6cbe5d3e85378119ba7
+  period: 2024-02
+  incident:
+    name: BlueberryProtocol
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$1,400,000 USD
+    attacker_address: '0xc0ffeebabe5d496b2dde509f9fa189c25cf29671'
+    attack_tx: https://etherscan.io/tx/0xf0464b01d962f714eee9d4392b2494524d0e10ce3eb3723873afd1346b8b06e4
+    analyses:
+    - https://twitter.com/blueberryFDN/status/1760865357236211964
+  claim:
+    attacker: address:0xc0ffeebabe5d496b2dde509f9fa189c25cf29671
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$1,400,000 USD
+- id: defihacklabs:src/test/2024-02/DN404_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-02/DN404_exp.sol
+    sha256: dab2eeb8003c9330454f8448fa5f31be2bccae0fd171490fe5ccd5f079256206
+  period: 2024-02
+  incident:
+    name: DN404
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 200K
+    attacker_address: '0xd215ffaf0f85fb6f93f11e49bd6175ad58af0dfd'
+    attack_tx: https://etherscan.io/tx/0xbeef09ee9d694d2b24f3f367568cc6ba1dad591ea9f969c36e5b181fd301be82
+    analyses: []
+  claim:
+    attacker: address:0xd215ffaf0f85fb6f93f11e49bd6175ad58af0dfd
+    impact: drain
+    asset: null
+    amount: '200'
+    amount_text: 200K
+- id: defihacklabs:src/test/2024-02/MINER_bsc_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-02/MINER_bsc_exp.sol
+    sha256: 9a164f13c1437a6a086233641ab04cb61f9bc23c84236de06f3434a56516febb
+  period: 2024-02
+  incident:
+    name: MINER_bsc
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~3.5 WBNB
+    attacker_address: '0x031958a8137745350549fd95055398dd536a07c7'
+    attack_tx: https://bscscan.com/tx/0x15ab671c9bf918fa4b6a9eed9ccb527f32aca40e926ede2aec2c84dfa9c30512
+    analyses: []
+  claim:
+    attacker: address:0x031958a8137745350549fd95055398dd536a07c7
+    impact: drain
+    asset: WBNB
+    amount: '3.5'
+    amount_text: ~3.5 WBNB
+- id: defihacklabs:src/test/2024-02/Zoomer_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-02/Zoomer_exp.sol
+    sha256: 47a1cde9be137a6e52a5b88533a63aecdd9660ca43c954f358299dff24939310
+  period: 2024-02
+  incident:
+    name: Zoomer
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~14 ETH
+    attacker_address: '0xb0380b6d7a63e7cbf274c3b3c8838abbd6bd4abe'
+    attack_tx: https://app.blocksec.com/explorer/tx/eth/0x06d7e7436414c658a33452d28400799f3637e83930dcec39b3bd065dabc6ef04
+    analyses:
+    - https://app.blocksec.com/explorer/tx/eth/0x06d7e7436414c658a33452d28400799f3637e83930dcec39b3bd065dabc6ef04
+    - https://x.com/ChainAegis/status/1761246415488225668
+  claim:
+    attacker: address:0xb0380b6d7a63e7cbf274c3b3c8838abbd6bd4abe
+    impact: drain
+    asset: ETH
+    amount: '14'
+    amount_text: ~14 ETH
+- id: defihacklabs:src/test/2024-03/ETHFIN_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-03/ETHFIN_exp.sol
+    sha256: 77ce43892a5e059459d3c17cf4405d75c67275c5e6c022152fd5b6186a8f3726
+  period: 2024-03
+  incident:
+    name: ETHFIN
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$1.24K (2.13 BNB)
+    attacker_address: '0x52e38d496f8d712394d5ed55e4d4cdd21f1957de'
+    attack_tx: https://bscscan.com/tx/0xfe031685d84f3bae1785f5b2bd0ed480b87815c3f23ce6ced73b8573b7e367c6
+    analyses: []
+  claim:
+    attacker: address:0x52e38d496f8d712394d5ed55e4d4cdd21f1957de
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$1.24K (2.13 BNB)
+- id: defihacklabs:src/test/2024-03/GHT_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-03/GHT_exp.sol
+    sha256: 779065bbfe864093669a0b3946595fdd4eace68dae8afb078854661b92f30f4c
+  period: 2024-03
+  incident:
+    name: GHT
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$57K
+    attacker_address: '0x096f0f03e4be68d7e6dd39b22a3846b8ce9849a3'
+    attack_tx: https://app.blocksec.com/explorer/tx/eth/0xd17266bcdf30cbcbd7d0b5a006f43141981aeee2e1f860f68c9a1805ecacbc68?line=3
+    analyses:
+    - https://app.blocksec.com/explorer/tx/eth/0xd17266bcdf30cbcbd7d0b5a006f43141981aeee2e1f860f68c9a1805ecacbc68?line=3
+  claim:
+    attacker: address:0x096f0f03e4be68d7e6dd39b22a3846b8ce9849a3
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$57K
+- id: defihacklabs:src/test/2024-03/Woofi_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-03/Woofi_exp.sol
+    sha256: b0b3c4dd0bfad48be914c6ed2abea46ff0f3b43b2b48ec705a1a1817f503d43d
+  period: 2024-03
+  incident:
+    name: Woofi
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~8M
+    attacker_address: '0x9961190b258897bca7a12b8f37f415e689d281c4'
+    attack_tx: https://arbiscan.io/tx/0x57e555328b7def90e1fc2a0f7aa6df8d601a8f15803800a5aaf0a20382f21fbd
+    analyses:
+    - https://twitter.com/PeckShieldAlert/status/1765054155478175943
+    - https://twitter.com/spreekaway/status/1765046559832764886
+  claim:
+    attacker: address:0x9961190b258897bca7a12b8f37f415e689d281c4
+    impact: drain
+    asset: null
+    amount: '8'
+    amount_text: ~8M
+- id: defihacklabs:src/test/2024-04/BNBX_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-04/BNBX_exp.sol
+    sha256: 881b0fc8f549a03604e0836663d64ab90d1b8c99d707fe3b53e3e18921aa9e98
+  period: 2024-04
+  incident:
+    name: BNBX
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~5 $ETH
+    attacker_address: '0x123fa25c574bb3158ecf6515595932a92a1da510'
+    attack_tx: https://bscscan.com/tx/0xea88dc6dbd81d09c572b5849e0d4508598edcf8f11c9a995cd8fe7e6c194f39e
+    analyses: []
+  claim:
+    attacker: address:0x123fa25c574bb3158ecf6515595932a92a1da510
+    impact: drain
+    asset: $ETH
+    amount: '5'
+    amount_text: ~5 $ETH
+- id: defihacklabs:src/test/2024-04/HedgeyFinance_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-04/HedgeyFinance_exp.sol
+    sha256: 860269987d5f1a5811bbae0c4c9071118ccfb29665d98622b7e11ed47160f1ab
+  period: 2024-04
+  incident:
+    name: HedgeyFinance
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 48M USD
+    attacker_address: '0xDed2b1a426E1b7d415A40Bcad44e98F47181dda2'
+    attack_tx: https://etherscan.io/tx/0x2606d459a50ca4920722a111745c2eeced1d8a01ff25ee762e22d5d4b1595739
+    analyses:
+    - https://medium.com/@CUBE3AI/hedgey-finance-hack-detected-by-cube3-ai-minutes-before-exploit-1f500e7052d4
+    - https://twitter.com/Cube3AI/status/1781294512716820918
+  claim:
+    attacker: address:0xDed2b1a426E1b7d415A40Bcad44e98F47181dda2
+    impact: drain
+    asset: null
+    amount: '48'
+    amount_text: 48M USD
+- id: defihacklabs:src/test/2024-04/PikeFinance_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-04/PikeFinance_exp.sol
+    sha256: c4a1c8f3e7291d8018ed8ca68b175f45a705d213e4a292d30a4338d4f6d9c1be
+  period: 2024-04
+  incident:
+    name: PikeFinance
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 1.4M
+    attacker_address: '0x19066f7431df29a0910d287c8822936bb7d89e23'
+    attack_tx: https://etherscan.io/tx/0xe2912b8bf34d561983f2ae95f34e33ecc7792a2905a3e317fcc98052bce66431
+    analyses: []
+  claim:
+    attacker: address:0x19066f7431df29a0910d287c8822936bb7d89e23
+    impact: drain
+    asset: null
+    amount: '1.4'
+    amount_text: 1.4M
+- id: defihacklabs:src/test/2024-05/RedKeysCoin_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-05/RedKeysCoin_exp.sol
+    sha256: 180ed35f24545d909372db61a83f298726c1470d5754551cc37a0dcab14cb3c3
+  period: 2024-05
+  incident:
+    name: RedKeysCoin
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: $12K
+    attacker_address: '0x36a6135672035507b772279d99a9f7445f2d1601'
+    attack_tx: https://bscscan.com/tx/0x8d5fb97b35b830f8addcf31c8e0c6135f15bbc2163d891a3701ada0ad654d427
+    analyses:
+    - https://x.com/SlowMist_Team/status/1794975336192438494
+  claim:
+    attacker: address:0x36a6135672035507b772279d99a9f7445f2d1601
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: $12K
+- id: defihacklabs:src/test/2024-06/INcufi_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-06/INcufi_exp.sol
+    sha256: d4cff33ba9795202a596076a5492ec2399a68f09a22006bd89cfcdfa1404e5f6
+  period: 2024-06
+  incident:
+    name: INcufi
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~59643 USD
+    attacker_address: '0xb6911dee6a5b1c65ad1ac11a99aec09c2cf83c0e'
+    attack_tx: https://app.blocksec.com/explorer/tx/bsc/0x556419e0a6ee8e6de6b3679605f9f62ad013007419a1b55c9f56590a824bfb52
+    analyses:
+    - https://app.blocksec.com/explorer/tx/bsc/0x556419e0a6ee8e6de6b3679605f9f62ad013007419a1b55c9f56590a824bfb52
+  claim:
+    attacker: address:0xb6911dee6a5b1c65ad1ac11a99aec09c2cf83c0e
+    impact: drain
+    asset: null
+    amount: '59643'
+    amount_text: ~59643 USD
+- id: defihacklabs:src/test/2024-06/Velocore_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-06/Velocore_exp.sol
+    sha256: 8a318a904e4fc969d25c2d33a6b71bbd72d710c5313470d392e2d91caf6af1a9
+  period: 2024-06
+  incident:
+    name: Velocore
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: $6.88M
+    attacker_address: '0x8cdc37ed79c5ef116b9dc2a53cb86acaca3716bf'
+    attack_tx: https://lineascan.build/tx/0xed11d5b013bf3296b1507da38b7bcb97845dd037d33d3d1b0c5e763889cdbed1
+    analyses:
+    - https://x.com/BeosinAlert/status/1797247874528645333
+  claim:
+    attacker: address:0x8cdc37ed79c5ef116b9dc2a53cb86acaca3716bf
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: $6.88M
+- id: defihacklabs:src/test/2024-06/YYS_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-06/YYS_exp.sol
+    sha256: 366c6b45b652fd9a619b74842358eea3b169e6efd9bcbddb6cf61c786e25c7a2
+  period: 2024-06
+  incident:
+    name: YYS
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: $28K
+    attacker_address: '0x101723def8695f5bb8d5d4aa70869c10b5ff6340'
+    attack_tx: https://app.blocksec.com/explorer/tx/bsc/0x397a09af6494c0bfcd89e010f5dd65d90f3ee1cf1ff813ce5b0c1d42a1c8dec9?line=84
+    analyses:
+    - https://app.blocksec.com/explorer/tx/bsc/0x397a09af6494c0bfcd89e010f5dd65d90f3ee1cf1ff813ce5b0c1d42a1c8dec9?line=84
+  claim:
+    attacker: address:0x101723def8695f5bb8d5d4aa70869c10b5ff6340
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: $28K
+- id: defihacklabs:src/test/2024-07/DoughFina_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-07/DoughFina_exp.sol
+    sha256: d9d7d2b068fb38909ef0e94af5a81db590e6ad7fee5d6aeddfd0147f017c3a00
+  period: 2024-07
+  incident:
+    name: DoughFina
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~1.81M USD
+    attacker_address: '0x67104175fc5fabbdb5a1876c3914e04b94c71741'
+    attack_tx: https://app.blocksec.com/explorer/tx/eth/0x92cdcc732eebf47200ea56123716e337f6ef7d5ad714a2295794fdc6031ebb2e
+    analyses:
+    - https://app.blocksec.com/explorer/tx/eth/0x92cdcc732eebf47200ea56123716e337f6ef7d5ad714a2295794fdc6031ebb2e
+    - https://x.com/CertiKAlert/status/1811668992882307478
+  claim:
+    attacker: address:0x67104175fc5fabbdb5a1876c3914e04b94c71741
+    impact: drain
+    asset: null
+    amount: '1.81'
+    amount_text: ~1.81M USD
+- id: defihacklabs:src/test/2024-07/GAX_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-07/GAX_exp.sol
+    sha256: 9f31bc5e03f392925f73e12049374f49cf15e114b12a9abf3c8dd197cb7b9ac7
+  period: 2024-07
+  incident:
+    name: GAX
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~50k $BUSD
+    attacker_address: '0x8ccf2860f38fc2f4a56dec897c8c976503fcb123'
+    attack_tx: https://bscscan.com/tx/0x368f842e79a10bb163d98353711be58431a7cd06098d6f4b6cbbcd4c77b53108
+    analyses: []
+  claim:
+    attacker: address:0x8ccf2860f38fc2f4a56dec897c8c976503fcb123
+    impact: drain
+    asset: null
+    amount: '50'
+    amount_text: ~50k $BUSD
+- id: defihacklabs:src/test/2024-07/Lifiprotocol_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-07/Lifiprotocol_exp.sol
+    sha256: 6f23e3fd81aa86e4988eb5f3af601d5bc7c2de6bb527c5f43e32af0c491ebfdc
+  period: 2024-07
+  incident:
+    name: Lifiprotocol
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~10M USD
+    attacker_address: '0x8b3cb6bf982798fba233bca56749e22eec42dcf3'
+    attack_tx: https://app.blocksec.com/explorer/tx/eth/0xd82fe84e63b1aa52e1ce540582ee0895ba4a71ec5e7a632a3faa1aff3e763873
+    analyses:
+    - https://app.blocksec.com/explorer/tx/eth/0xd82fe84e63b1aa52e1ce540582ee0895ba4a71ec5e7a632a3faa1aff3e763873
+    - https://x.com/danielvf/status/1505689981385334784
+  claim:
+    attacker: address:0x8b3cb6bf982798fba233bca56749e22eec42dcf3
+    impact: drain
+    asset: null
+    amount: '10'
+    amount_text: ~10M USD
+- id: defihacklabs:src/test/2024-08/COCO_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-08/COCO_exp.sol
+    sha256: 1d1f0a6e6c9fd6ace073d4324e457b10faf0de38807609751e146bd7e9586d03
+  period: 2024-08
+  incident:
+    name: COCO
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 280BNB
+    attacker_address: '0x0cc28b80d21ebe7b3f3320faa059f163e98a55a2'
+    attack_tx: https://app.blocksec.com/explorer/tx/bsc/0x7b743f0fa0ffc6542bc4132405f6c986a00187b6a8b23613ab98c8bcfe9fd875
+    analyses:
+    - https://app.blocksec.com/explorer/tx/bsc/0x7b743f0fa0ffc6542bc4132405f6c986a00187b6a8b23613ab98c8bcfe9fd875
+    - https://x.com/TenArmorAlert/status/1826101724278579639
+  claim:
+    attacker: address:0x0cc28b80d21ebe7b3f3320faa059f163e98a55a2
+    impact: drain
+    asset: BNB
+    amount: '280'
+    amount_text: 280BNB
+- id: defihacklabs:src/test/2024-08/unverified_667d_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-08/unverified_667d_exp.sol
+    sha256: e19066af201222645ea9545614aa5c0b54fe29e6d13d987641831dd638e0a695
+  period: 2024-08
+  incident:
+    name: unverified_667d
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 10k
+    attacker_address: '0x847705eeb01b4f2ae9a92be12615c1052f52e7ad'
+    attack_tx: https://bscscan.com/tx/0x56d3ed5f635b009e19d693e432479323b23b3eb368cf04e161adbc672a15898e
+    analyses:
+    - https://x.com/TenArmorAlert/status/1828983569278231038
+  claim:
+    attacker: address:0x847705eeb01b4f2ae9a92be12615c1052f52e7ad
+    impact: drain
+    asset: null
+    amount: '10'
+    amount_text: 10k
+- id: defihacklabs:src/test/2024-09/PLN_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-09/PLN_exp.sol
+    sha256: 6160261c601aa483539526ba963727b74b935b90d4c968725879ef5d5f92ec8c
+  period: 2024-09
+  incident:
+    name: PLN
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 400k USD
+    attacker_address: '0x67404bcd629E920100c594d62f3678340F40D95a'
+    attack_tx: https://etherscan.io/tx/0xcc36283cee837a8a0d4af0357d1957dc561913e44ad293ea9da8acf15d874ed5
+    analyses:
+    - https://x.com/TenArmorAlert/status/1831525062253654300
+  claim:
+    attacker: address:0x67404bcd629E920100c594d62f3678340F40D95a
+    impact: drain
+    asset: null
+    amount: '400'
+    amount_text: 400k USD
+- id: defihacklabs:src/test/2024-09/PestoToken_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-09/PestoToken_exp.sol
+    sha256: afe27d86c58eda7c11ef0c3d2d41e7e3cb48e4786bc214408bd865d0faeb557e
+  period: 2024-09
+  incident:
+    name: PestoToken
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 1.4K USD
+    attacker_address: '0x7248939f65bdd23aab9eaab1bc4a4f909567486e'
+    attack_tx: https://app.blocksec.com/explorer/tx/eth/0x3d5b4a0d560e8dd750239b578e2b85921b523835b644714dc239a2db70cf067c
+    analyses:
+    - https://app.blocksec.com/explorer/tx/eth/0x3d5b4a0d560e8dd750239b578e2b85921b523835b644714dc239a2db70cf067c
+    - https://x.com/TenArmorAlert/status/1838225968009527652
+  claim:
+    attacker: address:0x7248939f65bdd23aab9eaab1bc4a4f909567486e
+    impact: drain
+    asset: null
+    amount: '1.4'
+    amount_text: 1.4K USD
+- id: defihacklabs:src/test/2024-09/Shezmu_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-09/Shezmu_exp.sol
+    sha256: 21e93bf8c5115b10b7535d39ab268a271a7a4591f4b04fba18fe652280262a9d
+  period: 2024-09
+  incident:
+    name: Shezmu
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 4.9M USD
+    attacker_address: '0xa3a64255484ad65158af0f9d96b5577f79901a1d'
+    attack_tx: https://etherscan.io/tx/0x39328ea4377a8887d3f6ce91b2f4c6b19a851e2fc5163e2f83bbc2fc136d0c71
+    analyses:
+    - https://medium.com/coinmonks/decoding-shezmus-4-9-million-exploit-10dc0266b25b
+    - https://x.com/shoucccc/status/1837228053862437244
+  claim:
+    attacker: address:0xa3a64255484ad65158af0f9d96b5577f79901a1d
+    impact: drain
+    asset: null
+    amount: '4.9'
+    amount_text: 4.9M USD
+- id: defihacklabs:src/test/2024-09/unverified_766a_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-09/unverified_766a_exp.sol
+    sha256: 3b9b852947a0ea4a1310e9790b65faadda485e18ec9af07046807e9f91e4bc5b
+  period: 2024-09
+  incident:
+    name: unverified_766a
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 100 USD
+    attacker_address: '0xba35d089addac99a8e7bcd1a25712b1702623ae3'
+    attack_tx: https://app.blocksec.com/explorer/tx/bsc/0x73d459ad3c926f5247a2018197d13b2a0acbc1fc46e1e54525c210a46130a56b
+    analyses:
+    - https://app.blocksec.com/explorer/tx/bsc/0x73d459ad3c926f5247a2018197d13b2a0acbc1fc46e1e54525c210a46130a56b
+    - https://x.com/TenArmorAlert/status/1836339028616188321
+  claim:
+    attacker: address:0xba35d089addac99a8e7bcd1a25712b1702623ae3
+    impact: drain
+    asset: null
+    amount: '100'
+    amount_text: 100 USD
+- id: defihacklabs:src/test/2024-09/unverified_a89f_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-09/unverified_a89f_exp.sol
+    sha256: 66b7b38c0a979df345d453b3b9c1182b4580cef4c1857ae4c305128cfaa42166
+  period: 2024-09
+  incident:
+    name: unverified_a89f
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: $1.5k
+    attacker_address: '0xfe51ffcd2af4748d77130646988F966733583dc1'
+    attack_tx: https://app.blocksec.com/explorer/tx/eth/0x83c71a83656b0fecfa860e76a9becf738930b3f1b2510c7d0339ab585090a82d
+    analyses:
+    - https://app.blocksec.com/explorer/tx/eth/0x83c71a83656b0fecfa860e76a9becf738930b3f1b2510c7d0339ab585090a82d
+    - https://app.blocksec.com/explorer/tx/eth/0xf93db4cdee0ed2af06067a9c953ebc62dd17f70be37961636c42d698cc23e932
+    - https://x.com/TenArmorAlert/status/1831637553415610877
+  claim:
+    attacker: address:0xfe51ffcd2af4748d77130646988F966733583dc1
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: $1.5k
+- id: defihacklabs:src/test/2024-10/AIZPTToken_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-10/AIZPTToken_exp.sol
+    sha256: cfb1599a8c11d7b2340621bb2c83e2cea64978b7ce7090e7b970ea297d1314de
+  period: 2024-10
+  incident:
+    name: AIZPTToken
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 34.88 BNB (~$20K USD)
+    attacker_address: '0x3026c464d3bd6ef0ced0d49e80f171b58176ce32'
+    attack_tx: https://bscscan.com/tx/0x5e694707337cca979d18f9e45f40e81d6ca341ed342f1377f563e779a746460d
+    analyses:
+    - https://twitter.com/rotcivegaf
+  claim:
+    attacker: address:0x3026c464d3bd6ef0ced0d49e80f171b58176ce32
+    impact: drain
+    asset: BNB
+    amount: '34.88'
+    amount_text: 34.88 BNB (~$20K USD)
+- id: defihacklabs:src/test/2024-10/MorphoBlue_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-10/MorphoBlue_exp.sol
+    sha256: f67bc59a8279eadbfbeb8abaa98fc14b353f5149cd4f1ecb3ce820e9eabc3443
+  period: 2024-10
+  incident:
+    name: MorphoBlue
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: $230,000
+    attacker_address: '0x02DBE46169fDf6555F2A125eEe3dce49703b13f5'
+    attack_tx: https://etherscan.io/tx/0x256979ae169abb7fbbbbc14188742f4b9debf48b48ad5b5207cadcc99ccb493b
+    analyses:
+    - https://x.com/omeragoldberg/status/1845515843787960661
+  claim:
+    attacker: address:0x02DBE46169fDf6555F2A125eEe3dce49703b13f5
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: $230,000
+- id: defihacklabs:src/test/2024-11/Ak1111_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-11/Ak1111_exp.sol
+    sha256: fdba0bdd131f29788764ca74bab5c2c666ae982631e31f66f9ae920b797e6df8
+  period: 2024-11
+  incident:
+    name: Ak1111
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 31.5K USD
+    attacker_address: '0xCe21C6e4fa557A9041FA98DFf59A4401Ef0a18aC'
+    attack_tx: https://bscscan.com/tx/0xc29c98da0c14f4ca436d38f8238f8da1c84c4b1ee6480c4b4facc4b81a013438
+    analyses:
+    - https://x.com/TenArmorAlert/status/1860554838897197135
+  claim:
+    attacker: address:0xCe21C6e4fa557A9041FA98DFf59A4401Ef0a18aC
+    impact: drain
+    asset: null
+    amount: '31.5'
+    amount_text: 31.5K USD
+- id: defihacklabs:src/test/2024-11/DeltaPrime_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-11/DeltaPrime_exp.sol
+    sha256: 342bf50be3d870cc7b2c326d0c161e4e5c8a6e8f4e79e1ec49f28b702ef38e9e
+  period: 2024-11
+  incident:
+    name: DeltaPrime
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: $4.75M
+    attacker_address: '0xb87881637b5c8e6885c51ab7d895e53fa7d7c567'
+    attack_tx: https://arbiscan.io/tx/0x6a2f989b5493b52ffc078d0a59a3bf9727d134b403aa6e0bf309fd513a728f7f
+    analyses: []
+  claim:
+    attacker: address:0xb87881637b5c8e6885c51ab7d895e53fa7d7c567
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: $4.75M
+- id: defihacklabs:src/test/2024-11/RPP_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-11/RPP_exp.sol
+    sha256: f44e1a704c91efcbd3820b38893ee7f2feb1fe3db2f2418429b7be2a2a0d5c4b
+  period: 2024-11
+  incident:
+    name: RPP
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~ $14.1K
+    attacker_address: '0x709b30b69176a3ccc8ef3bb37219267ee2f5b112'
+    attack_tx: https://bscscan.com/tx/0x76c39537374e7fa7f206ed3c99aa6b14ccf1d2dadaabe6139164cc37966e40bd
+    analyses:
+    - https://x.com/TenArmorAlert/status/1853984974309142768
+  claim:
+    attacker: address:0x709b30b69176a3ccc8ef3bb37219267ee2f5b112
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~ $14.1K
+- id: defihacklabs:src/test/2024-12/JHY_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2024-12/JHY_exp.sol
+    sha256: 0b8851824013d8192d23ce04d750a0dc72e67d6db5c31770cf3eb668efc1a495
+  period: 2024-12
+  incident:
+    name: JHY
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 11k USD
+    attacker_address: '0x00000000dd0412366388639b1101544fff2dce8d'
+    attack_tx: https://bscscan.com/tx/0xb6a9055e3ce7f006391760fbbcc4e4bc8df8228dc47a8bb4ff657370ccc49256
+    analyses:
+    - https://x.com/TenArmorAlert/status/1867950089156575317
+  claim:
+    attacker: address:0x00000000dd0412366388639b1101544fff2dce8d
+    impact: drain
+    asset: null
+    amount: '11'
+    amount_text: 11k USD
+- id: defihacklabs:src/test/2025-01/JPulsepot_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-01/JPulsepot_exp.sol
+    sha256: ccab6dc0ffc9cbc7331976816189572b0eab3ea95cb08db309bc686233e72fcf
+  period: 2025-01
+  incident:
+    name: JPulsepot
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 21.5K
+    attacker_address: '0xf1e73123594cb0f3655d40e4dd6bde41fa8806e8'
+    attack_tx: https://bscscan.com/tx/0xd6ba15ecf3df9aaae37450df8f79233267af41535793ee1f69c565b50e28f7da
+    analyses:
+    - https://x.com/CertiKAlert/status/1877662352834793639
+  claim:
+    attacker: address:0xf1e73123594cb0f3655d40e4dd6bde41fa8806e8
+    impact: drain
+    asset: null
+    amount: '21.5'
+    amount_text: 21.5K
+- id: defihacklabs:src/test/2025-02/Bybit_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-02/Bybit_exp.sol
+    sha256: 20f4814417b829184770143b8ac0fc7cc8eebc587b91621b54052d5efd1a1402
+  period: 2025-02
+  incident:
+    name: Bybit
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 1.5B (401346 ETH + 8000 mETH + 15000 cmETH + 90375 stETH)
+    attacker_address: '0x0fa09c3a328792253f8dee7116848723b72a6d2e'
+    attack_tx: https://etherscan.io/tx/0x46deef0f52e3a983b67abf4714448a41dd7ffd6d32d32da69d62081c68ad7882
+    analyses:
+    - https://x.com/PatrickAlphaC/status/1893215304135618759
+    - https://x.com/SlowMist_Team/status/1892963250385592345
+    - https://x.com/zachxbt/status/1893211577836302365
+  claim:
+    attacker: address:0x0fa09c3a328792253f8dee7116848723b72a6d2e
+    impact: drain
+    asset: null
+    amount: '1.5'
+    amount_text: 1.5B (401346 ETH + 8000 mETH + 15000 cmETH + 90375 stETH)
+- id: defihacklabs:src/test/2025-02/GMT7_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-02/GMT7_exp.sol
+    sha256: a772c5b6b1bdce67e323571b34a8a7c8e8c968eb78f0832e1e4d8ecfc9d7c392
+  period: 2025-02
+  incident:
+    name: GMT7
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 16.75 BNB
+    attacker_address: '0x0A4125690753b6Cc82cAdbCa0f0899eb2025acB0'
+    attack_tx: https://bscscan.com/tx/0x5eb225ce9fb2c7a169e1736eb3b2bf2b6a5843839dd84cdcf6fe2ab0577ae21f
+    analyses: []
+  claim:
+    attacker: address:0x0A4125690753b6Cc82cAdbCa0f0899eb2025acB0
+    impact: drain
+    asset: BNB
+    amount: '16.75'
+    amount_text: 16.75 BNB
+- id: defihacklabs:src/test/2025-02/HegicOptions_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-02/HegicOptions_exp.sol
+    sha256: 55cc07895fbeb4365dd12831b80ef3f835186cdb9df540d8b665dedae60b2664
+  period: 2025-02
+  incident:
+    name: HegicOptions
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~104M
+    attacker_address: '0x4B53608fF0cE42cDF9Cf01D7d024C2c9ea1aA2e8'
+    attack_tx: null
+    analyses: []
+  claim:
+    attacker: address:0x4B53608fF0cE42cDF9Cf01D7d024C2c9ea1aA2e8
+    impact: drain
+    asset: null
+    amount: '104'
+    amount_text: ~104M
+- id: defihacklabs:src/test/2025-02/HenloKart_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-02/HenloKart_exp.sol
+    sha256: 63d59716f98031af87b72e329be95dab00333a2f25d29de9d5a8dd4a5e95605c
+  period: 2025-02
+  incident:
+    name: HenloKart
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 0.59 ETH
+    attacker_address: '0xc2b2197ca4b2ee3b4eb61fc59e6d592d04a2e26a'
+    attack_tx: https://basescan.org/tx/0xf9ccb244be71ce3ff8c61021dc43a51c21bd1e11d73e61e64d05a9218f832c7e
+    analyses: []
+  claim:
+    attacker: address:0xc2b2197ca4b2ee3b4eb61fc59e6d592d04a2e26a
+    impact: drain
+    asset: ETH
+    amount: '0.59'
+    amount_text: 0.59 ETH
+- id: defihacklabs:src/test/2025-02/unverified_35bc_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-02/unverified_35bc_exp.sol
+    sha256: 3d3deb869abe7189e436a7464798a79bcd0e76bb7a730388933629fe632e3099
+  period: 2025-02
+  incident:
+    name: unverified_35bc
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 6700 USD
+    attacker_address: '0xd75652ada2f6a140f2ffcd7cd20f34c21fbc3fbc'
+    attack_tx: https://app.blocksec.com/explorer/tx/bsc/0xd7a61b07ca4dc5966d00b3cc99b03c6ab2cee688fa13b30bea08f5142023777d
+    analyses:
+    - https://app.blocksec.com/explorer/tx/bsc/0xd7a61b07ca4dc5966d00b3cc99b03c6ab2cee688fa13b30bea08f5142023777d
+    - https://x.com/TenArmorAlert/status/1893333680417890648
+  claim:
+    attacker: address:0xd75652ada2f6a140f2ffcd7cd20f34c21fbc3fbc
+    impact: drain
+    asset: null
+    amount: '6700'
+    amount_text: 6700 USD
+- id: defihacklabs:src/test/2025-03/BBXToken_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-03/BBXToken_exp.sol
+    sha256: 209e0ea98050e0934213783529d7d7616bc9fa5d23c7eccff059c219b5509062
+  period: 2025-03
+  incident:
+    name: BBXToken
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 11902 BUSD
+    attacker_address: '0x8aea7516b3b6aabf474f8872c5e71c1a7907e69e'
+    attack_tx: https://bscscan.com/tx/0x0dd486368444598610239b934dd9e8c6474a06d11380d1cfec4d91568b5ac581
+    analyses:
+    - https://blog.solidityscan.com/bbx-token-hack-analysis-f2e962c00ee5
+    - https://x.com/TenArmorAlert/status/1916312483792408688
+  claim:
+    attacker: address:0x8aea7516b3b6aabf474f8872c5e71c1a7907e69e
+    impact: drain
+    asset: BUSD
+    amount: '11902'
+    amount_text: 11902 BUSD
+- id: defihacklabs:src/test/2025-03/OneInchFusionV1SettlementHack.sol_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-03/OneInchFusionV1SettlementHack.sol_exp.sol
+    sha256: 9701c3436274b35f2097eef5c42a3c8bafd41e75416e572bd16ecfc8e4b302bc
+  period: 2025-03
+  incident:
+    name: OneInchFusionV1SettlementHack.sol
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 4.5M
+    attacker_address: '0xA7264a43A57Ca17012148c46AdBc15a5F951766e'
+    attack_tx: https://etherscan.io/tx/0x62734ce80311e64630a009dd101a967ea0a9c012fabbfce8eac90f0f4ca090d6
+    analyses:
+    - https://x.com/DecurityHQ/status/1898069385199153610
+  claim:
+    attacker: address:0xA7264a43A57Ca17012148c46AdBc15a5F951766e
+    impact: drain
+    asset: null
+    amount: '4.5'
+    amount_text: 4.5M
+- id: defihacklabs:src/test/2025-03/PTM_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-03/PTM_exp.sol
+    sha256: 1cd1fea2b3b31f0745976f3de9cbd79709914c65844373a46373bd4c89103a07
+  period: 2025-03
+  incident:
+    name: PTM
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 552.63 USDT
+    attacker_address: '0x52e38d496f8d712394d5ed55e4d4cdd21f1957de'
+    attack_tx: https://bscscan.com/tx/0x1bb9c2a30564ed685580f17890d5fa153edb3e86cc39fe6804cfb6dbfa0cae92
+    analyses: []
+  claim:
+    attacker: address:0x52e38d496f8d712394d5ed55e4d4cdd21f1957de
+    impact: drain
+    asset: USDT
+    amount: '552.63'
+    amount_text: 552.63 USDT
+- id: defihacklabs:src/test/2025-04/BTNFT_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-04/BTNFT_exp.sol
+    sha256: cd898e299846e6ac557122638ee114f77e94358111f81a27e4aefd2cc5b344d6
+  period: 2025-04
+  incident:
+    name: BTNFT
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 19025.9193312786235214 BUSD
+    attacker_address: '0xbda2a27cdb2ffd4258f3b1ed664ed0f28f9e0fc3'
+    attack_tx: https://bscscan.com/tx/0x1e90cbff665c43f91d66a56b4aa9ba647486a5311bb0b4381de4d653a9d8237d
+    analyses:
+    - https://twitter.com/rotcivegaf
+  claim:
+    attacker: address:0xbda2a27cdb2ffd4258f3b1ed664ed0f28f9e0fc3
+    impact: drain
+    asset: BUSD
+    amount: '19025.9193312786235214'
+    amount_text: 19025.9193312786235214 BUSD
+- id: defihacklabs:src/test/2025-04/ImpermaxV3_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-04/ImpermaxV3_exp.sol
+    sha256: f1697a659cd9cb43297511b3ae629eda1daba345738626f0063cb9afb1bf0387
+  period: 2025-04
+  incident:
+    name: ImpermaxV3
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~300k
+    attacker_address: '0xe3223f7e3343c2c8079f261d59ee1e513086c7c3'
+    attack_tx: https://basescan.org/tx/0xde903046b5cdf27a5391b771f41e645e9cc670b649f7b87b1524fc4076f45983
+    analyses:
+    - https://medium.com/@quillaudits/how-impermax-v3-lost-300k-in-a-flashloan-attack-35b02d0cf152
+  claim:
+    attacker: address:0xe3223f7e3343c2c8079f261d59ee1e513086c7c3
+    impact: drain
+    asset: null
+    amount: '300'
+    amount_text: ~300k
+- id: defihacklabs:src/test/2025-04/flylong_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-04/flylong_exp.sol
+    sha256: e8278b3f476a4e7b89095d540cbb228d889d1f03c0c617947ab4908d9572a6cc
+  period: 2025-04
+  incident:
+    name: flylong
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 1.73 BNB
+    attacker_address: '0xd4e11065267421F88c0cf7a7791d84D8Fdd7d42B'
+    attack_tx: https://bscscan.com/tx/0x45f6a7df540933b3d2b1a275fcbfc146bbd48934ffb6635c4839d8590a9efc88
+    analyses: []
+  claim:
+    attacker: address:0xd4e11065267421F88c0cf7a7791d84D8Fdd7d42B
+    impact: drain
+    asset: BNB
+    amount: '1.73'
+    amount_text: 1.73 BNB
+- id: defihacklabs:src/test/2025-04/multitransferswap_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-04/multitransferswap_exp.sol
+    sha256: 79f5b80ae6187b395a9283b7c88b3688603a975e191bddf9a7554807928fe670
+  period: 2025-04
+  incident:
+    name: multitransferswap
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 0.34 ETH
+    attacker_address: '0x7c982E93d6B1eDE9626A84EbeafBC42e5991Dee8'
+    attack_tx: https://etherscan.io/tx/0xbb82787a24d9b8d1047bbc12fe5d4b8d4ad3fc3e32e997985043ec3ef6d7dffe
+    analyses: []
+  claim:
+    attacker: address:0x7c982E93d6B1eDE9626A84EbeafBC42e5991Dee8
+    impact: drain
+    asset: ETH
+    amount: '0.34'
+    amount_text: 0.34 ETH
+- id: defihacklabs:src/test/2025-05/Dumbo_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-05/Dumbo_exp.sol
+    sha256: 9db9ebeec9fa6247605494767591a55da86c5b175991d8f67b4a75e4ad7986c5
+  period: 2025-05
+  incident:
+    name: Dumbo
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 628.45 BUSD
+    attacker_address: '0x280489Ba18fC7FbfAa38316EfF5b842dCc91a738'
+    attack_tx: https://bscscan.com/tx/0xbfd59a18d4500649c6a15e578fdd0a05fdef5b932f3e3d51b8e2a5640cd4fb6c
+    analyses: []
+  claim:
+    attacker: address:0x280489Ba18fC7FbfAa38316EfF5b842dCc91a738
+    impact: drain
+    asset: BUSD
+    amount: '628.45'
+    amount_text: 628.45 BUSD
+- id: defihacklabs:src/test/2025-05/KRCToken_pair_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-05/KRCToken_pair_exp.sol
+    sha256: dcc46d57b00a09dfa00e296b181908fb8c59d7a166944bc62a8faffde87c524c
+  period: 2025-05
+  incident:
+    name: KRCToken_pair
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 7k USD
+    attacker_address: '0x9943f26831f9b468a7fe5ac531c352baab8af655'
+    attack_tx: https://bscscan.com/tx/0x78f242dee5b8e15a43d23d76bce827f39eb3ac54b44edcd327c5d63de3848daf
+    analyses:
+    - https://x.com/CertikAIAgent/status/1924280794916536765
+    - https://x.com/OpenZeppelin/status/1953111764536561867
+  claim:
+    attacker: address:0x9943f26831f9b468a7fe5ac531c352baab8af655
+    impact: drain
+    asset: null
+    amount: '7'
+    amount_text: 7k USD
+- id: defihacklabs:src/test/2025-05/unverified_91a1_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-05/unverified_91a1_exp.sol
+    sha256: 26408cef4fd889b0247c021f86e0cd422a2339ece5b5225c54dc40344cf1b9ef
+  period: 2025-05
+  incident:
+    name: unverified_91a1
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 551.22 USD
+    attacker_address: '0xc0082433ac0928eCB63D9A1b87fDd8567F956f11'
+    attack_tx: https://basescan.org/tx/0x2d57862be191d62342b320bd3595b9a747fad10c7c3920ed86a2f7ac8a4c2cc7
+    analyses: []
+  claim:
+    attacker: address:0xc0082433ac0928eCB63D9A1b87fDd8567F956f11
+    impact: drain
+    asset: null
+    amount: '551.22'
+    amount_text: 551.22 USD
+- id: defihacklabs:src/test/2025-06/MetaPool_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-06/MetaPool_exp.sol
+    sha256: b90fa641ebcc5fe1ba06dd0eb4dda51b8401ed45f7c3b5422a37f124a3d7658e
+  period: 2025-06
+  incident:
+    name: MetaPool
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 25k USD
+    attacker_address: '0x48f1d0f5831eb6e544f8cbde777b527b87a1be98'
+    attack_tx: https://etherscan.io/tx/0x57ee419a001d85085478d04dd2a73daa91175b1d7c11d8a8fb5622c56fd1fa69
+    analyses:
+    - https://x.com/peckshield/status/1934895187102454206
+  claim:
+    attacker: address:0x48f1d0f5831eb6e544f8cbde777b527b87a1be98
+    impact: drain
+    asset: null
+    amount: '25'
+    amount_text: 25k USD
+- id: defihacklabs:src/test/2025-06/PegaBall_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-06/PegaBall_exp.sol
+    sha256: 994ab6f54a5a4dc69b0307a4e3795cc897ef076e868645cc91305e9c079f0ca4
+  period: 2025-06
+  incident:
+    name: PegaBall
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 1,512.85 USD
+    attacker_address: '0x28a8cB85d9d2C9ee536931De22Fe80e3EfEa3bD6'
+    attack_tx: https://etherscan.io/tx/0x3cecc3f347edff1d27a0c929f2e7a4c04522afb3a74e24db94684cb6b51b1d65
+    analyses: []
+  claim:
+    attacker: address:0x28a8cB85d9d2C9ee536931De22Fe80e3EfEa3bD6
+    impact: drain
+    asset: null
+    amount: '1512.85'
+    amount_text: 1,512.85 USD
+- id: defihacklabs:src/test/2025-06/unverified_8490_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-06/unverified_8490_exp.sol
+    sha256: 29046c0ee89d6c17bc9fd740a6d35a4c1aec3844f31e250359b6840b89089d4f
+  period: 2025-06
+  incident:
+    name: unverified_8490
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 48.3K USD
+    attacker_address: '0x7248939f65bdd23aab9eaab1bc4a4f909567486e'
+    attack_tx: https://bscscan.com/tx/0x9191153c8523d97f3441a08fef1da5e4169d9c2983db9398364071daa33f59d1
+    analyses:
+    - https://x.com/TenArmorAlert/status/1932309011564781774
+  claim:
+    attacker: address:0x7248939f65bdd23aab9eaab1bc4a4f909567486e
+    impact: drain
+    asset: null
+    amount: '48.3'
+    amount_text: 48.3K USD
+- id: defihacklabs:src/test/2025-07/ActivePoolScrvUsdUrgentRedemption_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-07/ActivePoolScrvUsdUrgentRedemption_exp.sol
+    sha256: 2f748b254cbb1e0f0fe480841a5478c60db42e7b84d3544ab50cebcdd8bcfe48
+  period: 2025-07
+  incident:
+    name: ActivePoolScrvUsdUrgentRedemption
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 4,204.55 USD
+    attacker_address: '0x4cf8ed875e508c3acd60e56a1ca21395d106bc94'
+    attack_tx: https://etherscan.io/tx/0x0cf19b3f83f574c1911eb42457f22578359483dfef197f8906678bc0a76a740b
+    analyses: []
+  claim:
+    attacker: address:0x4cf8ed875e508c3acd60e56a1ca21395d106bc94
+    impact: drain
+    asset: null
+    amount: '4204.55'
+    amount_text: 4,204.55 USD
+- id: defihacklabs:src/test/2025-07/ActivePoolUrgentRedemption_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-07/ActivePoolUrgentRedemption_exp.sol
+    sha256: 4c1a7fa468c153d7298d8fbdadf14d6b9a4921e34bf3c1fc9acbc6ae356faf21
+  period: 2025-07
+  incident:
+    name: ActivePoolUrgentRedemption
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 2,696.49 USD
+    attacker_address: '0xc8d64bb25b489ba3fb33f1f81505e8938685c248'
+    attack_tx: https://etherscan.io/tx/0xc8ac54bdab9a2ce670a6ac2540e07dc88b5eeb7e0306e86d1d66f584428b3e0d
+    analyses: []
+  claim:
+    attacker: address:0xc8d64bb25b489ba3fb33f1f81505e8938685c248
+    impact: drain
+    asset: null
+    amount: '2696.49'
+    amount_text: 2,696.49 USD
+- id: defihacklabs:src/test/2025-07/AvaxBIFKNPair_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-07/AvaxBIFKNPair_exp.sol
+    sha256: e96f65df57ba83e335dce03c50d330b0f9b16ecd8e907943a93b243993bc802f
+  period: 2025-07
+  incident:
+    name: AvaxBIFKNPair
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 2,422.73 USD
+    attacker_address: '0x13459bc2db6053524881415321667d5e16f5f15c'
+    attack_tx: https://snowtrace.io/tx/0xab813aeecd174d51a9f6d7d0eb9b323bccedba6c5cce0e965781a08f3473dbd5
+    analyses: []
+  claim:
+    attacker: address:0x13459bc2db6053524881415321667d5e16f5f15c
+    impact: drain
+    asset: null
+    amount: '2422.73'
+    amount_text: 2,422.73 USD
+- id: defihacklabs:src/test/2025-07/BoJLeverageMarket_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-07/BoJLeverageMarket_exp.sol
+    sha256: 54a754f52ace46017894a7aa1f93854cf203e78a821dd232b3fad5c2f1f057da
+  period: 2025-07
+  incident:
+    name: BoJLeverageMarket
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 7,227.59 USD
+    attacker_address: '0xdf4089d9845C87ed8FD109bD724f30339C2d0B7B'
+    attack_tx: https://basescan.org/tx/0x591567aed3ef606b3ad41f1ee6dfb1e9589aeff52d17c6c2c6f8dbdb8d238afd
+    analyses: []
+  claim:
+    attacker: address:0xdf4089d9845C87ed8FD109bD724f30339C2d0B7B
+    impact: drain
+    asset: null
+    amount: '7227.59'
+    amount_text: 7,227.59 USD
+- id: defihacklabs:src/test/2025-07/FPC_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-07/FPC_exp.sol
+    sha256: cc77190a52ac0f4fd3cf6a14e32b4d092c422dfe1b2209a6cc7fcba8a266547a
+  period: 2025-07
+  incident:
+    name: FPC
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 4.7M USDT
+    attacker_address: '0x18dd258631b23777c101440380bf053c79db3d9d'
+    attack_tx: https://bscscan.com/tx/0x3a9dd216fb6314c013fa8c4f85bfbbe0ed0a73209f54c57c1aab02ba989f5937
+    analyses:
+    - https://x.com/TenArmorAlert/status/1940423393880244327
+  claim:
+    attacker: address:0x18dd258631b23777c101440380bf053c79db3d9d
+    impact: drain
+    asset: null
+    amount: '4.7'
+    amount_text: 4.7M USDT
+- id: defihacklabs:src/test/2025-07/MulticallWithETH_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-07/MulticallWithETH_exp.sol
+    sha256: 079ef2b89d08edaef88f5d7a9998810b549cba223d2a904ee5cc1cd7738cd76f
+  period: 2025-07
+  incident:
+    name: MulticallWithETH
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~10 K usdt
+    attacker_address: '0x726fb298168c89d5dce9a578668ab156c7e7be67'
+    attack_tx: https://bscscan.com/tx/0x6da7be6edf3176c7c4b15064937ee7148031f92a4b72043ae80a2b3403ab6302
+    analyses: []
+  claim:
+    attacker: address:0x726fb298168c89d5dce9a578668ab156c7e7be67
+    impact: drain
+    asset: null
+    amount: '10'
+    amount_text: ~10 K usdt
+- id: defihacklabs:src/test/2025-07/SWAPPStaking_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-07/SWAPPStaking_exp.sol
+    sha256: 4b8922b218a57f18cffe8e2c376264310b9df1653e885c342636ed0f1788025f
+  period: 2025-07
+  incident:
+    name: SWAPPStaking
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 32,196.28 USD
+    attacker_address: '0x657a2b6fe37ced2f31fd7513095dbfb126a53601'
+    attack_tx: https://app.blocksec.com/explorer/tx/eth/0xa02b159fb438c8f0fb2a8d90bc70d8b2273d06b55920b26f637cab072b7a0e3e
+    analyses:
+    - https://app.blocksec.com/explorer/tx/eth/0xa02b159fb438c8f0fb2a8d90bc70d8b2273d06b55920b26f637cab072b7a0e3e
+    - https://x.com/deeberiroz/status/1947213692220710950
+  claim:
+    attacker: address:0x657a2b6fe37ced2f31fd7513095dbfb126a53601
+    impact: drain
+    asset: null
+    amount: '32196.28'
+    amount_text: 32,196.28 USD
+- id: defihacklabs:src/test/2025-07/VDS_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-07/VDS_exp.sol
+    sha256: 34a145c75e35f2681c4906f52934ceaa53eb663d2345b50c0431f1cf4667ec55
+  period: 2025-07
+  incident:
+    name: VDS
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 13k USD
+    attacker_address: '0xa3e18e6028b1ca09433157cd6a5e807ffe705350'
+    attack_tx: https://bscscan.com/tx/0x0e01fd8798f970fd689014cb215e622aca8b7c8c243176c5b504e0043402e31f
+    analyses:
+    - https://x.com/SlowMist_Team/status/1945672192471302645
+  claim:
+    attacker: address:0xa3e18e6028b1ca09433157cd6a5e807ffe705350
+    impact: drain
+    asset: null
+    amount: '13'
+    amount_text: 13k USD
+- id: defihacklabs:src/test/2025-08/0x8d2e_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-08/0x8d2e_exp.sol
+    sha256: 4b82072a9cf319759e8969365dddee8d7f2a2d03850f79881ba5f68692dec900
+  period: 2025-08
+  incident:
+    name: '0x8d2e'
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 40k USDC
+    attacker_address: '0x4efd5f0749b1b91afdcd2ecf464210db733150e0'
+    attack_tx: https://basescan.org/tx/0x6be0c4b5414883a933639c136971026977df4737b061f864a4a04e4bd7f07106
+    analyses:
+    - https://x.com/TenArmorAlert/status/1958354933247590450
+  claim:
+    attacker: address:0x4efd5f0749b1b91afdcd2ecf464210db733150e0
+    impact: drain
+    asset: null
+    amount: '40'
+    amount_text: 40k USDC
+- id: defihacklabs:src/test/2025-08/ArbitrumBaseSwapper_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-08/ArbitrumBaseSwapper_exp.sol
+    sha256: a14da3d019dfcfe9df46f731035212967b588493f607e97cf9ffb75d14cd0270
+  period: 2025-08
+  incident:
+    name: ArbitrumBaseSwapper
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 1,847.33 USD
+    attacker_address: '0x38ae75EAD48102e2431aC8Cea164ed28637388a3'
+    attack_tx: https://arbiscan.io/tx/0xd4fad993e3dfd37e406be0d5225986a2605ba509d893dafc0c77e0be29ab535d
+    analyses: []
+  claim:
+    attacker: address:0x38ae75EAD48102e2431aC8Cea164ed28637388a3
+    impact: drain
+    asset: null
+    amount: '1847.33'
+    amount_text: 1,847.33 USD
+- id: defihacklabs:src/test/2025-08/EquilibriaEPendle_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-08/EquilibriaEPendle_exp.sol
+    sha256: d84603ee792ac4ec6298849f1ba801466588eb19d29ced062966ea8817a054ca
+  period: 2025-08
+  incident:
+    name: EquilibriaEPendle
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 62,661.57 USD
+    attacker_address: '0x4DCCc719f277eBeB8F7fdB68cD4b105E5bC325db'
+    attack_tx: https://etherscan.io/tx/0x185a16017fb4d9b2fefdf5935435253d53d4758238275426b507fe54eb4fe97a
+    analyses: []
+  claim:
+    attacker: address:0x4DCCc719f277eBeB8F7fdB68cD4b105E5bC325db
+    impact: drain
+    asset: null
+    amount: '62661.57'
+    amount_text: 62,661.57 USD
+- id: defihacklabs:src/test/2025-08/EverValueCoin_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-08/EverValueCoin_exp.sol
+    sha256: 4eef1a1ca479a865cc21d86bb0f5d907997a6252f59227092e5547b58049a422
+  period: 2025-08
+  incident:
+    name: EverValueCoin
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 100k USD
+    attacker_address: '0xaa06fde501a82ce1c0365273684247a736885daf'
+    attack_tx: https://arbiscan.io/tx/0xb13b2ab202cb902b8986cbd430d7227bf3ddca831b79786af145ccb5f00fcf3f
+    analyses:
+    - https://x.com/SuplabsYi/status/1961906638438445268
+  claim:
+    attacker: address:0xaa06fde501a82ce1c0365273684247a736885daf
+    impact: drain
+    asset: null
+    amount: '100'
+    amount_text: 100k USD
+- id: defihacklabs:src/test/2025-08/MyCoinMaster_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-08/MyCoinMaster_exp.sol
+    sha256: c441783413828c87bad185718cd1ed24b6a8b3b7021eefa343a8a8622bc15646
+  period: 2025-08
+  incident:
+    name: MyCoinMaster
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 653.49 USD
+    attacker_address: '0xEBE15A67e37203563d0D99AafAf06eCf41305FbA'
+    attack_tx: https://bscscan.com/tx/0x57865009e1cfb7516240eb901342f3b434c2a2754e14604c838024ffe2e191a7
+    analyses: []
+  claim:
+    attacker: address:0xEBE15A67e37203563d0D99AafAf06eCf41305FbA
+    impact: drain
+    asset: null
+    amount: '653.49'
+    amount_text: 653.49 USD
+- id: defihacklabs:src/test/2025-08/SizeCredit_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2025-08/SizeCredit_exp.sol
+    sha256: b80e511cd8eb4a34c54d1a2ce681933cbc211f73c646a1b2ac54fe70b5590991
+  period: 2025-08
+  incident:
+    name: SizeCredit
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 19.7k USD
+    attacker_address: '0xa7e9b982b0e19a399bc737ca5346ef0ef12046da'
+    attack_tx: https://etherscan.io/tx/0xc7477d6a5c63b04d37a39038a28b4cbaa06beb167e390d55ad4a421dbe4067f8
+    analyses:
+    - https://x.com/SuplabsYi/status/1956306748073230785
+  claim:
+    attacker: address:0xa7e9b982b0e19a399bc737ca5346ef0ef12046da
+    impact: drain
+    asset: null
+    amount: '19.7'
+    amount_text: 19.7k USD
+- id: defihacklabs:src/test/2026-01/makina_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2026-01/makina_exp.sol
+    sha256: bb523b83922d1b2b346fb940d36f25a7a17a2efabc6c2aea3128a01960ace52a
+  period: 2026-01
+  incident:
+    name: makina
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~5.1M USDC (pool loss)
+    attacker_address: '0x2f934b0fd5c4f99bab37d47604a3a1aeadef1ccc'
+    attack_tx: https://app.blocksec.com/phalcon/explorer/tx/eth/0x569733b8016ef9418f0b6bde8c14224d9e759e79301499908ecbcd956a0651f5
+    analyses:
+    - https://app.blocksec.com/phalcon/explorer/tx/eth/0x569733b8016ef9418f0b6bde8c14224d9e759e79301499908ecbcd956a0651f5
+    - https://x.com/CertiKAlert/status/2013473512116363734
+    - https://x.com/TenArmorAlert/status/2013460083078836342,
+  claim:
+    attacker: address:0x2f934b0fd5c4f99bab37d47604a3a1aeadef1ccc
+    impact: drain
+    asset: null
+    amount: '5.1'
+    amount_text: ~5.1M USDC (pool loss)
+- id: defihacklabs:src/test/2026-02/XDKRecycle_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2026-02/XDKRecycle_exp.sol
+    sha256: d9d3c86610579b6f776912be3b5a1d684605ac3357b7708562a752a5a3b80783
+  period: 2026-02
+  incident:
+    name: XDKRecycle
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 6.84 WBNB
+    attacker_address: '0xb180ef1bf6fb3e9a0b5db4460e4db804e946cc8a'
+    attack_tx: https://bscscan.com/tx/0x4848bae0fe22f781a94b4613596e7640f70d443db03b6a18fdaffcd30de718d0
+    analyses:
+    - https://x.com/DefimonAlerts/status/2024163654631882916
+  claim:
+    attacker: address:0xb180ef1bf6fb3e9a0b5db4460e4db804e946cc8a
+    impact: drain
+    asset: WBNB
+    amount: '6.84'
+    amount_text: 6.84 WBNB
+- id: defihacklabs:src/test/2026-03/AlkemiEarn_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2026-03/AlkemiEarn_exp.sol
+    sha256: 58da8b9506ee5688b3bdbca870c33345317fe07db68f77bccc54afa0efebcbaa
+  period: 2026-03
+  incident:
+    name: AlkemiEarn
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 43.45 ETH
+    attacker_address: '0x0ed1c01b8420a965d7bd2374db02896464c91cd7'
+    attack_tx: https://skylens.certik.com/tx/eth/0xa17001eb39f867b8bed850de9107018a2d2503f95f15e4dceb7d68fff5ef6d9d?active_tab=events
+    analyses:
+    - https://skylens.certik.com/tx/eth/0xa17001eb39f867b8bed850de9107018a2d2503f95f15e4dceb7d68fff5ef6d9d?active_tab=events
+    - https://x.com/blockaid_
+    - https://x.com/blockaid_/status/2031351883470676048?s=20
+  claim:
+    attacker: address:0x0ed1c01b8420a965d7bd2374db02896464c91cd7
+    impact: drain
+    asset: ETH
+    amount: '43.45'
+    amount_text: 43.45 ETH
+- id: defihacklabs:src/test/2026-03/WhalebitOracleManipulation_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2026-03/WhalebitOracleManipulation_exp.sol
+    sha256: 1131f3176bf24a4eeb036ee9e59f46a9d78729cea4778d4145bf9266e0ba18be
+  period: 2026-03
+  incident:
+    name: WhalebitOracleManipulation
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 824K USD
+    attacker_address: '0xe66b37de57b65691b9f4ac48de2c2b7be53c5c6f'
+    attack_tx: https://polygonscan.com/tx/0x5d54fa839821e370b020d13a9b11b6f4f8cadc4eaed0a404ea17ad1bd725dbde
+    analyses:
+    - https://x.com/DefimonAlerts/status/2039372077686251787
+  claim:
+    attacker: address:0xe66b37de57b65691b9f4ac48de2c2b7be53c5c6f
+    impact: drain
+    asset: null
+    amount: '824'
+    amount_text: 824K USD
+- id: defihacklabs:src/test/2026-04/giddyvaultv3_compound_auth_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2026-04/giddyvaultv3_compound_auth_exp.sol
+    sha256: c44a8b8ea84929b30e2a43388241775314b9506fe1074d5f769bc2998b6f6a74
+  period: 2026-04
+  incident:
+    name: giddyvaultv3_compound_auth
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$1.3M
+    attacker_address: '0x81fe3d7d35dfefa15b9e6800b6aefc3358e7b156'
+    attack_tx: https://etherscan.io/tx/0x5edb66a4c2ea55bba95d36d27713e3bb1c67c3c4199a8a1759e754c6f25482e5
+    analyses:
+    - https://x.com/DefimonAlerts/status/2047334517535642024
+  claim:
+    attacker: address:0x81fe3d7d35dfefa15b9e6800b6aefc3358e7b156
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$1.3M
+- id: defihacklabs:src/test/2026-04/unverified_a152_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2026-04/unverified_a152_exp.sol
+    sha256: 17a6cd93a7d03c6f92fb5267c8af9b19e97daedb2dff3eaef227f99ecb1c09c9
+  period: 2026-04
+  incident:
+    name: unverified_a152
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 229,030.97 USDT
+    attacker_address: '0x224c940003dd0b8aa1a20e655ced0363d573fa46'
+    attack_tx: https://etherscan.io/tx/0x57709a498f27c7219b634ae20e7d2cbf9ab8dd6aca7b3845fabf93b57760b576
+    analyses: []
+  claim:
+    attacker: address:0x224c940003dd0b8aa1a20e655ced0363d573fa46
+    impact: drain
+    asset: USDT
+    amount: '229030.97'
+    amount_text: 229,030.97 USDT
+- id: defihacklabs:src/test/2026-05/AROS_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2026-05/AROS_exp.sol
+    sha256: 539e7145d19b4e8496bcd6fce06bc4530af9849dbb2598d41e5e43d6dc79dcb1
+  period: 2026-05
+  incident:
+    name: AROS
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$295K
+    attacker_address: '0x6f548693937039C8C4343E01C5bd42c5986508f5'
+    attack_tx: https://bscscan.com/tx/0xe89fe640ec5241edfca7d8dcae77a0a4270dee15e4bbd043fc60e393aabf41e1
+    analyses:
+    - https://x.com/TenArmorAlert/status/2061289921990570349
+  claim:
+    attacker: address:0x6f548693937039C8C4343E01C5bd42c5986508f5
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$295K
+- id: defihacklabs:src/test/2026-05/DxSale_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2026-05/DxSale_exp.sol
+    sha256: 2fdcb45abbd9bbfaf04f8ffae39375868cae4c5338147a34126ea88e26ae90b1
+  period: 2026-05
+  incident:
+    name: DxSale
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$7.3M USD
+    attacker_address: '0xC4574DDEF299e7E563971e200433e592EeaaFA69'
+    attack_tx: null
+    analyses:
+    - https://x.com/CoinsultAudits/status/1928203831996297670
+    - https://x.com/Tahax1/status/1928169316736651568
+  claim:
+    attacker: address:0xC4574DDEF299e7E563971e200433e592EeaaFA69
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$7.3M USD
+- id: defihacklabs:src/test/2026-05/MAPProtocol_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2026-05/MAPProtocol_exp.sol
+    sha256: b6ed30e90306af4e9bebece26c19ef073df866fdf9a1988e0489ccd315791b62
+  period: 2026-05
+  incident:
+    name: MAPProtocol
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$180K
+    attacker_address: '0x40592025392bd7d7463711c6e82ed34241b64279'
+    attack_tx: https://etherscan.io/tx/0x31e56b4737649e0acdb0ebb4eca44d16aeca25f60c022cbde85f092bde27664a
+    analyses:
+    - https://x.com/MapProtocol/status/2059587998409490510
+  claim:
+    attacker: address:0x40592025392bd7d7463711c6e82ed34241b64279
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$180K
+- id: defihacklabs:src/test/2026-05/SQTokenStaking_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2026-05/SQTokenStaking_exp.sol
+    sha256: 21a4f090edbced6426d91239f5246995dfaa2a024939fc2b7247ceec28cd5c58
+  period: 2026-05
+  incident:
+    name: SQTokenStaking
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$346.1K
+    attacker_address: '0xE746c9043Aa0106853c5e4380A9A307Fe385378e'
+    attack_tx: https://bscscan.com/tx/0x1bae633eda9b3d98999ea116bc403712eaa07093ec32bd6d559085cc4607f5b8
+    analyses:
+    - https://x.com/Defi_Nerd_sec/status/2054425936746148148
+  claim:
+    attacker: address:0xE746c9043Aa0106853c5e4380A9A307Fe385378e
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$346.1K
+- id: defihacklabs:src/test/2026-05/WUSD_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2026-05/WUSD_exp.sol
+    sha256: fac55a326756aa4e932f2d5efb1721b67ff4678264f519c43ee3a6f19c9578ca
+  period: 2026-05
+  incident:
+    name: WUSD
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: ~$200K USD (USDC + USDT drained from Uniswap V3 GLO pools)
+    attacker_address: '0x88329A09428778F62BC0C8BAac0997864E5a57f8'
+    attack_tx: null
+    analyses:
+    - https://x.com/exvulsec/status/2058803971947385330
+  claim:
+    attacker: address:0x88329A09428778F62BC0C8BAac0997864E5a57f8
+    impact: drain
+    asset: null
+    amount: null
+    amount_text: ~$200K USD (USDC + USDT drained from Uniswap V3 GLO pools)
+- id: defihacklabs:src/test/2026-06/TOPBPool_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2026-06/TOPBPool_exp.sol
+    sha256: b4dded8dd1b6bf8eea477cc64909f80b455b59cb16a77dccc82e700cee89235d
+  period: 2026-06
+  incident:
+    name: TOPBPool
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 944.20 WETH
+    attacker_address: '0xff8ef7bc455a57e5893232203052ce0232b39fa2'
+    attack_tx: https://etherscan.io/tx/0x967aa34c69b7775c718545c7f94d92e965eb5fc553c0f27f6f1a9c65c93ac156
+    analyses:
+    - https://x.com/DefimonAlerts/status/2064616112822583505
+  claim:
+    attacker: address:0xff8ef7bc455a57e5893232203052ce0232b39fa2
+    impact: drain
+    asset: WETH
+    amount: '944.20'
+    amount_text: 944.20 WETH
+- id: defihacklabs:src/test/2026-07/edel-xstock_exp.sol
+  poc:
+    repo: https://github.com/SunWeb3Sec/DeFiHackLabs
+    commit: 2c99b565ae24ea2006adf181da20c4419b3edc30
+    path: src/test/2026-07/edel-xstock_exp.sol
+    sha256: b7b1008b962e0566ff1f7209807e6f1f31e8f42d25fac9253271f59976a971ce
+  period: 2026-07
+  incident:
+    name: edel-xstock
+    record: DeFiHackLabs header (@KeyInfo)
+    lost_text: 204,215.57 USDC
+    attacker_address: '0x58428161bB55c14A413945f06cbDeC157F411C76'
+    attack_tx: https://etherscan.io/tx/0xe2320086b2815d21b0927839bd0e306466c29a68d38d5361e99dd21ec5472612
+    analyses:
+    - https://x.com/TenArmorAlert/status/2072130807356129726
+  claim:
+    attacker: address:0x58428161bB55c14A413945f06cbDeC157F411C76
+    impact: drain
+    asset: USDC
+    amount: '204215.57'
+    amount_text: 204,215.57 USDC
