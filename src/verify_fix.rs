@@ -613,13 +613,22 @@ mod tests {
 
     fn script(dir: &Path, name: &str, body: &str) -> PathBuf {
         let path = dir.join(name);
-        std::fs::write(&path, body).unwrap();
+        // Write to a temporary name and rename into place. On Linux, exec'ing a
+        // file that is still open for writing fails with ETXTBSY (os error 26),
+        // and a fork from another test thread can hold that write handle for an
+        // instant. Nothing ever executes the temporary name.
+        let tmp = dir.join(format!("{name}.tmp"));
+        std::fs::write(&tmp, body).unwrap();
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
-            let mut perms = std::fs::metadata(&path).unwrap().permissions();
+            let mut perms = std::fs::metadata(&tmp).unwrap().permissions();
             perms.set_mode(0o755);
-            std::fs::set_permissions(&path, perms).unwrap();
+            std::fs::set_permissions(&tmp, perms).unwrap();
+        }
+        std::fs::rename(&tmp, &path).unwrap();
+        #[cfg(unix)]
+        {
             path
         }
         // Windows cannot execute a shell script (error 193). The stand-in is
