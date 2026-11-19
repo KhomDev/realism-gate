@@ -18,7 +18,6 @@ use crate::trace::{self, CallClass};
 use regex::Regex;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
-use std::process::Command;
 use std::sync::OnceLock;
 
 /// What `git ls-tree` and `git grep` saw at one commit.
@@ -51,9 +50,7 @@ pub fn load(root: &Path, commit: &str) -> Result<Index, String> {
         .map(|l| l.trim().replace('\\', "/"))
         .filter(|l| !l.is_empty())
         .collect();
-    let grep = Command::new("git")
-        .arg("-C")
-        .arg(root)
+    let grep = crate::git::command(root)
         .args([
             "grep",
             "-I",
@@ -86,9 +83,7 @@ pub fn load(root: &Path, commit: &str) -> Result<Index, String> {
 }
 
 fn git(root: &Path, args: &[&str]) -> Result<String, String> {
-    let out = Command::new("git")
-        .arg("-C")
-        .arg(root)
+    let out = crate::git::command(root)
         .args(args)
         .output()
         .map_err(|e| format!("could not run git: {e}"))?;
