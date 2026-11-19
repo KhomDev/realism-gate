@@ -25,7 +25,7 @@ A tool that checks proofs should be exact about what it does not check.
   fork pinned there still trips RG11. Use an `allow` comment.
 - Code in other contracts the test calls externally is not followed. An
   assertion inside an external helper contract does not count for RG08.
-- `invariant_*` and stateful fuzz entry points are not checked in v0.1.
+- `invariant_*` and stateful fuzz entry points are not checked.
 - Yul blocks are skipped.
 
 ## It approximates
