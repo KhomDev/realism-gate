@@ -36,6 +36,12 @@ may change in any minor release.
   `REALISM_GATE_SANDBOX=1` (and the `/.dockerenv` and `/run/.containerenv`
   markers) still count as an attestation, and `docs/verify-fix.md` says so. The
   policy is unchanged; `tests/verify_fix_limits.rs` makes a change visible.
+- **Every third-party action in the workflows and `action.yml` is pinned to a
+  commit SHA.** Each `uses:` line names the commit and its version in a comment
+  (`# v7.0.1`), and the major version is unchanged. Two `taiki-e/install-action`
+  tags are named after the tool, with no version tag on the same commit, so
+  their comment says `cargo-audit tag` and `cargo-binstall tag`. Local `./`
+  references are not affected.
 
 ### Fixed
 
