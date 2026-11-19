@@ -8,6 +8,17 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-11-19
+
+A security and fix release. RG02 now catches a prank as a contract the PoC
+deploys from its own file (#17). `--changed-since` and `verify-fix` no
+longer let an untrusted repository or patch run a program or write outside
+the copy. New adversarial, fuzz-corpus and property tests ship with it; eight
+adversarial cases the checker gets wrong today are committed as ignored tests
+with their inputs (`cargo test -- --ignored`), so the gaps are on record. No
+rule id, flag, default or output field changed, and the published precision
+numbers are unchanged (re-measured on this build).
+
 ### Security
 
 - **`--changed-since` no longer lets a repository's own config run a program.**
@@ -589,7 +600,8 @@ First release.
 - A pinned public-corpus benchmark (`scripts/bench-corpus.sh`,
   `bench/defihacklabs.json`, `docs/benchmark.md`), re-measured in CI.
 
-[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/KhomDev/realism-gate/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/KhomDev/realism-gate/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/KhomDev/realism-gate/compare/v0.6.1...v1.0.0
 [0.6.1]: https://github.com/KhomDev/realism-gate/compare/v0.6.0...v0.6.1
