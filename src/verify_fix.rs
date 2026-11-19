@@ -19,6 +19,7 @@
 use serde_json::Value;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 #[derive(Debug, Clone)]
 pub struct Request {
@@ -555,13 +556,27 @@ fn hunk_old_start(header: &str) -> Result<usize, VerifyError> {
         .map_err(|_| VerifyError(format!("malformed hunk `{header}`")))
 }
 
+/// A fresh directory for one copy of a project tree. The name is unique per
+/// process (the counter) and per process ID, and `create_dir` refuses an
+/// existing directory, so two copies can never share a tree. A shared tree is
+/// what let one test remove the working directory another test's forge was
+/// running in.
 fn copy_of(from: &Path) -> Result<PathBuf, VerifyError> {
-    let to = std::env::temp_dir().join(format!(
-        "realism-gate-verify-{}-{}",
-        std::process::id(),
-        unique()
-    ));
-    copy_tree(from, &to)?;
+    static SEQ: AtomicU64 = AtomicU64::new(0);
+    let to = loop {
+        let seq = SEQ.fetch_add(1, Ordering::Relaxed);
+        let candidate =
+            std::env::temp_dir().join(format!("realism-gate-verify-{}-{seq}", std::process::id()));
+        match std::fs::create_dir(&candidate) {
+            Ok(()) => break candidate,
+            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => continue,
+            Err(e) => return Err(VerifyError(format!("{}: {e}", candidate.display()))),
+        }
+    };
+    if let Err(e) = copy_tree(from, &to) {
+        let _ = std::fs::remove_dir_all(&to);
+        return Err(e);
+    }
     Ok(to)
 }
 
@@ -622,14 +637,6 @@ fn copy_tree(from: &Path, to: &Path) -> Result<(), VerifyError> {
 
 fn first_lines(text: &str, n: usize) -> String {
     text.lines().take(n).collect::<Vec<_>>().join("\n")
-}
-
-fn unique() -> u64 {
-    use std::time::{SystemTime, UNIX_EPOCH};
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_nanos() as u64)
-        .unwrap_or(0)
 }
 
 #[cfg(test)]
@@ -706,9 +713,8 @@ mod tests {
 
     #[test]
     fn a_poc_that_fails_on_both_sides_is_not_a_fix() {
-        let dir = std::env::temp_dir().join(format!("rg-vf-{}", unique()));
-        let _ = std::fs::remove_dir_all(&dir);
-        std::fs::create_dir_all(&dir).unwrap();
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().to_path_buf();
         let forge = script(
             &dir,
             "forge",
@@ -721,14 +727,12 @@ mod tests {
             matches!(out, Outcome::BugDoesNotReproduce { .. }),
             "{out:?}"
         );
-        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
     fn a_passing_poc_means_the_fix_does_not_hold() {
-        let dir = std::env::temp_dir().join(format!("rg-vp-{}", unique()));
-        let _ = std::fs::remove_dir_all(&dir);
-        std::fs::create_dir_all(&dir).unwrap();
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().to_path_buf();
         let forge = script(
             &dir,
             "forge",
@@ -738,14 +742,12 @@ mod tests {
         std::fs::create_dir_all(&poc_dir).unwrap();
         let out = verify(&req(&dir, forge, Some(poc_dir), None)).unwrap();
         assert!(matches!(out, Outcome::FixDoesNotHold { .. }), "{out:?}");
-        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
     fn a_log_line_that_says_success_false_does_not_prove_a_fix() {
-        let dir = std::env::temp_dir().join(format!("rg-vspoof-{}", unique()));
-        let _ = std::fs::remove_dir_all(&dir);
-        std::fs::create_dir_all(&dir).unwrap();
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().to_path_buf();
         // The old parser treated this stdout as a failure and reported FixHolds.
         let forge = script(
             &dir,
@@ -756,14 +758,12 @@ mod tests {
         std::fs::create_dir_all(&poc_dir).unwrap();
         let out = verify(&req(&dir, forge, Some(poc_dir), None)).unwrap();
         assert!(matches!(out, Outcome::FixDoesNotHold { .. }), "{out:?}");
-        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
     fn a_compile_error_is_not_a_failed_poc() {
-        let dir = std::env::temp_dir().join(format!("rg-vc-{}", unique()));
-        let _ = std::fs::remove_dir_all(&dir);
-        std::fs::create_dir_all(&dir).unwrap();
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().to_path_buf();
         let forge = script(
             &dir,
             "forge",
@@ -773,13 +773,12 @@ mod tests {
         std::fs::create_dir_all(&poc_dir).unwrap();
         let err = verify(&req(&dir, forge, Some(poc_dir), None)).unwrap_err();
         assert!(err.0.contains("compile"), "{}", err.0);
-        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
     fn a_patch_is_applied_before_forge_runs_and_the_baseline_must_pass() {
-        let dir = std::env::temp_dir().join(format!("rg-vpatch-{}", unique()));
-        let _ = std::fs::remove_dir_all(&dir);
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().to_path_buf();
         std::fs::create_dir_all(dir.join("src")).unwrap();
         std::fs::write(dir.join("src/A.sol"), "contract A { uint x = 1; }\n").unwrap();
         let patch = dir.join("fix.diff");
@@ -806,13 +805,12 @@ mod tests {
         assert!(matches!(out, Outcome::FixHolds { .. }), "{out:?}");
         let original = std::fs::read_to_string(dir.join("src/A.sol")).unwrap();
         assert!(original.contains("x = 1"), "{original}");
-        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
     fn a_patch_that_escapes_the_tree_is_refused() {
-        let dir = std::env::temp_dir().join(format!("rg-vesc-{}", unique()));
-        let _ = std::fs::remove_dir_all(&dir);
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().to_path_buf();
         std::fs::create_dir_all(dir.join("src")).unwrap();
         std::fs::write(dir.join("src/A.sol"), "contract A { uint x = 1; }\n").unwrap();
         let outside = dir.join("outside.txt");
@@ -839,21 +837,18 @@ mod tests {
             err.0
         );
         assert!(!outside.exists(), "the patch wrote outside the temp tree");
-        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
     fn ffi_in_foundry_toml_refuses_to_run() {
-        let dir = std::env::temp_dir().join(format!("rg-vffi-{}", unique()));
-        let _ = std::fs::remove_dir_all(&dir);
-        std::fs::create_dir_all(&dir).unwrap();
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().to_path_buf();
         std::fs::write(dir.join("foundry.toml"), "[profile.default]\nffi = true\n").unwrap();
         let forge = script(&dir, "forge", "#!/bin/sh\nexit 0\n");
         let poc_dir = dir.join("patched");
         std::fs::create_dir_all(&poc_dir).unwrap();
         let err = verify(&req(&dir, forge, Some(poc_dir), None)).unwrap_err();
         assert!(err.0.contains("ffi"), "{}", err.0);
-        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
