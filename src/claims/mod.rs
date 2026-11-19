@@ -655,6 +655,26 @@ mod tests {
         assert!(front_matter("text\n---\nmore\n").is_none());
     }
 
+    // serde-saphyr (2.0.x, as locked) reads an empty document as the default
+    // `Raw`, so an empty block is the same "no claims" error as a block that
+    // names nothing. It must stay an error, not a panic and not an empty pass.
+    #[test]
+    fn an_empty_claims_file_is_refused_without_a_panic() {
+        for text in ["", "\n", "# only a comment\n"] {
+            let err = Claims::parse(text).unwrap_err();
+            assert!(err.starts_with("no claims:"), "{text:?}: {err}");
+        }
+    }
+
+    #[test]
+    fn an_empty_front_matter_block_is_refused_without_a_panic() {
+        let text = "---\n---\n\n# Finding\n";
+        let block = front_matter(text).expect("an empty block is still a block");
+        assert_eq!(block, "");
+        let err = Claims::parse(block).unwrap_err();
+        assert!(err.starts_with("no claims:"), "{err}");
+    }
+
     #[test]
     fn the_outcome_follows_the_rows() {
         let row = |field, status| Row {

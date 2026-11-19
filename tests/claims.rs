@@ -616,3 +616,105 @@ fn a_card_without_claims_is_an_input_error() {
         stderr(&o)
     );
 }
+
+#[test]
+fn an_empty_claims_file_is_an_input_error_not_a_crash() {
+    // serde-saphyr reads an empty document into the default claims block; the
+    // "no claims" check reports it. Exit 2 is "the inputs could not be read".
+    let dir = scratch("empty-claims");
+    std::fs::write(dir.join("Poc.t.sol"), "contract Poc {}\n").unwrap();
+    std::fs::write(dir.join("claims.yaml"), "").unwrap();
+    std::fs::write(dir.join("finding.md"), "# A finding\n").unwrap();
+    let o = run_in(
+        &dir,
+        &[
+            "check",
+            "Poc.t.sol",
+            "--report",
+            "finding.md",
+            "--no-config",
+            "--no-declaration",
+        ],
+    );
+    assert_eq!(o.status.code(), Some(2), "{}{}", stdout(&o), stderr(&o));
+    assert!(stderr(&o).contains("no claims"), "{}", stderr(&o));
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn an_empty_front_matter_block_is_an_input_error_not_a_crash() {
+    let dir = scratch("empty-front-matter");
+    std::fs::write(dir.join("Poc.t.sol"), "contract Poc {}\n").unwrap();
+    std::fs::write(dir.join("finding.md"), "---\n---\n\n# A finding\n").unwrap();
+    let o = run_in(
+        &dir,
+        &[
+            "check",
+            "Poc.t.sol",
+            "--report",
+            "finding.md",
+            "--no-config",
+            "--no-declaration",
+        ],
+    );
+    assert_eq!(o.status.code(), Some(2), "{}{}", stdout(&o), stderr(&o));
+    assert!(stderr(&o).contains("no claims"), "{}", stderr(&o));
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn a_privileged_prank_contradicts_an_unprivileged_attacker() {
+    // Fictional fixture. The exploit step runs as `owner` (a role), not as an
+    // attacker. RG02 fires, so the claim that the attacker is any user is
+    // CONTRADICTED and the run exits 1.
+    let dir = scratch("privileged-prank");
+    std::fs::write(
+        dir.join("Poc.t.sol"),
+        r#"contract Vault {
+    uint256 public balance = 100;
+    function sweep(address) external { balance = 0; }
+}
+contract Poc {
+    Vault vault;
+    function setUp() public { vault = new Vault(); }
+    function test_sweep_as_owner() public {
+        uint256 before = vault.balance();
+        vm.prank(owner);
+        vault.sweep(address(this));
+        assertLt(vault.balance(), before);
+    }
+}
+"#,
+    )
+    .unwrap();
+    std::fs::write(
+        dir.join("claims.yaml"),
+        "schema: realism-gate.claims/v1\nattacker: any-user\nimpact: drain\n",
+    )
+    .unwrap();
+    std::fs::write(dir.join("finding.md"), "# Drains the vault\n").unwrap();
+
+    let o = run_in(
+        &dir,
+        &[
+            "check",
+            "Poc.t.sol",
+            "--report",
+            "finding.md",
+            "--no-config",
+            "--no-declaration",
+            "--format",
+            "json",
+        ],
+    );
+    let v = json(&o);
+    assert_eq!(
+        row(&v, "attacker")["status"],
+        "contradicted",
+        "{}",
+        v["claims"]
+    );
+    assert_eq!(v["claims"]["outcome"], "contradicted");
+    assert_eq!(o.status.code(), Some(1), "{}", stderr(&o));
+    let _ = std::fs::remove_dir_all(&dir);
+}
