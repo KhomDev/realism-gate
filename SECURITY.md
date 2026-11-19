@@ -16,9 +16,9 @@ The MCP server does not expose `verify-fix` (`src/mcp.rs:49`, two tools only).
 
 `check` never builds, compiles or runs the PoC. It does run `git` as above, so
 a repository under review can influence `git` output. Whether a repository's
-own `.git/config` can make `git` execute code is an open question until the
-tests in the threat model's git section have run; see
-[docs/threat-model.md](docs/threat-model.md).
+own `.git/config` can make `git` execute code was tested. One case was
+exploitable under `--changed-since` and is fixed; the rest are not. See
+[docs/threat-model.md](docs/threat-model.md) and `tests/security.rs` (PR #21).
 
 `verify-fix` is the one command that runs code from the project under review.
 It refuses to run on the host unless the operator passes `--sandbox` or
