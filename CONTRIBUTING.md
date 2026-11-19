@@ -56,6 +56,9 @@ cargo test
    If the numbers move, run it with `--write` and explain the change in
    `docs/benchmark.md`.
 
+Test-suite measurements (line coverage and mutation status) are in
+[docs/test-quality.md](docs/test-quality.md). They are a snapshot, not a CI gate.
+
 ## Before you open a pull request
 
 ```bash

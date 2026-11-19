@@ -93,6 +93,11 @@ may change in any minor release.
   the tests already in the file; every JSON report validates against
   `docs/output-schema.json`, and every SARIF log has the keys SARIF 2.1.0
   requires. The schema checker moved to `tests/support/` so both tests share it.
+- **`docs/test-quality.md`: line coverage and the mutant count for the rule
+  code.** Whole-crate line coverage is 87.77%; the least-covered rule files are
+  listed. Mutation outcomes are not recorded yet: a full `cargo mutants` run
+  takes hours here, so the page says so rather than estimating a survival rate.
+  Linked from `CONTRIBUTING.md`. Nothing is gated on these numbers.
 
 ## [1.0.1] - 2026-11-19
 
