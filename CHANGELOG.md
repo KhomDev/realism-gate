@@ -37,6 +37,18 @@ may change in any minor release.
   markers) still count as an attestation, and `docs/verify-fix.md` says so. The
   policy is unchanged; `tests/verify_fix_limits.rs` makes a change visible.
 
+### Fixed
+
+- **RG02 fires on a prank as a contract the test deployed from a type in its
+  own file (#17).** `vm.prank(address(vault))` and `vm.startPrank(address(vault))`
+  with `vault = new Vault()`, where `Vault` is defined in the PoC file, was
+  read as a helper and not as the protocol, so the attacker claim was SHOWN.
+  It is now flagged, and the claim is CONTRADICTED. Three cases stay quiet: a
+  contract named for the attacker, a contract the attacker deploys under
+  `startPrank(attacker)`, and a hard-coded literal address (unchanged, out of
+  scope). The published measurements do not change; see the PR for the
+  before and after numbers.
+
 ## [1.0.1] - 2026-11-19
 
 A patch release: fixes, tests and documentation. No rule, flag, default or

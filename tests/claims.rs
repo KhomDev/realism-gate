@@ -718,3 +718,195 @@ contract Poc {
     assert_eq!(o.status.code(), Some(1), "{}", stderr(&o));
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+/// Runs `check` with an unprivileged attacker claim on one PoC source and
+/// returns the parsed JSON and the process output. Fictional fixtures only.
+fn attacker_claim_on(name: &str, source: &str) -> (Value, Output) {
+    let dir = scratch(name);
+    std::fs::write(dir.join("Poc.t.sol"), source).unwrap();
+    std::fs::write(
+        dir.join("claims.yaml"),
+        "schema: realism-gate.claims/v1\nattacker: any-user\nimpact: drain\n",
+    )
+    .unwrap();
+    std::fs::write(dir.join("finding.md"), "# Drains the vault\n").unwrap();
+    let o = run_in(
+        &dir,
+        &[
+            "check",
+            "Poc.t.sol",
+            "--report",
+            "finding.md",
+            "--no-config",
+            "--no-declaration",
+            "--format",
+            "json",
+        ],
+    );
+    let v = json(&o);
+    let _ = std::fs::remove_dir_all(&dir);
+    (v, o)
+}
+
+// RG02 (issue #17): a prank as a contract the test deployed, from a type the
+// PoC file defines, is a prank as the protocol. The attacker claim is
+// CONTRADICTED. The same prank as a contract named for the attacker is not.
+
+const DEPLOYED_COPY_IN_SETUP: &str = r#"contract Vault {
+    uint256 public balance = 100;
+    function sweep(address) external { balance = 0; }
+}
+contract Poc {
+    Vault vault;
+    function setUp() public { vault = new Vault(); }
+    function test_sweep_as_the_vault() public {
+        uint256 before = vault.balance();
+        vm.prank(address(vault));
+        vault.sweep(address(this));
+        assertLt(vault.balance(), before);
+    }
+}
+"#;
+
+#[test]
+fn a_prank_as_a_deployed_copy_in_setup_contradicts_the_attacker() {
+    let (v, o) = attacker_claim_on("prank-copy-setup", DEPLOYED_COPY_IN_SETUP);
+    assert_eq!(
+        row(&v, "attacker")["status"],
+        "contradicted",
+        "{}",
+        v["claims"]
+    );
+    assert_eq!(o.status.code(), Some(1), "{}", stderr(&o));
+}
+
+#[test]
+fn a_start_prank_as_a_deployed_copy_contradicts_the_attacker() {
+    let (v, o) = attacker_claim_on(
+        "start-prank-copy",
+        r#"contract Vault {
+    uint256 public balance = 100;
+    function sweep(address) external { balance = 0; }
+}
+contract Poc {
+    function test_sweep_as_the_vault() public {
+        Vault vault = new Vault();
+        uint256 before = vault.balance();
+        vm.startPrank(address(vault));
+        vault.sweep(address(this));
+        vm.stopPrank();
+        assertLt(vault.balance(), before);
+    }
+}
+"#,
+    );
+    assert_eq!(
+        row(&v, "attacker")["status"],
+        "contradicted",
+        "{}",
+        v["claims"]
+    );
+    assert_eq!(o.status.code(), Some(1), "{}", stderr(&o));
+}
+
+#[test]
+fn a_prank_as_an_attacker_contract_the_test_deploys_is_not_a_privileged_step() {
+    // The attacker's own contract is a legitimate sender: pranking as it is
+    // the attacker acting. RG02 must stay silent on it.
+    let (v, o) = attacker_claim_on(
+        "attacker-contract",
+        r#"contract Vault {
+    uint256 public balance = 100;
+    function sweep(address) external { balance = 0; }
+}
+contract AttackerContract {
+    function run(Vault v) external { v.sweep(address(this)); }
+}
+contract Poc {
+    Vault vault;
+    AttackerContract attackerContract;
+    function setUp() public {
+        vault = new Vault();
+        attackerContract = new AttackerContract();
+    }
+    function test_drain() public {
+        uint256 before = vault.balance();
+        vm.prank(address(attackerContract));
+        attackerContract.run(vault);
+        assertLt(vault.balance(), before);
+    }
+}
+"#,
+    );
+    assert_ne!(
+        row(&v, "attacker")["status"],
+        "contradicted",
+        "{}",
+        v["claims"]
+    );
+    assert_eq!(o.status.code(), Some(0), "{}", stderr(&o));
+}
+
+#[test]
+fn a_contract_the_attacker_deploys_is_not_a_protocol_copy() {
+    // The attacker creates a helper under startPrank(attacker) and pranks as
+    // it. The helper's name is neutral; the deployment is the attacker's.
+    let (v, o) = attacker_claim_on(
+        "attacker-deploys",
+        r#"contract Vault {
+    uint256 public balance = 100;
+    function sweep(address) external { balance = 0; }
+}
+contract Factory {}
+contract Poc {
+    address attacker = makeAddr("attacker");
+    function test_drain() public {
+        Vault vault = new Vault();
+        uint256 before = vault.balance();
+        vm.startPrank(attacker);
+        Factory f = new Factory();
+        vm.stopPrank();
+        vm.prank(address(f));
+        vault.sweep(address(this));
+        assertLt(vault.balance(), before);
+    }
+}
+"#,
+    );
+    assert_ne!(
+        row(&v, "attacker")["status"],
+        "contradicted",
+        "{}",
+        v["claims"]
+    );
+    assert_eq!(o.status.code(), Some(0), "{}", stderr(&o));
+}
+
+#[test]
+fn a_hard_coded_literal_prank_is_unchanged_and_out_of_scope() {
+    // Out of scope for #17: the tool cannot tell what 0x1234 is, so the
+    // behaviour does not change. This pins it, so a later change is a choice.
+    let (v, _o) = attacker_claim_on(
+        "literal-prank",
+        r#"contract Vault {
+    uint256 public balance = 100;
+    function sweep(address) external { balance = 0; }
+}
+contract Poc {
+    function test_drain() public {
+        Vault vault = new Vault();
+        uint256 before = vault.balance();
+        vm.prank(address(0x1234));
+        vault.sweep(address(this));
+        assertLt(vault.balance(), before);
+    }
+}
+"#,
+    );
+    assert_ne!(
+        row(&v, "attacker")["status"],
+        "contradicted",
+        "{}",
+        v["claims"]
+    );
+}

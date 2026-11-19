@@ -71,6 +71,16 @@ fn rg02_privileged_step_in_exploit() {
 }
 
 #[test]
+fn rg02_prank_as_a_contract_the_test_deployed() {
+    // Issue #17: a copy of the protocol defined in the PoC file and deployed
+    // by the test. The prank is the protocol acting, not the attacker.
+    expect(
+        "tests/fixtures/bad/RG02_prank_deployed_copy.t.sol",
+        &[("RG02", Warn, 24)],
+    );
+}
+
+#[test]
 fn rg03_deployer_is_attacker() {
     expect(
         "tests/fixtures/bad/RG03_deployer_is_attacker.t.sol",
