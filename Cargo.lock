@@ -2374,7 +2374,7 @@ dependencies = [
 
 [[package]]
 name = "realism-gate"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "clap",
  "oxc_allocator",
