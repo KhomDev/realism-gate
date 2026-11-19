@@ -1,0 +1,49 @@
+name: fuzz
+
+# The long run. Each parser target gets five minutes of libFuzzer on Linux, once
+# a week. The same seed corpus is replayed by `cargo test` (tests/fuzz_corpus.rs)
+# on every CI run, on every platform; that is the short run.
+
+on:
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  fuzz:
+    name: fuzz ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [solidity, rust, typescript, move, claims, declaration]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install nightly toolchain
+        run: rustup toolchain install nightly --profile minimal
+
+      - name: Install cargo-fuzz
+        uses: taiki-e/install-action@cdd500fcb345d29dabc5617aab1edf24d5211116 # the tag ci.yml uses for cargo-audit
+        with:
+          tool: cargo-fuzz
+
+      - name: Fuzz ${{ matrix.target }} for five minutes
+        working-directory: fuzz
+        run: cargo +nightly fuzz run ${{ matrix.target }} -- -max_total_time=300
+
+      - name: Upload crashing inputs
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: fuzz-crashes-${{ matrix.target }}
+          path: fuzz/artifacts/${{ matrix.target }}/
+          if-no-files-found: ignore
+          retention-days: 30
