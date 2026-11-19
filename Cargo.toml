@@ -54,6 +54,9 @@ lto = true
 codegen-units = 1
 strip = true
 
+[dev-dependencies]
+tempfile = "3.27.0"
+
 # cargo-binstall: where the release workflow puts each archive and what is in
 # it. Spelled out rather than left to binstall's guessing, and checked by the
 # release workflow's dry run, which installs through this metadata.
