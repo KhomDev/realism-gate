@@ -65,6 +65,17 @@ may change in any minor release.
   attackers, trust boundaries with `file:line` references, the guarantees and
   what proves each one, and the open hypotheses with their status.
 
+### Tests
+
+- **`tests/adversarial.rs`: PoCs and reports written to fool the checker.** It
+  covers a privileged address reached through a local variable, a helper
+  contract, and an `abi.encode`/`abi.decode` round trip; a prank and an
+  assertion inside `if (false)` or after `return`; a claims file and front
+  matter that disagree; a non-ASCII identifier; a 5 MB file; and a deeply
+  nested expression. Each case states what the tool should do. Eight cases fail
+  today and are `#[ignore]`d with the reason, and the inputs are listed in the
+  pull request. No rule changed.
+
 ## [1.0.1] - 2026-11-19
 
 A patch release: fixes, tests and documentation. No rule, flag, default or
