@@ -26,6 +26,7 @@ realism-report*.sarif
 
 # --- build / tooling ---------------------------------------------------------
 target/
+fuzz/artifacts/
 dist/
 __pycache__/
 *.py[cod]

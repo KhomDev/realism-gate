@@ -75,6 +75,18 @@ may change in any minor release.
   nested expression. Each case states what the tool should do. Eight cases fail
   today and are `#[ignore]`d with the reason, and the inputs are listed in the
   pull request. No rule changed.
+- **Fuzz targets for every parser, in `fuzz/`.** One cargo-fuzz target each
+  for the Solidity, Rust, TypeScript and Move frontends, the claims YAML and
+  front matter (with the prose heuristics), and `realism.yaml`. The property is
+  that no target panics. The crate is excluded from the main workspace, so a
+  normal build needs no nightly. Its seed corpus is copied from the test
+  fixtures and examples.
+- **`tests/fuzz_corpus.rs` replays the corpus on every `cargo test`.** It runs
+  the same target bodies over each seed and over a fixed set of deterministic
+  mutations. cargo-fuzz does not run on Windows, so this is the check that runs
+  everywhere.
+- **`fuzz.yml`, a weekly five-minute fuzz run per target on Linux.** It uploads
+  crashing inputs as an artifact.
 
 ## [1.0.1] - 2026-11-19
 

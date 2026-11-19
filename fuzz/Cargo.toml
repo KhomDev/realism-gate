@@ -1,0 +1,59 @@
+[package]
+name = "realism-gate-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+description = "cargo-fuzz targets for realism-gate's parsers. Excluded from the main workspace; needs nightly and Linux or macOS."
+
+# cargo-fuzz's own convention: this is a workspace of its own, so building the
+# main crate never touches it.
+[workspace]
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+realism-gate = { path = ".." }
+
+[[bin]]
+name = "solidity"
+path = "fuzz_targets/solidity.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "rust"
+path = "fuzz_targets/rust.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "typescript"
+path = "fuzz_targets/typescript.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "move"
+path = "fuzz_targets/move.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "claims"
+path = "fuzz_targets/claims.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "declaration"
+path = "fuzz_targets/declaration.rs"
+test = false
+doc = false
+bench = false

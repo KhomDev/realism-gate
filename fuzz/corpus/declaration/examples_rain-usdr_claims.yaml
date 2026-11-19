@@ -1,0 +1,31 @@
+# The claims this finding makes, as data. `realism-gate check test/ --report
+# finding.md` binds each one to the PoC and prints one row per field; the
+# predicate for each field is in docs/claims.md.
+schema: realism-gate.claims/v1
+
+# Who can do it, and from which position.
+attacker: any-user
+
+# What happens. The predicate reads the keywords: "revert" and "blocked" mean
+# a revert plus a negative control is the evidence.
+impact: other:distributeSurplus reverts with ReserveBackingShortfall (revenue halted) and PSM.sellStable reverts with CeilingExceeded (on-ramp denial)
+
+# The asset and the amount the claim is about.
+asset: USDR
+amount: the drawn USDR equals the locked stablecoins, so the position is capital-neutral
+
+# Everything the attack needs that is not the attacker's own transaction.
+preconditions:
+  - no privileged role
+  - no oracle or price movement
+  - no keeper and no off-chain trigger
+
+# Names the PoC cites, checked against the target at the pinned commit (RG20).
+cited:
+  - src/VaultEngine.sol:open
+  - src/VaultEngine.sol:frob
+  - src/BalanceSheet.sol:distributeSurplus
+  - src/PSM.sol:sellStable
+
+severity: high
+fix: restrict vaults on fee-exempt stable collateral to the PSM

@@ -1,0 +1,21 @@
+version: 1
+chain: evm
+
+attacker:
+  identities: [mallet]
+
+privileged:
+  - identity: keeper
+    role: keeper
+    reason: harvest() is called on a fixed schedule by a public keeper network; the attacker only has to be deposited when it runs
+
+preconditions:
+  - step: the keeper calls harvest()
+    performed_by: privileged
+    boundary: own_transaction
+  - step: deposit right before the harvest
+    performed_by: attacker
+    boundary: same_block
+  - step: withdraw inside the keeper's harvest transaction
+    performed_by: attacker
+    boundary: victim_transaction
