@@ -325,7 +325,20 @@ fn poc_arg(poc: &Path, root: &Path, work: &Path) -> String {
     }
 }
 
+/// The largest patch `verify-fix` reads. A fix is a few kilobytes; the cap
+/// keeps a huge file from being read whole into memory.
+const MAX_PATCH_BYTES: u64 = 8 * 1024 * 1024;
+
 fn apply_patch(dir: &Path, patch: &Path) -> Result<(), VerifyError> {
+    let len = std::fs::metadata(patch)
+        .map_err(|e| VerifyError(format!("{}: {e}", patch.display())))?
+        .len();
+    if len > MAX_PATCH_BYTES {
+        return Err(VerifyError(format!(
+            "{}: {len} bytes is too large; verify-fix reads a patch of up to {MAX_PATCH_BYTES} bytes",
+            patch.display()
+        )));
+    }
     let text = std::fs::read_to_string(patch)
         .map_err(|e| VerifyError(format!("{}: {e}", patch.display())))?;
     let paths = patch_paths(&text)?;
@@ -350,6 +363,12 @@ fn apply_patch(dir: &Path, patch: &Path) -> Result<(), VerifyError> {
 fn patch_paths(text: &str) -> Result<Vec<String>, VerifyError> {
     let mut paths = Vec::new();
     for line in text.lines() {
+        if is_symlink_header(line) {
+            return Err(VerifyError(
+                "the patch creates or changes a symbolic link (mode 120000). A link can point outside the temp tree, so verify-fix refuses it."
+                    .into(),
+            ));
+        }
         let raw = if let Some(rest) = line.strip_prefix("diff --git ") {
             for part in rest.split_whitespace() {
                 let p = strip_ab(part);
@@ -389,6 +408,15 @@ fn patch_paths(text: &str) -> Result<Vec<String>, VerifyError> {
         }
     }
     Ok(paths)
+}
+
+/// A git header that sets a symbolic-link mode: `new file mode 120000`,
+/// `new mode 120000`, `old mode 120000`, or an `index` line that ends in it.
+fn is_symlink_header(line: &str) -> bool {
+    let t = line.trim_end();
+    let mode_line =
+        t.starts_with("new file mode ") || t.starts_with("new mode ") || t.starts_with("old mode ");
+    (mode_line || t.starts_with("index ")) && t.ends_with(" 120000")
 }
 
 fn strip_ab(p: &str) -> String {
@@ -860,5 +888,122 @@ mod tests {
         assert_eq!(v, vec![true]);
         let v = parse_results(r#"{"suite":{"test_a":{"status":"Failure"}}}"#).unwrap();
         assert_eq!(v, vec![false]);
+    }
+
+    // ---- Patch and copy escapes beyond the `../` case (threat model H4, H6).
+
+    /// A unified diff whose only header is `+++ TARGET`, which is all that
+    /// `patch_paths` reads.
+    fn header_only(target: &str) -> String {
+        format!("--- a/x\n+++ {target}\n@@ -0,0 +1 @@\n+x\n")
+    }
+
+    #[test]
+    fn a_patch_path_that_leaves_the_tree_is_refused_however_it_is_spelled() {
+        // Each spelling names a file outside the temp tree on some system:
+        // absolute, drive-letter (absolute and drive-relative), the Windows
+        // verbatim prefix, a UNC share, and `..` written with backslashes.
+        for target in [
+            "b//abs/evil",
+            "b/C:/evil.txt",
+            "b/C:evil.txt",
+            "b/\\\\?\\C:\\evil.txt",
+            "b/\\\\server\\share\\evil.txt",
+            "b/..\\evil.txt",
+            "b/src\\..\\..\\evil.txt",
+            "b/src/../../evil.txt",
+        ] {
+            let err = patch_paths(&header_only(target));
+            assert!(err.is_err(), "`{target}` was accepted: {err:?}");
+        }
+    }
+
+    #[test]
+    fn a_patch_that_creates_a_symlink_is_refused() {
+        // `git apply` creates a symlink from a mode 120000 entry, and the
+        // symlink's target is not checked. A later read or write through it
+        // would leave the tree. Refused before any apply.
+        let text = "diff --git a/src/leak.sol b/src/leak.sol\nnew file mode 120000\nindex 0000000..1111111\n--- /dev/null\n+++ b/src/leak.sol\n@@ -0,0 +1 @@\n+/etc/passwd\n";
+        let err = patch_paths(text);
+        assert!(err.is_err(), "a symlink entry was accepted: {err:?}");
+        let text = "diff --git a/src/a.sol b/src/a.sol\nold mode 100644\nnew mode 120000\n--- a/src/a.sol\n+++ b/src/a.sol\n@@ -1 +1 @@\n-x\n+y\n";
+        assert!(
+            patch_paths(text).is_err(),
+            "a mode change to a symlink was accepted"
+        );
+    }
+
+    #[test]
+    fn a_symlink_in_the_project_is_neither_copied_nor_written_through() {
+        // The project under review contains a file link and a directory link
+        // to a place outside the tree. A copy must not contain either, and a
+        // patch aimed at the file link must not write outside the copy.
+        let tmp = tempfile::tempdir().unwrap();
+        let outside = tmp.path().join("outside");
+        std::fs::create_dir_all(&outside).unwrap();
+        std::fs::write(outside.join("secret.txt"), "untouched\n").unwrap();
+        let root = tmp.path().join("project");
+        std::fs::create_dir_all(root.join("src")).unwrap();
+        std::fs::write(root.join("src/A.sol"), "contract A { uint x = 1; }\n").unwrap();
+        if !make_symlink(&outside.join("secret.txt"), &root.join("src/link.sol"))
+            || !make_dir_symlink(&outside, &root.join("linkdir"))
+        {
+            eprintln!("symlinks cannot be created here; the symlink test is skipped");
+            return;
+        }
+        let copy = copy_of(&root).unwrap();
+        assert!(
+            !copy.join("src/link.sol").exists(),
+            "a file link was copied"
+        );
+        assert!(
+            !copy.join("linkdir").exists(),
+            "a directory link was copied"
+        );
+
+        let patch = tmp.path().join("write-through.diff");
+        std::fs::write(
+            &patch,
+            "--- a/src/link.sol\n+++ b/src/link.sol\n@@ -0,0 +1 @@\n+pwned\n",
+        )
+        .unwrap();
+        let _ = apply_patch(&copy, &patch);
+        assert_eq!(
+            std::fs::read_to_string(outside.join("secret.txt")).unwrap(),
+            "untouched\n",
+            "the patch wrote through a link to outside the tree"
+        );
+        let _ = std::fs::remove_dir_all(&copy);
+    }
+
+    #[test]
+    fn an_oversized_patch_is_refused_with_a_clear_error() {
+        let tmp = tempfile::tempdir().unwrap();
+        let patch = tmp.path().join("huge.diff");
+        let file = std::fs::File::create(&patch).unwrap();
+        file.set_len(MAX_PATCH_BYTES + 1).unwrap();
+        drop(file);
+        let err = apply_patch(tmp.path(), &patch).unwrap_err();
+        assert!(err.0.contains("too large"), "{}", err.0);
+    }
+
+    #[cfg(unix)]
+    fn make_symlink(target: &Path, link: &Path) -> bool {
+        std::os::unix::fs::symlink(target, link).is_ok()
+    }
+
+    #[cfg(windows)]
+    fn make_symlink(target: &Path, link: &Path) -> bool {
+        std::os::windows::fs::symlink_file(target, link).is_ok()
+    }
+
+    #[cfg(unix)]
+    fn make_dir_symlink(target: &Path, link: &Path) -> bool {
+        std::os::unix::fs::symlink(target, link).is_ok()
+    }
+
+    #[cfg(windows)]
+    fn make_dir_symlink(target: &Path, link: &Path) -> bool {
+        std::os::windows::fs::symlink_dir(target, link).is_ok()
     }
 }
