@@ -1,8 +1,32 @@
 # Security policy
 
-realism-gate is an offline, read-only checker. It runs no Solidity, makes no
-network calls and writes only the files you ask it to. That leaves three kinds
-of issue that matter.
+realism-gate reads a PoC and a report and writes a verdict. What it executes
+depends on the command, so the guarantee is stated per command. The full model
+is in [docs/threat-model.md](docs/threat-model.md).
+
+| Command | Runs a Solidity compiler or test runner | Runs other programs | Network |
+|---|---|---|---|
+| `check` | no | `git` only, read-only: `rev-parse --show-toplevel` in the working directory on every run (`src/cli.rs:471`, `:730`); `rev-parse`, `ls-tree`, `grep` in `--target` with `--target-commit` (`src/cite.rs:39`); `diff`, `ls-files` in the working directory with `--changed-since` (`src/changed.rs:32`) | none |
+| `init-claims` | no | none | none |
+| `explain`, `rules` | no | none | none |
+| `verify-fix` | **yes**: `forge test --json` twice, once on an unpatched copy and once on a patched copy (`src/verify_fix.rs:113-114`, `:169`) | `git apply` inside the temp copy when `--patch` is used (`src/verify_fix.rs:335`); `forge` | forge can reach the network if the PoC or the project asks for it; `FOUNDRY_FFI=false` is set but there is no network isolation in the tool |
+| MCP `check_poc`, `check_claims` | no | runs the `realism-gate` binary with `check` arguments only (`src/mcp.rs:123`, `:145`; `src/bin/realism-gate-mcp.rs:34`) | none |
+
+The MCP server does not expose `verify-fix` (`src/mcp.rs:49`, two tools only).
+
+`check` never builds, compiles or runs the PoC. It does run `git` as above, so
+a repository under review can influence `git` output. Whether a repository's
+own `.git/config` can make `git` execute code is an open question until the
+tests in the threat model's git section have run; see
+[docs/threat-model.md](docs/threat-model.md).
+
+`verify-fix` is the one command that runs code from the project under review.
+It refuses to run on the host unless the operator passes `--sandbox` or
+`--allow-host`, or an environment check passes (`src/cli.rs:296-315`). See
+[docs/verify-fix.md](docs/verify-fix.md).
+
+It makes no network calls of its own. CI checks the dependency graph and the
+source for network code.
 
 ## What counts
 

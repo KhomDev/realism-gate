@@ -49,6 +49,16 @@ may change in any minor release.
   scope). The published measurements do not change; see the PR for the
   before and after numbers.
 
+### Documentation
+
+- **SECURITY.md states the guarantee per command.** It said the tool "runs no
+  Solidity", which was true of `check` and false of `verify-fix`, which runs
+  `forge` on the PoC. The table now says what each command executes and what
+  it reaches on the network.
+- **`docs/threat-model.md` is new.** A short STRIDE-light model: assets,
+  attackers, trust boundaries with `file:line` references, the guarantees and
+  what proves each one, and the open hypotheses with their status.
+
 ## [1.0.1] - 2026-11-19
 
 A patch release: fixes, tests and documentation. No rule, flag, default or
