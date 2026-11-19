@@ -46,6 +46,13 @@ The diff is checked before it is applied. A path that is absolute or contains
 apply the diff, a small built-in applier writes only paths that already passed
 that check. The tree you started with is not modified.
 
+Three more limits apply. A patch that creates or changes a symbolic link (mode
+`120000`) is refused, because `git apply` would create a link whose target is
+not checked. A symbolic link in the project is not copied, and a patch aimed at
+it writes only inside the copy; `src/verify_fix.rs` has the test. A patch larger
+than 8 MiB is refused before it is read. Windows drive prefixes, the verbatim prefix (two backslashes, a question mark, a backslash) and UNC
+paths are refused like absolute paths.
+
 ## Do not run an untrusted project on the host
 
 A Foundry project can set `ffi = true` and can name an RPC URL. `verify-fix`
@@ -64,5 +71,11 @@ A container is detected when `/.dockerenv` or `/run/.containerenv` exists, or
 when `REALISM_GATE_SANDBOX=1`. That detection is not a guarantee. If you are
 gating a PoC you do not trust, run the command in a container you built for
 that, with no extra network, and pass `--sandbox`.
+
+The detection trusts the environment and the marker files. Anything that can
+set `REALISM_GATE_SANDBOX=1` or create `/.dockerenv` passes it, and an agent
+with a shell can do both. The command is not offered through the MCP server.
+The current policy is pinned by `tests/verify_fix_limits.rs`; changing it is a
+decision for the maintainer, not a side effect of a patch.
 
 `check` never calls this command and never runs forge.

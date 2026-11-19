@@ -25,6 +25,17 @@ may change in any minor release.
 - **`--target-commit` and `--changed-since` values that start with `-` are
   refused** (exit 2). Tested; this was already enforced, and is now a regression
   test.
+- **`verify-fix` refuses a patch that creates a symbolic link, and a patch
+  over 8 MiB.** `git apply` turns a mode `120000` entry into a link whose target
+  is not checked, so a later read could leave the temp tree. The check runs
+  before any apply. The size cap stops a huge patch being read whole into
+  memory, with a clear error. A project symlink is not copied (already true;
+  now tested), and drive-letter, verbatim and UNC spellings of an absolute path
+  are tested as refused.
+- **The host decision for `verify-fix` is pinned by tests.**
+  `REALISM_GATE_SANDBOX=1` (and the `/.dockerenv` and `/run/.containerenv`
+  markers) still count as an attestation, and `docs/verify-fix.md` says so. The
+  policy is unchanged; `tests/verify_fix_limits.rs` makes a change visible.
 
 ## [1.0.1] - 2026-11-19
 
