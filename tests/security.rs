@@ -265,6 +265,81 @@ fn a_clean_filter_in_the_working_tree_does_not_run_under_changed_since() {
 }
 
 #[test]
+fn a_clean_filter_named_in_info_attributes_does_not_run_under_changed_since() {
+    // `--attr-source` replaces the worktree's .gitattributes, but git still
+    // reads .git/info/attributes, which is also the untrusted repository's.
+    let root = scratch("cwd-info-attributes");
+    let repo_dir = root.join("repo");
+    let _ = repo(&repo_dir);
+    std::fs::create_dir_all(repo_dir.join(".git/info")).unwrap();
+    std::fs::write(
+        repo_dir.join(".git/info/attributes"),
+        "* filter=rgtest
+",
+    )
+    .unwrap();
+    let marker = root.join("info-filter-ran");
+    git(
+        &repo_dir,
+        &["config", "filter.rgtest.clean", &touch(&marker)],
+    );
+    std::fs::write(
+        repo_dir.join("src/Vault.sol"),
+        format!(
+            "{VAULT}// edit
+"
+        ),
+    )
+    .unwrap();
+
+    let o = realism_gate(
+        &repo_dir,
+        &[
+            "check",
+            "test/Poc.t.sol",
+            "--changed-since",
+            "HEAD",
+            "--no-config",
+            "--no-declaration",
+            "--format",
+            "json",
+        ],
+    );
+    assert!(
+        !marker.exists(),
+        "a clean filter named in .git/info/attributes ran; stderr: {}",
+        stderr(&o)
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+#[test]
+fn changed_since_lists_edited_and_untracked_files_and_skips_deleted_ones() {
+    let root = scratch("cwd-listing");
+    let repo_dir = root.join("repo");
+    let _ = repo(&repo_dir);
+    std::fs::write(
+        repo_dir.join("src/Vault.sol"),
+        format!(
+            "{VAULT}// edit
+"
+        ),
+    )
+    .unwrap();
+    std::fs::write(
+        repo_dir.join("src/New.sol"),
+        "contract New {}
+",
+    )
+    .unwrap();
+    std::fs::remove_file(repo_dir.join("test/Poc.t.sol")).unwrap();
+    let files = realism_gate::changed::files("HEAD", &repo_dir).expect("listing");
+    let files: Vec<&str> = files.iter().map(String::as_str).collect();
+    assert_eq!(files, ["src/New.sol", "src/Vault.sol"]);
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+#[test]
 fn a_diff_external_in_the_working_tree_does_not_run_under_changed_since() {
     let root = scratch("cwd-external");
     let repo_dir = root.join("repo");
