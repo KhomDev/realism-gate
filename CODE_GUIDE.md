@@ -1,5 +1,8 @@
 # CODE_GUIDE: the realism-gate codebase, line by line
 
+> **Historical.** This guide describes v0.4.0. For the current design, start with
+> [ARCHITECTURE.md](ARCHITECTURE.md). Line references below point at the v0.4.0 tag.
+
 This document is the technical companion to the [README](README.md). The README
 says what the tool is for; this says how the code works, where each behaviour
 lives, and which numbers are measured rather than asserted. It describes the

@@ -1,5 +1,8 @@
 # Contributing
 
+Start with [ARCHITECTURE.md](ARCHITECTURE.md): the components, what crosses each
+boundary, and where to change things.
+
 The most valuable contribution is **a false positive or false negative reduced
 to a synthetic test**. The second most valuable is a rule with a test that
 fires and a sound test that must not. The third is a report that a number in
