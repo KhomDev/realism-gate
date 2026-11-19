@@ -8,6 +8,11 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-19
+
+A patch release: fixes, tests and documentation. No rule, flag, default or
+output field changed.
+
 ### Changed
 
 - **Claim-binding precision is quoted with its out-of-sample number first.**
@@ -16,6 +21,26 @@ may change in any minor release.
   1.0.0 build, before the nine misses this corpus exposed were fixed, next to
   the 98.9% (n=91) measured afterwards on the same pairs. The 1.0.0 entry below
   quoted only the second number. No code change.
+
+### Fixed
+
+- **The verify-fix tests no longer share a temporary directory.** A copy of a
+  project tree now gets a name that no other copy in the process can have (the
+  process ID and a counter), and `create_dir` refuses an existing directory.
+  The verify-fix tests run in `tempfile` directories of their own. This is the
+  cause of the intermittent `The current directory is invalid.` failure of
+  `a_passing_poc_means_the_fix_does_not_hold` on windows-latest: a test could
+  remove a directory another test's forge was running in. The retry around
+  spawning forge is kept.
+- **Stale version wording in the docs.** `docs/limitations.md` and
+  `docs/declaration.md` said "in v0.1" about current behaviour. The statements
+  are unchanged; only the version phrase is gone.
+- **Empty claims are tested.** An empty `claims.yaml` and an empty front-matter
+  block are refused as "no claims" (exit 2), as before, and the tests pin that.
+  A privileged prank that contradicts an "any user" attacker claim is tested
+  end to end on the command line.
+- **Dependencies.** serde-saphyr 2.0.0 to 2.1.1 and toml (Dependabot #15).
+  The empty-input tests above pass on both versions.
 
 ## [1.0.0] - 2026-11-13
 
@@ -473,7 +498,8 @@ First release.
 - A pinned public-corpus benchmark (`scripts/bench-corpus.sh`,
   `bench/defihacklabs.json`, `docs/benchmark.md`), re-measured in CI.
 
-[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/KhomDev/realism-gate/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/KhomDev/realism-gate/compare/v0.6.1...v1.0.0
 [0.6.1]: https://github.com/KhomDev/realism-gate/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/KhomDev/realism-gate/compare/v0.5.0...v0.6.0
