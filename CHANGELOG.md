@@ -8,6 +8,21 @@ may change in any minor release.
 
 ## [Unreleased]
 
+### Security
+
+- **`--changed-since` no longer lets a repository's own config run a program.**
+  A `.git/config` in the working tree could set `core.fsmonitor`, which git
+  runs on an index refresh, and a `.gitattributes` with a `filter` could name a
+  clean filter, which git runs for a worktree comparison. Both ran. Every git
+  call now goes through one helper that turns `core.fsmonitor` off, and the
+  worktree comparison reads an empty attribute source, so no clean filter runs.
+  This needs git 2.40 or later (`--attr-source`). It can list a file that
+  differs from the revision only in line endings, which is checked rather than
+  missed. `tests/security.rs` plants each program and asserts it does not run.
+- **`--target-commit` and `--changed-since` values that start with `-` are
+  refused** (exit 2). Tested; this was already enforced, and is now a regression
+  test.
+
 ## [1.0.1] - 2026-11-19
 
 A patch release: fixes, tests and documentation. No rule, flag, default or

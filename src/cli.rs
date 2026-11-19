@@ -728,9 +728,7 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
 /// The repo under review: the git toplevel of `cwd`, or `cwd` when it is not
 /// a checkout. Policy files inside it are the target's, and are not applied.
 fn policy_root(cwd: &Path) -> PathBuf {
-    let out = std::process::Command::new("git")
-        .arg("-C")
-        .arg(cwd)
+    let out = crate::git::command(cwd)
         .args(["rev-parse", "--show-toplevel"])
         .output();
     if let Ok(out) = out

@@ -23,6 +23,7 @@ pub mod config;
 pub mod declaration;
 pub mod engine;
 pub mod finding;
+mod git;
 pub mod identity;
 pub mod ir;
 pub mod mcp;
