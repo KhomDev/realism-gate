@@ -12,13 +12,16 @@ may change in any minor release.
 
 - **`--changed-since` no longer lets a repository's own config run a program.**
   A `.git/config` in the working tree could set `core.fsmonitor`, which git
-  runs on an index refresh, and a `.gitattributes` with a `filter` could name a
-  clean filter, which git runs for a worktree comparison. Both ran. Every git
-  call now goes through one helper that turns `core.fsmonitor` off, and the
-  worktree comparison reads an empty attribute source, so no clean filter runs.
-  This needs git 2.40 or later (`--attr-source`). It can list a file that
-  differs from the revision only in line endings, which is checked rather than
-  missed. `tests/security.rs` plants each program and asserts it does not run.
+  runs on an index refresh, and a `filter` attribute in `.gitattributes` or
+  `.git/info/attributes` could name a clean filter, which git runs for a
+  worktree comparison. Both ran. Every git call now goes through one helper
+  that turns `core.fsmonitor` off. git is no longer asked to compare the
+  worktree: realism-gate lists the blob ids at the revision (`ls-tree`) and
+  hashes the current files with `hash-object --no-filters`, then compares the
+  ids itself. A file that differs from the revision only in line endings is
+  listed, which is checked rather than missed; a symbolic link is listed
+  without being read. `tests/security.rs` plants each program and asserts it
+  does not run.
 - **`--target-commit` and `--changed-since` values that start with `-` are
   refused** (exit 2). Tested; this was already enforced, and is now a regression
   test.
