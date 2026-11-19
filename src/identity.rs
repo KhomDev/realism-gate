@@ -211,6 +211,11 @@ pub fn is_mock_name(name: &str) -> bool {
     has_any(&words(name), MOCK_WORDS).is_some()
 }
 
+/// Whether the name marks the PoC's own scaffolding (`helper`, `shim`, ...).
+pub fn is_helper_name(name: &str) -> bool {
+    has_any(&words(name), HELPER_WORDS).is_some()
+}
+
 pub fn is_token_name(name: &str) -> bool {
     let lower = name.to_ascii_lowercase();
     TOKEN_HINTS.iter().any(|h| lower.contains(h))
@@ -677,7 +682,7 @@ fn is_address_literal(e: &Expr) -> bool {
     }
 }
 
-fn deployed_type(e: &Expr) -> Option<String> {
+pub fn deployed_type(e: &Expr) -> Option<String> {
     match &e.kind {
         ExprKind::Call { callee, args, .. } => match &callee.kind {
             ExprKind::New(t) => Some(t.clone()),

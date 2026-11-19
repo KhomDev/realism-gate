@@ -28,9 +28,9 @@
     }
   },
   "tool": {
-    "path": "realism-gate\\target\\debug\\realism-gate.exe",
-    "version": "realism-gate 1.0.0",
-    "sha256": "06eb73f29b9eddf267f024dd14bfb5c79e45c774bbdf178a13b354c3e2a600de"
+    "path": "target\\debug\\realism-gate.exe",
+    "version": "realism-gate 1.0.1",
+    "sha256": "65625b56cf34907fa56a9c6510224ff6fb2bea52b18e9da0257eea0a97ad78a8"
   },
   "frozen": {
     "seed": "rg-claims-2026-11-12",

@@ -2,7 +2,9 @@
 
 use super::{Ctx, Raw, Sender, snippet};
 use crate::finding::Severity;
-use crate::identity::{Class, compact, is_privileged_getter, key};
+use crate::identity::{
+    Class, compact, is_attacker_name, is_helper_name, is_mock_name, is_privileged_getter, key,
+};
 use crate::ir::ExprKind;
 use crate::trace::{CallClass, OpKind, Phase};
 use std::collections::{BTreeMap, BTreeSet};
@@ -213,6 +215,11 @@ pub fn privileged_step_in_exploit(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
                 Class::Protocol(t) => Some(format!(
                     "`{k}` is a contract under review ({t}); no attacker can send a transaction from it"
                 )),
+                // Issue #17: the PoC defines a copy of the protocol and deploys
+                // it. Classed as a helper because its type is in this file.
+                Class::Helper => deployed_copy(ctx, &k).map(|t| format!(
+                    "`{k}` is a `{t}` the test deploys from a type defined in this file; that is a copy of the protocol, and no attacker can send a transaction from it"
+                )),
                 _ => None,
             },
         };
@@ -242,6 +249,55 @@ pub fn privileged_step_in_exploit(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
                 .unwrap_or_default(),
         });
     }
+}
+
+/// A contract the test deploys (`new T()`) from a type `T` the PoC's own file
+/// defines, under a name that does not read as the attacker, a mock or a
+/// helper. Such a deployment reproduces the protocol with a copy, so a prank as
+/// it impersonates the protocol. Returns the type name. Issue #17.
+fn deployed_copy(ctx: &Ctx<'_, '_>, k: &str) -> Option<String> {
+    let env = ctx.env;
+    let t = env.deployed_type(k)?;
+    let attacker_like = env.is_attacker(k) || is_attacker_name(k) || is_attacker_name(&t);
+    let scaffold_like =
+        is_mock_name(k) || is_mock_name(&t) || is_helper_name(k) || is_helper_name(&t);
+    if attacker_like || scaffold_like || deployed_by_attacker(ctx, k) {
+        return None;
+    }
+    Some(t)
+}
+
+/// Whether the test deployed `k` while the sender was the attacker. The
+/// exploit's own contract, created under `startPrank(attacker)`, is the
+/// attacker's, not a copy of the protocol (corpus case FortressLoans). The
+/// deployment is the `new` call the trace records just before the assignment.
+fn deployed_by_attacker(ctx: &Ctx<'_, '_>, k: &str) -> bool {
+    ctx.trace.ops.iter().enumerate().any(|(i, op)| {
+        let OpKind::Assign {
+            target,
+            value: Some(value),
+            ..
+        } = &op.kind
+        else {
+            return false;
+        };
+        if target != k || crate::identity::deployed_type(value).is_none() {
+            return false;
+        }
+        let deploy = (0..i)
+            .rev()
+            .take_while(|&j| !matches!(ctx.trace.ops[j].kind, OpKind::Assign { .. }))
+            .find(|&j| {
+                matches!(
+                    ctx.trace.ops[j].call().map(|c| &c.class),
+                    Some(CallClass::Deploy(_))
+                )
+            });
+        matches!(
+            deploy.and_then(|j| ctx.senders.get(j).copied().flatten()),
+            Some(Sender::Switched(e)) if ctx.env.is_attacker(&key(e))
+        )
+    })
 }
 
 /// RG19: `setUp()` both pranks as a role and writes protocol storage.
