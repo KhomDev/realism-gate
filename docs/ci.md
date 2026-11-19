@@ -210,7 +210,7 @@ realism-gate check test --format sarif --output realism.sarif
 or download and check an archive:
 
 ```bash
-version=v1.0.0
+version=v1.0.1
 target=x86_64-unknown-linux-musl
 curl -fsSLO "https://github.com/KhomDev/realism-gate/releases/download/$version/realism-gate-${version#v}-$target.tar.gz"
 curl -fsSLO "https://github.com/KhomDev/realism-gate/releases/download/$version/SHA256SUMS"
