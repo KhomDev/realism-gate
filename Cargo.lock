@@ -2382,6 +2382,7 @@ dependencies = [
  "oxc_parser",
  "oxc_span",
  "proc-macro2",
+ "proptest",
  "regex",
  "serde",
  "serde-saphyr",

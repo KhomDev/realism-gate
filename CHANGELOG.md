@@ -87,6 +87,12 @@ may change in any minor release.
   everywhere.
 - **`fuzz.yml`, a weekly five-minute fuzz run per target on Linux.** It uploads
   crashing inputs as an artifact.
+- **Property tests (`proptest`) in `tests/properties.rs`.** For generated inputs,
+  not only the fixtures: the JSON report does not depend on the order the files
+  are given; adding an unrelated test function does not change the findings of
+  the tests already in the file; every JSON report validates against
+  `docs/output-schema.json`, and every SARIF log has the keys SARIF 2.1.0
+  requires. The schema checker moved to `tests/support/` so both tests share it.
 
 ## [1.0.1] - 2026-11-19
 
