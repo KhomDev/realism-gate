@@ -29,7 +29,7 @@ holding several unrelated PoCs, run once per PoC.
 
 ```yaml
 version: 1          # required; this build reads version 1
-chain: evm          # the only chain model in v0.1
+chain: evm          # the only chain model
 
 attacker:
   identities: [attacker, "address(exploit)"]
