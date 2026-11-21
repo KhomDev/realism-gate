@@ -31,6 +31,12 @@ exists:
 3. a YAML front-matter block at the top of the finding.
 4. heuristics over the finding's prose, **labelled inferred**.
 
+A structured source does not silently override another. If the report's front
+matter parses as claims and differs from the `claims.yaml` (sibling or
+`--claims`) that would win, `check` exits 2 and names both sources; if they
+agree, the higher-priority file is used. The comparison only happens when the
+front matter parses as a claims block, so unrelated front matter is left alone.
+
 The first three are **structured**: every field you write is one row, and a
 field you leave out is not claimed. The fourth is a fallback and is never a
 pass; see [the inferred rule](#the-inferred-rule).

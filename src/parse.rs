@@ -210,58 +210,96 @@ impl Lower<'_> {
         }
     }
 
-    fn block(&self, block: &ast::Block<'_>, out: &mut Vec<Stmt>) {
+    /// Lowers a block, stopping once control cannot fall through its last
+    /// statement. Returns whether the block itself does not fall through.
+    fn block(&self, block: &ast::Block<'_>, out: &mut Vec<Stmt>) -> bool {
         for stmt in block.stmts.iter() {
-            self.stmt(stmt, out);
+            if self.stmt(stmt, out) {
+                return true;
+            }
         }
+        false
     }
 
-    fn push_expr(&self, e: &ast::Expr<'_>, out: &mut Vec<Stmt>) {
+    fn push_expr(&self, e: &ast::Expr<'_>, out: &mut Vec<Stmt>) -> bool {
         let expr = self.expr(e);
         out.push(Stmt {
             pos: expr.pos,
             kind: StmtKind::Expr(expr),
         });
+        false
     }
 
-    fn stmt(&self, s: &ast::Stmt<'_>, out: &mut Vec<Stmt>) {
+    /// Whether a condition is a boolean literal (or `!` of one). Only those
+    /// branches are dropped; a dynamic condition keeps both branches, as the
+    /// IR has always done.
+    fn const_bool(&self, e: &Expr) -> Option<bool> {
+        match &e.kind {
+            ExprKind::Lit(Lit::Bool(b)) => Some(*b),
+            ExprKind::Unary(op, inner) if op == "!" => self.const_bool(inner).map(|b| !b),
+            _ => None,
+        }
+    }
+
+    /// Lowers one statement. Returns true when control cannot continue after
+    /// it (an unconditional `return` or `revert`, or a block that ends in one).
+    fn stmt(&self, s: &ast::Stmt<'_>, out: &mut Vec<Stmt>) -> bool {
         let pos = self.pos(s.span);
         match &s.kind {
             ast::StmtKind::Expr(e) => self.push_expr(e, out),
-            ast::StmtKind::DeclSingle(v) => out.push(Stmt {
-                pos,
-                kind: StmtKind::Decl {
-                    vars: vec![(
-                        v.name.map(|n| n.as_str().to_string()).unwrap_or_default(),
-                        self.text(v.ty.span),
-                    )],
-                    init: v.initializer.as_ref().map(|e| self.expr(e)),
-                },
-            }),
-            ast::StmtKind::DeclMulti(vars, init) => out.push(Stmt {
-                pos,
-                kind: StmtKind::Decl {
-                    vars: vars
-                        .iter()
-                        .map(|slot| match slot {
-                            solar_parse::interface::SpannedOption::Some(v) => (
-                                v.name.map(|n| n.as_str().to_string()).unwrap_or_default(),
-                                self.text(v.ty.span),
-                            ),
-                            solar_parse::interface::SpannedOption::None(_) => {
-                                (String::new(), String::new())
-                            }
-                        })
-                        .collect(),
-                    init: Some(self.expr(init)),
-                },
-            }),
+            ast::StmtKind::DeclSingle(v) => {
+                out.push(Stmt {
+                    pos,
+                    kind: StmtKind::Decl {
+                        vars: vec![(
+                            v.name.map(|n| n.as_str().to_string()).unwrap_or_default(),
+                            self.text(v.ty.span),
+                        )],
+                        init: v.initializer.as_ref().map(|e| self.expr(e)),
+                    },
+                });
+                false
+            }
+            ast::StmtKind::DeclMulti(vars, init) => {
+                out.push(Stmt {
+                    pos,
+                    kind: StmtKind::Decl {
+                        vars: vars
+                            .iter()
+                            .map(|slot| match slot {
+                                solar_parse::interface::SpannedOption::Some(v) => (
+                                    v.name.map(|n| n.as_str().to_string()).unwrap_or_default(),
+                                    self.text(v.ty.span),
+                                ),
+                                solar_parse::interface::SpannedOption::None(_) => {
+                                    (String::new(), String::new())
+                                }
+                            })
+                            .collect(),
+                        init: Some(self.expr(init)),
+                    },
+                });
+                false
+            }
             ast::StmtKind::Block(b) | ast::StmtKind::UncheckedBlock(b) => self.block(b, out),
             ast::StmtKind::If(cond, then, otherwise) => {
-                self.push_expr(cond, out);
-                self.stmt(then, out);
-                if let Some(otherwise) = otherwise {
-                    self.stmt(otherwise, out);
+                let lowered = self.expr(cond);
+                match self.const_bool(&lowered) {
+                    Some(true) => self.stmt(then, out),
+                    Some(false) => otherwise
+                        .as_ref()
+                        .is_some_and(|otherwise| self.stmt(otherwise, out)),
+                    None => {
+                        out.push(Stmt {
+                            pos: lowered.pos,
+                            kind: StmtKind::Expr(lowered),
+                        });
+                        let then_ends = self.stmt(then, out);
+                        let else_ends = otherwise
+                            .as_ref()
+                            .is_some_and(|otherwise| self.stmt(otherwise, out));
+                        then_ends && else_ends
+                    }
                 }
             }
             ast::StmtKind::For {
@@ -270,55 +308,91 @@ impl Lower<'_> {
                 next,
                 body,
             } => {
-                if let Some(init) = init {
-                    self.stmt(init, out);
+                if let Some(init) = init
+                    && self.stmt(init, out)
+                {
+                    return true;
+                }
+                let cond = cond.as_ref().map(|c| self.expr(c));
+                if cond.as_ref().and_then(|c| self.const_bool(c)) == Some(false) {
+                    // `for (init; false; next)`: init ran, the body never does.
+                    return false;
                 }
                 if let Some(cond) = cond {
-                    self.push_expr(cond, out);
+                    out.push(Stmt {
+                        pos: cond.pos,
+                        kind: StmtKind::Expr(cond),
+                    });
                 }
                 self.stmt(body, out);
                 if let Some(next) = next {
                     self.push_expr(next, out);
                 }
+                false
             }
             ast::StmtKind::While(cond, body) => {
-                self.push_expr(cond, out);
+                let cond = self.expr(cond);
+                if self.const_bool(&cond) == Some(false) {
+                    return false;
+                }
+                out.push(Stmt {
+                    pos: cond.pos,
+                    kind: StmtKind::Expr(cond),
+                });
                 self.stmt(body, out);
+                false
             }
             ast::StmtKind::DoWhile(body, cond) => {
-                self.stmt(body, out);
+                let body_ends = self.stmt(body, out);
                 self.push_expr(cond, out);
+                body_ends
             }
-            ast::StmtKind::Emit(path, args) => out.push(Stmt {
-                pos,
-                kind: StmtKind::Emit {
-                    event: path.last().as_str().to_string(),
-                    args: self.call_args(args).0,
-                },
-            }),
-            ast::StmtKind::Return(e) => out.push(Stmt {
-                pos,
-                kind: StmtKind::Return(e.as_ref().map(|e| self.expr(e))),
-            }),
-            ast::StmtKind::Revert(..) => out.push(Stmt {
-                pos,
-                kind: StmtKind::Revert,
-            }),
+            ast::StmtKind::Emit(path, args) => {
+                out.push(Stmt {
+                    pos,
+                    kind: StmtKind::Emit {
+                        event: path.last().as_str().to_string(),
+                        args: self.call_args(args).0,
+                    },
+                });
+                false
+            }
+            ast::StmtKind::Return(e) => {
+                out.push(Stmt {
+                    pos,
+                    kind: StmtKind::Return(e.as_ref().map(|e| self.expr(e))),
+                });
+                true
+            }
+            ast::StmtKind::Revert(..) => {
+                out.push(Stmt {
+                    pos,
+                    kind: StmtKind::Revert,
+                });
+                true
+            }
             ast::StmtKind::Try(t) => {
                 self.push_expr(t.expr, out);
                 for clause in t.clauses.iter() {
                     self.block(&clause.block, out);
                 }
+                false
             }
-            ast::StmtKind::Assembly(_) => out.push(Stmt {
-                pos,
-                kind: StmtKind::Assembly,
-            }),
-            ast::StmtKind::Placeholder => out.push(Stmt {
-                pos,
-                kind: StmtKind::Placeholder,
-            }),
-            ast::StmtKind::Break | ast::StmtKind::Continue => {}
+            ast::StmtKind::Assembly(_) => {
+                out.push(Stmt {
+                    pos,
+                    kind: StmtKind::Assembly,
+                });
+                false
+            }
+            ast::StmtKind::Placeholder => {
+                out.push(Stmt {
+                    pos,
+                    kind: StmtKind::Placeholder,
+                });
+                false
+            }
+            ast::StmtKind::Break | ast::StmtKind::Continue => false,
         }
     }
 
@@ -505,6 +579,56 @@ mod tests {
         assert_eq!(c.function("test_x").unwrap().modifiers, vec!["m"]);
         let m = c.function("m").unwrap().body.clone().unwrap();
         assert!(matches!(m[1].kind, StmtKind::Placeholder));
+    }
+
+    fn body_texts(src: &str, function: &str) -> Vec<String> {
+        let unit = parse_source("t.sol", src);
+        let body = unit.contracts[0]
+            .function(function)
+            .unwrap()
+            .body
+            .clone()
+            .unwrap();
+        body.iter()
+            .filter_map(|s| match &s.kind {
+                StmtKind::Expr(e) => Some(e.text.clone()),
+                StmtKind::Decl { .. } => Some("decl".into()),
+                StmtKind::Return(_) => Some("return".into()),
+                StmtKind::Revert => Some("revert".into()),
+                _ => None,
+            })
+            .collect()
+    }
+
+    #[test]
+    fn statically_dead_branches_are_not_lowered() {
+        let src = r#"
+            contract T {
+                function f() public {
+                    if (false) { a(); } else { b(); }
+                    if (true) { c(); } else { d(); }
+                    while (false) { e(); }
+                    for (uint i; false; i++) { g(); }
+                }
+            }
+        "#;
+        assert_eq!(body_texts(src, "f"), vec!["b()", "c()", "decl"]);
+    }
+
+    #[test]
+    fn statements_after_an_unconditional_return_or_revert_are_dropped() {
+        let src = r#"
+            contract T {
+                function f() public { a(); return; b(); }
+                function g() public { c(); revert E(); d(); }
+                function h() public { if (x) { return; } e(); }
+            }
+        "#;
+        assert_eq!(body_texts(src, "f"), vec!["a()", "return"]);
+        assert_eq!(body_texts(src, "g"), vec!["c()", "revert"]);
+        // A return in one branch of a dynamic condition does not end the
+        // function: the else path falls through to `e()`.
+        assert_eq!(body_texts(src, "h"), vec!["x", "return", "e()"]);
     }
 
     #[test]

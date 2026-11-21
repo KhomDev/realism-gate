@@ -1,7 +1,7 @@
 # Architecture
 
 This page explains how realism-gate is put together: why each part exists, what crosses each
-boundary, and what the user sees when a part fails. It describes `main` after 1.0.2. The
+boundary, and what the user sees when a part fails. It describes `main` after 1.0.3. The
 module walk-through in [CODE_GUIDE.md](CODE_GUIDE.md) describes v0.4.0 and is kept as history.
 Where they disagree, this page and the source win.
 

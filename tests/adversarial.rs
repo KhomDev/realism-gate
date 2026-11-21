@@ -266,11 +266,10 @@ fn live_prank_after_a_dead_prank_is_still_reported() {
 }
 
 #[test]
-#[ignore = "bug: a prank inside if (false) is treated as an executed privileged step (RG02, attacker CONTRADICTED)"]
 fn a_prank_only_inside_if_false_does_not_contradict_the_attacker_claim() {
     // INPUT: `if (false) { vm.prank(admin); }` then `vm.prank(attacker); vault.withdrawAll();`
     // SHOULD: the dead prank does not run, so the attacker claim is not CONTRADICTED.
-    // ACTUAL: RG02 fires on the dead `vm.prank(admin)` and the claim is CONTRADICTED.
+    // WAS (1.0.2): RG02 fired on the dead `vm.prank(admin)` and the claim was CONTRADICTED.
     // The only privileged prank is dead, so nothing privileged runs. The
     // attacker claim must not be CONTRADICTED by a prank that never happened.
     let s = Scratch::new("deadonly");
@@ -295,10 +294,9 @@ fn a_prank_only_inside_if_false_does_not_contradict_the_attacker_claim() {
 // ---------------------------------------------------------------------------
 
 #[test]
-#[ignore = "bug: an assertion after return counts as evidence and the drain claim is SHOWN"]
 fn an_impact_assertion_after_return_is_not_evidence() {
     // INPUT: `vault.withdrawAll(); return; assertGt(before, vault.balance());`
-    // SHOULD: drain is not SHOWN. ACTUAL: drain is SHOWN.
+    // SHOULD: drain is not SHOWN. WAS (1.0.2): drain was SHOWN.
     // The only value assertion sits after `return`. It never runs, so the drain
     // claim must not be SHOWN.
     let s = Scratch::new("unreach");
@@ -319,10 +317,9 @@ fn an_impact_assertion_after_return_is_not_evidence() {
 }
 
 #[test]
-#[ignore = "bug: an assertion inside if (false) counts as evidence and the drain claim is SHOWN"]
 fn an_impact_assertion_inside_if_false_is_not_evidence() {
     // INPUT: `vault.withdrawAll(); if (false) { assertGt(before, vault.balance()); }`
-    // SHOULD: drain is not SHOWN. ACTUAL: drain is SHOWN.
+    // SHOULD: drain is not SHOWN. WAS (1.0.2): drain was SHOWN.
     let s = Scratch::new("iffalse");
     let file = s.write(
         "test/IfFalse.t.sol",
@@ -346,12 +343,11 @@ fn an_impact_assertion_inside_if_false_is_not_evidence() {
 // ---------------------------------------------------------------------------
 
 #[test]
-#[ignore = "bug: a field named both inside and outside front matter is accepted; docs/claims.md says it is an error"]
 fn a_field_named_inside_and_outside_front_matter_is_an_error() {
     // INPUT: front matter with `attacker: any-user` at the top level and
     // `claims: attacker: role:admin` under `claims:`.
-    // SHOULD: exit 2 (docs/claims.md: an error). ACTUAL: exit 0 for the claim
-    // table (COMPLETE, attacker any-user shown) and the duplicate is dropped.
+    // SHOULD: exit 2 (docs/claims.md: an error). WAS (1.0.2): exit 0 for the
+    // claim table (COMPLETE, attacker any-user shown) and the duplicate dropped.
     // docs/claims.md: a field named both inside and outside the block is an
     // error, not a choice of which one wins.
     let s = Scratch::new("bothplaces");
@@ -385,12 +381,11 @@ fn a_field_named_inside_and_outside_front_matter_is_an_error() {
 }
 
 #[test]
-#[ignore = "bug: a claims.yaml next to the report silently overrides a contradicting front-matter block"]
 fn claims_yaml_does_not_silently_override_contradicting_front_matter() {
     // INPUT: claims.yaml says `attacker: any-user`; the report's front matter
     // says `attacker: role:admin`. SHOULD: the disagreement is named (an error,
-    // or a note that the front matter was not used). ACTUAL: claims.yaml wins
-    // and the other block is dropped without a word.
+    // or a note that the front matter was not used). WAS (1.0.2): claims.yaml
+    // won and the other block was dropped without a word.
     let s = Scratch::new("contradict");
     let file = s.write(
         "test/Contra.t.sol",

@@ -1,6 +1,6 @@
 # Threat model
 
-Scope: realism-gate 1.0.2 on `main`. Every code reference is `file:line` in
+Scope: realism-gate 1.0.3 on `main`. Every code reference is `file:line` in
 this repository. Items marked **unverified** have no test and no reading yet.
 The method is STRIDE-light: what is worth protecting, who might attack, where
 data crosses a boundary, and what proves each guarantee.

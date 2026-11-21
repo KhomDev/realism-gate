@@ -110,7 +110,10 @@ pub struct Stmt {
 
 /// Statements are flattened: the bodies of `if`, `for`, `while`, `try` and
 /// nested blocks appear inline, in source order. The rules reason about what a
-/// test does, not about which branch runs, so the flattening is deliberate.
+/// test does, not about which branch runs, so a dynamic branch keeps both
+/// sides. Two cases are decided statically: a branch whose condition is a
+/// boolean literal is lowered only when it runs, and statements after an
+/// unconditional `return` or `revert` are dropped.
 #[derive(Debug, Clone, PartialEq)]
 pub enum StmtKind {
     Expr(Expr),

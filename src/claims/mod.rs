@@ -219,7 +219,7 @@ impl Claims {
     /// Parses `claims.yaml` or a front-matter block.
     pub fn parse(text: &str) -> Result<Claims, String> {
         let raw: Raw = serde_saphyr::from_str(text).map_err(|e| e.to_string())?;
-        let raw = raw.flatten();
+        let raw = raw.flatten()?;
         if let Some(schema) = &raw.schema
             && schema.trim() != SCHEMA
         {
@@ -455,6 +455,21 @@ pub fn resolve(
     if let Some(path) = claims {
         let text = read(path)?;
         let parsed = Claims::parse(&text).map_err(|e| format!("{}: {e}", path.display()))?;
+        // An explicit file still has to agree with a structured front-matter
+        // block in the report it accompanies.
+        if let Some(report) = report {
+            let report_text = read(report)?;
+            if let Some(block) = front_matter(&report_text)
+                && let Ok(front_claims) = Claims::parse(block)
+                && front_claims != parsed
+            {
+                return Err(format!(
+                    "{} and the front matter of {} state different claims; remove one or make them agree",
+                    path.display(),
+                    report.display()
+                ));
+            }
+        }
         return Ok(Some(Loaded {
             claims: parsed,
             binding: Binding::Structured,
@@ -465,20 +480,35 @@ pub fn resolve(
     let Some(report) = report else {
         return Ok(None);
     };
+    let text = read(report)?;
+    let front = front_matter(&text);
     let dir = report.parent().unwrap_or(Path::new("."));
     let sibling = dir.join(FILE_NAME);
     if sibling.is_file() {
-        let text = read(&sibling)?;
-        let parsed = Claims::parse(&text).map_err(|e| format!("{}: {e}", sibling.display()))?;
+        let sibling_text = read(&sibling)?;
+        let parsed =
+            Claims::parse(&sibling_text).map_err(|e| format!("{}: {e}", sibling.display()))?;
+        // A front-matter block that parses as claims must agree with the
+        // sibling file. Picking one silently would let the same finding state
+        // two different claim sets depending on which file a reader opens.
+        if let Some(block) = front
+            && let Ok(front_claims) = Claims::parse(block)
+            && front_claims != parsed
+        {
+            return Err(format!(
+                "{} and the front matter of {} state different claims; remove one or make them agree",
+                sibling.display(),
+                report.display()
+            ));
+        }
         return Ok(Some(Loaded {
             claims: parsed,
             binding: Binding::Structured,
             source: display_path(&sibling, base),
-            text: Some(text),
+            text: Some(sibling_text),
         }));
     }
-    let text = read(report)?;
-    if let Some(block) = front_matter(&text) {
+    if let Some(block) = front {
         let parsed =
             Claims::parse(block).map_err(|e| format!("{} front matter: {e}", report.display()))?;
         return Ok(Some(Loaded {
@@ -559,33 +589,47 @@ struct Raw {
 }
 
 impl Raw {
-    /// Merges a nested `claims:` block into the top level. The top level wins
-    /// for `schema`; a field named in both is an error.
-    fn flatten(self) -> Raw {
+    /// Merges a nested `claims:` block into the top level. A field named in
+    /// both places is an error, as docs/claims.md says: silently choosing one
+    /// would let a report say two different things about the same claim.
+    fn flatten(self) -> Result<Raw, String> {
         let Some(inner) = self.claims else {
-            return self;
+            return Ok(self);
         };
-        let inner = inner.flatten();
-        Raw {
-            schema: self.schema.or(inner.schema),
+        let inner = inner.flatten()?;
+        let merge = |field: &str,
+                     outer: Option<String>,
+                     inner: Option<String>|
+         -> Result<Option<String>, String> {
+            match (outer, inner) {
+                (Some(_), Some(_)) => Err(format!(
+                    "{field}: named both inside and outside the claims block"
+                )),
+                (outer, inner) => Ok(outer.or(inner)),
+            }
+        };
+        let merge_list =
+            |field: &str, outer: Vec<String>, inner: Vec<String>| -> Result<Vec<String>, String> {
+                match (outer.is_empty(), inner.is_empty()) {
+                    (false, false) => Err(format!(
+                        "{field}: named both inside and outside the claims block"
+                    )),
+                    (true, _) => Ok(inner),
+                    (false, true) => Ok(outer),
+                }
+            };
+        Ok(Raw {
+            schema: merge("schema", self.schema, inner.schema)?,
             claims: None,
-            attacker: self.attacker.or(inner.attacker),
-            impact: self.impact.or(inner.impact),
-            asset: self.asset.or(inner.asset),
-            amount: self.amount.or(inner.amount),
-            preconditions: if self.preconditions.is_empty() {
-                inner.preconditions
-            } else {
-                self.preconditions
-            },
-            cited: if self.cited.is_empty() {
-                inner.cited
-            } else {
-                self.cited
-            },
-            severity: self.severity.or(inner.severity),
-            fix: self.fix.or(inner.fix),
-        }
+            attacker: merge("attacker", self.attacker, inner.attacker)?,
+            impact: merge("impact", self.impact, inner.impact)?,
+            asset: merge("asset", self.asset, inner.asset)?,
+            amount: merge("amount", self.amount, inner.amount)?,
+            preconditions: merge_list("preconditions", self.preconditions, inner.preconditions)?,
+            cited: merge_list("cited", self.cited, inner.cited)?,
+            severity: merge("severity", self.severity, inner.severity)?,
+            fix: merge("fix", self.fix, inner.fix)?,
+        })
     }
 }
 
@@ -638,6 +682,21 @@ mod tests {
         assert_eq!(
             c.impact,
             Some(Impact::Other("PSM.sellStable reverts".to_string()))
+        );
+    }
+
+    #[test]
+    fn a_field_named_in_both_places_is_an_error() {
+        let err =
+            Claims::parse("attacker: any-user\nclaims:\n  attacker: role:admin\n").unwrap_err();
+        assert!(err.contains("attacker") && err.contains("both"), "{err}");
+        let err = Claims::parse(
+            "preconditions:\n  - no role\nclaims:\n  preconditions:\n    - no oracle\n",
+        )
+        .unwrap_err();
+        assert!(
+            err.contains("preconditions") && err.contains("both"),
+            "{err}"
         );
     }
 

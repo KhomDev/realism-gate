@@ -30,8 +30,9 @@ A tool that checks proofs should be exact about what it does not check.
 
 ## It approximates
 
-- Control flow is flattened. A prank inside an `if` counts whether or not the
-  branch runs.
+- Control flow is flattened. A prank inside a dynamic `if` counts whether or
+  not the branch runs. A branch under a boolean literal is lowered only when it
+  runs, and statements after an unconditional `return`/`revert` are dropped.
 - Data flow is followed through plain assignments and a few levels of aliasing,
   not through storage, return values of external calls, or arrays.
 - Solidity's C3 linearization is approximated depth first. For ordinary test

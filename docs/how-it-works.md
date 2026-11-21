@@ -27,8 +27,10 @@ file is lowered into a small owned model (`src/ir.rs`): contracts, state
 variables, functions, modifiers, statements and expressions, each with its
 source text and position. Control flow is flattened: the bodies of `if`,
 `for`, `while`, `try` and nested blocks appear inline in source order. The
-rules reason about what a test does, not which branch runs, so the flattening
-is deliberate.
+rules reason about what a test does, not which branch runs, so a dynamic branch
+keeps both sides. Two cases are decided statically: a branch under a boolean
+literal is lowered only when it runs, and statements after an unconditional
+`return` or `revert` are dropped.
 
 A file that does not parse cleanly is not dropped. The parser recovers, and
 whatever it recovered is checked; the report lists the file under "could not

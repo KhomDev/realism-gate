@@ -12,6 +12,7 @@
 mod support;
 
 use proptest::prelude::*;
+use realism_gate::project::Project;
 use serde_json::{Value, json};
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
@@ -194,6 +195,32 @@ proptest! {
 }
 
 // ---------------------------------------------------------------- property 3
+
+proptest! {
+    #![proptest_config(ProptestConfig::with_cases(CASES))]
+
+    /// A branch under a boolean-literal condition is in the trace exactly when
+    /// it can run. The parser drops `if (false)` and keeps `if (true)`; a
+    /// dynamic condition keeps both.
+    #[test]
+    fn only_a_live_literal_branch_reaches_the_trace(alive in any::<bool>()) {
+        let src = format!(
+            "contract T {{ function test_a() public {{ if ({alive}) {{ vm.prank(admin); }} }} }}"
+        );
+        let project = Project::from_sources(&[("t.sol", src.as_str())]);
+        let suites = project.suites();
+        let suite = &suites[0];
+        let tr = realism_gate::trace::build(&project, suite, suite.tests[0]);
+        let pranks = tr
+            .ops
+            .iter()
+            .filter(|op| op.call().is_some_and(|c| c.method == "prank"))
+            .count();
+        prop_assert_eq!(pranks, usize::from(alive));
+    }
+}
+
+// ---------------------------------------------------------------- property 4
 
 /// The SARIF 2.1.0 keys this file checks: a log has `version` ("2.1.0") and
 /// `runs`; a run has `tool.driver.name`; each result has `message.text`; each

@@ -75,10 +75,15 @@ fn walk(dir: &Path, out: &mut Vec<PathBuf>) -> Result<(), LoadError> {
     Ok(())
 }
 
+fn extension(name: &str) -> Option<String> {
+    Path::new(name)
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(|e| e.to_ascii_lowercase())
+}
+
 fn is_source(name: &str) -> bool {
-    name.ends_with(".sol")
-        || name.ends_with(".rs")
-        || name.ends_with(".move")
+    matches!(extension(name).as_deref(), Some("sol" | "rs" | "move"))
         || crate::solana::parse_ts::is_script_path(name)
 }
 
@@ -97,14 +102,13 @@ pub fn display_path(path: &Path, base: &Path) -> String {
 /// a script is TypeScript or JavaScript, everything else is Solidity. `None`
 /// for a script that is not a Solana test: it imports no Solana package.
 pub fn parse_any(path: &str, source: &str) -> Option<Unit> {
-    if path.ends_with(".rs") {
-        Some(crate::solana::parse_rust::parse_source(path, source))
-    } else if path.ends_with(".move") {
-        Some(parse_move(path, source))
-    } else if crate::solana::parse_ts::is_script_path(path) {
-        crate::solana::parse_ts::parse_source(path, source)
-    } else {
-        Some(parse_source(path, source))
+    match extension(path).as_deref() {
+        Some("rs") => Some(crate::solana::parse_rust::parse_source(path, source)),
+        Some("move") => Some(parse_move(path, source)),
+        _ if crate::solana::parse_ts::is_script_path(path) => {
+            crate::solana::parse_ts::parse_source(path, source)
+        }
+        _ => Some(parse_source(path, source)),
     }
 }
 
@@ -339,6 +343,16 @@ mod tests {
         let suites = p.suites();
         let names: Vec<&str> = suites[0].tests.iter().map(|f| f.name.as_str()).collect();
         assert_eq!(names, vec!["testA"]);
+    }
+
+    #[test]
+    fn source_extensions_are_case_insensitive() {
+        for name in ["A.SOL", "x.Rs", "m.Move", "t.TS", "t.MTS", "t.Js"] {
+            assert!(is_source(name), "{name}");
+        }
+        assert!(!is_source("t.d.ts"));
+        assert!(!is_source("t.D.TS"));
+        assert!(!is_source("notes.md"));
     }
 
     #[test]

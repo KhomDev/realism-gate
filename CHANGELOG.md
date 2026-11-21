@@ -8,6 +8,53 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-11-21
+
+A correctness release. Five of the eight adversarial cases recorded as ignored
+in 1.0.2 now pass and are enabled; the parser no longer lowers statically dead
+branches or statements after an unconditional `return`/`revert`, and a claim
+field named in both places is the error docs/claims.md always said it was. No
+rule id, flag, default or output field changed.
+
+### Fixed
+
+- **Statically dead code is not lowered.** `if (false) { vm.prank(admin); }`
+  used to reach the trace, so a dead prank could contradict an attacker claim
+  (RG02). A branch whose condition is a boolean literal is now lowered only when
+  it runs; a dynamic condition keeps both sides, as before. `while (false)` and
+  `for (…; false; …)` bodies are skipped too.
+- **Statements after an unconditional `return` or `revert` are dropped.** An
+  assertion after `return;` could count as impact evidence and mark a drain
+  claim SHOWN. A return in one branch of a dynamic `if` still falls through, so
+  the branch is not treated as ending the function.
+- **A claim field named both inside and outside a nested `claims:` block is an
+  error.** `Raw::flatten` silently preferred the outer value; docs/claims.md
+  says the duplicate is an error, and now it is.
+- **A `claims.yaml` that disagrees with the report's front matter is an error.**
+  The file used to win silently, so one finding could state two claim sets.
+  When both parse as claims and differ, `check` exits 2 naming both sources;
+  agreement is accepted.
+- **Source discovery is case-insensitive on Windows and elsewhere.** `.SOL`,
+  `.Rs`, `.Move` and upper-case TypeScript extensions are found, and `.d.ts`
+  declaration files remain excluded.
+- Simplified the `vm.label` classification in `identity.rs` (clippy's
+  `nonminimal_bool`).
+
+### Tests
+
+- Enabled five ignored adversarial cases: the dead prank, the assertion after
+  `return`, the assertion inside `if (false)`, the duplicate claim field and
+  the claims/front-matter disagreement.
+- New parser unit tests for statically dead branches and unreachable code.
+- New claims unit tests for the duplicate-field error.
+- New property test: a literal-condition branch reaches the trace exactly when
+  it can run.
+- New unit test for case-insensitive source extensions.
+
+Three tracked gaps remain ignored and unchanged: a privileged prank inside a
+helper contract the test calls, an address round-tripped through
+`abi.encode`/`abi.decode`, and super-linear time on very large files.
+
 ## [1.0.2] - 2026-11-19
 
 A security and fix release. RG02 now catches a prank as a contract the PoC
@@ -600,7 +647,8 @@ First release.
 - A pinned public-corpus benchmark (`scripts/bench-corpus.sh`,
   `bench/defihacklabs.json`, `docs/benchmark.md`), re-measured in CI.
 
-[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v1.0.3...HEAD
+[1.0.3]: https://github.com/KhomDev/realism-gate/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/KhomDev/realism-gate/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/KhomDev/realism-gate/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/KhomDev/realism-gate/compare/v0.6.1...v1.0.0

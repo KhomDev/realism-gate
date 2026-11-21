@@ -75,7 +75,8 @@ fn is_bankrun(source: &str) -> bool {
 /// Whether a path names a JavaScript or TypeScript source this frontend reads.
 pub fn is_script_path(path: &str) -> bool {
     const EXTENSIONS: &[&str] = &[".ts", ".mts", ".cts", ".js", ".mjs", ".cjs"];
-    !path.ends_with(".d.ts") && EXTENSIONS.iter().any(|e| path.ends_with(e))
+    let lower = path.to_ascii_lowercase();
+    !lower.ends_with(".d.ts") && EXTENSIONS.iter().any(|e| lower.ends_with(e))
 }
 
 /// Parses one script. `None` when it is not a Solana test file: it imports no

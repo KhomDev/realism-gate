@@ -353,8 +353,8 @@ impl<'p> Env<'p> {
                     }
                 }
                 OpKind::Call(c) => {
-                    let label_call = (c.class == CallClass::Cheat && c.method == "label")
-                        || (c.class == CallClass::StdCheat && c.method == "label");
+                    let label_call = c.method == "label"
+                        && matches!(c.class, CallClass::Cheat | CallClass::StdCheat);
                     if label_call
                         && c.args.len() >= 2
                         && let ExprKind::Lit(Lit::Str(s)) = &c.args[1].kind
