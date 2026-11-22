@@ -13,6 +13,15 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Output, Stdio};
 use std::time::{Duration, Instant};
 
+/// The size and timing tests hold this so they run one at a time. The harness
+/// runs tests in parallel; a 5 MB or 1 GiB fixture must not inflate another
+/// test's measurement.
+static HEAVY: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+fn heavy() -> std::sync::MutexGuard<'static, ()> {
+    HEAVY.lock().unwrap_or_else(|e| e.into_inner())
+}
+
 const HEADER: &str = "// SPDX-License-Identifier: MIT\n\
 pragma solidity ^0.8.20;\n\
 \n\
@@ -453,6 +462,7 @@ fn cyrillic_lookalike_identifier_is_not_silently_accepted() {
 
 #[test]
 fn a_five_megabyte_source_file_finishes_and_does_not_panic() {
+    let _guard = heavy();
     // INPUT: about 5 MB of small test functions (about 40 000 of them).
     // SHOULD: finish within 120 s. Before the suite trace was memoized the
     // callback scan ran once per test, so 885 KB (8 000 functions) took about
@@ -555,20 +565,22 @@ fn a_very_deeply_nested_expression_does_not_overflow_the_stack() {
 }
 
 #[test]
-fn four_thousand_test_functions_finish_within_the_bound() {
-    // The callback scan used to run once per test, so this case was quadratic
-    // in the number of test functions (4 000 took about 48 s in a debug build).
-    // A debug build gets a wider bound than the release suite the timeout is
-    // really about.
+fn twelve_thousand_test_functions_finish_within_the_bound() {
+    let _guard = heavy();
+    // The callback scan ran once per test and RG15 lowercased the whole file
+    // per test, so the old run was quadratic: 8 000 functions took ~25 s in a
+    // release build and ~165 s in debug, and 16 000 took ~107 s in release.
+    // At 12 000 the old code is ~60 s in release and far over 120 s in debug;
+    // the linear code is a few seconds either way.
     let bound = if cfg!(debug_assertions) {
-        Duration::from_secs(60)
+        Duration::from_secs(120)
     } else {
-        Duration::from_secs(10)
+        Duration::from_secs(20)
     };
-    let s = Scratch::new("four-thousand");
+    let s = Scratch::new("twelve-thousand");
     let mut src = String::from(HEADER);
     src.push_str("contract ManyTest is Test {\n    Vault vault = new Vault();\n");
-    for i in 0..4_000u64 {
+    for i in 0..12_000u64 {
         src.push_str(&format!(
             "    function test_n{i}() public {{\n        vm.prank(address(uint160({i} + 1)));\n        vault.setFee({i});\n    }}\n"
         ));
@@ -584,7 +596,7 @@ fn four_thousand_test_functions_finish_within_the_bound() {
             "--format",
             "json",
         ],
-        Duration::from_secs(120),
+        Duration::from_secs(300),
     );
     assert!(
         matches!(out.status.code(), Some(0..=2)),
@@ -594,12 +606,13 @@ fn four_thousand_test_functions_finish_within_the_bound() {
     );
     assert!(
         elapsed <= bound,
-        "4 000 test functions took {elapsed:?}, over the {bound:?} bound"
+        "12 000 test functions took {elapsed:?}, over the {bound:?} bound"
     );
 }
 
 #[test]
 fn an_oversized_source_file_is_refused_by_name_before_it_is_read() {
+    let _guard = heavy();
     // A 1 GiB file is refused from its metadata, not read and then rejected.
     // The error names the file and the limit.
     let s = Scratch::new("huge");
@@ -662,6 +675,80 @@ fn an_oversized_policy_input_is_refused_by_name_before_it_is_read() {
             "{flag} did not name the input limit: {stderr}"
         );
     }
+}
+
+#[test]
+fn a_non_regular_policy_input_is_refused_by_name() {
+    // A directory is not a FIFO, but it exercises the same type check on
+    // every platform: the reader refuses it by policy before the OS error
+    // that a plain read would produce.
+    let s = Scratch::new("not-regular");
+    let file = s.write("test/Poc.t.sol", &poc("        vault.setFee(1);"));
+    let dir = s.0.join("report-dir");
+    std::fs::create_dir(&dir).unwrap();
+    let file_arg = file.to_string_lossy().to_string();
+    let dir_arg = dir.to_string_lossy().to_string();
+    let (out, _) = run_bounded(
+        &s.0,
+        &[
+            "check",
+            file_arg.as_str(),
+            "--report",
+            dir_arg.as_str(),
+            "--no-declaration",
+            "--format",
+            "json",
+        ],
+        Duration::from_secs(60),
+    );
+    assert_eq!(out.status.code(), Some(2));
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(stderr.contains("not a regular file"), "{stderr}");
+}
+
+#[cfg(unix)]
+#[test]
+fn a_fifo_policy_input_is_refused_without_blocking() {
+    // A FIFO has length 0, so a size-only check would read it and block until
+    // a writer appears. The reader refuses non-regular files before opening
+    // it. The deadline is the point: with the old check this test hangs on
+    // the read and run_bounded fails it.
+    let s = Scratch::new("fifo");
+    let file = s.write("test/Poc.t.sol", &poc("        vault.setFee(1);"));
+    let fifo = s.0.join("report.fifo");
+    let made = std::process::Command::new("mkfifo")
+        .arg(&fifo)
+        .status()
+        .map(|status| status.success())
+        .unwrap_or(false);
+    if !made {
+        eprintln!("mkfifo is unavailable; the FIFO case is skipped");
+        return;
+    }
+    let file_arg = file.to_string_lossy().to_string();
+    let fifo_arg = fifo.to_string_lossy().to_string();
+    let start = Instant::now();
+    let (out, _) = run_bounded(
+        &s.0,
+        &[
+            "check",
+            file_arg.as_str(),
+            "--report",
+            fifo_arg.as_str(),
+            "--no-declaration",
+            "--format",
+            "json",
+        ],
+        Duration::from_secs(20),
+    );
+    assert_eq!(out.status.code(), Some(2));
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(stderr.contains("not a regular file"), "{stderr}");
+    assert!(
+        start.elapsed() < Duration::from_secs(10),
+        "a FIFO input blocked for {:?}",
+        start.elapsed()
+    );
 }
 
 #[test]

@@ -55,6 +55,9 @@ pub enum LoadError {
         bytes: u64,
         limit: u64,
     },
+    NotRegular {
+        path: PathBuf,
+    },
 }
 
 impl fmt::Display for LoadError {
@@ -85,6 +88,11 @@ impl fmt::Display for LoadError {
                 "{}: {bytes} bytes is over the {limit}-byte input limit; it was not read",
                 path.display()
             ),
+            LoadError::NotRegular { path } => write!(
+                f,
+                "{}: not a regular file; a report, claims, declaration or config input must be a regular file (a FIFO could block, and a symlink can change after the check)",
+                path.display()
+            ),
         }
     }
 }
@@ -94,14 +102,22 @@ impl std::error::Error for LoadError {}
 /// Reads a `--report`, `--claims`, `--declaration` or `--config` file after
 /// checking its size from metadata, so a huge input is refused by name rather
 /// than read whole.
+///
+/// Only regular files are read, and the type is checked with
+/// `symlink_metadata`: a FIFO has length zero and `read_to_string` would
+/// block forever on it, and a symlink can point at a different file each
+/// time. Symlinks are refused too; `docs/limitations.md` states the policy.
 pub fn read_input(path: &Path) -> Result<String, LoadError> {
-    let len = std::fs::metadata(path)
-        .map_err(|e| LoadError::Io(path.to_path_buf(), e))?
-        .len();
-    if len > MAX_INPUT_BYTES {
+    let meta = std::fs::symlink_metadata(path).map_err(|e| LoadError::Io(path.to_path_buf(), e))?;
+    if !meta.file_type().is_file() {
+        return Err(LoadError::NotRegular {
+            path: path.to_path_buf(),
+        });
+    }
+    if meta.len() > MAX_INPUT_BYTES {
         return Err(LoadError::InputTooLarge {
             path: path.to_path_buf(),
-            bytes: len,
+            bytes: meta.len(),
             limit: MAX_INPUT_BYTES,
         });
     }
@@ -516,6 +532,79 @@ mod tests {
         assert_eq!(
             display_path(&Path::new("root").join("test").join("A.t.sol"), base),
             "test/A.t.sol"
+        );
+    }
+
+    fn make_file_symlink(target: &Path, link: &Path) -> bool {
+        #[cfg(unix)]
+        {
+            std::os::unix::fs::symlink(target, link).is_ok()
+        }
+        #[cfg(windows)]
+        {
+            std::os::windows::fs::symlink_file(target, link).is_ok()
+        }
+    }
+
+    #[test]
+    fn policy_inputs_must_be_regular_files() {
+        let tmp = tempfile::tempdir().unwrap();
+        let file = tmp.path().join("finding.md");
+        std::fs::write(&file, "text\n").unwrap();
+        assert_eq!(read_input(&file).unwrap(), "text\n");
+
+        let dir = tmp.path().join("a-directory");
+        std::fs::create_dir(&dir).unwrap();
+        let err = read_input(&dir).unwrap_err();
+        assert!(err.to_string().contains("not a regular file"), "{err}");
+
+        let link = tmp.path().join("link.md");
+        if make_file_symlink(&file, &link) {
+            let err = read_input(&link).unwrap_err();
+            assert!(err.to_string().contains("not a regular file"), "{err}");
+        } else {
+            eprintln!("symlinks cannot be created here; the symlink case is skipped");
+        }
+    }
+
+    #[test]
+    fn the_source_file_count_and_total_are_capped() {
+        let dummy = PathBuf::from("x.sol");
+        let mut out = Vec::new();
+        let mut total = 0u64;
+        for _ in 0..MAX_SOURCE_FILES {
+            add_file(&dummy, 0, &mut out, &mut total).unwrap();
+        }
+        let err = add_file(&dummy, 0, &mut out, &mut total).unwrap_err();
+        assert!(
+            err.to_string().contains(&MAX_SOURCE_FILES.to_string()),
+            "{err}"
+        );
+
+        let mut out = Vec::new();
+        let mut total = 0u64;
+        // 16 files of 8 MiB reach the 128 MiB total exactly; the next one
+        // exceeds it without any single file exceeding the per-file cap.
+        for _ in 0..16 {
+            add_file(&dummy, MAX_SOURCE_FILE_BYTES, &mut out, &mut total).unwrap();
+        }
+        let err = add_file(&dummy, MAX_SOURCE_FILE_BYTES, &mut out, &mut total).unwrap_err();
+        assert!(
+            err.to_string()
+                .contains(&MAX_SOURCE_TOTAL_BYTES.to_string()),
+            "{err}"
+        );
+    }
+
+    #[test]
+    fn a_directory_past_the_depth_limit_is_refused() {
+        let tmp = tempfile::tempdir().unwrap();
+        let mut out = Vec::new();
+        let mut total = 0u64;
+        let err = walk(tmp.path(), MAX_WALK_DEPTH + 1, &mut out, &mut total).unwrap_err();
+        assert!(
+            err.to_string().contains(&MAX_WALK_DEPTH.to_string()),
+            "{err}"
         );
     }
 }
