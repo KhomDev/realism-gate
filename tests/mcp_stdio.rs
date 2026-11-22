@@ -32,7 +32,7 @@ fn read_frame(input: &mut dyn Read) -> Vec<u8> {
 }
 
 #[test]
-fn an_oversized_content_length_gets_a_jsonrpc_error_and_a_clean_exit() {
+fn an_oversized_frame_is_answered_and_the_server_stops_without_serving_a_ping() {
     let mut child = Command::new(env!("CARGO_BIN_EXE_realism-gate-mcp"))
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -41,12 +41,18 @@ fn an_oversized_content_length_gets_a_jsonrpc_error_and_a_clean_exit() {
         .expect("the MCP binary runs");
     {
         let mut stdin = child.stdin.take().unwrap();
-        // No body follows: closing the pipe is how a client disappears. The
-        // server must answer from the header alone rather than wait for the
-        // declared gigabyte.
-        stdin
-            .write_all(b"Content-Length: 999999999\r\n\r\n")
-            .unwrap();
+        // The declared body really follows, and then a well-formed ping. The
+        // server must answer the oversized frame from the header, stop with
+        // exit 2, and never treat the 9 MB body as a line (which used to make
+        // the next read a fatal line-cap error before the ping was served).
+        let mut request = b"Content-Length: 9000000\r\n\r\n".to_vec();
+        request.extend(std::iter::repeat_n(b'x', 9_000_000));
+        request.extend_from_slice(
+            b"Content-Length: 40\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"ping\"}",
+        );
+        // The server stops after the header, so this write may hit a closed
+        // pipe; that is part of the behavior under test.
+        let _ = stdin.write_all(&request);
     }
     let out = child.wait_with_output().expect("the server exits");
 
@@ -60,10 +66,17 @@ fn an_oversized_content_length_gets_a_jsonrpc_error_and_a_clean_exit() {
             .is_some_and(|m| m.contains("frame limit")),
         "{value}"
     );
-    assert!(
-        out.status.success(),
-        "the server did not stay in control: {:?}: {}",
-        out.status,
+    // One answer only: the ping is not served after the refusal.
+    let headers = out
+        .stdout
+        .windows(b"Content-Length: ".len())
+        .filter(|w| *w == b"Content-Length: ")
+        .count();
+    assert_eq!(headers, 1, "the server kept serving after the refusal");
+    assert_eq!(
+        out.status.code(),
+        Some(2),
+        "the framing error must stop the server: {}",
         String::from_utf8_lossy(&out.stderr)
     );
 }

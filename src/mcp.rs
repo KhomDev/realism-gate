@@ -226,27 +226,28 @@ pub const MAX_HEADER_LINE_BYTES: usize = 8 * 1024;
 /// The most header lines between `Content-Length` and the blank line.
 pub const MAX_HEADER_LINES: usize = 64;
 
-/// A malformed frame. `fatal` says whether the stream can be read again:
-/// an oversized frame can be answered and the server can keep serving, while
-/// a stream that ends mid-header cannot.
+/// A framing error. The server stops after it: an oversized frame cannot be
+/// resynchronised without trusting (and draining) a length the client chose,
+/// so the only honest recovery is to answer the frame and stop. `respond`
+/// says whether a JSON-RPC error frame is written before the stop.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FrameError {
     pub message: String,
-    pub fatal: bool,
+    pub respond: bool,
 }
 
 impl FrameError {
-    fn recoverable(message: impl Into<String>) -> FrameError {
+    fn error(message: impl Into<String>) -> FrameError {
         FrameError {
             message: message.into(),
-            fatal: false,
+            respond: false,
         }
     }
 
-    fn fatal(message: impl Into<String>) -> FrameError {
+    fn answered(message: impl Into<String>) -> FrameError {
         FrameError {
             message: message.into(),
-            fatal: true,
+            respond: true,
         }
     }
 }
@@ -276,7 +277,7 @@ fn read_line_limited(input: &mut dyn BufRead, max: usize) -> Result<Option<Vec<u
     loop {
         let buf = input
             .fill_buf()
-            .map_err(|e| FrameError::fatal(format!("stdin: {e}")))?;
+            .map_err(|e| FrameError::error(format!("stdin: {e}")))?;
         if buf.is_empty() {
             if out.is_empty() {
                 return Ok(None);
@@ -285,7 +286,7 @@ fn read_line_limited(input: &mut dyn BufRead, max: usize) -> Result<Option<Vec<u
         }
         if let Some(at) = buf.iter().position(|b| *b == b'\n') {
             if out.len() + at > max {
-                return Err(FrameError::fatal(format!(
+                return Err(FrameError::error(format!(
                     "a line is over the {max}-byte line limit; the stream was refused"
                 )));
             }
@@ -295,7 +296,7 @@ fn read_line_limited(input: &mut dyn BufRead, max: usize) -> Result<Option<Vec<u
         }
         let take = buf.len();
         if out.len() + take > max {
-            return Err(FrameError::fatal(format!(
+            return Err(FrameError::error(format!(
                 "a line is over the {max}-byte line limit; the stream was refused"
             )));
         }
@@ -324,26 +325,26 @@ pub fn read_frame(input: &mut dyn BufRead) -> Result<Option<Value>, FrameError> 
             let value = trimmed.split_once(':').map(|(_, v)| v.trim()).unwrap_or("");
             let len: usize = value
                 .parse()
-                .map_err(|_| FrameError::fatal(format!("bad content-length: {trimmed}")))?;
+                .map_err(|_| FrameError::error(format!("bad content-length: {trimmed}")))?;
             if len > MAX_FRAME_BYTES {
                 // The body is deliberately not read. Waiting for a length the
                 // client may never send would hang the server, and allocating
-                // it is the bug this cap exists to stop. The caller answers
-                // with a JSON-RPC error and keeps serving; a client that does
-                // send the huge body is refused on the next read rather than
-                // desynchronised silently.
-                return Err(FrameError::recoverable(format!(
+                // it is the bug this cap exists to stop. The caller writes a
+                // JSON-RPC error and stops: an unread body cannot be
+                // resynchronised without trusting that same length, so the
+                // server does not claim to keep serving.
+                return Err(FrameError::answered(format!(
                     "Content-Length {len} is over the {MAX_FRAME_BYTES}-byte frame limit; the frame was refused"
                 )));
             }
             let mut headers = 0usize;
             loop {
                 let Some(header) = read_line_limited(input, MAX_HEADER_LINE_BYTES)? else {
-                    return Err(FrameError::fatal("stdin ended in the headers"));
+                    return Err(FrameError::error("stdin ended in the headers"));
                 };
                 headers += 1;
                 if headers > MAX_HEADER_LINES {
-                    return Err(FrameError::fatal(format!(
+                    return Err(FrameError::error(format!(
                         "more than {MAX_HEADER_LINES} header lines; the stream was refused"
                     )));
                 }
@@ -354,14 +355,14 @@ pub fn read_frame(input: &mut dyn BufRead) -> Result<Option<Value>, FrameError> 
             let mut buf = vec![0u8; len];
             input
                 .read_exact(&mut buf)
-                .map_err(|e| FrameError::fatal(format!("stdin body: {e}")))?;
+                .map_err(|e| FrameError::error(format!("stdin body: {e}")))?;
             let v = serde_json::from_slice(&buf)
-                .map_err(|e| FrameError::fatal(format!("request: {e}")))?;
+                .map_err(|e| FrameError::error(format!("request: {e}")))?;
             return Ok(Some(v));
         }
         return serde_json::from_str(trimmed)
             .map(Some)
-            .map_err(|e| FrameError::fatal(format!("request: {e}")));
+            .map_err(|e| FrameError::error(format!("request: {e}")));
     }
 }
 
@@ -529,14 +530,14 @@ mod tests {
     }
 
     #[test]
-    fn an_oversized_frame_is_refused_before_any_allocation_and_is_recoverable() {
+    fn an_oversized_frame_is_refused_before_any_allocation_is_answered_then_stops() {
         let mut input = std::io::Cursor::new(
             format!("Content-Length: {}\r\n\r\n", MAX_FRAME_BYTES + 1).into_bytes(),
         );
         let err = read_frame(&mut input).unwrap_err();
         assert!(
-            !err.fatal,
-            "the server can answer and keep reading: {err:?}"
+            err.respond,
+            "the client gets an error frame before the stop: {err:?}"
         );
         assert!(
             err.message.contains(&MAX_FRAME_BYTES.to_string()),
@@ -563,7 +564,7 @@ mod tests {
         let mut input = b"Content-Length: 2\r\n".to_vec();
         input.extend(std::iter::repeat_n(b'x', MAX_HEADER_LINE_BYTES + 1));
         let err = read_frame(&mut std::io::Cursor::new(input)).unwrap_err();
-        assert!(err.fatal);
+        assert!(!err.respond, "no frame is written for a header error");
         assert!(
             err.message.contains(&MAX_HEADER_LINE_BYTES.to_string()),
             "{}",
