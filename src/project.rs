@@ -80,7 +80,7 @@ impl fmt::Display for LoadError {
             ),
             LoadError::TooDeep { path, limit } => write!(
                 f,
-                "{}: directory nesting is deeper than the {limit}-directory depth limit",
+                "{}: directory nesting is deeper than the {limit}-level depth limit",
                 path.display()
             ),
             LoadError::InputTooLarge { path, bytes, limit } => write!(
@@ -107,6 +107,9 @@ impl std::error::Error for LoadError {}
 /// `symlink_metadata`: a FIFO has length zero and `read_to_string` would
 /// block forever on it, and a symlink can point at a different file each
 /// time. Symlinks are refused too; `docs/limitations.md` states the policy.
+/// The check is not atomic with the open: a path swapped in between can still
+/// block or read a different file, so these inputs must come from a trusted
+/// location.
 pub fn read_input(path: &Path) -> Result<String, LoadError> {
     let meta = std::fs::symlink_metadata(path).map_err(|e| LoadError::Io(path.to_path_buf(), e))?;
     if !meta.file_type().is_file() {
