@@ -632,6 +632,39 @@ fn an_oversized_source_file_is_refused_by_name_before_it_is_read() {
 }
 
 #[test]
+fn an_oversized_policy_input_is_refused_by_name_before_it_is_read() {
+    // --report, --claims, --declaration and --config are read after a size
+    // check. The file is 17 MiB of sparse zeros (the limit is 16 MiB), placed
+    // outside the project so the declaration/config "outside the repo under
+    // review" rule is not what refuses it. Before the cap the file was read
+    // and the run failed later for a different reason.
+    let s = Scratch::new("huge-input");
+    let outside = Scratch::new("huge-input-outside");
+    let file = s.write("test/Poc.t.sol", &poc("        vault.setFee(1);"));
+    let huge = outside.0.join("huge.bin");
+    let f = std::fs::File::create(&huge).unwrap();
+    f.set_len(17 * 1024 * 1024).unwrap();
+    drop(f);
+    let file_arg = file.to_string_lossy().to_string();
+    let huge_arg = huge.to_string_lossy().to_string();
+    for flag in ["--report", "--claims", "--declaration", "--config"] {
+        let mut args = vec!["check", file_arg.as_str(), "--format", "json"];
+        if flag != "--declaration" {
+            args.push("--no-declaration");
+        }
+        args.push(flag);
+        args.push(huge_arg.as_str());
+        let (out, _) = run_bounded(&s.0, &args, Duration::from_secs(60));
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert_eq!(out.status.code(), Some(2), "{flag}: {stderr}");
+        assert!(
+            stderr.contains("input limit") && stderr.contains("16777216"),
+            "{flag} did not name the input limit: {stderr}"
+        );
+    }
+}
+
+#[test]
 fn control_characters_in_source_never_reach_text_or_markdown_output() {
     // A Solidity string literal can hold a raw ESC (0x1b): the parser keeps
     // the bytes, and the rule message and evidence quote them. The render
