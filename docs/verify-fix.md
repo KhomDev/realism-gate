@@ -42,22 +42,45 @@ It is not a failed PoC and it is not a fix.
 ## The patch stays in the temp tree
 
 The diff is checked before it is applied. A path that is absolute or contains
-`..` is refused. `git apply` is run without `--unsafe-paths`. If git cannot
-apply the diff, a small built-in applier writes only paths that already passed
-that check. The tree you started with is not modified.
+`..` is refused. `git apply` is run without `--unsafe-paths`, and `git` is
+required: `git apply --check` runs first, then the apply. There is no
+hand-written fallback applier, because one that accepted a different subset of
+diffs could leave a tree the patch does not describe, and a verdict on that
+tree would be meaningless. If git is missing or the patch does not apply
+cleanly, the command exits with an error and forge does not run. The tree you
+started with is not modified.
 
 Three more limits apply. A patch that creates or changes a symbolic link (mode
 `120000`) is refused, because `git apply` would create a link whose target is
 not checked. A symbolic link in the project is not copied, and a patch aimed at
 it writes only inside the copy; `src/verify_fix.rs` has the test. A patch larger
-than 8 MiB is refused before it is read. Windows drive prefixes, the verbatim prefix (two backslashes, a question mark, a backslash) and UNC
-paths are refused like absolute paths.
+than 8 MiB is refused before it is read. Windows drive prefixes, the verbatim
+prefix (two backslashes, a question mark, a backslash) and UNC paths are refused
+like absolute paths.
 
 ## Do not run an untrusted project on the host
 
 A Foundry project can set `ffi = true` and can name an RPC URL. `verify-fix`
-refuses to start when `foundry.toml` sets `ffi = true`, and it sets
-`FOUNDRY_FFI=false` on the forge process. That is not a sandbox.
+refuses to run when any `foundry.toml` forge could read enables `ffi`. The
+check is a TOML parse, not a text heuristic, so spacing, tabs, quoted keys,
+dotted keys, inline tables and profiles it has never heard of cannot change the
+answer. Three trees are checked, and every check happens before a forge
+process is started:
+
+1. the root project (`--root`, or the current directory);
+2. the `--patched` tree;
+3. the copy the `--patch` is applied to, after the apply — a patch that adds
+   `ffi = true` is refused.
+
+Any key named `ffi` with the boolean value `true`, anywhere in the parsed
+document, is a refusal. That is deliberately conservative: a profile this
+program does not know about is still covered.
+
+`FOUNDRY_FFI=false` is set on the forge process, but it is not a control.
+Foundry documents `FOUNDRY_FFI` as an explicit exception to its environment
+overrides, so this program does not rely on the value: the TOML parse above is
+what stops an ffi project, and the container boundary is what contains the
+rest.
 
 On a machine that is not a container, the command exits with an error until
 you pass one of:
@@ -66,6 +89,10 @@ you pass one of:
   container or similar, `ffi` off, and network only to the pinned RPC the PoC
   needs.
 - `--allow-host`, which runs forge here anyway. `ffi` is still refused.
+
+The host decision is enforced inside the library entry point (`verify`), not
+only by the CLI: a caller that supplies no policy is refused before any tree is
+copied or any process is started.
 
 A container is detected when `/.dockerenv` or `/run/.containerenv` exists, or
 when `REALISM_GATE_SANDBOX=1`. That detection is not a guarantee. If you are

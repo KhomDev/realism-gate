@@ -11,10 +11,16 @@
 //!
 //! Forge runs on this machine. A project under review is untrusted: it can
 //! enable `ffi` and it can make forge open a connection. This command refuses
-//! to run when `foundry.toml` sets `ffi = true`, and the CLI refuses to run
-//! on the host unless the operator passes `--sandbox` (an attestation that
-//! the process is confined) or `--allow-host` (explicit, and still refused
-//! when ffi is on). See `docs/verify-fix.md`.
+//! to run when any `foundry.toml` in the tree sets `ffi = true`: the root
+//! project, the `--patched` tree, and the copied tree after a `--patch` is
+//! applied are all parsed as TOML. The environment variable `FOUNDRY_FFI` is
+//! not a control: Foundry documents it as an explicit exception to env
+//! overrides, so this command does not rely on setting it.
+//!
+//! The host decision is part of this function, not only of the CLI: a
+//! [`Request`] with no [`HostPolicy`] is refused before a copy is made or a
+//! forge process is started, so a library caller cannot skip the check. See
+//! `docs/verify-fix.md`.
 
 use serde_json::Value;
 use std::path::{Path, PathBuf};
@@ -35,9 +41,17 @@ pub struct Request {
     /// The project forge should run in. The unpatched run is a copy of this
     /// tree. Defaults to the current directory at the call site.
     pub root: PathBuf,
-    /// Whether the operator has accepted running forge here.
-    pub host: HostPolicy,
+    /// Whether the operator has accepted running forge here. `None` is the
+    /// absence of an attestation and is refused by [`verify`] before any copy
+    /// is made or any process is started.
+    pub host: Option<HostPolicy>,
 }
+
+/// The refusal a caller gets without an attestation. The CLI prints this, and
+/// a library caller that leaves [`Request::host`] as `None` gets the same.
+const HOST_REFUSAL: &str = "verify-fix will not run an untrusted forge project on the host. \
+     Run it in a container (ffi off, network only to the pinned RPC) and pass --sandbox, \
+     or pass --allow-host to run here anyway. See docs/verify-fix.md.";
 
 /// Who decided it is acceptable to execute the project.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -83,23 +97,27 @@ pub fn verify(req: &Request) -> Result<Outcome, VerifyError> {
             "pass exactly one of --patch FILE and --patched DIR".into(),
         ));
     }
-    if ffi_enabled(&req.root) {
-        return Err(VerifyError(
-            "foundry.toml sets ffi = true. verify-fix will not run a project that can execute \
-             host commands. Set ffi = false. A container with ffi off is the supported way to \
-             run an untrusted PoC; see docs/verify-fix.md."
-                .into(),
-        ));
+    // The host decision is enforced here, not only in the CLI: a library
+    // caller that supplies no policy is refused before any tree is copied.
+    if req.host.is_none() {
+        return Err(VerifyError(HOST_REFUSAL.into()));
     }
-    let _ = req.host;
+    // Every tree forge could run in is checked for ffi. The check on the
+    // copied tree after `--patch` is applied is the one that covers a patch
+    // that adds `ffi = true`.
+    refuse_ffi(&req.root, "the project in --root")?;
 
     let mut temps = TempDirs::default();
     let baseline = temps.push(copy_of(&req.root)?);
+    refuse_ffi(&baseline, "the copied project")?;
     let patched = if let Some(dir) = &req.patched_dir {
         if !dir.is_dir() {
             return Err(VerifyError(format!("{}: not a directory", dir.display())));
         }
-        temps.push(copy_of(dir)?)
+        refuse_ffi(dir, "the --patched tree")?;
+        let copy = temps.push(copy_of(dir)?);
+        refuse_ffi(&copy, "the copied --patched tree")?;
+        copy
     } else {
         let patch = req.patch.as_ref().expect("patch or dir");
         if !patch.is_file() {
@@ -107,6 +125,7 @@ pub fn verify(req: &Request) -> Result<Outcome, VerifyError> {
         }
         let work = temps.push(copy_of(&req.root)?);
         apply_patch(&work, patch)?;
+        refuse_ffi(&work, "the patched copy")?;
         work
     };
 
@@ -295,23 +314,47 @@ fn walk_results(v: &Value, out: &mut Vec<bool>) {
     }
 }
 
-fn ffi_enabled(root: &Path) -> bool {
-    let Ok(text) = std::fs::read_to_string(root.join("foundry.toml")) else {
-        return false;
+/// Whether `dir/foundry.toml` enables `ffi` anywhere. Parsed as TOML, so
+/// spacing, tabs, quoted keys and dotted keys cannot change the answer. Any
+/// table or inline table with a key named `ffi` whose value is the boolean
+/// `true` counts: the scan is deliberately conservative, so a profile this
+/// program has not heard of (or a top-level `ffi`) is refused too.
+fn ffi_enabled(dir: &Path) -> Result<bool, VerifyError> {
+    let path = dir.join("foundry.toml");
+    let text = match std::fs::read_to_string(&path) {
+        Ok(text) => text,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(false),
+        Err(e) => return Err(VerifyError(format!("{}: {e}", path.display()))),
     };
-    let stripped: String = text
-        .lines()
-        .map(|l| l.split('#').next().unwrap_or(""))
-        .collect::<Vec<_>>()
-        .join("\n");
-    stripped
-        .split(|c: char| !(c.is_ascii_alphanumeric() || c == '_' || c == '='))
-        .any(|w| {
-            let w = w.trim();
-            w.eq_ignore_ascii_case("ffi=true")
-        })
-        || stripped.to_ascii_lowercase().contains("ffi = true")
-        || stripped.to_ascii_lowercase().contains("ffi=true")
+    let doc: toml::Value = toml::from_str(&text).map_err(|e| {
+        VerifyError(format!(
+            "{}: cannot be parsed as TOML, so verify-fix cannot prove ffi is off: {e}",
+            path.display()
+        ))
+    })?;
+    Ok(ffi_set_true(&doc))
+}
+
+fn ffi_set_true(value: &toml::Value) -> bool {
+    match value {
+        toml::Value::Table(table) => table.iter().any(|(key, value)| {
+            (key == "ffi" && value.as_bool() == Some(true)) || ffi_set_true(value)
+        }),
+        toml::Value::Array(items) => items.iter().any(ffi_set_true),
+        _ => false,
+    }
+}
+
+fn refuse_ffi(dir: &Path, what: &str) -> Result<(), VerifyError> {
+    if ffi_enabled(dir)? {
+        return Err(VerifyError(format!(
+            "foundry.toml in {what} sets ffi = true. verify-fix will not run a project that can \
+             execute host commands. Set ffi = false. FOUNDRY_FFI=false is not a control: Foundry \
+             documents that variable as an explicit exception to env overrides. A container with \
+             ffi off is the supported way to run an untrusted PoC; see docs/verify-fix.md."
+        )));
+    }
+    Ok(())
 }
 
 fn poc_arg(poc: &Path, root: &Path, work: &Path) -> String {
@@ -345,17 +388,43 @@ fn apply_patch(dir: &Path, patch: &Path) -> Result<(), VerifyError> {
     for rel in &paths {
         dest_in(dir, rel)?;
     }
-    let git = Command::new("git")
-        .args(["apply", "--whitespace=nowarn"])
-        .arg(patch)
-        .current_dir(dir)
-        .output();
-    if let Ok(out) = git
-        && out.status.success()
-    {
+    // git is required. A hand-written applier that accepted a different
+    // subset of diffs could leave a tree the patch does not describe, and a
+    // verdict on that tree would be meaningless. `--check` first means a
+    // patch that cannot apply cleanly is refused before any file changes.
+    git_apply(dir, patch, true)?;
+    git_apply(dir, patch, false)
+}
+
+fn git_apply(dir: &Path, patch: &Path, check: bool) -> Result<(), VerifyError> {
+    let mut cmd = Command::new("git");
+    cmd.arg("apply");
+    if check {
+        cmd.arg("--check");
+    }
+    cmd.arg("--whitespace=nowarn").arg(patch).current_dir(dir);
+    let out = cmd.output().map_err(|e| {
+        VerifyError(format!(
+            "could not run git to apply the patch: {e}. verify-fix needs git for --patch; it \
+             does not fall back to a hand-written applier."
+        ))
+    })?;
+    if out.status.success() {
         return Ok(());
     }
-    apply_unified(dir, &text)
+    Err(VerifyError(format!(
+        "git apply{} refused the patch, so the patched tree would not be the one the patch \
+         describes:\n{}",
+        if check { " --check" } else { "" },
+        first_lines(
+            &format!(
+                "{}\n{}",
+                String::from_utf8_lossy(&out.stdout),
+                String::from_utf8_lossy(&out.stderr)
+            ),
+            20
+        )
+    )))
 }
 
 /// Paths a unified diff would write. Absolute paths and `..` are rejected
@@ -450,138 +519,6 @@ fn dest_in(dir: &Path, rel: &str) -> Result<PathBuf, VerifyError> {
         )));
     }
     Ok(dest)
-}
-
-fn apply_unified(dir: &Path, text: &str) -> Result<(), VerifyError> {
-    let lines: Vec<&str> = text.lines().collect();
-    let mut i = 0;
-    let mut applied = 0;
-    while i < lines.len() {
-        if lines[i].starts_with("diff ")
-            || lines[i].starts_with("index ")
-            || lines[i].starts_with("rename ")
-        {
-            i += 1;
-            continue;
-        }
-        if !lines[i].starts_with("--- ") {
-            i += 1;
-            continue;
-        }
-        i += 1;
-        if i >= lines.len() || !lines[i].starts_with("+++ ") {
-            return Err(VerifyError("malformed patch: missing +++".into()));
-        }
-        let new_path = strip_ab(lines[i].split_whitespace().nth(1).unwrap_or(""));
-        i += 1;
-        if new_path == "/dev/null" {
-            return Err(VerifyError(
-                "the patch deletes a file; verify-fix does not apply deletions".into(),
-            ));
-        }
-        let dest = dest_in(dir, &new_path)?;
-        let original = if dest.is_file() {
-            std::fs::read_to_string(&dest)
-                .map_err(|e| VerifyError(format!("{}: {e}", dest.display())))?
-        } else {
-            String::new()
-        };
-        let mut body: Vec<String> = original.lines().map(|s| s.to_string()).collect();
-        let mut old_idx = 0usize;
-        let mut rebuilt = Vec::new();
-        if i >= lines.len() || !lines[i].starts_with("@@") {
-            return Err(VerifyError("malformed patch: missing hunk".into()));
-        }
-        while i < lines.len() && lines[i].starts_with("@@") {
-            let old_start = hunk_old_start(lines[i])?;
-            i += 1;
-            if old_start == 0 {
-                return Err(VerifyError("malformed hunk".into()));
-            }
-            let keep_until = old_start - 1;
-            if keep_until < old_idx || keep_until > body.len() {
-                return Err(VerifyError(format!(
-                    "hunk does not apply to {}",
-                    dest.display()
-                )));
-            }
-            rebuilt.extend(body[old_idx..keep_until].iter().cloned());
-            old_idx = keep_until;
-            while i < lines.len() && !lines[i].starts_with("@@") && !lines[i].starts_with("--- ") {
-                let line = lines[i];
-                i += 1;
-                if line.starts_with('\\') {
-                    continue;
-                }
-                let (tag, rest) =
-                    line.split_at(line.chars().next().map(|c| c.len_utf8()).unwrap_or(0));
-                match tag {
-                    " " => {
-                        if body.get(old_idx).map(String::as_str) != Some(rest)
-                            && body.get(old_idx).map(String::as_str) != Some(line)
-                        {
-                            // A context line includes its leading space in `line`; `rest` is after it.
-                        }
-                        let ctx = line.strip_prefix(' ').unwrap_or(line);
-                        if body.get(old_idx).map(String::as_str) != Some(ctx) {
-                            return Err(VerifyError(format!(
-                                "hunk context does not match {}",
-                                dest.display()
-                            )));
-                        }
-                        rebuilt.push(ctx.to_string());
-                        old_idx += 1;
-                    }
-                    "-" => {
-                        let ctx = line.strip_prefix('-').unwrap_or(line);
-                        if body.get(old_idx).map(String::as_str) != Some(ctx) {
-                            return Err(VerifyError(format!(
-                                "hunk does not match {}",
-                                dest.display()
-                            )));
-                        }
-                        old_idx += 1;
-                    }
-                    "+" => {
-                        rebuilt.push(line.strip_prefix('+').unwrap_or(line).to_string());
-                    }
-                    _ => {
-                        return Err(VerifyError(format!("malformed hunk line `{line}`")));
-                    }
-                }
-            }
-        }
-        rebuilt.extend(body.drain(old_idx..));
-        body = rebuilt;
-        if let Some(parent) = dest.parent() {
-            std::fs::create_dir_all(parent)
-                .map_err(|e| VerifyError(format!("{}: {e}", parent.display())))?;
-        }
-        let mut text = body.join("\n");
-        if original.ends_with('\n') || !text.is_empty() {
-            text.push('\n');
-        }
-        std::fs::write(&dest, text).map_err(|e| VerifyError(format!("{}: {e}", dest.display())))?;
-        applied += 1;
-    }
-    if applied == 0 {
-        Err(VerifyError(
-            "the patch did not apply. git apply failed and the diff had no hunk the built-in applier could use.".into(),
-        ))
-    } else {
-        Ok(())
-    }
-}
-
-fn hunk_old_start(header: &str) -> Result<usize, VerifyError> {
-    // @@ -l,s +l,s @@
-    let spec = header
-        .split_whitespace()
-        .find(|p| p.starts_with('-'))
-        .ok_or_else(|| VerifyError(format!("malformed hunk `{header}`")))?;
-    let n = spec.trim_start_matches('-').split(',').next().unwrap_or("");
-    n.parse::<usize>()
-        .map_err(|_| VerifyError(format!("malformed hunk `{header}`")))
 }
 
 /// A fresh directory for one copy of a project tree. The name is unique per
@@ -735,7 +672,7 @@ mod tests {
             match_test: None,
             forge,
             root: dir.to_path_buf(),
-            host: HostPolicy::Sandbox,
+            host: Some(HostPolicy::Sandbox),
         }
     }
 
@@ -827,7 +764,7 @@ mod tests {
             match_test: Some("test_a".into()),
             forge,
             root: dir.clone(),
-            host: HostPolicy::Sandbox,
+            host: Some(HostPolicy::Sandbox),
         })
         .unwrap();
         assert!(matches!(out, Outcome::FixHolds { .. }), "{out:?}");
@@ -856,7 +793,7 @@ mod tests {
             match_test: None,
             forge,
             root: dir.clone(),
-            host: HostPolicy::Sandbox,
+            host: Some(HostPolicy::Sandbox),
         })
         .unwrap_err();
         assert!(
@@ -877,6 +814,94 @@ mod tests {
         std::fs::create_dir_all(&poc_dir).unwrap();
         let err = verify(&req(&dir, forge, Some(poc_dir), None)).unwrap_err();
         assert!(err.0.contains("ffi"), "{}", err.0);
+    }
+
+    /// Spellings a TOML parser accepts for the same setting. The old
+    /// comment-stripped heuristic missed the ones with tabs, quotes and
+    /// dotted keys; a real parse cannot.
+    const FFI_TRUE: &[&str] = &[
+        "[profile.default]\nffi = true\n",
+        "[profile.default]\nffi\t=\ttrue\n",
+        "[profile.default]\nffi=true\n",
+        "[profile.default]\n\"ffi\" = true\n",
+        "[profile.default]\n'ffi' = true\n",
+        "[profile.default]\nffi = true # enabled\n",
+        "profile.default.ffi = true\n",
+        "ffi = true\n",
+        "[profile.ci]\nffi = true\n",
+        "profile = { default = { ffi = true } }\n",
+    ];
+
+    #[test]
+    fn ffi_is_seen_however_toml_spells_it() {
+        for text in FFI_TRUE {
+            let tmp = tempfile::tempdir().unwrap();
+            std::fs::write(tmp.path().join("foundry.toml"), text).unwrap();
+            assert!(
+                ffi_enabled(tmp.path()).unwrap(),
+                "{text:?} was not read as ffi = true"
+            );
+        }
+    }
+
+    #[test]
+    fn a_setting_that_does_not_enable_ffi_is_not_refused() {
+        for text in [
+            "[profile.default]\nffi = false\n",
+            "[profile.default]\nffi = \"true\"\n",
+            "[profile.default]\nffi_mode = true\n",
+            "[profile.default]\nremeas = true\n",
+            "# [profile.default]\n# ffi = true\n",
+        ] {
+            let tmp = tempfile::tempdir().unwrap();
+            std::fs::write(tmp.path().join("foundry.toml"), text).unwrap();
+            assert!(
+                !ffi_enabled(tmp.path()).unwrap(),
+                "{text:?} was wrongly read as ffi = true"
+            );
+        }
+    }
+
+    #[test]
+    fn a_foundry_toml_that_does_not_parse_is_refused_not_treated_as_off() {
+        let tmp = tempfile::tempdir().unwrap();
+        std::fs::write(
+            tmp.path().join("foundry.toml"),
+            "[profile.default\nffi = true\n",
+        )
+        .unwrap();
+        let err = ffi_enabled(tmp.path()).unwrap_err();
+        assert!(err.0.contains("TOML"), "{}", err.0);
+    }
+
+    /// A forge stand-in that records that it ran, so a test can prove a
+    /// refusal happened before any process was started.
+    fn forge_marker(dir: &Path) -> (PathBuf, PathBuf) {
+        let marker = dir.join("forge-ran.txt");
+        let marker_text = marker.to_string_lossy().replace('\\', "/");
+        let body = format!(
+            "#!/bin/sh\nprintf 'ran\\n' > '{marker_text}'\nprintf '%s\\n' '{{\"t\":{{\"test_a\":{{\"success\":true}}}}}}'\nexit 0\n"
+        );
+        (script(dir, "forge-marker", &body), marker)
+    }
+
+    #[test]
+    fn no_attestation_is_refused_before_forge_is_started() {
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().to_path_buf();
+        let (forge, marker) = forge_marker(&dir);
+        let poc_dir = dir.join("patched");
+        std::fs::create_dir_all(&poc_dir).unwrap();
+        let mut request = req(&dir, forge, Some(poc_dir), None);
+        request.host = None;
+        let err = verify(&request).unwrap_err();
+        assert!(
+            err.0
+                .contains("will not run an untrusted forge project on the host"),
+            "{}",
+            err.0
+        );
+        assert!(!marker.exists(), "forge was started without an attestation");
     }
 
     #[test]

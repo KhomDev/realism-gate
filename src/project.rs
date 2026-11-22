@@ -17,10 +17,44 @@ const SKIP_DIRS: &[&str] = &[
     "artifacts",
 ];
 
+/// The largest single source file this program reads. A PoC is a test, not a
+/// vendored tree, and the limit is checked from metadata before the read, so
+/// an oversized file is refused without allocating it.
+pub const MAX_SOURCE_FILE_BYTES: u64 = 8 * 1024 * 1024;
+/// The largest total source text read in one run.
+pub const MAX_SOURCE_TOTAL_BYTES: u64 = 128 * 1024 * 1024;
+/// The largest number of source files read in one run.
+pub const MAX_SOURCE_FILES: usize = 20_000;
+/// How deep directory discovery goes.
+pub const MAX_WALK_DEPTH: usize = 64;
+/// The largest `--report`, `--claims`, `--declaration` or `--config` file.
+pub const MAX_INPUT_BYTES: u64 = 16 * 1024 * 1024;
+
 #[derive(Debug)]
 pub enum LoadError {
     Missing(PathBuf),
     Io(PathBuf, std::io::Error),
+    FileTooLarge {
+        path: PathBuf,
+        bytes: u64,
+        limit: u64,
+    },
+    TotalTooLarge {
+        bytes: u64,
+        limit: u64,
+    },
+    TooManyFiles {
+        limit: usize,
+    },
+    TooDeep {
+        path: PathBuf,
+        limit: usize,
+    },
+    InputTooLarge {
+        path: PathBuf,
+        bytes: u64,
+        limit: u64,
+    },
 }
 
 impl fmt::Display for LoadError {
@@ -28,25 +62,101 @@ impl fmt::Display for LoadError {
         match self {
             LoadError::Missing(p) => write!(f, "{}: no such file or directory", p.display()),
             LoadError::Io(p, e) => write!(f, "{}: {e}", p.display()),
+            LoadError::FileTooLarge { path, bytes, limit } => write!(
+                f,
+                "{}: {bytes} bytes is over the {limit}-byte per-file limit; it was not read",
+                path.display()
+            ),
+            LoadError::TotalTooLarge { bytes, limit } => write!(
+                f,
+                "the sources total {bytes} bytes, over the {limit}-byte total limit; the run was not started"
+            ),
+            LoadError::TooManyFiles { limit } => write!(
+                f,
+                "more than {limit} source files; that is the per-run file limit"
+            ),
+            LoadError::TooDeep { path, limit } => write!(
+                f,
+                "{}: directory nesting is deeper than the {limit}-directory depth limit",
+                path.display()
+            ),
+            LoadError::InputTooLarge { path, bytes, limit } => write!(
+                f,
+                "{}: {bytes} bytes is over the {limit}-byte input limit; it was not read",
+                path.display()
+            ),
         }
     }
 }
 
 impl std::error::Error for LoadError {}
 
+/// Reads a `--report`, `--claims`, `--declaration` or `--config` file after
+/// checking its size from metadata, so a huge input is refused by name rather
+/// than read whole.
+pub fn read_input(path: &Path) -> Result<String, LoadError> {
+    let len = std::fs::metadata(path)
+        .map_err(|e| LoadError::Io(path.to_path_buf(), e))?
+        .len();
+    if len > MAX_INPUT_BYTES {
+        return Err(LoadError::InputTooLarge {
+            path: path.to_path_buf(),
+            bytes: len,
+            limit: MAX_INPUT_BYTES,
+        });
+    }
+    std::fs::read_to_string(path).map_err(|e| LoadError::Io(path.to_path_buf(), e))
+}
+
+fn file_len(path: &Path) -> Result<u64, LoadError> {
+    Ok(std::fs::metadata(path)
+        .map_err(|e| LoadError::Io(path.to_path_buf(), e))?
+        .len())
+}
+
+fn add_file(
+    path: &Path,
+    len: u64,
+    out: &mut Vec<PathBuf>,
+    total: &mut u64,
+) -> Result<(), LoadError> {
+    if len > MAX_SOURCE_FILE_BYTES {
+        return Err(LoadError::FileTooLarge {
+            path: path.to_path_buf(),
+            bytes: len,
+            limit: MAX_SOURCE_FILE_BYTES,
+        });
+    }
+    if out.len() >= MAX_SOURCE_FILES {
+        return Err(LoadError::TooManyFiles {
+            limit: MAX_SOURCE_FILES,
+        });
+    }
+    *total = total.saturating_add(len);
+    if *total > MAX_SOURCE_TOTAL_BYTES {
+        return Err(LoadError::TotalTooLarge {
+            bytes: *total,
+            limit: MAX_SOURCE_TOTAL_BYTES,
+        });
+    }
+    out.push(path.to_path_buf());
+    Ok(())
+}
+
 /// Every Solidity, Rust and TypeScript or JavaScript file under `paths`,
 /// sorted, with dependency and build directories skipped. A path given explicitly is always included, even if it
 /// sits inside a skipped directory.
 pub fn discover(paths: &[PathBuf]) -> Result<Vec<PathBuf>, LoadError> {
     let mut out = Vec::new();
+    let mut total = 0u64;
     for path in paths {
         if !path.exists() {
             return Err(LoadError::Missing(path.clone()));
         }
         if path.is_file() {
-            out.push(path.clone());
+            add_file(path, file_len(path)?, &mut out, &mut total)?;
         } else {
-            walk(path, &mut out)?;
+            walk(path, 1, &mut out, &mut total)?;
         }
     }
     out.sort();
@@ -54,7 +164,18 @@ pub fn discover(paths: &[PathBuf]) -> Result<Vec<PathBuf>, LoadError> {
     Ok(out)
 }
 
-fn walk(dir: &Path, out: &mut Vec<PathBuf>) -> Result<(), LoadError> {
+fn walk(
+    dir: &Path,
+    depth: usize,
+    out: &mut Vec<PathBuf>,
+    total: &mut u64,
+) -> Result<(), LoadError> {
+    if depth > MAX_WALK_DEPTH {
+        return Err(LoadError::TooDeep {
+            path: dir.to_path_buf(),
+            limit: MAX_WALK_DEPTH,
+        });
+    }
     let entries = std::fs::read_dir(dir).map_err(|e| LoadError::Io(dir.to_path_buf(), e))?;
     for entry in entries {
         let entry = entry.map_err(|e| LoadError::Io(dir.to_path_buf(), e))?;
@@ -67,9 +188,13 @@ fn walk(dir: &Path, out: &mut Vec<PathBuf>) -> Result<(), LoadError> {
             if name.starts_with('.') || SKIP_DIRS.contains(&name.as_str()) {
                 continue;
             }
-            walk(&path, out)?;
+            walk(&path, depth + 1, out, total)?;
         } else if file_type.is_file() && is_source(&name) {
-            out.push(path);
+            let len = entry
+                .metadata()
+                .map_err(|e| LoadError::Io(path.clone(), e))?
+                .len();
+            add_file(&path, len, out, total)?;
         }
     }
     Ok(())
@@ -177,10 +302,36 @@ impl<'p> Suite<'p> {
 
 impl Project {
     /// Parses every file. Read errors abort; parse errors are kept per file.
+    /// A file over the per-file limit, or a set over the total limit, is
+    /// refused from metadata before it is read.
     pub fn load(files: &[PathBuf], base: &Path) -> Result<Project, LoadError> {
-        let mut units = Vec::with_capacity(files.len());
+        let mut units = Vec::with_capacity(files.len().min(MAX_SOURCE_FILES));
+        let mut total = 0u64;
         for file in files {
+            let len = file_len(file)?;
+            if len > MAX_SOURCE_FILE_BYTES {
+                return Err(LoadError::FileTooLarge {
+                    path: file.clone(),
+                    bytes: len,
+                    limit: MAX_SOURCE_FILE_BYTES,
+                });
+            }
+            total = total.saturating_add(len);
+            if total > MAX_SOURCE_TOTAL_BYTES {
+                return Err(LoadError::TotalTooLarge {
+                    bytes: total,
+                    limit: MAX_SOURCE_TOTAL_BYTES,
+                });
+            }
             let bytes = std::fs::read(file).map_err(|e| LoadError::Io(file.clone(), e))?;
+            // The file can grow between the metadata check and the read.
+            if bytes.len() as u64 > MAX_SOURCE_FILE_BYTES {
+                return Err(LoadError::FileTooLarge {
+                    path: file.clone(),
+                    bytes: bytes.len() as u64,
+                    limit: MAX_SOURCE_FILE_BYTES,
+                });
+            }
             let source = String::from_utf8_lossy(&bytes);
             units.extend(parse_any(&display_path(file, base), &source));
         }
@@ -249,9 +400,13 @@ impl Project {
                 }
                 let linear = self.linearize(unit, contract);
                 let mut tests: Vec<&Function> = Vec::new();
+                // A set for the duplicate check: scanning `tests` for every
+                // function made suite construction quadratic in the number
+                // of test functions in one contract.
+                let mut seen: std::collections::HashSet<&str> = std::collections::HashSet::new();
                 for l in &linear {
                     for f in &l.contract.functions {
-                        if is_test_function(f) && !tests.iter().any(|t| t.name == f.name) {
+                        if is_test_function(f) && seen.insert(f.name.as_str()) {
                             tests.push(f);
                         }
                     }

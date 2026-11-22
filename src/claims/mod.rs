@@ -527,7 +527,7 @@ pub fn resolve(
 }
 
 fn read(path: &Path) -> Result<String, String> {
-    std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))
+    crate::project::read_input(path).map_err(|e| e.to_string())
 }
 
 /// The YAML front-matter block of a markdown file: the text between a leading
