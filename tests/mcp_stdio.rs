@@ -73,10 +73,21 @@ fn an_oversized_frame_is_answered_and_the_server_stops_without_serving_a_ping() 
         .filter(|w| *w == b"Content-Length: ")
         .count();
     assert_eq!(headers, 1, "the server kept serving after the refusal");
+    let stderr = String::from_utf8_lossy(&out.stderr);
     assert_eq!(
         out.status.code(),
         Some(2),
-        "the framing error must stop the server: {}",
-        String::from_utf8_lossy(&out.stderr)
+        "the framing error must stop the server: {stderr}"
+    );
+    // The old code answered the frame but kept reading, then hit the line cap
+    // on the body and printed the line-limit error. The new code must stop on
+    // the oversized frame itself.
+    assert!(
+        stderr.contains("Content-Length") && stderr.contains("frame limit"),
+        "the stop was not the oversized-frame refusal: {stderr}"
+    );
+    assert!(
+        !stderr.contains("line limit"),
+        "the server read the refused body instead of stopping: {stderr}"
     );
 }
