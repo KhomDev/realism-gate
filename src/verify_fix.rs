@@ -12,7 +12,9 @@
 //! Forge runs on this machine. A project under review is untrusted: it can
 //! enable `ffi`, grant itself `fs_permissions`, and make forge open a
 //! connection. This command refuses to run when any `foundry.toml` in the tree
-//! sets `ffi = true`, or when any `fs_permissions` entry is not exactly
+//! sets `ffi` to anything other than the boolean `false`, when a key Foundry
+//! normalizes to `ffi` is spelled as an alias, or when any `fs_permissions`
+//! key (again including aliases) grants anything other than exactly
 //! `access = "read"` (write access would let the first PoC run rewrite the
 //! other tree's or the global config for the second run). The root project,
 //! the `--patched` tree, the copied tree after a `--patch` is applied and
@@ -151,7 +153,10 @@ fn verify_with_global_config(
     refuse_dotenv(&baseline, "the copied project")?;
     let patched = if let Some(dir) = &req.patched_dir {
         if !dir.is_dir() {
-            return Err(VerifyError(format!("{}: not a directory", dir.display())));
+            return Err(VerifyError(format!(
+                "{}: not a directory",
+                display_path(dir)
+            )));
         }
         refuse_config_dir(dir, "the --patched tree")?;
         let copy = temps.push(copy_of(dir)?);
@@ -164,7 +169,10 @@ fn verify_with_global_config(
         // `../fix.diff` would name a different file (or none).
         let patch = absolute_from_cwd(req.patch.as_ref().expect("patch or dir"))?;
         if !patch.is_file() {
-            return Err(VerifyError(format!("{}: no such patch", patch.display())));
+            return Err(VerifyError(format!(
+                "{}: no such patch",
+                display_path(&patch)
+            )));
         }
         let work = temps.push(copy_of(&req.root)?);
         apply_patch(&work, &patch)?;
@@ -535,94 +543,139 @@ fn read_config(path: &Path) -> Result<Option<toml::Value>, VerifyError> {
     let meta = match std::fs::metadata(path) {
         Ok(meta) => meta,
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(None),
-        Err(e) => return Err(VerifyError(format!("{}: {e}", path.display()))),
+        Err(e) => return Err(VerifyError(format!("{}: {e}", display_path(path)))),
     };
     if !meta.is_file() {
         return Err(VerifyError(format!(
             "{}: not a regular file; verify-fix will not read a Foundry config it cannot bound",
-            path.display()
+            display_path(path)
         )));
     }
     if meta.len() > MAX_CONFIG_BYTES {
         return Err(VerifyError(format!(
             "{}: {} bytes is over the {MAX_CONFIG_BYTES}-byte limit for a Foundry config; it was not read",
-            path.display(),
+            display_path(path),
             meta.len()
         )));
     }
     let text = std::fs::read_to_string(path)
-        .map_err(|e| VerifyError(format!("{}: {e}", path.display())))?;
+        .map_err(|e| VerifyError(format!("{}: {e}", display_path(path))))?;
     let doc: toml::Value = toml::from_str(&text).map_err(|e| {
         VerifyError(format!(
             "{}: cannot be parsed as TOML, so verify-fix cannot prove ffi is off and fs_permissions are read-only: {e}",
-            path.display()
+            display_path(path)
         ))
     })?;
     Ok(Some(doc))
 }
 
-/// Whether `dir/foundry.toml` enables `ffi` anywhere. Parsed as TOML, so
-/// spacing, tabs, quoted keys and dotted keys cannot change the answer. Any
-/// table or inline table with a key named `ffi` whose value is the boolean
-/// `true` counts: the scan is deliberately conservative, so a profile this
-/// program has not heard of (or a top-level `ffi`) is refused too.
-#[cfg(test)]
-fn ffi_enabled(dir: &Path) -> Result<bool, VerifyError> {
-    match read_config(&dir.join("foundry.toml"))? {
-        Some(doc) => Ok(ffi_set_true(&doc)),
-        None => Ok(false),
-    }
+/// Foundry matches config keys after lowercasing ASCII and removing every
+/// non-alphanumeric character: `FFI`, `Ffi`, `ffi_` and `ffi__` all set
+/// `ffi`, and `FS_PERMISSIONS`, `FS-PERMISSIONS`, `fsPermissions`,
+/// `fs_Permissions`, `Fs-Permissions` and `fs permissions` all set
+/// `fs_permissions`. The guard applies the same normalization and refuses any
+/// spelling other than the canonical key, because an alias is not the key this
+/// check can prove off.
+fn normalized_key(key: &str) -> String {
+    key.chars()
+        .filter(char::is_ascii_alphanumeric)
+        .map(|c| c.to_ascii_lowercase())
+        .collect()
 }
 
-fn ffi_set_true(value: &toml::Value) -> bool {
-    match value {
-        toml::Value::Table(table) => table.iter().any(|(key, value)| {
-            (key == "ffi" && value.as_bool() == Some(true)) || ffi_set_true(value)
-        }),
-        toml::Value::Array(items) => items.iter().any(ffi_set_true),
-        _ => false,
-    }
+/// A config setting that must stop the run. The two alias variants are
+/// refused whatever their value: Foundry resolves them, so their exact value
+/// is not something this check can rely on.
+#[derive(Debug)]
+enum ConfigProblem {
+    FfiTrue,
+    FfiAlias(String),
+    FfiNotBoolean(String),
+    FsPermissionsAlias(String),
+    FsPermissions(String),
 }
 
-/// A problem with an `fs_permissions` entry, or `None` when every entry grants
-/// only reading. Any access other than exactly `"read"`, a missing access, a
-/// non-array value or a non-table entry is refused. Write access would let the
-/// first PoC run rewrite the other tree's or the global config to
-/// `ffi = true`, and the second run would then execute `ffi`.
-fn fs_permissions_problem(value: &toml::Value) -> Option<String> {
+/// Scans a parsed config for any key Foundry normalizes to `ffi` or
+/// `fs_permissions`. Only exactly `ffi = false` and exactly
+/// `fs_permissions = [{ access = "read", ... }]` are allowed; every other
+/// spelling or value is a problem. The scan is document-wide, so an unknown
+/// profile or a nested inline table cannot hide a setting.
+fn config_problem(value: &toml::Value) -> Option<ConfigProblem> {
     match value {
         toml::Value::Table(table) => {
             for (key, value) in table {
-                if key == "fs_permissions" {
-                    let Some(entries) = value.as_array() else {
-                        return Some("fs_permissions is not an array".to_string());
-                    };
-                    for entry in entries {
-                        let Some(entry) = entry.as_table() else {
-                            return Some("an fs_permissions entry is not a table".to_string());
-                        };
-                        match entry.get("access").and_then(toml::Value::as_str) {
-                            Some("read") => {}
-                            Some(other) => {
-                                return Some(format!("an entry grants access = \"{other}\""));
-                            }
-                            None => {
-                                return Some(
-                                    "an entry has no access (or it is not a string)".into(),
-                                );
-                            }
+                match normalized_key(key).as_str() {
+                    "ffi" => {
+                        if key != "ffi" {
+                            return Some(ConfigProblem::FfiAlias(key.clone()));
+                        }
+                        match value {
+                            toml::Value::Boolean(false) => {}
+                            toml::Value::Boolean(true) => return Some(ConfigProblem::FfiTrue),
+                            _ => return Some(ConfigProblem::FfiNotBoolean(key.clone())),
                         }
                     }
+                    "fspermissions" => {
+                        if key != "fs_permissions" {
+                            return Some(ConfigProblem::FsPermissionsAlias(key.clone()));
+                        }
+                        if let Some(problem) = fs_entries_problem(value) {
+                            return Some(ConfigProblem::FsPermissions(problem));
+                        }
+                    }
+                    _ => {}
                 }
-                if let Some(problem) = fs_permissions_problem(value) {
+                if let Some(problem) = config_problem(value) {
                     return Some(problem);
                 }
             }
             None
         }
-        toml::Value::Array(items) => items.iter().find_map(fs_permissions_problem),
+        toml::Value::Array(items) => items.iter().find_map(config_problem),
         _ => None,
     }
+}
+
+/// A problem with an `fs_permissions` value, or `None` when every entry grants
+/// only reading. Any access other than exactly `"read"`, a missing or
+/// non-string access, a non-array value or a non-table entry is refused. Write
+/// access would let the first PoC run rewrite the other tree's or the global
+/// config to an ffi alias, and the second run would then execute host commands.
+fn fs_entries_problem(value: &toml::Value) -> Option<String> {
+    let Some(entries) = value.as_array() else {
+        return Some("a value that is not an array".to_string());
+    };
+    for entry in entries {
+        let Some(entry) = entry.as_table() else {
+            return Some("an entry that is not a table".to_string());
+        };
+        match entry.get("access").and_then(toml::Value::as_str) {
+            Some("read") => {}
+            Some(other) => return Some(format!("an entry that grants access = \"{other}\"")),
+            None => return Some("an entry that has no access (or it is not a string)".into()),
+        }
+    }
+    None
+}
+
+/// Whether `dir/foundry.toml` contains a problem the guard refuses. A config
+/// that does not parse is an error, not a pass.
+#[cfg(test)]
+fn config_refused(dir: &Path) -> Result<bool, VerifyError> {
+    match read_config(&dir.join("foundry.toml"))? {
+        Some(doc) => Ok(config_problem(&doc).is_some()),
+        None => Ok(false),
+    }
+}
+
+/// A path for an error message with one separator style. On Windows a path
+/// built by joining a user-supplied `--root` (which may use `/`) with
+/// `foundry.toml` would otherwise display both separators.
+fn display_path(path: &Path) -> String {
+    let text = path.display().to_string();
+    #[cfg(windows)]
+    let text = text.replace('/', "\\");
+    text
 }
 
 fn ffi_error(what: &str) -> VerifyError {
@@ -634,28 +687,60 @@ fn ffi_error(what: &str) -> VerifyError {
     ))
 }
 
+fn ffi_alias_error(what: &str, key: &str) -> VerifyError {
+    VerifyError(format!(
+        "{what} uses the key `{key}`, which Foundry normalizes to `ffi`. verify-fix \
+         refuses any non-canonical spelling of ffi, whatever its value: Foundry resolves \
+         `FFI`, `Ffi`, `ffi_`, `ffi__` and similar keys, so an alias cannot be proven off. \
+         Use exactly `ffi = false`; see docs/verify-fix.md."
+    ))
+}
+
+fn ffi_not_boolean_error(what: &str, key: &str) -> VerifyError {
+    VerifyError(format!(
+        "{what} sets `{key}` to a value that is not a boolean. verify-fix accepts only exactly \
+         `ffi = false`. Foundry currently rejects this type instead of coercing it, but the \
+         guard does not rely on that; see docs/verify-fix.md."
+    ))
+}
+
+fn fs_alias_error(what: &str, key: &str) -> VerifyError {
+    VerifyError(format!(
+        "{what} uses the key `{key}`, which Foundry normalizes to `fs_permissions`. \
+         verify-fix refuses any non-canonical spelling of fs_permissions: Foundry resolves \
+         `FS_PERMISSIONS`, `FS-PERMISSIONS`, `fsPermissions`, `fs_Permissions`, \
+         `Fs-Permissions` and similar keys, so the write check cannot rely on the exact \
+         spelling. Use exactly `fs_permissions`; only access = \"read\" entries are allowed; \
+         see docs/verify-fix.md."
+    ))
+}
+
 fn fs_error(what: &str, problem: &str) -> VerifyError {
     VerifyError(format!(
         "{what} sets fs_permissions with {problem}. verify-fix refuses a Foundry config that grants file \
          write access: the first PoC run could rewrite the other tree's or the global config to \
-         ffi = true, and the second run would execute ffi. Only access = \"read\" entries are \
+         an ffi alias, and the second run would execute host commands. Only access = \"read\" entries are \
          allowed; see docs/verify-fix.md."
     ))
 }
 
-/// Checks one config file for both controls: `ffi` anywhere, and any
-/// `fs_permissions` entry that is not read-only.
+/// Checks one config file for both controls: any key Foundry normalizes to
+/// `ffi`, and any key it normalizes to `fs_permissions` that is not read-only.
 fn refuse_config_file(path: &Path, what: &str) -> Result<(), VerifyError> {
     let Some(doc) = read_config(path)? else {
         return Ok(());
     };
-    if ffi_set_true(&doc) {
-        return Err(ffi_error(&format!("{what} ({})", path.display())));
-    }
-    if let Some(problem) = fs_permissions_problem(&doc) {
-        return Err(fs_error(&format!("{what} ({})", path.display()), &problem));
-    }
-    Ok(())
+    let Some(problem) = config_problem(&doc) else {
+        return Ok(());
+    };
+    let label = format!("{what} ({})", display_path(path));
+    Err(match problem {
+        ConfigProblem::FfiTrue => ffi_error(&label),
+        ConfigProblem::FfiAlias(key) => ffi_alias_error(&label, &key),
+        ConfigProblem::FfiNotBoolean(key) => ffi_not_boolean_error(&label, &key),
+        ConfigProblem::FsPermissionsAlias(key) => fs_alias_error(&label, &key),
+        ConfigProblem::FsPermissions(problem) => fs_error(&label, &problem),
+    })
 }
 
 fn refuse_config_dir(dir: &Path, what: &str) -> Result<(), VerifyError> {
@@ -695,10 +780,10 @@ fn refuse_dotenv(dir: &Path, what: &str) -> Result<(), VerifyError> {
     match std::fs::symlink_metadata(&path) {
         Ok(_) => Err(VerifyError(format!(
             "{what} contains a .env file ({}). Foundry loads dotenv after it starts, so a .env can point FOUNDRY_CONFIG at a config verify-fix never checked. verify-fix refuses a .env in the trees it runs; remove it from the patch or the project.",
-            path.display()
+            display_path(&path)
         ))),
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
-        Err(e) => Err(VerifyError(format!("{}: {e}", path.display()))),
+        Err(e) => Err(VerifyError(format!("{}: {e}", display_path(&path)))),
     }
 }
 
@@ -712,7 +797,7 @@ fn pinned_config(dir: &Path) -> Result<PathBuf, VerifyError> {
     let path = absolute_from_cwd(&dir.join("foundry.toml"))?;
     if !path.is_file() {
         std::fs::write(&path, "[profile.default]\n")
-            .map_err(|e| VerifyError(format!("{}: {e}", path.display())))?;
+            .map_err(|e| VerifyError(format!("{}: {e}", display_path(&path))))?;
     }
     Ok(path)
 }
@@ -735,7 +820,7 @@ fn global_foundry_toml() -> Option<PathBuf> {
 /// used after that (the patch, or a `--forge` with a separator) has to be
 /// fixed before it is reinterpreted.
 fn absolute_from_cwd(path: &Path) -> Result<PathBuf, VerifyError> {
-    std::path::absolute(path).map_err(|e| VerifyError(format!("{}: {e}", path.display())))
+    std::path::absolute(path).map_err(|e| VerifyError(format!("{}: {e}", display_path(path))))
 }
 
 /// A bare `forge` keeps PATH lookup; a value containing a path separator is
@@ -1335,26 +1420,102 @@ mod tests {
             let tmp = tempfile::tempdir().unwrap();
             std::fs::write(tmp.path().join("foundry.toml"), text).unwrap();
             assert!(
-                ffi_enabled(tmp.path()).unwrap(),
+                config_refused(tmp.path()).unwrap(),
                 "{text:?} was not read as ffi = true"
             );
         }
     }
 
     #[test]
-    fn a_setting_that_does_not_enable_ffi_is_not_refused() {
+    fn benign_settings_are_not_refused() {
         for text in [
             "[profile.default]\nffi = false\n",
-            "[profile.default]\nffi = \"true\"\n",
             "[profile.default]\nffi_mode = true\n",
             "[profile.default]\nremeas = true\n",
             "# [profile.default]\n# ffi = true\n",
+            "[profile.default]\nffi = false\nfs_permissions = []\n",
+            "[profile.default]\nfs_permissions = [{ access = \"read\", path = \".\" }]\n",
         ] {
             let tmp = tempfile::tempdir().unwrap();
             std::fs::write(tmp.path().join("foundry.toml"), text).unwrap();
             assert!(
-                !ffi_enabled(tmp.path()).unwrap(),
-                "{text:?} was wrongly read as ffi = true"
+                !config_refused(tmp.path()).unwrap(),
+                "{text:?} was wrongly refused"
+            );
+        }
+    }
+
+    #[test]
+    fn foundry_key_aliases_and_non_boolean_ffi_values_are_refused() {
+        // Foundry normalizes config keys (lowercase ASCII, non-alphanumerics
+        // removed), so an alias reaches the same setting as the canonical
+        // key. An alias is refused whatever its value; an exact `ffi` is
+        // allowed only as boolean false.
+        for (text, needle) in [
+            ("ffi = \"true\"\n", "not a boolean"),
+            ("ffi = 1\n", "not a boolean"),
+            ("ffi = 0\n", "not a boolean"),
+            ("ffi = \"false\"\n", "not a boolean"),
+            ("[profile.default]\nFFI = false\n", "normalizes to `ffi`"),
+            ("[profile.default]\nFfi = true\n", "normalizes to `ffi`"),
+            ("[profile.default]\nffi_ = false\n", "normalizes to `ffi`"),
+            ("[profile.default]\nffi__ = true\n", "normalizes to `ffi`"),
+            ("[profile.default]\nf_f_i = true\n", "normalizes to `ffi`"),
+            ("[profile.default]\nf-f-i = true\n", "normalizes to `ffi`"),
+            (
+                "[profile.default]\n\"f.f.i\" = true\n",
+                "normalizes to `ffi`",
+            ),
+            (
+                "[profile.default]\n\"f f i\" = true\n",
+                "normalizes to `ffi`",
+            ),
+            (
+                "profile = { default = { FFI = true } }\n",
+                "normalizes to `ffi`",
+            ),
+            ("[[profile.ci]]\nFFI = true\n", "normalizes to `ffi`"),
+            (
+                "[profile.default]\nFS_PERMISSIONS = []\n",
+                "normalizes to `fs_permissions`",
+            ),
+            (
+                "[profile.default]\nFS-PERMISSIONS = []\n",
+                "normalizes to `fs_permissions`",
+            ),
+            (
+                "[profile.default]\nfsPermissions = []\n",
+                "normalizes to `fs_permissions`",
+            ),
+            (
+                "[profile.default]\nfs_Permissions = []\n",
+                "normalizes to `fs_permissions`",
+            ),
+            (
+                "[profile.default]\nFs-Permissions = []\n",
+                "normalizes to `fs_permissions`",
+            ),
+            (
+                "[profile.default]\nfs__permissions = []\n",
+                "normalizes to `fs_permissions`",
+            ),
+            (
+                "[profile.default]\n\"fs.permissions\" = []\n",
+                "normalizes to `fs_permissions`",
+            ),
+            (
+                "[profile.default]\n\"fs permissions\" = []\n",
+                "normalizes to `fs_permissions`",
+            ),
+        ] {
+            let tmp = tempfile::tempdir().unwrap();
+            let path = tmp.path().join("foundry.toml");
+            std::fs::write(&path, text).unwrap();
+            let err = refuse_config_file(&path, "test config").unwrap_err();
+            assert!(
+                err.0.contains(needle) && err.0.contains("test config"),
+                "{text:?}: {}",
+                err.0
             );
         }
     }
@@ -1367,7 +1528,7 @@ mod tests {
             "[profile.default\nffi = true\n",
         )
         .unwrap();
-        let err = ffi_enabled(tmp.path()).unwrap_err();
+        let err = config_refused(tmp.path()).unwrap_err();
         assert!(err.0.contains("TOML"), "{}", err.0);
     }
 
@@ -1512,7 +1673,7 @@ mod tests {
         let file = std::fs::File::create(dir.join("foundry.toml")).unwrap();
         file.set_len(MAX_CONFIG_BYTES + 1).unwrap();
         drop(file);
-        let err = ffi_enabled(&dir).unwrap_err();
+        let err = config_refused(&dir).unwrap_err();
         assert!(
             err.0.contains(&MAX_CONFIG_BYTES.to_string()) && err.0.contains("not read"),
             "{}",
@@ -1527,19 +1688,31 @@ mod tests {
         for (text, needle) in [
             (
                 "[profile.default]\nfs_permissions = [{ access = \"write\", path = \".\" }]\n",
-                "write",
+                "with an entry that grants access = \"write\"",
             ),
             (
                 "[profile.default]\nfs_permissions = [{ access = \"read-write\", path = \".\" }]\n",
-                "read-write",
+                "access = \"read-write\"",
+            ),
+            (
+                "[profile.default]\nfs_permissions = [{ access = \"READ\", path = \".\" }]\n",
+                "access = \"READ\"",
             ),
             (
                 "[profile.default]\nfs_permissions = [{ path = \".\" }]\n",
                 "no access",
             ),
             (
+                "[profile.default]\nfs_permissions = [{ access = 1, path = \".\" }]\n",
+                "no access",
+            ),
+            (
                 "[profile.default]\nfs_permissions = \"read\"\n",
                 "not an array",
+            ),
+            (
+                "[profile.default]\nfs_permissions = [\"read\"]\n",
+                "not a table",
             ),
         ] {
             std::fs::write(&path, text).unwrap();
@@ -1558,6 +1731,17 @@ mod tests {
             std::fs::write(&path, text).unwrap();
             refuse_config_file(&path, "test config").unwrap();
         }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn config_error_paths_use_one_separator_style() {
+        // A --root passed with forward slashes used to render as
+        // "C:\...\project/foundry.toml" in the refusal.
+        assert_eq!(
+            display_path(Path::new("C:/tmp/project/foundry.toml")),
+            "C:\\tmp\\project\\foundry.toml"
+        );
     }
 
     #[test]

@@ -1,5 +1,6 @@
-//! The `ffi` guard end to end: every tree forge could run in is parsed as
-//! TOML, and a refusal happens before forge is started.
+//! The `ffi` and `fs_permissions` guard end to end: every tree forge could run
+//! in is parsed as TOML, keys Foundry normalizes to either setting are checked
+//! under that normalization, and a refusal happens before forge is started.
 //!
 //! The forge here is a stand-in that records that it ran. A refused case must
 //! leave the marker absent; the control case must create it, so a guard that
@@ -8,9 +9,10 @@
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
-/// Spellings TOML accepts for `ffi = true`. The 1.0.3 heuristic (strip
-/// comments, compare normalized words) missed the tabbed, quoted and dotted
-/// forms; a parse cannot.
+/// Spellings TOML accepts for `ffi = true`, and the key aliases Foundry
+/// resolves to `ffi` after normalizing keys (case and non-alphanumerics are
+/// ignored). The 1.0.3 heuristic missed the tabbed, quoted and dotted forms;
+/// the exact-key scan this replaces missed every alias.
 const SPELLINGS: &[&str] = &[
     "[profile.default]\nffi = true\n",
     "[profile.default]\nffi\t=\ttrue\n",
@@ -20,6 +22,29 @@ const SPELLINGS: &[&str] = &[
     "profile.default.ffi = true\n",
     "ffi = true\n",
     "[profile.ci]\nffi = true\n",
+    "[profile.default]\nFFI = true\n",
+    "[profile.default]\nFfi = true\n",
+    "[profile.default]\nffi_ = true\n",
+    "[profile.default]\nffi__ = true\n",
+    "[profile.default]\nf_f_i = true\n",
+    "[profile.default]\nf-f-i = true\n",
+    "[profile.default]\n\"f.f.i\" = true\n",
+    "[profile.default]\n\"f f i\" = true\n",
+    "FFI = true\n",
+];
+
+/// Key spellings Foundry normalizes to `fs_permissions`. Verified against
+/// forge 1.5.1: every one of these populated `fs_permissions` in
+/// `forge config`.
+const FS_ALIASES: &[&str] = &[
+    "FS_PERMISSIONS",
+    "FS-PERMISSIONS",
+    "fsPermissions",
+    "fs_Permissions",
+    "Fs-Permissions",
+    "fs__permissions",
+    "\"fs.permissions\"",
+    "\"fs permissions\"",
 ];
 
 const BENIGN: &str = "[profile.default]\nffi = false\n";
@@ -161,6 +186,78 @@ fn refused(case: &str, spelling: &str, out: &Output, marker: &Path) {
         !marker.exists(),
         "{case} {spelling:?}: forge was started despite ffi = true"
     );
+}
+
+fn fs_alias_config(key: &str, access: &str) -> String {
+    format!("[profile.default]\n{key} = [{{ access = \"{access}\", path = \".\" }}]\n")
+}
+
+fn global_config(dir: &Path, text: &str) {
+    let home = dir.join("home/.foundry");
+    std::fs::create_dir_all(&home).unwrap();
+    std::fs::write(home.join("foundry.toml"), text).unwrap();
+}
+
+fn refused_fs(case: &str, key: &str, out: &Output, marker: &Path) {
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{case} {key:?}: {stderr}");
+    assert!(
+        stderr.contains("fs_permissions"),
+        "{case} {key:?}: the refusal does not name fs_permissions: {stderr}"
+    );
+    assert!(
+        stderr.contains(key.trim_matches('"')),
+        "{case} {key:?}: the refusal does not name the alias key: {stderr}"
+    );
+    assert!(
+        !marker.exists(),
+        "{case} {key:?}: forge ran despite the fs_permissions alias"
+    );
+}
+
+/// A forge stand-in that appends to a counter and, on that run, writes an
+/// ffi alias to the fake global Foundry config.
+fn rewriting_forge(dir: &Path, home: &Path) -> (PathBuf, PathBuf) {
+    let counter = dir.join("forge-runs.txt");
+    let foundry_dir = home.join(".foundry");
+    let global = foundry_dir.join("foundry.toml");
+    #[cfg(unix)]
+    let path = {
+        use std::os::unix::fs::PermissionsExt;
+        let p = dir.join("forge-rewrite");
+        std::fs::write(
+            &p,
+            format!(
+                "#!/bin/sh\nprintf 'ran\\n' >> '{}'\nmkdir -p '{}'\nprintf '[profile.default]\\nFFI = true\\n' > '{}'\nprintf '%s\\n' '{{\"t\":{{\"test_a\":{{\"success\":true}}}}}}'\nexit 0\n",
+                counter.display(),
+                foundry_dir.display(),
+                global.display()
+            ),
+        )
+        .unwrap();
+        let mut perms = std::fs::metadata(&p).unwrap().permissions();
+        perms.set_mode(0o755);
+        std::fs::set_permissions(&p, perms).unwrap();
+        p
+    };
+    #[cfg(windows)]
+    let path = {
+        let p = dir.join("forge-rewrite.bat");
+        std::fs::write(
+            &p,
+            format!(
+                "@echo off\r\n>> \"{}\" echo ran\r\nif not exist \"{}\" mkdir \"{}\"\r\n> \"{}\" echo [profile.default]\r\n>> \"{}\" echo FFI = true\r\necho {{\"t\":{{\"test_a\":{{\"success\":true}}}}}}\r\nexit /b 0\r\n",
+                counter.display(),
+                foundry_dir.display(),
+                foundry_dir.display(),
+                global.display(),
+                global.display()
+            ),
+        )
+        .unwrap();
+        p
+    };
+    (path, counter)
 }
 
 #[test]
@@ -460,5 +557,162 @@ fn read_only_fs_permissions_reach_forge() {
         "a read-only config never reached forge: {stderr}"
     );
     assert_eq!(out.status.code(), Some(1), "{stderr}");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn fs_permissions_aliases_are_refused_in_every_config_the_guard_reads() {
+    for key in FS_ALIASES {
+        // 1. The root tree, with a write value.
+        let dir = scratch("fs-alias-root");
+        let project = dir.join("project");
+        std::fs::write(project.join("foundry.toml"), fs_alias_config(key, "write")).unwrap();
+        let (forge, marker) = fake_forge(&dir);
+        let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+        refused_fs("root write", key, &out, &marker);
+        let _ = std::fs::remove_dir_all(&dir);
+
+        // 2. The root tree, with a read-only value: the alias itself is
+        // refused, so a read-only alias cannot be used to test the rule.
+        let dir = scratch("fs-alias-read");
+        let project = dir.join("project");
+        std::fs::write(project.join("foundry.toml"), fs_alias_config(key, "read")).unwrap();
+        let (forge, marker) = fake_forge(&dir);
+        let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+        refused_fs("root read", key, &out, &marker);
+        let _ = std::fs::remove_dir_all(&dir);
+
+        // 3. The --patched tree.
+        let dir = scratch("fs-alias-patched");
+        let project = dir.join("project");
+        std::fs::write(
+            project.join("patched/foundry.toml"),
+            fs_alias_config(key, "write"),
+        )
+        .unwrap();
+        let (forge, marker) = fake_forge(&dir);
+        let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+        refused_fs("--patched", key, &out, &marker);
+        let _ = std::fs::remove_dir_all(&dir);
+
+        // 4. The copied tree after --patch is applied.
+        let dir = scratch("fs-alias-patch");
+        let project = dir.join("project");
+        let patch = dir.join("fs-alias.diff");
+        std::fs::write(&patch, replacement_patch(&fs_alias_config(key, "write"))).unwrap();
+        let (forge, marker) = fake_forge(&dir);
+        let out = verify_fix(&project, &forge, None, Some(&patch));
+        refused_fs("--patch", key, &out, &marker);
+        let _ = std::fs::remove_dir_all(&dir);
+
+        // 5. The global config.
+        let dir = scratch("fs-alias-global");
+        let project = dir.join("project");
+        global_config(&dir, &fs_alias_config(key, "write"));
+        let (forge, marker) = fake_forge(&dir);
+        let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+        refused_fs("global", key, &out, &marker);
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(stderr.contains("global config"), "{key:?}: {stderr}");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+}
+
+#[test]
+fn a_global_config_with_an_ffi_alias_is_refused_before_forge_starts() {
+    for spelling in SPELLINGS {
+        let dir = scratch("global-alias-ffi");
+        let project = dir.join("project");
+        global_config(&dir, spelling);
+        let (forge, marker) = fake_forge(&dir);
+        let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert_eq!(out.status.code(), Some(2), "{spelling:?}: {stderr}");
+        assert!(
+            stderr.contains("global config") && stderr.to_ascii_lowercase().contains("ffi"),
+            "{spelling:?}: {stderr}"
+        );
+        assert!(
+            !marker.exists(),
+            "{spelling:?}: forge ran despite the global config"
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+}
+
+#[test]
+fn a_global_config_with_a_fs_permissions_alias_is_refused_before_forge_starts() {
+    for key in FS_ALIASES {
+        let dir = scratch("global-alias-fs");
+        let project = dir.join("project");
+        global_config(&dir, &fs_alias_config(key, "write"));
+        let (forge, marker) = fake_forge(&dir);
+        let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+        refused_fs("global", key, &out, &marker);
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(stderr.contains("global config"), "{key:?}: {stderr}");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+}
+
+#[test]
+fn a_minimal_top_level_ffi_alias_is_refused_before_forge() {
+    // The reviewer's minimal single-run bypass: one top-level alias key.
+    let dir = scratch("minimal-ffi-alias");
+    let project = dir.join("project");
+    std::fs::write(project.join("foundry.toml"), "FFI = true\n").unwrap();
+    let (forge, marker) = fake_forge(&dir);
+    let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+    refused("minimal", "FFI = true\n", &out, &marker);
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn the_alias_cross_run_combination_is_refused_before_forge() {
+    // The reviewer's cross-run combination: an fs_permissions alias that
+    // grants write and an ffi alias, in the same config.
+    let dir = scratch("alias-combined");
+    let project = dir.join("project");
+    std::fs::write(
+        project.join("foundry.toml"),
+        "FFI = true\nFS_PERMISSIONS = [{ access = \"write\", path = \".\" }]\n",
+    )
+    .unwrap();
+    let (forge, marker) = fake_forge(&dir);
+    let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{stderr}");
+    assert!(
+        stderr.to_ascii_lowercase().contains("ffi") || stderr.contains("fs_permissions"),
+        "{stderr}"
+    );
+    assert!(
+        !marker.exists(),
+        "forge ran despite the alias combination: {stderr}"
+    );
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn a_global_config_rewritten_by_the_first_run_is_refused_before_the_second() {
+    // The first run rewrites the global config to an ffi alias. The second
+    // revalidation must refuse it, so forge is started exactly once.
+    let dir = scratch("revalidate-global");
+    let project = dir.join("project");
+    let home = dir.join("home");
+    let (forge, counter) = rewriting_forge(&dir, &home);
+    let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{stderr}");
+    assert!(
+        stderr.contains("global config") && stderr.to_ascii_lowercase().contains("ffi"),
+        "{stderr}"
+    );
+    let runs = std::fs::read_to_string(&counter).unwrap_or_default();
+    assert_eq!(
+        runs.lines().count(),
+        1,
+        "forge was started again after the global config was rewritten: {stderr}"
+    );
     let _ = std::fs::remove_dir_all(&dir);
 }
