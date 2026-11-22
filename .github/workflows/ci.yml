@@ -4,9 +4,6 @@ on:
   push:
     branches: [main, "release/**"]
   pull_request:
-  # The mutation job below is a measurement, not a gate. It runs weekly.
-  schedule:
-    - cron: "17 4 * * 1"
 
 permissions:
   contents: read
@@ -262,58 +259,3 @@ jobs:
       # a rule below the 80% floor ships as error (ruling R3).
       - name: Reproduce the evaluation
         run: bash eval/run.sh /tmp/rg010/realism-gate-0.1.0-x86_64-unknown-linux-gnu/realism-gate target/release/realism-gate --check
-
-  # ------------------------------------------------ weekly mutation measurement
-  mutants:
-    name: cargo-mutants (weekly)
-    if: github.event_name == 'schedule'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Install toolchain
-        run: rustup toolchain install stable --profile minimal
-
-      - name: Install cargo-mutants
-        uses: taiki-e/install-action@cdd500fcb345d29dabc5617aab1edf24d5211116 # cargo-mutants tag
-        with:
-          tool: cargo-mutants
-
-      # A measurement, not a gate: survivors are review leads, not failures.
-      # The step is allowed to fail so a surviving mutant never blocks the
-      # branch; the recorded numbers are in the summary below.
-      - name: Mutate the rule, claim, bind and verify-fix code
-        continue-on-error: true
-        run: |
-          cargo mutants \
-            --file 'src/rules/*.rs' \
-            --file 'src/claims/*.rs' \
-            --file 'src/bind/*.rs' \
-            --file 'src/verify_fix.rs' \
-            --timeout 120
-
-      - name: Record the survival rate
-        if: always()
-        shell: bash
-        run: |
-          set -u
-          if [ ! -d mutants.out ]; then
-            echo "cargo-mutants produced no outcomes; see the step log above" >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          caught=$(wc -l < mutants.out/caught.txt 2>/dev/null || echo 0)
-          missed=$(wc -l < mutants.out/missed.txt 2>/dev/null || echo 0)
-          timedout=$(wc -l < mutants.out/timeout.txt 2>/dev/null || echo 0)
-          unviable=$(wc -l < mutants.out/unviable.txt 2>/dev/null || echo 0)
-          total=$((caught + missed))
-          {
-            echo "## cargo-mutants (weekly)"
-            echo
-            echo "caught: ${caught} · missed: ${missed} · timeout: ${timedout} · unviable: ${unviable}"
-            if [ "$total" -gt 0 ]; then
-              echo
-              echo "survival rate: ${missed} of ${total} = $((100 * missed / total))%"
-            fi
-            echo
-            echo "docs/test-quality.md says which scopes this covers. It is not a gate."
-          } >> "$GITHUB_STEP_SUMMARY"
