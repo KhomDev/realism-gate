@@ -22,20 +22,36 @@ unchanged. Reporter: self-review.
   tables, the top-level table and profiles the program has never heard of are
   all covered. Foundry's global config (`~/.foundry/foundry.toml`, or
   `%USERPROFILE%\.foundry\foundry.toml`), the root tree, the `--patched` tree
-  and the copy after `--patch` are checked, and every check happens before a
-  forge process is started. A `foundry.toml` that does not parse is refused
-  rather than assumed off. A config in an ancestor directory of the temp copy
-  is **not** checked; `docs/threat-model.md` H5 records that residual.
+  and the copy after `--patch` are checked before the tree is used, with the
+  global config and both copies parsed again immediately before each forge
+  start. A `foundry.toml` that does not parse is
+  refused rather than assumed off. A config in an ancestor directory of the
+  temp copy is **not** checked; on Windows Foundry may resolve the OS known
+  profile folder while this check uses `USERPROFILE`/`HOME`, so the two can
+  differ; `docs/threat-model.md` H5 records both residuals.
   `FOUNDRY_FFI=false` is not described as a control: Foundry documents the
   variable as an explicit exception to its environment overrides
   (`src/verify_fix.rs`, `tests/verify_fix_ffi.rs`).
+- **Write `fs_permissions` are refused, closing the cross-run bypass.** A PoC
+  could set `fs_permissions = [{ access = "read-write", path = "C:/" }]` and use
+  `vm.writeFile` to rewrite the other copy's or the global config to
+  `ffi = true` between the two runs. Every `fs_permissions` entry in every
+  checked config must now grant exactly `access = "read"`; a write or
+  read-write entry, a missing access, or a non-array value is refused before
+  any forge run. Both copies and the global config are also re-parsed
+  immediately before each run, which catches a simple rewrite; the
+  `fs_permissions` refusal is the primary control. Tests:
+  `fs_permissions_must_be_read_only`,
+  `write_fs_permissions_are_refused_in_every_config_the_guard_reads`,
+  `read_only_fs_permissions_reach_forge`,
+  `a_rewritten_tree_or_global_config_is_refused_before_the_next_run`.
 - **The dotenv redirect is closed.** Foundry loads a `.env` after it starts,
   and dotenvy does not override an already-set variable. Removing
   `FOUNDRY_CONFIG` therefore let a `--patch` that created `.env` +
   `evil.toml` point forge at an unparsed `ffi = true` config. `FOUNDRY_CONFIG`
   is now pinned to the absolute path of a config the guard checked inside the
   copy (a minimal `[profile.default]` file is created when the tree has none),
-  and any `.env` in a copied tree is refused before forge runs. Tests:
+  and any `.env` in a copied tree is refused before each forge run. Tests:
   `a_patch_that_adds_dotenv_and_an_evil_config_is_refused`,
   `a_clean_dotenv_is_still_refused`,
   `the_forge_child_gets_the_pinned_absolute_config` (`src/verify_fix.rs`,
@@ -62,9 +78,11 @@ unchanged. Reporter: self-review.
   `a_forge_that_runs_past_the_timeout_is_killed_and_is_not_a_verdict`,
   `a_forge_that_floods_stdout_is_killed_and_is_not_a_verdict`).
 - **The copied tree is bounded.** The project or `--patched` tree is
-  attacker-controlled; the copy is capped at 50 000 files, 512 MiB in total
-  and 64 directories, checked from metadata while copying, so a hostile tree
-  cannot fill the disk before forge's own limits apply (`copy_tree`,
+  attacker-controlled; the copy is capped at 50 000 files, 512 MiB in total,
+  50 000 directories and 64 levels deep, checked from metadata while copying,
+  so a hostile tree cannot fill the disk with files or empty directories before
+  forge's own limits apply (`copy_tree`, `copy_tree_with_limits`,
+  `the_copy_file_byte_and_directory_caps_are_enforced`,
   `a_tree_larger_than_the_copy_limit_is_refused_before_forge_starts`,
   `a_tree_deeper_than_the_copy_limit_is_refused_before_forge_starts`).
 - **MCP framing is bounded.** `Content-Length` is refused above 8 MiB before
@@ -75,25 +93,26 @@ unchanged. Reporter: self-review.
 - **Control characters and bidi formatting from source and claims do not
   reach terminal output.** The text, Markdown and evidence-card renderers
   replace newline, carriage return, tab and U+2028/U+2029 with a space, and
-  drop other Unicode control characters plus the bidi controls
-  U+202A-U+202E and U+2066-U+2069, from finding messages, evidence, paths,
-  suite and test names, claim text and evidence, suppression notes and parse
-  errors, before any colour wrapper. A Linux file name containing a newline
-  can no longer fabricate a report line. JSON and SARIF keep their serde
-  escaping (`src/render/mod.rs`,
+  drop other Unicode control characters plus the bidi controls U+061C, U+200E,
+  U+200F, U+202A-U+202E and U+2066-U+2069, from finding messages, evidence,
+  paths, suite and test names, claim text and evidence, suppression notes and
+  parse errors, before any colour wrapper. A Linux file name containing a
+  newline can no longer fabricate a report line. JSON and SARIF keep their
+  serde escaping (`src/render/mod.rs`,
   `control_characters_in_source_never_reach_text_or_markdown_output`,
   `a_newline_or_bidi_in_a_path_cannot_fabricate_a_report_line`).
 
 ### Fixed
 
 - **Input caps.** 8 MiB per source file (from metadata, before the read),
-  128 MiB and 20 000 files per run, 64 directories deep, and 16 MiB for a
+  128 MiB and 20 000 files per run, 64 levels deep, and 16 MiB for a
   `--report`, `--claims`, `--declaration` or `--config` file. Every error names
   the limit (`src/project.rs`, `an_oversized_source_file_is_refused_by_name_before_it_is_read`).
 - **Policy inputs must be regular files.** The 16 MiB cap alone did not bound a
   FIFO: it has length zero, so `read_to_string` blocked forever. The type is
   now checked with `symlink_metadata`, a FIFO is refused before it is opened,
-  and a symlink is refused too (`src/project.rs`,
+  and a symlink is refused too. The check is not atomic with the open; policy
+  files must come from a trusted location (`src/project.rs`,
   `a_non_regular_policy_input_is_refused_by_name`,
   `a_fifo_policy_input_is_refused_without_blocking`).
 - **The trace is no longer quadratic in test count.** A suite base (state
@@ -101,9 +120,9 @@ unchanged. Reporter: self-review.
   fee-concession fact are computed once per suite; the test-function
   duplicate check uses a set. The 5 MB / 40 000-function adversarial case is
   enabled instead of ignored, and a 12 000-function case (serialised with the
-  other size tests so the measurement is stable) has a bound the old quadratic
-  run cannot meet (`src/trace.rs`, `src/project.rs`, `src/engine.rs`,
-  `tests/adversarial.rs`).
+  other size tests so the measurement is stable) has a 5 s release bound and a
+  120 s debug bound the old quadratic run cannot meet (`src/trace.rs`,
+  `src/project.rs`, `src/engine.rs`, `tests/adversarial.rs`).
 - Deleted the dead no-op context-line branch in the removed fallback applier.
 
 ### Changed
@@ -125,23 +144,27 @@ unchanged. Reporter: self-review.
   marker, plus a benign control that reaches forge; a fake HOME whose global
   config enables ffi; a patch that adds `.env` + an ffi config (refused); a
   clean `.env` (refused by policy); the pinned absolute `FOUNDRY_CONFIG` the
-  child actually receives; and a 2 MiB sparse `foundry.toml` refused before
-  the read.
+  child actually receives; a 2 MiB sparse `foundry.toml` refused before the
+  read; write/read-write `fs_permissions` refused in the root, `--patched`,
+  post-patch and global configs; and a read-only control that reaches forge.
 - `tests/verify_fix_paths.rs`: a relative `--patch` outside `--root`, a
   relative `--forge` with a separator, and a patch that `git apply --check`
   refuses (exit 2, no forge, original tree untouched).
 - `tests/verify_fix_copy_limits.rs`: a sparse tree over 512 MiB and a tree 70
-  directories deep, both refused before forge starts.
+  levels deep, both refused before forge starts.
 - `tests/mcp_stdio.rs`: the stdio binary answers a 9 MB `Content-Length` with
-  a JSON-RPC error, does not serve the following ping, and exits 2.
+  a JSON-RPC error, stops on that refusal (not on the body's line cap), does
+  not serve the following ping, and exits 2.
 - Adversarial: raw ESC in a Solidity string literal, a 1 GiB sparse file, a
   non-regular policy input, a FIFO policy input with a deadline (Unix), the
   enabled 5 MB case and the 12 000-function bound, with the size/timing tests
   serialised.
 - Unit tests for the TOML `ffi` scan, the host refusal, the global config,
-  relative forge paths, regular-file inputs, the source count/total/depth
-  caps, forge timeout and stdout flood, bounded frames, empty-line looping,
-  newline/bidi sanitization and claim-cell sanitization.
+  `fs_permissions` read-only enforcement, per-run revalidation of a rewritten
+  tree/global config, the copy file/byte/directory/depth caps, relative forge
+  paths, regular-file inputs, the source count/total/depth caps, forge timeout
+  and stdout flood, bounded frames, empty-line looping, newline/bidi
+  sanitization and claim-cell sanitization.
 - `docs/threat-model.md` guarantees and hypotheses, and `docs/limitations.md`,
   updated to what is now tested, with the remaining unverified items marked.
 
