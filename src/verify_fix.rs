@@ -13,9 +13,19 @@
 //! enable `ffi` and it can make forge open a connection. This command refuses
 //! to run when any `foundry.toml` in the tree sets `ffi = true`: the root
 //! project, the `--patched` tree, and the copied tree after a `--patch` is
-//! applied are all parsed as TOML. The environment variable `FOUNDRY_FFI` is
-//! not a control: Foundry documents it as an explicit exception to env
+//! applied are all parsed as TOML, and so is Foundry's global config
+//! (`~/.foundry/foundry.toml`, or `%USERPROFILE%\.foundry\foundry.toml`).
+//! `FOUNDRY_CONFIG` is removed from the forge environment, so a parent
+//! process cannot point forge at an unchecked file. A `foundry.toml` in an
+//! ancestor directory of the temp copy is not checked; `docs/verify-fix.md`
+//! states that residual. The environment variable `FOUNDRY_FFI` is not a
+//! control either: Foundry documents it as an explicit exception to env
 //! overrides, so this command does not rely on setting it.
+//!
+//! Path arguments that name a file are resolved from the caller's current
+//! directory before the temp copy becomes the process working directory:
+//! `--patch ../fix.diff` and a `--forge` value containing a separator keep
+//! working. A bare `--forge forge` keeps PATH lookup.
 //!
 //! The host decision is part of this function, not only of the CLI: a
 //! [`Request`] with no [`HostPolicy`] is refused before a copy is made or a
@@ -23,9 +33,13 @@
 //! `docs/verify-fix.md`.
 
 use serde_json::Value;
+use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::process::Command;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::process::{Child, Command, ExitStatus, Stdio};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::mpsc;
+use std::time::{Duration, Instant};
 
 #[derive(Debug, Clone)]
 pub struct Request {
@@ -92,6 +106,17 @@ struct Side {
 /// missing, a patch that did not apply, a project that is unsafe to run, or
 /// a compile error (the PoC never ran).
 pub fn verify(req: &Request) -> Result<Outcome, VerifyError> {
+    verify_with_global_config(req, global_foundry_toml().as_deref())
+}
+
+/// The body of [`verify`]. `global_config` is Foundry's global
+/// `foundry.toml` when it exists; the unit tests pass `None` so a developer's
+/// own global config cannot change their result. The integration tests drive
+/// [`verify`] through the binary with a fake home.
+fn verify_with_global_config(
+    req: &Request,
+    global_config: Option<&Path>,
+) -> Result<Outcome, VerifyError> {
     if req.patch.is_some() == req.patched_dir.is_some() {
         return Err(VerifyError(
             "pass exactly one of --patch FILE and --patched DIR".into(),
@@ -102,14 +127,18 @@ pub fn verify(req: &Request) -> Result<Outcome, VerifyError> {
     if req.host.is_none() {
         return Err(VerifyError(HOST_REFUSAL.into()));
     }
-    // Every tree forge could run in is checked for ffi. The check on the
-    // copied tree after `--patch` is applied is the one that covers a patch
-    // that adds `ffi = true`.
+    // Every config forge could read is checked for ffi: the global config
+    // first, then the trees. The check on the copied tree after `--patch` is
+    // applied is the one that covers a patch that adds `ffi = true`.
+    if let Some(path) = global_config {
+        refuse_ffi_file(path, "Foundry's global config")?;
+    }
     refuse_ffi(&req.root, "the project in --root")?;
 
     let mut temps = TempDirs::default();
     let baseline = temps.push(copy_of(&req.root)?);
     refuse_ffi(&baseline, "the copied project")?;
+    refuse_dotenv(&baseline, "the copied project")?;
     let patched = if let Some(dir) = &req.patched_dir {
         if !dir.is_dir() {
             return Err(VerifyError(format!("{}: not a directory", dir.display())));
@@ -117,15 +146,20 @@ pub fn verify(req: &Request) -> Result<Outcome, VerifyError> {
         refuse_ffi(dir, "the --patched tree")?;
         let copy = temps.push(copy_of(dir)?);
         refuse_ffi(&copy, "the copied --patched tree")?;
+        refuse_dotenv(&copy, "the copied --patched tree")?;
         copy
     } else {
-        let patch = req.patch.as_ref().expect("patch or dir");
+        // Resolve from the caller's current directory now. `git apply` runs
+        // with the temp copy as its working directory, where a relative
+        // `../fix.diff` would name a different file (or none).
+        let patch = absolute_from_cwd(req.patch.as_ref().expect("patch or dir"))?;
         if !patch.is_file() {
             return Err(VerifyError(format!("{}: no such patch", patch.display())));
         }
         let work = temps.push(copy_of(&req.root)?);
-        apply_patch(&work, patch)?;
+        apply_patch(&work, &patch)?;
         refuse_ffi(&work, "the patched copy")?;
+        refuse_dotenv(&work, "the patched copy")?;
         work
     };
 
@@ -165,13 +199,13 @@ fn forge_command(forge: &Path) -> Command {
 // ETXTBSY (26). Only the parallel test suite can open that window, so the retry
 // is compiled into test builds; a released binary keeps the single attempt.
 #[cfg(test)]
-fn output_with_retry(cmd: &mut Command) -> std::io::Result<std::process::Output> {
+fn spawn_with_retry(cmd: &mut Command) -> std::io::Result<Child> {
     let mut last = None;
     for _ in 0..10 {
-        match cmd.output() {
-            Ok(out) => return Ok(out),
+        match cmd.spawn() {
+            Ok(child) => return Ok(child),
             Err(e) if matches!(e.raw_os_error(), Some(26) | Some(32)) => {
-                std::thread::sleep(std::time::Duration::from_millis(20));
+                std::thread::sleep(Duration::from_millis(20));
                 last = Some(e);
             }
             Err(e) => return Err(e),
@@ -181,13 +215,150 @@ fn output_with_retry(cmd: &mut Command) -> std::io::Result<std::process::Output>
 }
 
 #[cfg(not(test))]
-fn output_with_retry(cmd: &mut Command) -> std::io::Result<std::process::Output> {
-    cmd.output()
+fn spawn_with_retry(cmd: &mut Command) -> std::io::Result<Child> {
+    cmd.spawn()
+}
+
+/// The bytes one forge stream produced, and the exit status.
+struct ForgeOutput {
+    status: ExitStatus,
+    stdout: Vec<u8>,
+    stderr: Vec<u8>,
+}
+
+/// Reads at most `cap` bytes. On the byte that would exceed the cap the
+/// reader stops and sets `overflow`; dropping the pipe closes the read end,
+/// so a flooding child gets a broken pipe instead of filling memory.
+fn read_capped(mut reader: impl Read, cap: usize, overflow: Arc<AtomicBool>) -> Vec<u8> {
+    let mut out = Vec::new();
+    let mut buf = [0u8; 64 * 1024];
+    loop {
+        match reader.read(&mut buf) {
+            Ok(0) => break,
+            Ok(n) => {
+                if out.len() + n > cap {
+                    let take = cap.saturating_sub(out.len());
+                    out.extend_from_slice(&buf[..take]);
+                    overflow.store(true, Ordering::SeqCst);
+                    break;
+                }
+                out.extend_from_slice(&buf[..n]);
+            }
+            Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(_) => break,
+        }
+    }
+    out
+}
+
+fn stop_child(child: &mut Child) {
+    let _ = child.kill();
+    let _ = child.wait();
+}
+
+/// Waits for a spawned forge with a wall-clock timeout and bounded streams.
+/// A timeout or an overflow is a [`VerifyError`]: the verdict is never taken
+/// from a run that did not finish or from a truncated log.
+fn wait_forge(
+    child: &mut Child,
+    timeout: Duration,
+    stdout_cap: usize,
+    stderr_cap: usize,
+) -> Result<ForgeOutput, VerifyError> {
+    let stdout = child.stdout.take().expect("stdout is piped");
+    let stderr = child.stderr.take().expect("stderr is piped");
+    let out_overflow = Arc::new(AtomicBool::new(false));
+    let err_overflow = Arc::new(AtomicBool::new(false));
+    let (out_tx, out_rx) = mpsc::channel();
+    let (err_tx, err_rx) = mpsc::channel();
+    {
+        let flag = Arc::clone(&out_overflow);
+        std::thread::spawn(move || {
+            let _ = out_tx.send(read_capped(stdout, stdout_cap, flag));
+        });
+    }
+    {
+        let flag = Arc::clone(&err_overflow);
+        std::thread::spawn(move || {
+            let _ = err_tx.send(read_capped(stderr, stderr_cap, flag));
+        });
+    }
+    let start = Instant::now();
+    let status = loop {
+        if let Some(status) = child
+            .try_wait()
+            .map_err(|e| VerifyError(format!("forge: {e}")))?
+        {
+            break status;
+        }
+        if out_overflow.load(Ordering::SeqCst) {
+            stop_child(child);
+            return Err(VerifyError(format!(
+                "forge wrote more than {stdout_cap} bytes to stdout; it was killed and the verdict is not taken from a truncated log"
+            )));
+        }
+        if err_overflow.load(Ordering::SeqCst) {
+            stop_child(child);
+            return Err(VerifyError(format!(
+                "forge wrote more than {stderr_cap} bytes to stderr; it was killed and the verdict is not taken from a truncated log"
+            )));
+        }
+        if start.elapsed() >= timeout {
+            stop_child(child);
+            return Err(VerifyError(format!(
+                "forge did not finish within {} seconds; it was killed and there is no verdict",
+                timeout.as_secs()
+            )));
+        }
+        std::thread::sleep(Duration::from_millis(20));
+    };
+    // The direct child exited. A descendant can still hold a pipe open, so
+    // the wait for the readers is bounded too.
+    let stdout = out_rx
+        .recv_timeout(Duration::from_secs(5))
+        .map_err(|_| {
+            VerifyError(
+                "forge exited but its stdout pipe stayed open (a child process may still hold it); there is no verdict"
+                    .into(),
+            )
+        })?;
+    let stderr = err_rx
+        .recv_timeout(Duration::from_secs(5))
+        .map_err(|_| {
+            VerifyError(
+                "forge exited but its stderr pipe stayed open (a child process may still hold it); there is no verdict"
+                    .into(),
+            )
+        })?;
+    // The child can exit between the last overflow poll and `try_wait`. The
+    // readers have finished by now, so a cap hit is visible here too; never
+    // take a verdict from a stream that was truncated.
+    if out_overflow.load(Ordering::SeqCst) {
+        return Err(VerifyError(format!(
+            "forge wrote more than {stdout_cap} bytes to stdout; the verdict is not taken from a truncated log"
+        )));
+    }
+    if err_overflow.load(Ordering::SeqCst) {
+        return Err(VerifyError(format!(
+            "forge wrote more than {stderr_cap} bytes to stderr; the verdict is not taken from a truncated log"
+        )));
+    }
+    Ok(ForgeOutput {
+        status,
+        stdout,
+        stderr,
+    })
 }
 
 fn run_forge(req: &Request, work: &Path, label: &str) -> Result<Side, VerifyError> {
     let poc = poc_arg(&req.poc, &req.root, work);
-    let mut cmd = forge_command(&req.forge);
+    let forge = forge_program(&req.forge)?;
+    // Pin FOUNDRY_CONFIG to the absolute path of a config this command has
+    // checked. Removing the variable is not enough: Foundry loads a `.env`
+    // after it starts, and dotenvy does not override an existing variable, so
+    // an inherited absolute value is what stops a `.env` from redirecting it.
+    let config = pinned_config(work)?;
+    let mut cmd = forge_command(&forge);
     cmd.current_dir(work)
         .arg("test")
         .arg("--match-path")
@@ -195,16 +366,26 @@ fn run_forge(req: &Request, work: &Path, label: &str) -> Result<Side, VerifyErro
         .arg("--json")
         // Ask forge not to honor a config that turns ffi on, and do not add
         // an RPC URL. A fork test still uses whatever URL the test names.
-        .env("FOUNDRY_FFI", "false");
+        .env("FOUNDRY_FFI", "false")
+        .env("FOUNDRY_CONFIG", &config)
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
     if let Some(name) = &req.match_test {
         cmd.arg("--match-test").arg(name);
     }
-    let output = output_with_retry(&mut cmd).map_err(|e| {
+    let mut child = spawn_with_retry(&mut cmd).map_err(|e| {
         VerifyError(format!(
             "could not run {}: {e}. verify-fix needs forge on PATH, or --forge.",
-            req.forge.display()
+            forge.display()
         ))
     })?;
+    let output = wait_forge(
+        &mut child,
+        FORGE_TIMEOUT,
+        FORGE_STDOUT_CAP,
+        FORGE_STDERR_CAP,
+    )?;
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
     let results = match parse_results(&stdout) {
@@ -320,12 +501,36 @@ fn walk_results(v: &Value, out: &mut Vec<bool>) {
 /// `true` counts: the scan is deliberately conservative, so a profile this
 /// program has not heard of (or a top-level `ffi`) is refused too.
 fn ffi_enabled(dir: &Path) -> Result<bool, VerifyError> {
-    let path = dir.join("foundry.toml");
-    let text = match std::fs::read_to_string(&path) {
-        Ok(text) => text,
+    ffi_in_file(&dir.join("foundry.toml"))
+}
+
+/// The same check for one config file: the global config, or a `foundry.toml`
+/// in a tree. A missing file is not an error (it enables nothing).
+///
+/// The size and type are checked before the read. A config is small; a tree
+/// could otherwise ship a huge `foundry.toml` and make this allocate it, and
+/// a FIFO named `foundry.toml` would block.
+fn ffi_in_file(path: &Path) -> Result<bool, VerifyError> {
+    let meta = match std::fs::metadata(path) {
+        Ok(meta) => meta,
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(false),
         Err(e) => return Err(VerifyError(format!("{}: {e}", path.display()))),
     };
+    if !meta.is_file() {
+        return Err(VerifyError(format!(
+            "{}: not a regular file; verify-fix will not read a Foundry config it cannot bound",
+            path.display()
+        )));
+    }
+    if meta.len() > MAX_CONFIG_BYTES {
+        return Err(VerifyError(format!(
+            "{}: {} bytes is over the {MAX_CONFIG_BYTES}-byte limit for a Foundry config; it was not read",
+            path.display(),
+            meta.len()
+        )));
+    }
+    let text = std::fs::read_to_string(path)
+        .map_err(|e| VerifyError(format!("{}: {e}", path.display())))?;
     let doc: toml::Value = toml::from_str(&text).map_err(|e| {
         VerifyError(format!(
             "{}: cannot be parsed as TOML, so verify-fix cannot prove ffi is off: {e}",
@@ -345,16 +550,91 @@ fn ffi_set_true(value: &toml::Value) -> bool {
     }
 }
 
+fn ffi_error(what: &str) -> VerifyError {
+    VerifyError(format!(
+        "{what} sets ffi = true. verify-fix will not run a project that can \
+         execute host commands. Set ffi = false. FOUNDRY_FFI=false is not a control: Foundry \
+         documents that variable as an explicit exception to env overrides. A container with \
+         ffi off is the supported way to run an untrusted PoC; see docs/verify-fix.md."
+    ))
+}
+
 fn refuse_ffi(dir: &Path, what: &str) -> Result<(), VerifyError> {
     if ffi_enabled(dir)? {
-        return Err(VerifyError(format!(
-            "foundry.toml in {what} sets ffi = true. verify-fix will not run a project that can \
-             execute host commands. Set ffi = false. FOUNDRY_FFI=false is not a control: Foundry \
-             documents that variable as an explicit exception to env overrides. A container with \
-             ffi off is the supported way to run an untrusted PoC; see docs/verify-fix.md."
-        )));
+        return Err(ffi_error(&format!("foundry.toml in {what}")));
     }
     Ok(())
+}
+
+fn refuse_ffi_file(path: &Path, what: &str) -> Result<(), VerifyError> {
+    if ffi_in_file(path)? {
+        return Err(ffi_error(&format!("{what} ({})", path.display())));
+    }
+    Ok(())
+}
+
+/// A `.env` in a tree forge will run in is refused. Foundry loads dotenv
+/// after it starts, and a `.env` can set `FOUNDRY_CONFIG` to a config this
+/// command never parsed. `copy_tree` skips dotfiles, so the only way one
+/// appears in a copy is a `--patch` that creates it; the check runs after the
+/// patch and is defense in depth next to the pinned `FOUNDRY_CONFIG`.
+fn refuse_dotenv(dir: &Path, what: &str) -> Result<(), VerifyError> {
+    let path = dir.join(".env");
+    match std::fs::symlink_metadata(&path) {
+        Ok(_) => Err(VerifyError(format!(
+            "{what} contains a .env file ({}). Foundry loads dotenv after it starts, so a .env can point FOUNDRY_CONFIG at a config verify-fix never checked. verify-fix refuses a .env in the trees it runs; remove it from the patch or the project.",
+            path.display()
+        ))),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(e) => Err(VerifyError(format!("{}: {e}", path.display()))),
+    }
+}
+
+/// The absolute path of the config the forge child is pinned to. If the tree
+/// has no `foundry.toml`, a minimal one is created in the copy. The config
+/// has already been checked for `ffi` by `refuse_ffi`; the absolute path is
+/// what stops a `.env` from redirecting `FOUNDRY_CONFIG` (dotenvy does not
+/// override an already-set variable).
+fn pinned_config(dir: &Path) -> Result<PathBuf, VerifyError> {
+    let path = absolute_from_cwd(&dir.join("foundry.toml"))?;
+    if !path.is_file() {
+        std::fs::write(&path, "[profile.default]\n")
+            .map_err(|e| VerifyError(format!("{}: {e}", path.display())))?;
+    }
+    Ok(path)
+}
+
+/// Foundry's global config: `~/.foundry/foundry.toml`, where the home
+/// directory is `USERPROFILE` (then `HOME`) on Windows and `HOME` elsewhere.
+/// A config in an *ancestor* of the temp copy is not found this way; that
+/// residual is documented rather than silently claimed.
+fn global_foundry_toml() -> Option<PathBuf> {
+    #[cfg(windows)]
+    let home = std::env::var_os("USERPROFILE").or_else(|| std::env::var_os("HOME"));
+    #[cfg(not(windows))]
+    let home = std::env::var_os("HOME");
+    home.filter(|h| !h.is_empty())
+        .map(|h| PathBuf::from(h).join(".foundry").join("foundry.toml"))
+}
+
+/// Resolves a path argument from the caller's current directory. The temp
+/// copy becomes the forge process's working directory, so a path that is
+/// used after that (the patch, or a `--forge` with a separator) has to be
+/// fixed before it is reinterpreted.
+fn absolute_from_cwd(path: &Path) -> Result<PathBuf, VerifyError> {
+    std::path::absolute(path).map_err(|e| VerifyError(format!("{}: {e}", path.display())))
+}
+
+/// A bare `forge` keeps PATH lookup; a value containing a path separator is
+/// resolved from the caller's current directory, so the temp copy's working
+/// directory does not change which binary runs.
+fn forge_program(forge: &Path) -> Result<PathBuf, VerifyError> {
+    let text = forge.to_string_lossy();
+    if text.contains('/') || text.contains('\\') {
+        absolute_from_cwd(forge)
+    } else {
+        Ok(forge.to_path_buf())
+    }
 }
 
 fn poc_arg(poc: &Path, root: &Path, work: &Path) -> String {
@@ -372,8 +652,23 @@ fn poc_arg(poc: &Path, root: &Path, work: &Path) -> String {
 /// keeps a huge file from being read whole into memory.
 const MAX_PATCH_BYTES: u64 = 8 * 1024 * 1024;
 
+/// The largest Foundry config (a tree's or the global one) that is read.
+const MAX_CONFIG_BYTES: u64 = 1024 * 1024;
+
+/// How long one forge run may take. `check` never runs forge; this bounds the
+/// opt-in command when a PoC or a fork hangs.
+const FORGE_TIMEOUT: Duration = Duration::from_secs(600);
+
+/// The most a forge run may print. A verdict is never taken from a truncated
+/// log, so exceeding either cap is a [`VerifyError`], not a failed PoC.
+const FORGE_STDOUT_CAP: usize = 64 * 1024 * 1024;
+const FORGE_STDERR_CAP: usize = 1024 * 1024;
+
 fn apply_patch(dir: &Path, patch: &Path) -> Result<(), VerifyError> {
-    let len = std::fs::metadata(patch)
+    // Called directly by tests with a path relative to the test process's
+    // current directory; `git apply` below runs with the temp copy as cwd.
+    let patch = absolute_from_cwd(patch)?;
+    let len = std::fs::metadata(&patch)
         .map_err(|e| VerifyError(format!("{}: {e}", patch.display())))?
         .len();
     if len > MAX_PATCH_BYTES {
@@ -382,7 +677,7 @@ fn apply_patch(dir: &Path, patch: &Path) -> Result<(), VerifyError> {
             patch.display()
         )));
     }
-    let text = std::fs::read_to_string(patch)
+    let text = std::fs::read_to_string(&patch)
         .map_err(|e| VerifyError(format!("{}: {e}", patch.display())))?;
     let paths = patch_paths(&text)?;
     for rel in &paths {
@@ -392,8 +687,8 @@ fn apply_patch(dir: &Path, patch: &Path) -> Result<(), VerifyError> {
     // subset of diffs could leave a tree the patch does not describe, and a
     // verdict on that tree would be meaningless. `--check` first means a
     // patch that cannot apply cleanly is refused before any file changes.
-    git_apply(dir, patch, true)?;
-    git_apply(dir, patch, false)
+    git_apply(dir, &patch, true)?;
+    git_apply(dir, &patch, false)
 }
 
 fn git_apply(dir: &Path, patch: &Path, check: bool) -> Result<(), VerifyError> {
@@ -563,6 +858,13 @@ impl Drop for TempDirs {
     }
 }
 
+/// The most files, bytes and directory levels a copied tree may contain. The
+/// project and `--patched` tree are attacker-controlled: without caps, a
+/// hostile repository can fill the disk before forge's own limits apply.
+const MAX_COPY_FILES: usize = 50_000;
+const MAX_COPY_BYTES: u64 = 512 * 1024 * 1024;
+const MAX_COPY_DEPTH: usize = 64;
+
 fn copy_tree(from: &Path, to: &Path) -> Result<(), VerifyError> {
     std::fs::create_dir_all(to).map_err(|e| VerifyError(format!("{}: {e}", to.display())))?;
     let skip = [
@@ -574,7 +876,23 @@ fn copy_tree(from: &Path, to: &Path) -> Result<(), VerifyError> {
         ".git",
         "artifacts",
     ];
-    fn walk(from: &Path, to: &Path, skip: &[&str]) -> Result<(), VerifyError> {
+    struct Budget {
+        files: usize,
+        bytes: u64,
+    }
+    fn walk(
+        from: &Path,
+        to: &Path,
+        skip: &[&str],
+        depth: usize,
+        budget: &mut Budget,
+    ) -> Result<(), VerifyError> {
+        if depth > MAX_COPY_DEPTH {
+            return Err(VerifyError(format!(
+                "{}: directory nesting is deeper than the {MAX_COPY_DEPTH}-directory limit; verify-fix will not copy it",
+                from.display()
+            )));
+        }
         for entry in
             std::fs::read_dir(from).map_err(|e| VerifyError(format!("{}: {e}", from.display())))?
         {
@@ -589,15 +907,32 @@ fn copy_tree(from: &Path, to: &Path) -> Result<(), VerifyError> {
             if ty.is_dir() {
                 std::fs::create_dir_all(&dest)
                     .map_err(|e| VerifyError(format!("{}: {e}", dest.display())))?;
-                walk(&entry.path(), &dest, skip)?;
+                walk(&entry.path(), &dest, skip, depth + 1, budget)?;
             } else if ty.is_file() {
+                let len = entry
+                    .metadata()
+                    .map_err(|e| VerifyError(format!("{}: {e}", entry.path().display())))?
+                    .len();
+                budget.files += 1;
+                if budget.files > MAX_COPY_FILES {
+                    return Err(VerifyError(format!(
+                        "the tree being copied has more than {MAX_COPY_FILES} files; verify-fix will not copy it"
+                    )));
+                }
+                budget.bytes = budget.bytes.saturating_add(len);
+                if budget.bytes > MAX_COPY_BYTES {
+                    return Err(VerifyError(format!(
+                        "the tree being copied is larger than {MAX_COPY_BYTES} bytes; verify-fix will not copy it"
+                    )));
+                }
                 std::fs::copy(entry.path(), &dest)
                     .map_err(|e| VerifyError(format!("{}: {e}", dest.display())))?;
             }
         }
         Ok(())
     }
-    walk(from, to, &skip)
+    let mut budget = Budget { files: 0, bytes: 0 };
+    walk(from, to, &skip, 1, &mut budget)
 }
 
 fn first_lines(text: &str, n: usize) -> String {
@@ -676,6 +1011,13 @@ mod tests {
         }
     }
 
+    /// The unit tests pass no global config, so a developer's own
+    /// `~/.foundry/foundry.toml` cannot change their result. The integration
+    /// tests cover the public entry point and the global config.
+    fn run(req: &Request) -> Result<Outcome, VerifyError> {
+        verify_with_global_config(req, None)
+    }
+
     #[test]
     fn a_poc_that_fails_on_both_sides_is_not_a_fix() {
         let tmp = tempfile::tempdir().unwrap();
@@ -687,7 +1029,7 @@ mod tests {
         );
         let poc_dir = dir.join("patched");
         std::fs::create_dir_all(&poc_dir).unwrap();
-        let out = verify(&req(&dir, forge, Some(poc_dir), None)).unwrap();
+        let out = run(&req(&dir, forge, Some(poc_dir), None)).unwrap();
         assert!(
             matches!(out, Outcome::BugDoesNotReproduce { .. }),
             "{out:?}"
@@ -705,7 +1047,7 @@ mod tests {
         );
         let poc_dir = dir.join("patched");
         std::fs::create_dir_all(&poc_dir).unwrap();
-        let out = verify(&req(&dir, forge, Some(poc_dir), None)).unwrap();
+        let out = run(&req(&dir, forge, Some(poc_dir), None)).unwrap();
         assert!(matches!(out, Outcome::FixDoesNotHold { .. }), "{out:?}");
     }
 
@@ -721,7 +1063,7 @@ mod tests {
         );
         let poc_dir = dir.join("patched");
         std::fs::create_dir_all(&poc_dir).unwrap();
-        let out = verify(&req(&dir, forge, Some(poc_dir), None)).unwrap();
+        let out = run(&req(&dir, forge, Some(poc_dir), None)).unwrap();
         assert!(matches!(out, Outcome::FixDoesNotHold { .. }), "{out:?}");
     }
 
@@ -736,7 +1078,7 @@ mod tests {
         );
         let poc_dir = dir.join("patched");
         std::fs::create_dir_all(&poc_dir).unwrap();
-        let err = verify(&req(&dir, forge, Some(poc_dir), None)).unwrap_err();
+        let err = run(&req(&dir, forge, Some(poc_dir), None)).unwrap_err();
         assert!(err.0.contains("compile"), "{}", err.0);
     }
 
@@ -757,7 +1099,7 @@ mod tests {
             "forge",
             "#!/bin/sh\nif grep -q 'x = 2' \"$PWD/src/A.sol\"; then\n  printf '%s\\n' '{\"t\":{\"test_a\":{\"success\":false}}}'\n  exit 1\nfi\nprintf '%s\\n' '{\"t\":{\"test_a\":{\"success\":true}}}'\nexit 0\n",
         );
-        let out = verify(&Request {
+        let out = run(&Request {
             poc: PathBuf::from("test/Poc.t.sol"),
             patch: Some(patch),
             patched_dir: None,
@@ -786,7 +1128,7 @@ mod tests {
         )
         .unwrap();
         let forge = script(&dir, "forge", "#!/bin/sh\nexit 0\n");
-        let err = verify(&Request {
+        let err = run(&Request {
             poc: PathBuf::from("test/Poc.t.sol"),
             patch: Some(patch),
             patched_dir: None,
@@ -812,7 +1154,7 @@ mod tests {
         let forge = script(&dir, "forge", "#!/bin/sh\nexit 0\n");
         let poc_dir = dir.join("patched");
         std::fs::create_dir_all(&poc_dir).unwrap();
-        let err = verify(&req(&dir, forge, Some(poc_dir), None)).unwrap_err();
+        let err = run(&req(&dir, forge, Some(poc_dir), None)).unwrap_err();
         assert!(err.0.contains("ffi"), "{}", err.0);
     }
 
@@ -894,7 +1236,7 @@ mod tests {
         std::fs::create_dir_all(&poc_dir).unwrap();
         let mut request = req(&dir, forge, Some(poc_dir), None);
         request.host = None;
-        let err = verify(&request).unwrap_err();
+        let err = run(&request).unwrap_err();
         assert!(
             err.0
                 .contains("will not run an untrusted forge project on the host"),
@@ -902,6 +1244,125 @@ mod tests {
             err.0
         );
         assert!(!marker.exists(), "forge was started without an attestation");
+    }
+
+    #[test]
+    fn a_global_config_with_ffi_refuses_before_forge_is_started() {
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().to_path_buf();
+        let (forge, marker) = forge_marker(&dir);
+        let global = dir.join("global-foundry.toml");
+        std::fs::write(&global, "[profile.default]\nffi = true\n").unwrap();
+        let poc_dir = dir.join("patched");
+        std::fs::create_dir_all(&poc_dir).unwrap();
+        let request = req(&dir, forge, Some(poc_dir), None);
+        let err = verify_with_global_config(&request, Some(&global)).unwrap_err();
+        assert!(
+            err.0.contains("global config") && err.0.contains("ffi"),
+            "{}",
+            err.0
+        );
+        assert!(!marker.exists(), "forge ran despite the global ffi config");
+    }
+
+    #[test]
+    fn a_bare_forge_name_keeps_path_lookup() {
+        assert_eq!(
+            forge_program(Path::new("forge")).unwrap(),
+            PathBuf::from("forge")
+        );
+    }
+
+    #[test]
+    fn a_forge_path_with_a_separator_is_resolved_from_the_process_cwd() {
+        let resolved = forge_program(Path::new("../tools/forge")).unwrap();
+        assert!(resolved.is_absolute(), "{}", resolved.display());
+        assert!(
+            resolved.ends_with(Path::new("tools").join("forge")),
+            "{}",
+            resolved.display()
+        );
+    }
+
+    /// Runs one process through the bounded waiter with test-sized limits.
+    fn run_process(
+        forge: &Path,
+        timeout: Duration,
+        stdout_cap: usize,
+        stderr_cap: usize,
+    ) -> Result<(), String> {
+        let mut cmd = forge_command(forge);
+        cmd.stdin(Stdio::null())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped());
+        let mut child = spawn_with_retry(&mut cmd).map_err(|e| e.to_string())?;
+        wait_forge(&mut child, timeout, stdout_cap, stderr_cap)
+            .map(|_| ())
+            .map_err(|e| e.0)
+    }
+
+    #[test]
+    fn a_forge_that_runs_past_the_timeout_is_killed_and_is_not_a_verdict() {
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().to_path_buf();
+        let forge = script(&dir, "forge-sleep", "#!/bin/sh\nsleep 30\nexit 0\n");
+        let start = Instant::now();
+        let err = run_process(&forge, Duration::from_millis(300), 1 << 20, 1 << 20).unwrap_err();
+        assert!(err.contains("did not finish"), "{err}");
+        assert!(
+            start.elapsed() < Duration::from_secs(10),
+            "the timeout did not bound the run: {:?}",
+            start.elapsed()
+        );
+    }
+
+    #[test]
+    fn a_forge_that_floods_stdout_is_killed_and_is_not_a_verdict() {
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().to_path_buf();
+        let forge = script(
+            &dir,
+            "forge-flood",
+            "#!/bin/sh\nwhile :; do printf 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'; done\n",
+        );
+        let start = Instant::now();
+        let err = run_process(&forge, Duration::from_secs(30), 1024, 1024).unwrap_err();
+        assert!(err.contains("stdout") && err.contains("1024"), "{err}");
+        assert!(
+            start.elapsed() < Duration::from_secs(10),
+            "the flood cap did not bound the run: {:?}",
+            start.elapsed()
+        );
+    }
+
+    #[test]
+    fn a_forge_that_floods_and_exits_at_once_is_still_not_a_verdict() {
+        // The child can exit between the last poll and `try_wait`; the
+        // post-wait overflow check must still refuse the truncated stream.
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().to_path_buf();
+        let forge = script(
+            &dir,
+            "forge-flood-exit",
+            "#!/bin/sh\ni=0\nwhile [ $i -lt 100 ]; do printf 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'; i=$((i+1)); done\nexit 0\n",
+        );
+        let err = run_process(&forge, Duration::from_secs(30), 1024, 1024).unwrap_err();
+        assert!(err.contains("stdout") && err.contains("1024"), "{err}");
+    }
+
+    #[test]
+    fn an_oversized_foundry_toml_is_refused_before_it_is_read() {
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().to_path_buf();
+        let file = std::fs::File::create(dir.join("foundry.toml")).unwrap();
+        file.set_len(MAX_CONFIG_BYTES + 1).unwrap();
+        drop(file);
+        let err = ffi_enabled(&dir).unwrap_err();
+        assert!(
+            err.0.contains(&MAX_CONFIG_BYTES.to_string()) && err.0.contains("not read"),
+            "{}",
+            err.0
+        );
     }
 
     #[test]

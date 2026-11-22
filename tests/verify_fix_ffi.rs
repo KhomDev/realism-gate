@@ -34,14 +34,18 @@ fn scratch(name: &str) -> PathBuf {
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(dir.join("project/test")).unwrap();
     std::fs::create_dir_all(dir.join("project/patched")).unwrap();
+    std::fs::create_dir_all(dir.join("home")).unwrap();
     std::fs::write(dir.join("project/test/Poc.t.sol"), "contract Poc {}\n").unwrap();
     std::fs::write(dir.join("project/foundry.toml"), BENIGN).unwrap();
     dir
 }
 
-/// A forge stand-in that records that it ran and prints one passing test.
+/// A forge stand-in that records that it ran, records the `FOUNDRY_CONFIG`
+/// value it inherited and that file's content, and prints one passing test.
 fn fake_forge(dir: &Path) -> (PathBuf, PathBuf) {
     let marker = dir.join("forge-ran.txt");
+    let config_value = dir.join("foundry-config-value.txt");
+    let config_content = dir.join("foundry-config-content.txt");
     #[cfg(unix)]
     let path = {
         use std::os::unix::fs::PermissionsExt;
@@ -49,8 +53,10 @@ fn fake_forge(dir: &Path) -> (PathBuf, PathBuf) {
         std::fs::write(
             &p,
             format!(
-                "#!/bin/sh\nprintf 'ran\\n' > '{}'\nprintf '%s\\n' '{{\"t\":{{\"test_a\":{{\"success\":true}}}}}}'\nexit 0\n",
-                marker.display()
+                "#!/bin/sh\nprintf 'ran\\n' > '{}'\nprintf '%s' \"${{FOUNDRY_CONFIG:-}}\" > '{}'\ncat \"${{FOUNDRY_CONFIG:-/dev/null}}\" > '{}' 2>/dev/null\nprintf '%s\\n' '{{\"t\":{{\"test_a\":{{\"success\":true}}}}}}'\nexit 0\n",
+                marker.display(),
+                config_value.display(),
+                config_content.display()
             ),
         )
         .unwrap();
@@ -65,8 +71,10 @@ fn fake_forge(dir: &Path) -> (PathBuf, PathBuf) {
         std::fs::write(
             &p,
             format!(
-                "@echo off\r\n> \"{}\" echo ran\r\necho {{\"t\":{{\"test_a\":{{\"success\":true}}}}}}\r\nexit /b 0\r\n",
-                marker.display()
+                "@echo off\r\n> \"{}\" echo ran\r\n> \"{}\" echo %FOUNDRY_CONFIG%\r\ntype \"%FOUNDRY_CONFIG%\" > \"{}\" 2>nul\r\necho {{\"t\":{{\"test_a\":{{\"success\":true}}}}}}\r\nexit /b 0\r\n",
+                marker.display(),
+                config_value.display(),
+                config_content.display()
             ),
         )
         .unwrap();
@@ -81,6 +89,20 @@ fn verify_fix(
     patched: Option<&Path>,
     patch: Option<&Path>,
 ) -> Output {
+    verify_fix_with_env(project, forge, patched, patch, &[])
+}
+
+fn verify_fix_with_env(
+    project: &Path,
+    forge: &Path,
+    patched: Option<&Path>,
+    patch: Option<&Path>,
+    extra_env: &[(&str, &str)],
+) -> Output {
+    let home = project
+        .parent()
+        .expect("the scratch project has a parent")
+        .join("home");
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_realism-gate"));
     cmd.arg("verify-fix")
         .arg("--sandbox")
@@ -90,7 +112,13 @@ fn verify_fix(
         .arg("test/Poc.t.sol")
         .arg("--forge")
         .arg(forge)
+        // A developer's real global Foundry config must not change a test.
+        .env("HOME", &home)
+        .env("USERPROFILE", &home)
         .env_remove("REALISM_GATE_SANDBOX");
+    for (key, value) in extra_env {
+        cmd.env(key, value);
+    }
     if let Some(p) = patched {
         cmd.arg("--patched").arg(p);
     }
@@ -183,5 +211,158 @@ fn the_guard_does_not_refuse_a_project_with_ffi_off() {
     );
     // Both sides passed, which is "the fix does not hold", not a usage error.
     assert_eq!(out.status.code(), Some(1), "{stderr}");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn a_global_config_that_enables_ffi_is_refused_before_forge_starts() {
+    // The fake HOME is set by verify_fix(); Foundry reads the same global
+    // file, so a tree with ffi off is still unsafe while this one says true.
+    let dir = scratch("global");
+    let project = dir.join("project");
+    std::fs::create_dir_all(dir.join("home/.foundry")).unwrap();
+    std::fs::write(
+        dir.join("home/.foundry/foundry.toml"),
+        "[profile.default]\nffi = true\n",
+    )
+    .unwrap();
+    let (forge, marker) = fake_forge(&dir);
+    let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{stderr}");
+    assert!(
+        stderr.contains("global config") && stderr.to_ascii_lowercase().contains("ffi"),
+        "{stderr}"
+    );
+    assert!(!marker.exists(), "forge ran despite an ffi global config");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+fn create_patch(path: &str, lines: &[&str]) -> String {
+    let mut patch = format!(
+        "--- /dev/null\n+++ b/{path}\n@@ -0,0 +1,{} @@\n",
+        lines.len()
+    );
+    for line in lines {
+        patch.push('+');
+        patch.push_str(line);
+        patch.push('\n');
+    }
+    patch
+}
+
+fn scripted_patch(dir: &Path, name: &str, sections: &[(&str, &[&str])]) -> PathBuf {
+    let mut text = String::new();
+    for (path, lines) in sections {
+        text.push_str(&create_patch(path, lines));
+    }
+    let patch = dir.join(name);
+    std::fs::write(&patch, text).unwrap();
+    patch
+}
+
+#[test]
+fn a_patch_that_adds_dotenv_and_an_evil_config_is_refused() {
+    // Foundry loads .env after it starts; a .env that sets FOUNDRY_CONFIG can
+    // point it at an ffi config the guard never parsed. copy_tree skips
+    // dotfiles, so this vector is a --patch that creates one.
+    let dir = scratch("dotenv");
+    let project = dir.join("project");
+    let patch = scripted_patch(
+        &dir,
+        "evil.diff",
+        &[
+            (".env", &["FOUNDRY_CONFIG=evil.toml"]),
+            ("evil.toml", &["[profile.default]", "ffi = true"]),
+        ],
+    );
+    let (forge, marker) = fake_forge(&dir);
+    let out = verify_fix(&project, &forge, None, Some(&patch));
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{stderr}");
+    assert!(stderr.contains(".env"), "{stderr}");
+    assert!(!marker.exists(), "forge ran despite the dotenv bypass");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn a_clean_dotenv_is_still_refused() {
+    // The policy is the file, not a pattern inside it: any .env in a copied
+    // tree is refused, so a future Foundry dotenv variable cannot reopen the
+    // vector quietly.
+    let dir = scratch("dotenv-clean");
+    let project = dir.join("project");
+    let patch = scripted_patch(&dir, "clean.diff", &[(".env", &["SOME_SETTING=1"])]);
+    let (forge, marker) = fake_forge(&dir);
+    let out = verify_fix(&project, &forge, None, Some(&patch));
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{stderr}");
+    assert!(stderr.contains(".env"), "{stderr}");
+    assert!(!marker.exists(), "forge ran with a .env in the copy");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn the_forge_child_gets_the_pinned_absolute_config() {
+    // A parent process (and, via dotenv, a project) can set FOUNDRY_CONFIG.
+    // The child must receive the absolute path of a config in the copy that
+    // verify-fix checked, not the inherited one. The project has no
+    // foundry.toml, so the pinned file is the minimal one verify-fix creates.
+    let dir = scratch("pinned");
+    let project = dir.join("project");
+    std::fs::remove_file(project.join("foundry.toml")).unwrap();
+    let dangerous = dir.join("dangerous.toml");
+    std::fs::write(&dangerous, "[profile.default]\nffi = true\n").unwrap();
+    let (forge, marker) = fake_forge(&dir);
+    let dangerous_text = dangerous.to_string_lossy().to_string();
+    let out = verify_fix_with_env(
+        &project,
+        &forge,
+        Some(&project.join("patched")),
+        None,
+        &[("FOUNDRY_CONFIG", dangerous_text.as_str())],
+    );
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(marker.exists(), "forge did not run: {stderr}");
+    assert_eq!(out.status.code(), Some(1), "{stderr}");
+    let value = std::fs::read_to_string(dir.join("foundry-config-value.txt")).unwrap();
+    let value = value.trim();
+    assert!(Path::new(value).is_absolute(), "{value:?} is not absolute");
+    assert!(value.ends_with("foundry.toml"), "{value:?}");
+    assert!(
+        value.contains("realism-gate-verify"),
+        "the pinned config is not in the temp copy: {value:?}"
+    );
+    assert_ne!(
+        value, dangerous_text,
+        "the inherited FOUNDRY_CONFIG was not overridden"
+    );
+    let content = std::fs::read_to_string(dir.join("foundry-config-content.txt")).unwrap();
+    assert!(
+        content.contains("[profile.default]"),
+        "the pinned config was not the checked one: {content:?}"
+    );
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn an_oversized_foundry_toml_is_refused_before_forge_starts() {
+    // A 2 MiB sparse config is refused from metadata, before it is read and
+    // before the TOML parse can allocate it.
+    let dir = scratch("huge-config");
+    let project = dir.join("project");
+    let foundry = project.join("foundry.toml");
+    let file = std::fs::File::create(&foundry).unwrap();
+    file.set_len(2 * 1024 * 1024).unwrap();
+    drop(file);
+    let (forge, marker) = fake_forge(&dir);
+    let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{stderr}");
+    assert!(
+        stderr.contains("1048576") && stderr.contains("not read"),
+        "{stderr}"
+    );
+    assert!(!marker.exists(), "forge ran despite an unreadable config");
     let _ = std::fs::remove_dir_all(&dir);
 }

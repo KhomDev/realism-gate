@@ -39,16 +39,38 @@ text `"success": false`, is not read as a result.
 A compile error, or JSON with no test result, is a failure to run the PoC.
 It is not a failed PoC and it is not a fix.
 
+## Bounded runs
+
+The copy is attacker-controlled, so it is capped before and while it is made:
+50 000 files, 512 MiB in total, and 64 directories deep. A tree over any of
+those is refused with an error naming the limit, before forge starts.
+
+Each forge run has a wall-clock limit of 10 minutes and stream caps of 64 MiB
+on stdout and 1 MiB on stderr. A run that exceeds the time or either stream
+cap is killed and is an error (exit 2), never a "fail": a verdict is not taken
+from a run that did not finish or from a truncated log. The direct child is
+killed. A Foundry config (a tree's or the global one) is read only when it is
+a regular file of at most 1 MiB; a larger one is refused before the read.
+
+Not bounded: the disk space forge itself uses (the copy is capped before it
+starts), a network connection the test itself opens, and a descendant process
+that outlives the killed forge. Those are the container's job.
+
 ## The patch stays in the temp tree
 
 The diff is checked before it is applied. A path that is absolute or contains
-`..` is refused. `git apply` is run without `--unsafe-paths`, and `git` is
-required: `git apply --check` runs first, then the apply. There is no
-hand-written fallback applier, because one that accepted a different subset of
-diffs could leave a tree the patch does not describe, and a verdict on that
-tree would be meaningless. If git is missing or the patch does not apply
-cleanly, the command exits with an error and forge does not run. The tree you
-started with is not modified.
+`..` is refused. The patch path is resolved from the directory you run the
+command in before `git apply` runs with the temp copy as its working
+directory, so `--patch ../fix.diff` means the file next to the project, not a
+file under the copy; a patch inside the project also works. The same rule
+applies to a `--forge` value that contains a path separator; a bare
+`--forge forge` keeps PATH lookup. `git apply` is run without
+`--unsafe-paths`, and `git` is required: `git apply --check` runs first, then
+the apply. There is no hand-written fallback applier, because one that
+accepted a different subset of diffs could leave a tree the patch does not
+describe, and a verdict on that tree would be meaningless. If git is missing
+or the patch does not apply cleanly, the command exits with an error and
+forge does not run. The tree you started with is not modified.
 
 Three more limits apply. A patch that creates or changes a symbolic link (mode
 `120000`) is refused, because `git apply` would create a link whose target is
@@ -61,25 +83,45 @@ like absolute paths.
 ## Do not run an untrusted project on the host
 
 A Foundry project can set `ffi = true` and can name an RPC URL. `verify-fix`
-refuses to run when any `foundry.toml` forge could read enables `ffi`. The
-check is a TOML parse, not a text heuristic, so spacing, tabs, quoted keys,
-dotted keys, inline tables and profiles it has never heard of cannot change the
-answer. Three trees are checked, and every check happens before a forge
-process is started:
+refuses to run when any Foundry config it can check enables `ffi`. The check
+is a TOML parse, not a text heuristic, so spacing, tabs, quoted keys, dotted
+keys, inline tables and profiles it has never heard of cannot change the
+answer. These are checked, and every check happens before a forge process is
+started:
 
-1. the root project (`--root`, or the current directory);
-2. the `--patched` tree;
-3. the copy the `--patch` is applied to, after the apply — a patch that adds
+1. the global config, `~/.foundry/foundry.toml` (`%USERPROFILE%\.foundry\foundry.toml`
+   on Windows, with `HOME` as the fallback);
+2. the root project (`--root`, or the current directory);
+3. the `--patched` tree;
+4. the copy the `--patch` is applied to, after the apply — a patch that adds
    `ffi = true` is refused.
 
-Any key named `ffi` with the boolean value `true`, anywhere in the parsed
+Any key named `ffi` with the boolean value `true`, anywhere in a parsed
 document, is a refusal. That is deliberately conservative: a profile this
-program does not know about is still covered.
+program does not know about is still covered. A checked config that does not
+parse as TOML is refused too, rather than assumed off.
+
+`FOUNDRY_CONFIG` is set on the forge child to the absolute path of a config
+inside the copy that this command checked. If the tree has no `foundry.toml`,
+a minimal `[profile.default]` file is created in the copy and pinned. This is
+deliberate: Foundry loads a `.env` after it starts, and dotenvy does not
+override an already-set variable, so deleting `FOUNDRY_CONFIG` would let a
+`.env` point it at a config the guard never parsed. As defense in depth, a
+`.env` in any copied tree is refused before forge runs; `copy_tree` skips
+dotfiles, so the vector is a `--patch` that creates one.
+
+**Residual, not covered.** Foundry searches upward from the project directory
+for configuration. The copy forge runs in lives under the system temp
+directory, so a `foundry.toml` in an *ancestor* of that copy (the temp root,
+or a directory above it) is outside this check. So is a config Foundry
+reaches through that own search rather than the pinned `FOUNDRY_CONFIG`, the
+global file, or a checked tree. Run the command in a container if those are in
+your threat model; `docs/threat-model.md` H5 records this as unverified.
 
 `FOUNDRY_FFI=false` is set on the forge process, but it is not a control.
 Foundry documents `FOUNDRY_FFI` as an explicit exception to its environment
-overrides, so this program does not rely on the value: the TOML parse above is
-what stops an ffi project, and the container boundary is what contains the
+overrides, so this program does not rely on the value: the TOML parses above
+are what stop an ffi project, and the container boundary is what contains the
 rest.
 
 On a machine that is not a container, the command exits with an error until
