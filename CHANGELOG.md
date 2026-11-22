@@ -16,11 +16,15 @@ unchanged. Reporter: self-review.
 
 ### Security
 
-- **`verify-fix` reads `ffi` from TOML, not from a text heuristic.** Any key
-  named `ffi` with the boolean value `true`, anywhere in the parsed
-  `foundry.toml`, is a refusal: spacing, tabs, quoted keys, dotted keys, inline
-  tables, the top-level table and profiles the program has never heard of are
-  all covered. Foundry's global config (`~/.foundry/foundry.toml`, or
+- **`verify-fix` reads `ffi` from TOML under Foundry's key normalization.**
+  Foundry lowercases ASCII letters and removes every non-alphanumeric
+  character from a key, so `FFI`, `Ffi`, `ffi_` and `ffi__` all set `ffi`.
+  The guard applies the same normalization: only exactly `ffi` with the
+  boolean value `false` is accepted, a boolean `true` is refused, any other
+  value is refused conservatively, and every non-canonical spelling is refused
+  whatever its value. The scan is document-wide: spacing, tabs, quoted keys,
+  dotted keys, inline tables, the top-level table and profiles the program has
+  never heard of are all covered. Foundry's global config (`~/.foundry/foundry.toml`, or
   `%USERPROFILE%\.foundry\foundry.toml`), the root tree, the `--patched` tree
   and the copy after `--patch` are checked before the tree is used, with the
   global config and both copies parsed again immediately before each forge
@@ -30,21 +34,35 @@ unchanged. Reporter: self-review.
   profile folder while this check uses `USERPROFILE`/`HOME`, so the two can
   differ; `docs/threat-model.md` H5 records both residuals.
   `FOUNDRY_FFI=false` is not described as a control: Foundry documents the
-  variable as an explicit exception to its environment overrides
+  variable as an explicit exception to its environment overrides. Tests:
+  `ffi_is_seen_however_toml_spells_it`,
+  `foundry_key_aliases_and_non_boolean_ffi_values_are_refused`,
+  `ffi_is_refused_in_the_root_the_patched_tree_and_after_a_patch` (17 exact
+  and alias spellings),
+  `a_global_config_with_an_ffi_alias_is_refused_before_forge_starts`,
+  `a_minimal_top_level_ffi_alias_is_refused_before_forge`
   (`src/verify_fix.rs`, `tests/verify_fix_ffi.rs`).
-- **Write `fs_permissions` are refused, closing the cross-run bypass.** A PoC
-  could set `fs_permissions = [{ access = "read-write", path = "C:/" }]` and use
-  `vm.writeFile` to rewrite the other copy's or the global config to
-  `ffi = true` between the two runs. Every `fs_permissions` entry in every
-  checked config must now grant exactly `access = "read"`; a write or
-  read-write entry, a missing access, or a non-array value is refused before
-  any forge run. Both copies and the global config are also re-parsed
-  immediately before each run, which catches a simple rewrite; the
+- **Write `fs_permissions` and its aliases are refused, closing the
+  config-rewrite path.** A PoC could set `fs_permissions = [{ access =
+  "read-write", path = "C:/" }]` and use `vm.writeFile` to rewrite the other
+  copy's or the global config to an ffi alias between the two runs; the key
+  itself has aliases too (`FS_PERMISSIONS`, `FS-PERMISSIONS`, `fsPermissions`,
+  `fs_Permissions`, `Fs-Permissions`, `fs__permissions`, ...), which Foundry
+  resolves to the same setting. Any key normalized to `fs_permissions` must be
+  the exact spelling, and every entry in every checked config must grant
+  exactly `access = "read"`; a write or read-write entry, a missing or
+  non-string access, a non-array value, a non-table entry, or an alias is
+  refused before any forge run. Both copies and the global config are also
+  re-parsed immediately before each run, which catches a simple rewrite; the
   `fs_permissions` refusal is the primary control. Tests:
   `fs_permissions_must_be_read_only`,
   `write_fs_permissions_are_refused_in_every_config_the_guard_reads`,
+  `fs_permissions_aliases_are_refused_in_every_config_the_guard_reads`,
+  `a_global_config_with_a_fs_permissions_alias_is_refused_before_forge_starts`,
+  `the_alias_cross_run_combination_is_refused_before_forge`,
   `read_only_fs_permissions_reach_forge`,
-  `a_rewritten_tree_or_global_config_is_refused_before_the_next_run`.
+  `a_rewritten_tree_or_global_config_is_refused_before_the_next_run`,
+  `a_global_config_rewritten_by_the_first_run_is_refused_before_the_second`.
 - **The dotenv redirect is closed.** Foundry loads a `.env` after it starts,
   and dotenvy does not override an already-set variable. Removing
   `FOUNDRY_CONFIG` therefore let a `--patch` that created `.env` +
@@ -124,6 +142,8 @@ unchanged. Reporter: self-review.
   120 s debug bound the old quadratic run cannot meet (`src/trace.rs`,
   `src/project.rs`, `src/engine.rs`, `tests/adversarial.rs`).
 - Deleted the dead no-op context-line branch in the removed fallback applier.
+- `verify-fix` config errors name the offending alias key and display paths
+  with one separator style on Windows.
 
 ### Changed
 
@@ -131,7 +151,8 @@ unchanged. Reporter: self-review.
   `verify`. The library API is documented as unstable, and this is the change
   that puts the host decision inside the library.
 - `#![forbid(unsafe_code)]` on the library and all three binaries.
-- CI has an MSRV job pinned to `1.95.0` (`cargo check --locked`). The weekly,
+- CI has an MSRV job that reads `rust-version` from `Cargo.toml` (`1.95`, the
+  1.95.0 minimum) and runs `cargo test --locked` on that toolchain. The weekly,
   non-gating `cargo-mutants` job over `src/rules/`, `src/claims/`, `src/bind/`
   and `src/verify_fix.rs` lives in its own `mutants.yml` workflow with a
   schedule and `workflow_dispatch`, so the regular CI jobs do not run weekly
@@ -139,10 +160,15 @@ unchanged. Reporter: self-review.
 
 ### Tests
 
-- `tests/verify_fix_ffi.rs`: eight TOML spellings × the root, the `--patched`
-  tree and the post-patch tree, each asserting exit 2 and an absent fake-forge
-  marker, plus a benign control that reaches forge; a fake HOME whose global
-  config enables ffi; a patch that adds `.env` + an ffi config (refused); a
+- `tests/verify_fix_ffi.rs`: 17 exact and alias spellings × the root, the
+  `--patched` tree and the post-patch tree, each asserting exit 2 and an
+  absent fake-forge marker, plus a benign control that reaches forge; a fake
+  HOME whose global config enables ffi, one per spelling; the
+  `fs_permissions` alias matrix (root with write and read-only values,
+  `--patched`, post-patch, global); the alias global-config cases; the
+  minimal top-level `FFI = true` and the `FS_PERMISSIONS` + `FFI` combination;
+  a first run that rewrites the global config, asserting exit 2 and exactly
+  one forge invocation; a patch that adds `.env` + an ffi config (refused); a
   clean `.env` (refused by policy); the pinned absolute `FOUNDRY_CONFIG` the
   child actually receives; a 2 MiB sparse `foundry.toml` refused before the
   read; write/read-write `fs_permissions` refused in the root, `--patched`,
@@ -159,12 +185,14 @@ unchanged. Reporter: self-review.
   non-regular policy input, a FIFO policy input with a deadline (Unix), the
   enabled 5 MB case and the 12 000-function bound, with the size/timing tests
   serialised.
-- Unit tests for the TOML `ffi` scan, the host refusal, the global config,
-  `fs_permissions` read-only enforcement, per-run revalidation of a rewritten
-  tree/global config, the copy file/byte/directory/depth caps, relative forge
-  paths, regular-file inputs, the source count/total/depth caps, forge timeout
-  and stdout flood, bounded frames, empty-line looping, newline/bidi
-  sanitization and claim-cell sanitization.
+- Unit tests for the TOML `ffi` scan under Foundry's key normalization, the
+  alias and non-boolean refusal, the host refusal, the global config,
+  `fs_permissions` read-only enforcement (including non-table entries and
+  non-string access), per-run revalidation of a rewritten tree/global config,
+  the copy file/byte/directory/depth caps, relative forge paths, regular-file
+  inputs, the source count/total/depth caps, forge timeout and stdout flood,
+  bounded frames, empty-line looping, newline/bidi sanitization and claim-cell
+  sanitization.
 - `docs/threat-model.md` guarantees and hypotheses, and `docs/limitations.md`,
   updated to what is now tested, with the remaining unverified items marked.
 

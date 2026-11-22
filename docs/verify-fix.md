@@ -94,27 +94,36 @@ answer. Four configs are checked:
 2. the root project (`--root`, or the current directory);
 3. the `--patched` tree;
 4. the copy the `--patch` is applied to, after the apply — a patch that adds
-   `ffi = true` is refused.
+   `ffi`, an alias of it, or a write `fs_permissions` is refused.
 
 The global config and the root are parsed before anything is copied, the
 `--patched` tree before it is copied, and the post-patch copy after the apply.
 The global config and both copies are parsed again immediately before **each**
 forge start (so also before the second run).
 
-Any key named `ffi` with the boolean value `true`, anywhere in a parsed
-document, is a refusal. That is deliberately conservative: a profile this
+Foundry normalizes config keys: it lowercases ASCII letters and removes every
+non-alphanumeric character, so `FFI`, `Ffi`, `ffi_` and `ffi__` all set `ffi`,
+and `FS_PERMISSIONS`, `FS-PERMISSIONS`, `fsPermissions`, `fs_Permissions`,
+`Fs-Permissions` and `fs permissions` all set `fs_permissions`. The guard
+applies the same normalization. Any key that normalizes to `ffi` is checked:
+only the exact key with the boolean value `false` is allowed. A boolean `true`
+is an ffi refusal, any other value is refused conservatively, and any
+non-canonical spelling is refused whatever its value, because an alias is not
+a key the guard can prove off. The scan is document-wide: a profile this
 program does not know about is still covered. A checked config that does not
 parse as TOML is refused too, rather than assumed off.
 
-The same parse enforces `fs_permissions`: every entry must grant exactly
+The same parse enforces `fs_permissions`, under the same normalization. Only
+the exact key `fs_permissions` is accepted, and every entry must grant exactly
 `access = "read"`. An entry with `access = "write"` or `access = "read-write"`,
-an entry with no `access`, or an `fs_permissions` value that is not an array is
-refused before any forge run. This is the primary control against a cross-run
-bypass: with write access the first PoC run could rewrite the other copy's (or
-the global) config to `ffi = true`, and the second run would then execute ffi.
-The re-parse before the first and the second run is defense in depth for the
-simple rewrite; a lingering process that writes after a check is covered only
-by the container boundary.
+an entry with no `access` (or a non-string one), a non-array value, a
+non-table entry, or any alias spelling is refused before any forge run. This
+is the primary control against a config rewrite: with write access the first
+PoC run could rewrite the other copy's (or the global) config to an ffi alias,
+and the second run would then execute host commands. The re-parse before the
+first and the second run is defense in depth for the simple rewrite; a
+lingering process that writes after a check is covered only by the container
+boundary.
 
 A project that grants itself write access is refused even when the PoC does
 not use it; narrow the entry to `access = "read"` for `verify-fix`.

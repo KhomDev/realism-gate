@@ -9,7 +9,7 @@ is in [docs/threat-model.md](docs/threat-model.md).
 | `check` | no | `git` only, read-only: `rev-parse --show-toplevel` in the working directory on every run (`src/cli.rs:725-727`); `rev-parse`, `ls-tree`, `grep` in `--target` with `--target-commit` (`src/cite.rs:44`, `:47`, `:55`); `rev-parse`, `ls-tree`, `ls-files` and `hash-object --no-filters` in the working directory with `--changed-since` (`src/changed.rs:57`, `:63`, `:81`, `:122`) | none |
 | `init-claims` | no | none | none |
 | `explain`, `rules` | no | none | none |
-| `verify-fix` | **yes**: `forge test --json` twice, once on an unpatched copy and once on a patched copy (`src/verify_fix.rs:184`, `:195`) | `git apply` inside the temp copy when `--patch` is used (`src/verify_fix.rs:780`, `:808`); `forge` | forge can reach the network if the PoC or the project asks for it; `FOUNDRY_FFI=false` is set but is not a control (Foundry documents it as an exception to env overrides); there is no network isolation in the tool |
+| `verify-fix` | **yes**: `forge test --json` twice, once on an unpatched copy and once on a patched copy (`src/verify_fix.rs:192`, `:203`) | `git apply` inside the temp copy when `--patch` is used (`src/verify_fix.rs:865`, `:893`); `forge` | forge can reach the network if the PoC or the project asks for it; `FOUNDRY_FFI=false` is set but is not a control (Foundry documents it as an exception to env overrides); there is no network isolation in the tool |
 | MCP `check_poc`, `check_claims` | no | runs the `realism-gate` binary with `check` arguments only (`src/mcp.rs:141`, `:171`; `src/bin/realism-gate-mcp.rs:34`) | none |
 
 The MCP server does not expose `verify-fix` (`src/mcp.rs:49`, two tools only).
