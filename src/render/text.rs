@@ -1,6 +1,6 @@
 //! Human-readable output.
 
-use super::{TOOL, VERSION};
+use super::{TOOL, VERSION, sanitize};
 use crate::engine::Report;
 use crate::finding::{Finding, Severity};
 
@@ -109,8 +109,8 @@ pub fn claims_table(table: &crate::claims::Table, color: bool) -> String {
         ("STATUS".to_string(), 0),
     ]));
     for row in &table.rows {
-        let claim = chunks(&row.claim, CLAIM_W);
-        let evidence = chunks(&row.evidence, EVIDENCE_W);
+        let claim = chunks(&sanitize(&row.claim), CLAIM_W);
+        let evidence = chunks(&sanitize(&row.evidence), EVIDENCE_W);
         let height = claim.len().max(evidence.len());
         for i in 0..height {
             let c = claim.get(i).cloned().unwrap_or_default();
@@ -157,8 +157,8 @@ fn wrap(text: &str, indent: usize, width: usize) -> String {
 fn tests_label(f: &Finding) -> String {
     match f.tests.len() {
         0 => String::new(),
-        1 => format!("{}::{}", f.suite, f.tests[0]),
-        n => format!("{} ({n} tests)", f.suite),
+        1 => format!("{}::{}", sanitize(&f.suite), sanitize(&f.tests[0])),
+        n => format!("{} ({n} tests)", sanitize(&f.suite)),
     }
 }
 
@@ -175,16 +175,16 @@ pub fn render(report: &Report, opts: TextOptions) -> String {
         plural(s.tests, "test", "tests"),
     ));
     if let Some(d) = &report.declaration {
-        out.push_str(&format!("declaration  {d}\n"));
+        out.push_str(&format!("declaration  {}\n", sanitize(d)));
     }
     if let Some(c) = &report.config {
-        out.push_str(&format!("config       {c}\n"));
+        out.push_str(&format!("config       {}\n", sanitize(c)));
     }
     if let Some(c) = &report.changed_since {
         out.push_str(&format!(
             "changed      {} since {}; findings elsewhere are not reported\n",
             plural(c.files, "file", "files"),
-            c.git_ref
+            sanitize(&c.git_ref)
         ));
     }
     out.push('\n');
@@ -195,7 +195,7 @@ pub fn render(report: &Report, opts: TextOptions) -> String {
             continue;
         }
         if current_file != Some(f.file.as_str()) {
-            out.push_str(&format!("{}\n", p.bold(&f.file)));
+            out.push_str(&format!("{}\n", p.bold(&sanitize(&f.file))));
             current_file = Some(f.file.as_str());
         }
         let sev = if f.is_active() {
@@ -203,7 +203,7 @@ pub fn render(report: &Report, opts: TextOptions) -> String {
         } else {
             p.dim("allow")
         };
-        let location = format!("{}:{}:{}", f.file, f.line, f.column);
+        let location = format!("{}:{}:{}", sanitize(&f.file), f.line, f.column);
         let who = tests_label(f);
         out.push_str(&format!(
             "  {sev}  {} {}  {}{}\n",
@@ -216,14 +216,15 @@ pub fn render(report: &Report, opts: TextOptions) -> String {
                 format!("  {}", p.dim(&who))
             }
         ));
-        out.push_str(&wrap(&f.message, 9, 96));
+        out.push_str(&wrap(&sanitize(&f.message), 9, 96));
         if !f.evidence.is_empty() {
-            out.push_str(&format!("         ↳ {}\n", p.dim(&f.evidence)));
+            out.push_str(&format!("         ↳ {}\n", p.dim(&sanitize(&f.evidence))));
         }
         if let Some(sup) = &f.suppressed {
             out.push_str(&format!(
                 "         allowed on line {}: {}\n",
-                sup.line, sup.reason
+                sup.line,
+                sanitize(&sup.reason)
             ));
         } else {
             let help = wrap(&format!("→ {}", f.help), 9, 96);
@@ -256,7 +257,11 @@ pub fn render(report: &Report, opts: TextOptions) -> String {
         for e in &report.parse_errors {
             if shown.insert(&e.file) {
                 let first = e.message.lines().next().unwrap_or("");
-                out.push_str(&format!("         {}  {}\n", e.file, p.dim(first)));
+                out.push_str(&format!(
+                    "         {}  {}\n",
+                    sanitize(&e.file),
+                    p.dim(&sanitize(first))
+                ));
             }
         }
         out.push('\n');
@@ -266,7 +271,7 @@ pub fn render(report: &Report, opts: TextOptions) -> String {
         out.push_str(&format!(
             "{}  {}  ·  {}\n",
             p.bold("CLAIMS"),
-            t.source,
+            sanitize(&t.source),
             t.binding.as_str()
         ));
         out.push_str(&claims_table(t, opts.color));
@@ -328,7 +333,7 @@ pub fn render(report: &Report, opts: TextOptions) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::wrap;
+    use super::*;
 
     #[test]
     fn wraps_and_indents() {
@@ -339,5 +344,28 @@ mod tests {
             wrap("x averyveryverylongword y", 0, 8),
             "x\naveryveryverylongword\ny\n"
         );
+    }
+
+    #[test]
+    fn the_sanitizer_keeps_only_newline_and_tab() {
+        assert_eq!(sanitize("a\tb\nc\rd\u{1b}[31m\u{7}"), "a\tb\ncd[31m");
+    }
+
+    #[test]
+    fn control_characters_are_dropped_from_claim_cells() {
+        let table = crate::claims::Table::new(
+            crate::claims::Binding::Structured,
+            "claims\u{1b}[31m.yaml".to_string(),
+            vec![crate::claims::Row {
+                field: "asset",
+                claim: "USDR\u{1b}[31m".to_string(),
+                evidence: "balanceOf\u{7}(attacker)".to_string(),
+                status: crate::claims::Status::Shown,
+            }],
+        );
+        let text = claims_table(&table, false);
+        assert!(!text.contains('\u{1b}'), "{text:?}");
+        assert!(!text.contains('\u{7}'), "{text:?}");
+        assert!(text.contains("USDR[31m"), "{text:?}");
     }
 }

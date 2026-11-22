@@ -7,7 +7,7 @@
 //! docs/evidence-card.md.
 
 use super::sha256;
-use super::{TOOL, VERSION};
+use super::{TOOL, VERSION, sanitize};
 use crate::claims::{Loaded, Table};
 use crate::project::Project;
 use crate::rules::RULES;
@@ -128,14 +128,15 @@ pub fn markdown(input: &Input<'_>) -> String {
         .project
         .units
         .iter()
-        .map(|u| format!("`{}`", u.path))
+        .map(|u| format!("`{}`", sanitize(&u.path)))
         .collect::<Vec<_>>()
         .join(", ");
     out.push_str(&format!("| PoC | sha256 `{}` ({files}) |\n", short(&poc)));
     match (&input.report_path, input.report_text) {
         (Some(path), Some(text)) => out.push_str(&format!(
-            "| report | sha256 `{}` (`{path}`) |\n",
-            short(&sha256::hex(text.replace("\r\n", "\n").as_bytes()))
+            "| report | sha256 `{}` (`{}`) |\n",
+            short(&sha256::hex(text.replace("\r\n", "\n").as_bytes())),
+            sanitize(path)
         )),
         _ => out.push_str("| report | not given |\n"),
     }
@@ -143,7 +144,7 @@ pub fn markdown(input: &Input<'_>) -> String {
         out.push_str(&format!(
             "| claims | sha256 `{}` ({}) |\n",
             short(&sha256::hex(text.replace("\r\n", "\n").as_bytes())),
-            input.claims.source
+            sanitize(&input.claims.source)
         ));
     }
     out.push_str(&format!(
@@ -152,7 +153,7 @@ pub fn markdown(input: &Input<'_>) -> String {
     ));
     let commit = input
         .target_commit
-        .map(|c| format!("`{c}`"))
+        .map(|c| format!("`{}`", sanitize(c)))
         .unwrap_or_else(|| "not pinned".to_string());
     out.push_str(&format!("| target commit | {commit} |\n"));
     out.push_str(&format!("| outcome | {} |\n\n", input.table.verdict()));
@@ -162,7 +163,7 @@ pub fn markdown(input: &Input<'_>) -> String {
     out.push('\n');
 
     out.push_str("## Reproduce\n\n```bash\n");
-    out.push_str(&input.rerun);
+    out.push_str(&sanitize(&input.rerun));
     out.push_str("\n```\n\n");
     out.push_str(
         "A reader who runs that command on this tree gets this table. The JSON twin carries\n\
