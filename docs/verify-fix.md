@@ -103,10 +103,13 @@ forge start (so also before the second run).
 
 Foundry resolves key aliases: `FFI`, `Ffi`, `ffi_` and `ffi__` set `ffi`, and
 `FS_PERMISSIONS`, `FS-PERMISSIONS`, `fsPermissions`, `fs_Permissions`,
-`Fs-Permissions`, `fs__permissions`, `fs.permissions` and `fs permissions` set
-`fs_permissions` (verified against forge 1.5.1). The guard applies a
-deliberately coarser normalization: it lowercases ASCII and removes every
-non-alphanumeric character. That catches every alias Foundry resolves and also
+`Fs-Permissions`, `fs__permissions`, the quoted key `"fs.permissions"` and
+`fs permissions` set `fs_permissions` (verified against forge 1.5.1). The
+unquoted dotted form `fs.permissions = ...` parses as nested `fs`/`permissions`
+keys, which Foundry does not resolve; the guard ignores it too, so there is no
+gap. The guard applies a deliberately coarser normalization than Foundry: it
+lowercases ASCII and keeps only ASCII alphanumerics, dropping Unicode
+characters too. That catches every alias Foundry resolves and also
 refuses spellings Foundry currently treats as unknown, such as `f_f_i`. Any
 key that normalizes to `ffi` is checked: only the exact key with the boolean
 value `false` is allowed. A boolean `true`

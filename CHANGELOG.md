@@ -19,9 +19,9 @@ unchanged. Reporter: self-review.
 - **`verify-fix` reads `ffi` from TOML under a conservative key
   normalization.** Foundry resolves case and separator aliases: `FFI`, `Ffi`,
   `ffi_` and `ffi__` all set `ffi` (verified against forge 1.5.1). The guard
-  applies a deliberately coarser normalization (lowercase ASCII,
-  non-alphanumerics removed), which catches every alias Foundry resolves and
-  also refuses some spellings Foundry treats as unknown (`f_f_i`). Only
+  applies a deliberately coarser normalization than Foundry (lowercase ASCII;
+  keeps ASCII alphanumerics only, dropping Unicode too), which catches every alias Foundry
+  resolves and also refuses some spellings Foundry treats as unknown (`f_f_i`). Only
   exactly `ffi` with the boolean value `false` is accepted, a boolean `true`
   is refused, any other value is refused conservatively, and every
   non-canonical spelling is refused whatever its value. The scan is document-wide: spacing, tabs, quoted keys,
@@ -49,8 +49,11 @@ unchanged. Reporter: self-review.
   "read-write", path = "C:/" }]` and use `vm.writeFile` to rewrite the other
   copy's or the global config to an ffi alias between the two runs; the key
   itself has aliases too (`FS_PERMISSIONS`, `FS-PERMISSIONS`, `fsPermissions`,
-  `fs_Permissions`, `Fs-Permissions`, `fs__permissions`, ...), which Foundry
-  resolves to the same setting. Any key normalized to `fs_permissions` must be
+  `fs_Permissions`, `Fs-Permissions`, `fs__permissions`, the quoted key
+  `"fs.permissions"`, and spaces), which Foundry resolves to the same setting.
+  The unquoted dotted form `fs.permissions = ...` parses as nested
+  `fs`/`permissions` keys; neither Foundry nor the guard resolves it as
+  `fs_permissions`, so there is no gap. Any key normalized to `fs_permissions` must be
   the exact spelling, and every entry in every checked config must grant
   exactly `access = "read"`; a write or read-write entry, a missing or
   non-string access, a non-array value, a non-table entry, or an alias is
