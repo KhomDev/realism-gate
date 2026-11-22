@@ -15,12 +15,14 @@
 //! project, the `--patched` tree, and the copied tree after a `--patch` is
 //! applied are all parsed as TOML, and so is Foundry's global config
 //! (`~/.foundry/foundry.toml`, or `%USERPROFILE%\.foundry\foundry.toml`).
-//! `FOUNDRY_CONFIG` is removed from the forge environment, so a parent
-//! process cannot point forge at an unchecked file. A `foundry.toml` in an
-//! ancestor directory of the temp copy is not checked; `docs/verify-fix.md`
-//! states that residual. The environment variable `FOUNDRY_FFI` is not a
-//! control either: Foundry documents it as an explicit exception to env
-//! overrides, so this command does not rely on setting it.
+//! `FOUNDRY_CONFIG` is pinned to the absolute path of a checked config in the
+//! copy (a minimal one is created when the tree has none), and a `.env` in a
+//! copied tree is refused: Foundry loads dotenv after it starts and would
+//! otherwise redirect the variable to a config this command never parsed. A
+//! `foundry.toml` in an ancestor directory of the temp copy is not checked;
+//! `docs/verify-fix.md` states that residual. The environment variable
+//! `FOUNDRY_FFI` is not a control either: Foundry documents it as an explicit
+//! exception to env overrides, so this command does not rely on setting it.
 //!
 //! Path arguments that name a file are resolved from the caller's current
 //! directory before the temp copy becomes the process working directory:
