@@ -11,10 +11,10 @@ for reviewers. CI does not gate on them.
 cargo install cargo-llvm-cov --locked
 cargo llvm-cov --locked --workspace --summary-only --no-cfg-coverage
 
-# Mutation testing on the rule, claim and binding code
+# Mutation testing on the rule, claim, binding and verify-fix code
 cargo install cargo-mutants --locked
-cargo mutants --list --file 'src/rules/*.rs' --file 'src/claims/*.rs' --file 'src/bind/*.rs'
-cargo mutants --file 'src/rules/*.rs' --file 'src/claims/*.rs' --file 'src/bind/*.rs'
+cargo mutants --list --file 'src/rules/*.rs' --file 'src/claims/*.rs' --file 'src/bind/*.rs' --file 'src/verify_fix.rs'
+cargo mutants --file 'src/rules/*.rs' --file 'src/claims/*.rs' --file 'src/bind/*.rs' --file 'src/verify_fix.rs'
 ```
 
 ## Line coverage
@@ -38,18 +38,25 @@ The least-covered files of the rule code (line coverage):
 
 The bind and claims code is also thin: `src/bind/mod.rs` at 77.58% is the
 least covered file in those two directories, and `src/bind/facts.rs` is at
-89.47%. The MCP server binary, `src/bin/realism-gate-mcp.rs`, has 0% line coverage:
-no test drives its stdio protocol.
+89.47%. These are 1.0.3 numbers; 1.0.4 adds tests for the MCP stdio server
+(`tests/mcp_stdio.rs`), the ffi guard (`tests/verify_fix_ffi.rs`), the render
+sanitizer and the input caps (`tests/adversarial.rs`), so the MCP binary is no
+longer at 0%.
 
 ## Mutation testing
 
-`cargo mutants --list` on `src/rules/`, `src/claims/` and `src/bind/` lists
-**875 mutants**: `evidence.rs` 233, `realism.rs` 137, `bind/mod.rs` 100,
-`bind/facts.rs` 99, `claims/mod.rs` 81, `privilege.rs` 78, `injection.rs` 58,
-`claims/extract.rs` 32, `rules/mod.rs` 28, `rules/catalog.rs` 21,
-`claims/init.rs` 8.
+`cargo mutants --list` on `src/rules/`, `src/claims/` and `src/bind/` listed
+**875 mutants** on 1.0.3: `evidence.rs` 233, `realism.rs` 137, `bind/mod.rs`
+100, `bind/facts.rs` 99, `claims/mod.rs` 81, `privilege.rs` 78,
+`injection.rs` 58, `claims/extract.rs` 32, `rules/mod.rs` 28,
+`rules/catalog.rs` 21, `claims/init.rs` 8. The 1.0.4 weekly scope adds
+`src/verify_fix.rs`, so the listed count is higher; the job below prints the
+current number and the outcomes.
 
-**Not measured.** A full run builds and tests each mutant. On this machine that
-is hours per run, so no caught, missed, timeout or unviable counts are
-recorded here, and no survival rate is claimed. The next step is a run with a
-time limit, one file at a time, and this page updated with its counts.
+**Weekly measurement, not a gate.** `.github/workflows/ci.yml` job `mutants`
+runs on the Monday 04:17 UTC schedule over the rule, claim, bind and
+verify-fix files with `--timeout 120`. The job writes the counts (caught,
+missed, timeout, unviable) and the survival rate, `missed / (caught + missed)`,
+to the run's job summary. The job was added on 2026-11-22; it has not produced
+a rate yet, so this page records none rather than inventing one. A surviving
+mutant is a review lead, not a failed build.

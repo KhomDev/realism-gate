@@ -1,3 +1,4 @@
+#![forbid(unsafe_code)]
 //! realism-gate: a static checker for proof-of-concept tests, written for
 //! Foundry (Solidity) or for Solana programs (Rust, or Anchor's TypeScript).
 //!

@@ -117,11 +117,11 @@ Every input is untrusted: PoCs and reports often come from someone else, or from
 
 | Boundary | What crosses it | How it is contained |
 |---|---|---|
-| Source files → parsers | arbitrary Solidity, Rust, TS, Move | real parsers with error recovery; a malformed file is reported, not a panic (tested). No size or depth limits yet |
+| Source files → parsers | arbitrary Solidity, Rust, TS, Move | real parsers with error recovery; a malformed file is reported, not a panic (tested). Discovery and loading cap the file (8 MiB), the total (128 MiB), the count (20 000) and the depth (64); the error names the limit |
 | Repo under review → policy | `realism.yaml`, `realism-gate.toml`, inline `allow` comments | ignored when inside the policy root, unless passed by flag from outside; allows count only with `--trust-inline-allows` |
 | realism-gate → git | `rev-parse` in the cwd on every `check`; `rev-parse`, `ls-tree` and `grep` in `--target` (`cite.rs`); `--changed-since` (`changed.rs`) | every call goes through `src/git.rs` (`core.fsmonitor` off, no stdin); `--changed-since` never asks git to compare the worktree, so no clean filter runs; option-looking revisions are refused. Each case is planted in `tests/security.rs` |
-| realism-gate → forge | `verify-fix` only | runs on a copy that holds no symlinks; a patch can't leave the copy however its path is spelled, can't create a symlink, and is capped at 8 MiB; `ffi = true` is refused; the host vs sandbox policy (`sandbox_attested`) trusts `REALISM_GATE_SANDBOX=1` or a container marker, which [docs/verify-fix.md](docs/verify-fix.md) states |
-| MCP client → server | JSON-RPC over stdio | two read-only tools; the server runs the CLI binary, so the same checks apply |
+| realism-gate → forge | `verify-fix` only | runs on a copy that holds no symlinks; a patch can't leave the copy however its path is spelled, can't create a symlink, is capped at 8 MiB and is applied by `git apply --check` then `git apply` (no fallback applier); `ffi = true` is refused by a TOML parse of the root, the `--patched` tree and the post-patch copy, before forge starts; the host vs sandbox policy is enforced inside `verify` (`Request::host` is `Option`), and `sandbox_attested` trusts `REALISM_GATE_SANDBOX=1` or a container marker, which [docs/verify-fix.md](docs/verify-fix.md) states |
+| MCP client → server | JSON-RPC over stdio | two read-only tools; the server runs the CLI binary, so the same checks apply; a frame is capped at 8 MiB and a header line at 8 KiB, and an oversized `Content-Length` gets a JSON-RPC error instead of an allocation |
 | Network | — | none: no HTTP client in the dependency graph, and a CI job checks the manifest, lockfile and source |
 
 The full threat model, with the test behind each guarantee, is [docs/threat-model.md](docs/threat-model.md).

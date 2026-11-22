@@ -8,6 +8,81 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-11-22
+
+A security and robustness release, from a self-review of 1.0.3. No rule id,
+flag, default or output field changed; the JSON and SARIF formats are
+unchanged. Reporter: self-review.
+
+### Security
+
+- **`verify-fix` reads `ffi` from TOML, not from a text heuristic.** Any key
+  named `ffi` with the boolean value `true`, anywhere in the parsed
+  `foundry.toml`, is a refusal: spacing, tabs, quoted keys, dotted keys, inline
+  tables, the top-level table and profiles the program has never heard of are
+  all covered. The root tree, the `--patched` tree and the copy after `--patch`
+  are checked, and every check happens before a forge process is started. A
+  `foundry.toml` that does not parse is refused rather than assumed off.
+  `FOUNDRY_FFI=false` is not described as a control: Foundry documents the
+  variable as an explicit exception to its environment overrides
+  (`src/verify_fix.rs`, `tests/verify_fix_ffi.rs`).
+- **The host policy is enforced in the library.** `verify` refuses a request
+  with no `HostPolicy` before copying a tree or starting forge, so a library
+  caller is covered like the CLI (`src/verify_fix.rs`,
+  `no_attestation_is_refused_before_forge_is_started`).
+- **`--patch` requires git.** `git apply --check` runs first and the
+  hand-written fallback applier is gone, so a tree the patch does not describe
+  is never run (`src/verify_fix.rs`, `docs/verify-fix.md`).
+- **MCP framing is bounded.** `Content-Length` is refused above 8 MiB before
+  any allocation and answered with a JSON-RPC error while the server keeps
+  serving; a header line is capped at 8 KiB; empty lines are skipped in a loop
+  instead of by recursion (`src/mcp.rs`, `tests/mcp_stdio.rs`).
+- **Control characters from source and claims do not reach terminal output.**
+  The text, Markdown and evidence-card renderers drop control characters
+  (newline and tab kept) from finding messages, evidence, paths, claim text and
+  evidence, suppression notes and parse errors, before any colour wrapper. JSON
+  and SARIF keep their serde escaping (`src/render/mod.rs`,
+  `control_characters_in_source_never_reach_text_or_markdown_output`).
+
+### Fixed
+
+- **Input caps.** 8 MiB per source file (from metadata, before the read),
+  128 MiB and 20 000 files per run, 64 directories deep, and 16 MiB for a
+  `--report`, `--claims`, `--declaration` or `--config` file. Every error names
+  the limit (`src/project.rs`, `an_oversized_source_file_is_refused_by_name_before_it_is_read`).
+- **The trace is no longer quadratic in test count.** A suite base (state
+  initializers, constructors, `setUp()` and callbacks) and the RG15 whole-file
+  fee-concession fact are computed once per suite; the test-function
+  duplicate check uses a set. The 5 MB / 40 000-function adversarial case is
+  enabled instead of ignored, and a 4 000-function case has a time bound
+  (`src/trace.rs`, `src/project.rs`, `src/engine.rs`, `tests/adversarial.rs`).
+- Deleted the dead no-op context-line branch in the removed fallback applier.
+
+### Changed
+
+- `verify_fix::Request::host` is `Option<HostPolicy>`; `None` is refused by
+  `verify`. The library API is documented as unstable, and this is the change
+  that puts the host decision inside the library.
+- `#![forbid(unsafe_code)]` on the library and all three binaries.
+- CI has an MSRV job pinned to `1.95.0` (`cargo check --locked`), and a weekly
+  `cargo-mutants` job over `src/rules/`, `src/claims/`, `src/bind/` and
+  `src/verify_fix.rs` that records its survival rate and does not gate
+  (`docs/test-quality.md`).
+
+### Tests
+
+- `tests/verify_fix_ffi.rs`: eight TOML spellings × the root, the `--patched`
+  tree and the post-patch tree, each asserting exit 2 and an absent fake-forge
+  marker, plus a benign control that reaches forge.
+- `tests/mcp_stdio.rs`: the stdio binary answers a 999 999 999-byte
+  `Content-Length` with a JSON-RPC error and exits 0.
+- Adversarial: raw ESC in a Solidity string literal, a 1 GiB sparse file, the
+  enabled 5 MB case and the 4 000-function bound.
+- Unit tests for the TOML `ffi` scan, the host refusal, bounded frames,
+  empty-line looping and claim-cell sanitization.
+- `docs/threat-model.md` guarantees and hypotheses, and `docs/limitations.md`,
+  updated to what is now tested, with the remaining unverified items marked.
+
 ## [1.0.3] - 2026-11-21
 
 A correctness release. Five of the eight adversarial cases recorded as ignored
