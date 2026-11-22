@@ -16,13 +16,15 @@ unchanged. Reporter: self-review.
 
 ### Security
 
-- **`verify-fix` reads `ffi` from TOML under Foundry's key normalization.**
-  Foundry lowercases ASCII letters and removes every non-alphanumeric
-  character from a key, so `FFI`, `Ffi`, `ffi_` and `ffi__` all set `ffi`.
-  The guard applies the same normalization: only exactly `ffi` with the
-  boolean value `false` is accepted, a boolean `true` is refused, any other
-  value is refused conservatively, and every non-canonical spelling is refused
-  whatever its value. The scan is document-wide: spacing, tabs, quoted keys,
+- **`verify-fix` reads `ffi` from TOML under a conservative key
+  normalization.** Foundry resolves case and separator aliases: `FFI`, `Ffi`,
+  `ffi_` and `ffi__` all set `ffi` (verified against forge 1.5.1). The guard
+  applies a deliberately coarser normalization (lowercase ASCII,
+  non-alphanumerics removed), which catches every alias Foundry resolves and
+  also refuses some spellings Foundry treats as unknown (`f_f_i`). Only
+  exactly `ffi` with the boolean value `false` is accepted, a boolean `true`
+  is refused, any other value is refused conservatively, and every
+  non-canonical spelling is refused whatever its value. The scan is document-wide: spacing, tabs, quoted keys,
   dotted keys, inline tables, the top-level table and profiles the program has
   never heard of are all covered. Foundry's global config (`~/.foundry/foundry.toml`, or
   `%USERPROFILE%\.foundry\foundry.toml`), the root tree, the `--patched` tree

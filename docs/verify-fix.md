@@ -101,12 +101,15 @@ The global config and the root are parsed before anything is copied, the
 The global config and both copies are parsed again immediately before **each**
 forge start (so also before the second run).
 
-Foundry normalizes config keys: it lowercases ASCII letters and removes every
-non-alphanumeric character, so `FFI`, `Ffi`, `ffi_` and `ffi__` all set `ffi`,
-and `FS_PERMISSIONS`, `FS-PERMISSIONS`, `fsPermissions`, `fs_Permissions`,
-`Fs-Permissions` and `fs permissions` all set `fs_permissions`. The guard
-applies the same normalization. Any key that normalizes to `ffi` is checked:
-only the exact key with the boolean value `false` is allowed. A boolean `true`
+Foundry resolves key aliases: `FFI`, `Ffi`, `ffi_` and `ffi__` set `ffi`, and
+`FS_PERMISSIONS`, `FS-PERMISSIONS`, `fsPermissions`, `fs_Permissions`,
+`Fs-Permissions`, `fs__permissions`, `fs.permissions` and `fs permissions` set
+`fs_permissions` (verified against forge 1.5.1). The guard applies a
+deliberately coarser normalization: it lowercases ASCII and removes every
+non-alphanumeric character. That catches every alias Foundry resolves and also
+refuses spellings Foundry currently treats as unknown, such as `f_f_i`. Any
+key that normalizes to `ffi` is checked: only the exact key with the boolean
+value `false` is allowed. A boolean `true`
 is an ffi refusal, any other value is refused conservatively, and any
 non-canonical spelling is refused whatever its value, because an alias is not
 a key the guard can prove off. The scan is document-wide: a profile this
