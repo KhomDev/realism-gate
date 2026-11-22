@@ -568,14 +568,14 @@ fn a_very_deeply_nested_expression_does_not_overflow_the_stack() {
 fn twelve_thousand_test_functions_finish_within_the_bound() {
     let _guard = heavy();
     // The callback scan ran once per test and RG15 lowercased the whole file
-    // per test, so the old run was quadratic: 8 000 functions took ~25 s in a
-    // release build and ~165 s in debug, and 16 000 took ~107 s in release.
-    // At 12 000 the old code is ~60 s in release and far over 120 s in debug;
-    // the linear code is a few seconds either way.
+    // per test, so the old run was quadratic. On this host 8 000 functions
+    // took ~25 s in release and ~165 s in debug, and 16 000 took ~107 s in
+    // release; on the review host 12 000 took ~16 s in release. The bound is
+    // 5 s in release (new code ~0.4 s) and 120 s in debug (new code ~3.7 s).
     let bound = if cfg!(debug_assertions) {
         Duration::from_secs(120)
     } else {
-        Duration::from_secs(20)
+        Duration::from_secs(5)
     };
     let s = Scratch::new("twelve-thousand");
     let mut src = String::from(HEADER);
