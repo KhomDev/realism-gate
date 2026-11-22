@@ -25,7 +25,7 @@ makes. Each row is bound to evidence in the PoC and gets one of four statuses:
 <!-- BEGIN:example-claims -->
 
 ```text
-realism-gate 1.0.3  ·  1 file  ·  1 suite  ·  4 tests
+realism-gate 1.0.4  ·  1 file  ·  1 suite  ·  4 tests
 
 test/ShadowVault.t.sol
   note   RG03 deployer-is-attacker  test/ShadowVault.t.sol:57:26  ShadowVaultTest::test_healthyDistribution_shipsSurplus
@@ -162,7 +162,7 @@ The test deploys a vault and then drains it as admin, with `deal` writing the va
 <!-- BEGIN:example -->
 
 ```text
-realism-gate 1.0.3  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.0.4  ·  1 file  ·  1 suite  ·  1 test
 
 test/VaultDrain.t.sol
   warn   RG11 unpinned-fork  test/VaultDrain.t.sol:17:9  VaultDrainTest::test_attackerDrainsVault
@@ -232,7 +232,7 @@ Same rule ids, same output. Rust harnesses (solana-program-test, LiteSVM, Mollus
 <!-- BEGIN:example-rust -->
 
 ```text
-realism-gate 1.0.3  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.0.4  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault_drain.rs
   warn   RG11 unpinned-fork  tests/vault_drain.rs:21:15  vault_drain::test_attacker_drains_vault
@@ -280,7 +280,7 @@ shows why a rule exists and how it can be wrong.
 <!-- BEGIN:example-anchor -->
 
 ```text
-realism-gate 1.0.3  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.0.4  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault-drain.ts
   warn   RG11 unpinned-fork  tests/vault-drain.ts:13:21  vault::lets the attacker drain the vault
@@ -383,7 +383,9 @@ Exit status for `check`: `0` nothing at or above `--fail-on`, no claim is `CONTR
 
 ## Limits
 
-It reads the test. It does not run it, except `verify-fix`, which runs forge twice under the limits in [docs/verify-fix.md](docs/verify-fix.md). It does not know a function is gated when the name does not say so. It does not know the balance at a pinned block. It does not know that a README forbids the call; RG17 is silent only when an operator `deployment.evidence` outside the repo cites a source. RG20 checks cited names only when you pass a target and a commit. It flattens control flow. A Move file is not type-checked. `check` has no network code.
+It reads the test. It does not run it, except `verify-fix`, which runs forge twice under the limits in [docs/verify-fix.md](docs/verify-fix.md). That command refuses to run forge when any Foundry config it can check sets `ffi` to anything other than the boolean `false`, when a key Foundry normalizes to `ffi` is spelled as an alias, or when any key Foundry normalizes to `fs_permissions` grants anything other than `access = "read"` — the root project, the `--patched` tree, the copy after `--patch` is applied, and the global `~/.foundry/foundry.toml` (or `%USERPROFILE%\.foundry\foundry.toml`). Foundry resolves case and separator aliases (`FFI`, `Ffi` and `ffi_` reach `ffi`; `FS_PERMISSIONS`, `FS-PERMISSIONS` and `fsPermissions` reach `fs_permissions`), and the guard is deliberately coarser than Foundry: it lowercases ASCII and keeps only ASCII alphanumerics (dropping Unicode too), so any non-canonical spelling is refused whatever its value, including spellings Foundry currently treats as unknown; a write `fs_permissions` would let the first PoC run rewrite the other copy's or the global config to an ffi alias. The global config and both copies are checked again immediately before each forge start, including before the second run. `FOUNDRY_CONFIG` is pinned to the absolute path of a checked config inside the copy (a minimal one is created if the tree has none), and a `.env` in a copied tree is refused — Foundry loads dotenv after it starts, so removing the variable would let a `.env` set it. A `foundry.toml` in an ancestor directory of the temp copy is not checked. `FOUNDRY_FFI=false` is not a control — Foundry documents that variable as an explicit exception to its environment overrides — so the guard is a TOML parse, not the variable. Relative `--patch`/`--forge` paths are resolved from the directory you run the command in. It does not know a function is gated when the name does not say so. It does not know the balance at a pinned block. It does not know that a README forbids the call; RG17 is silent only when an operator `deployment.evidence` outside the repo cites a source. RG20 checks cited names only when you pass a target and a commit. It flattens control flow. A Move file is not type-checked. `check` has no network code.
+
+Inputs are capped, and the error names the limit: 8 MiB per source file, 128 MiB and 20 000 files per run, 64 levels deep, and 16 MiB for a `--report`, `--claims`, `--declaration` or `--config` file. Those four inputs must be regular files: a FIFO is refused instead of blocking, and a symlink is refused. `verify-fix` copies are capped at 50 000 files, 512 MiB, 50 000 directories and 64 levels deep, each forge run at 10 minutes and 64 MiB stdout / 1 MiB stderr, and a Foundry config at 1 MiB. The text, Markdown and evidence-card output drop control characters and bidi formatting from source-derived fields, so a string literal or file name in a PoC cannot drive a terminal or fabricate a report line.
 
 A claim table is narrower than the bug. Binding cannot confirm a role the test does not grant, an asset the PoC never names, an amount stated only in prose, a precondition it has no words for, or a citation without a target commit. The `fix` row is always open until you run `verify-fix`. And the inferred fallback reads only backticked identifiers, the headline's impact verb and the words "any user"/"unprivileged"/role names; everything else is `NOT CHECKABLE`, and an inferred run is never a pass.
 

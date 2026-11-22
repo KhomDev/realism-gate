@@ -101,6 +101,21 @@ jobs:
       - name: Test on MSRV
         run: cargo +${{ steps.msrv.outputs.version }} test --locked
 
+  # The minimum is pinned to an exact release, not `stable`, so a new stable
+  # cannot move it silently. Check is enough here: the full test run is the
+  # job above, on the declared minimum.
+  msrv-pin:
+    name: msrv (1.95.0, check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install the pinned toolchain
+        run: rustup toolchain install 1.95.0 --profile minimal
+
+      - name: Check on 1.95.0
+        run: cargo +1.95.0 check --locked
+
   # ------------------------------------------------------------- supply chain
   deny:
     name: cargo-deny

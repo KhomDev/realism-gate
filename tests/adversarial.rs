@@ -13,6 +13,15 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Output, Stdio};
 use std::time::{Duration, Instant};
 
+/// The size and timing tests hold this so they run one at a time. The harness
+/// runs tests in parallel; a 5 MB or 1 GiB fixture must not inflate another
+/// test's measurement.
+static HEAVY: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+fn heavy() -> std::sync::MutexGuard<'static, ()> {
+    HEAVY.lock().unwrap_or_else(|e| e.into_inner())
+}
+
 const HEADER: &str = "// SPDX-License-Identifier: MIT\n\
 pragma solidity ^0.8.20;\n\
 \n\
@@ -452,13 +461,15 @@ fn cyrillic_lookalike_identifier_is_not_silently_accepted() {
 // ---------------------------------------------------------------------------
 
 #[test]
-#[ignore = "bug: run time grows faster than linearly with test functions per file (4 000 functions take 48 s)"]
 fn a_five_megabyte_source_file_finishes_and_does_not_panic() {
+    let _guard = heavy();
     // INPUT: about 5 MB of small test functions (about 40 000 of them).
-    // SHOULD: finish within 120 s. ACTUAL: 885 KB (8 000 functions) takes
-    // about 165 s; 4 000 functions take 48 s, 2 000 take 9 s, 1 000 take 1.6 s.
-    // Many small test functions, about 5 MB in total. The CLI's three exit
-    // codes (0, 1, 2) are the only acceptable outcomes; a crash is not.
+    // SHOULD: finish within 120 s. Before the suite trace was memoized the
+    // callback scan ran once per test, so 885 KB (8 000 functions) took about
+    // 165 s and 4 000 functions took 48 s. A suite base is now built once and
+    // shared, which this test pins. Many small test functions, about 5 MB in
+    // total. The CLI's three exit codes (0, 1, 2) are the only acceptable
+    // outcomes; a crash is not.
     let s = Scratch::new("big");
     let mut src = String::from(HEADER);
     src.push_str("contract BigTest is Test {\n    Vault vault = new Vault();\n");
@@ -550,5 +561,251 @@ fn a_very_deeply_nested_expression_does_not_overflow_the_stack() {
         matches!(out.status.code(), Some(0..=2)),
         "exit {:?}",
         out.status
+    );
+}
+
+#[test]
+fn twelve_thousand_test_functions_finish_within_the_bound() {
+    let _guard = heavy();
+    // The callback scan ran once per test and RG15 lowercased the whole file
+    // per test, so the old run was quadratic. On this host 8 000 functions
+    // took ~25 s in release and ~165 s in debug, and 16 000 took ~107 s in
+    // release; on the review host 12 000 took ~16 s in release. The bound is
+    // 5 s in release (new code ~0.4 s) and 120 s in debug (new code ~3.7 s).
+    let bound = if cfg!(debug_assertions) {
+        Duration::from_secs(120)
+    } else {
+        Duration::from_secs(5)
+    };
+    let s = Scratch::new("twelve-thousand");
+    let mut src = String::from(HEADER);
+    src.push_str("contract ManyTest is Test {\n    Vault vault = new Vault();\n");
+    for i in 0..12_000u64 {
+        src.push_str(&format!(
+            "    function test_n{i}() public {{\n        vm.prank(address(uint160({i} + 1)));\n        vault.setFee({i});\n    }}\n"
+        ));
+    }
+    src.push_str("}\n");
+    let file = s.write("test/Many.t.sol", &src);
+    let (out, elapsed) = run_bounded(
+        &s.0,
+        &[
+            "check",
+            &file.to_string_lossy(),
+            "--no-declaration",
+            "--format",
+            "json",
+        ],
+        Duration::from_secs(300),
+    );
+    assert!(
+        matches!(out.status.code(), Some(0..=2)),
+        "exit {:?}: {}",
+        out.status,
+        String::from_utf8_lossy(&out.stderr)
+    );
+    assert!(
+        elapsed <= bound,
+        "12 000 test functions took {elapsed:?}, over the {bound:?} bound"
+    );
+}
+
+#[test]
+fn an_oversized_source_file_is_refused_by_name_before_it_is_read() {
+    let _guard = heavy();
+    // A 1 GiB file is refused from its metadata, not read and then rejected.
+    // The error names the file and the limit.
+    let s = Scratch::new("huge");
+    let path = s.0.join("test/Huge.t.sol");
+    std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+    let file = std::fs::File::create(&path).unwrap();
+    file.set_len(1024 * 1024 * 1024).unwrap();
+    drop(file);
+    let (out, elapsed) = run_bounded(
+        &s.0,
+        &[
+            "check",
+            &path.to_string_lossy(),
+            "--no-declaration",
+            "--format",
+            "json",
+        ],
+        Duration::from_secs(60),
+    );
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{stderr}");
+    assert!(
+        stderr.contains("Huge.t.sol") && stderr.contains("limit"),
+        "the refusal did not name the file and the limit: {stderr}"
+    );
+    assert!(
+        elapsed < Duration::from_secs(30),
+        "an oversized file was read before it was refused: {elapsed:?}"
+    );
+}
+
+#[test]
+fn an_oversized_policy_input_is_refused_by_name_before_it_is_read() {
+    // --report, --claims, --declaration and --config are read after a size
+    // check. The file is 17 MiB of sparse zeros (the limit is 16 MiB), placed
+    // outside the project so the declaration/config "outside the repo under
+    // review" rule is not what refuses it. Before the cap the file was read
+    // and the run failed later for a different reason.
+    let s = Scratch::new("huge-input");
+    let outside = Scratch::new("huge-input-outside");
+    let file = s.write("test/Poc.t.sol", &poc("        vault.setFee(1);"));
+    let huge = outside.0.join("huge.bin");
+    let f = std::fs::File::create(&huge).unwrap();
+    f.set_len(17 * 1024 * 1024).unwrap();
+    drop(f);
+    let file_arg = file.to_string_lossy().to_string();
+    let huge_arg = huge.to_string_lossy().to_string();
+    for flag in ["--report", "--claims", "--declaration", "--config"] {
+        let mut args = vec!["check", file_arg.as_str(), "--format", "json"];
+        if flag != "--declaration" {
+            args.push("--no-declaration");
+        }
+        args.push(flag);
+        args.push(huge_arg.as_str());
+        let (out, _) = run_bounded(&s.0, &args, Duration::from_secs(60));
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert_eq!(out.status.code(), Some(2), "{flag}: {stderr}");
+        assert!(
+            stderr.contains("input limit") && stderr.contains("16777216"),
+            "{flag} did not name the input limit: {stderr}"
+        );
+    }
+}
+
+#[test]
+fn a_non_regular_policy_input_is_refused_by_name() {
+    // A directory is not a FIFO, but it exercises the same type check on
+    // every platform: the reader refuses it by policy before the OS error
+    // that a plain read would produce.
+    let s = Scratch::new("not-regular");
+    let file = s.write("test/Poc.t.sol", &poc("        vault.setFee(1);"));
+    let dir = s.0.join("report-dir");
+    std::fs::create_dir(&dir).unwrap();
+    let file_arg = file.to_string_lossy().to_string();
+    let dir_arg = dir.to_string_lossy().to_string();
+    let (out, _) = run_bounded(
+        &s.0,
+        &[
+            "check",
+            file_arg.as_str(),
+            "--report",
+            dir_arg.as_str(),
+            "--no-declaration",
+            "--format",
+            "json",
+        ],
+        Duration::from_secs(60),
+    );
+    assert_eq!(out.status.code(), Some(2));
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(stderr.contains("not a regular file"), "{stderr}");
+}
+
+#[cfg(unix)]
+#[test]
+fn a_fifo_policy_input_is_refused_without_blocking() {
+    // A FIFO has length 0, so a size-only check would read it and block until
+    // a writer appears. The reader refuses non-regular files before opening
+    // it. The deadline is the point: with the old check this test hangs on
+    // the read and run_bounded fails it.
+    let s = Scratch::new("fifo");
+    let file = s.write("test/Poc.t.sol", &poc("        vault.setFee(1);"));
+    let fifo = s.0.join("report.fifo");
+    let made = std::process::Command::new("mkfifo")
+        .arg(&fifo)
+        .status()
+        .map(|status| status.success())
+        .unwrap_or(false);
+    if !made {
+        eprintln!("mkfifo is unavailable; the FIFO case is skipped");
+        return;
+    }
+    let file_arg = file.to_string_lossy().to_string();
+    let fifo_arg = fifo.to_string_lossy().to_string();
+    let start = Instant::now();
+    let (out, _) = run_bounded(
+        &s.0,
+        &[
+            "check",
+            file_arg.as_str(),
+            "--report",
+            fifo_arg.as_str(),
+            "--no-declaration",
+            "--format",
+            "json",
+        ],
+        Duration::from_secs(20),
+    );
+    assert_eq!(out.status.code(), Some(2));
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(stderr.contains("not a regular file"), "{stderr}");
+    assert!(
+        start.elapsed() < Duration::from_secs(10),
+        "a FIFO input blocked for {:?}",
+        start.elapsed()
+    );
+}
+
+#[test]
+fn control_characters_in_source_never_reach_text_or_markdown_output() {
+    // A Solidity string literal can hold a raw ESC (0x1b): the parser keeps
+    // the bytes, and the rule message and evidence quote them. The render
+    // boundary drops control characters from user-derived fields, so a report
+    // cannot drive the reader's terminal. The tool's own colour codes must
+    // still appear when --color always asks for them.
+    let s = Scratch::new("esc");
+    let file = s.write(
+        "test/Esc.t.sol",
+        &poc(
+            "        vm.createSelectFork(\"http://127.0.0.1/\u{1b}[31m\");\n        assertEq(\"v\u{1b}[31m\", \"v\u{1b}[31m\");",
+        ),
+    );
+    let file_arg = file.to_string_lossy().to_string();
+    let run = |extra: &[&str]| {
+        let mut args = vec!["check", file_arg.as_str(), "--no-declaration", "--color"];
+        args.extend_from_slice(extra);
+        let (out, _) = run_bounded(&s.0, &args, Duration::from_secs(60));
+        out
+    };
+
+    let text = run(&["never", "--format", "text"]);
+    let text_out = String::from_utf8_lossy(&text.stdout);
+    assert!(
+        text_out.contains("RG09"),
+        "the fixture produced no finding: {text_out}"
+    );
+    assert!(
+        !text.stdout.contains(&0x1b),
+        "text output carries a control character"
+    );
+    assert!(
+        text_out.contains("[31m"),
+        "the sanitized text should remain: {text_out}"
+    );
+
+    let markdown = run(&["never", "--format", "markdown"]);
+    assert!(
+        !markdown.stdout.contains(&0x1b),
+        "markdown output carries a control character"
+    );
+
+    let coloured = run(&["always", "--format", "text"]);
+    let coloured_out = String::from_utf8_lossy(&coloured.stdout);
+    assert!(
+        coloured.stdout.windows(4).any(|w| w == b"\x1b[1;"),
+        "the tool's own colour codes are missing with --color always"
+    );
+    assert!(
+        !coloured.stdout.windows(5).any(|w| w == b"\x1b[31m"),
+        "the source's own escape sequence survived in colour output"
+    );
+    assert!(
+        coloured_out.contains("[31m"),
+        "the sanitized source text should remain: {coloured_out}"
     );
 }

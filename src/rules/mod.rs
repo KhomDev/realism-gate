@@ -40,6 +40,10 @@ pub struct Ctx<'p, 'a> {
     pub suite: &'a Suite<'p>,
     pub trace: &'a Trace<'p>,
     pub env: &'a Env<'p>,
+    /// Whether the suite's source, read as a whole, concedes a fee loss.
+    /// Computed once per suite: scanning and lowercasing the file per test
+    /// made a large suite quadratic.
+    pub fee_concession: bool,
     /// For each op, the sender of that op if it is an external call or a
     /// deployment.
     pub senders: Vec<Option<Sender<'p>>>,
@@ -47,6 +51,11 @@ pub struct Ctx<'p, 'a> {
     pub switches: Vec<(usize, &'p Expr)>,
     /// The file the test function is written in.
     pub test_unit: usize,
+}
+
+/// The whole-file fact a rule needs, computed once per suite.
+pub fn fee_concession(source: &str) -> bool {
+    realism::file_concedes_fee_loss(&source.to_ascii_lowercase())
 }
 
 impl<'p> Ctx<'p, '_> {
@@ -132,17 +141,16 @@ pub fn check_test<'p>(
     suite: &Suite<'p>,
     trace: &Trace<'p>,
     env: &Env<'p>,
+    fee_concession: bool,
 ) -> Vec<Raw> {
     let (senders, switches) = replay_senders(trace);
-    let test_unit = suite
-        .function(&trace.test.name)
-        .map(|(pos, _)| suite.linear[pos].unit)
-        .unwrap_or(suite.unit);
+    let test_unit = suite.linear[trace.test_pos].unit;
     let ctx = Ctx {
         project,
         suite,
         trace,
         env,
+        fee_concession,
         senders,
         switches,
         test_unit,

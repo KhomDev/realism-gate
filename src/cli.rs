@@ -299,20 +299,18 @@ fn verify_fix_cmd(args: VerifyArgs) -> Result<ExitCode, String> {
         None => std::env::current_dir().map_err(|e| format!("current directory: {e}"))?,
     };
     let host = if args.sandbox || sandbox_attested() {
-        verify_fix::HostPolicy::Sandbox
+        Some(verify_fix::HostPolicy::Sandbox)
     } else if args.allow_host {
         eprintln!(
             "realism-gate: --allow-host runs an untrusted forge project on this machine. \
              ffi stays off. Prefer a container; see docs/verify-fix.md."
         );
-        verify_fix::HostPolicy::AllowHost
+        Some(verify_fix::HostPolicy::AllowHost)
     } else {
-        return Err(
-            "verify-fix will not run an untrusted forge project on the host. \
-             Run it in a container (ffi off, network only to the pinned RPC) and pass --sandbox, \
-             or pass --allow-host to run here anyway. See docs/verify-fix.md."
-                .into(),
-        );
+        // The library refuses a request without a policy, with the message
+        // docs/verify-fix.md quotes. Passing `None` keeps that decision in
+        // one place for every caller.
+        None
     };
     match verify_fix::verify(&verify_fix::Request {
         poc: args.poc,
@@ -351,8 +349,7 @@ fn verify_fix_cmd(args: VerifyArgs) -> Result<ExitCode, String> {
 }
 
 fn init_claims_cmd(args: InitClaimsArgs) -> Result<ExitCode, String> {
-    let text = std::fs::read_to_string(&args.finding)
-        .map_err(|e| format!("{}: {e}", args.finding.display()))?;
+    let text = project::read_input(&args.finding).map_err(|e| e.to_string())?;
     let out = match &args.out {
         Some(p) => p.clone(),
         None => args
@@ -494,7 +491,7 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
         _ => None,
     };
     let decl_text = match &decl_path {
-        Some(p) => Some(std::fs::read_to_string(p).map_err(|e| format!("{}: {e}", p.display()))?),
+        Some(p) => Some(project::read_input(p).map_err(|e| e.to_string())?),
         None => None,
     };
     let decl = match (&decl_path, &decl_text) {
@@ -535,7 +532,7 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
     };
     let config = match &config_path {
         Some(p) => {
-            let text = std::fs::read_to_string(p).map_err(|e| format!("{}: {e}", p.display()))?;
+            let text = project::read_input(p).map_err(|e| e.to_string())?;
             Config::parse(&text).map_err(|e| format!("{}: {e}", p.display()))?
         }
         None => Config::default(),
@@ -609,9 +606,7 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
     // The report's prose, read once: the claim table comes from it and the
     // evidence card hashes it.
     let report_text = match &args.report {
-        Some(path) => {
-            Some(std::fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?)
-        }
+        Some(path) => Some(project::read_input(path).map_err(|e| e.to_string())?),
         None => None,
     };
     let loaded_claims = claims::resolve(args.report.as_deref(), args.claims.as_deref(), &cwd)?;

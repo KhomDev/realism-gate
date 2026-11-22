@@ -219,6 +219,8 @@ pub fn analyze(
             continue;
         }
         summary.suites += 1;
+        let base = trace::SuiteBase::new(project, &suite);
+        let fee_concession = rules::fee_concession(&project.units[suite.unit].source);
         for test in &suite.tests {
             if let Some(re) = &opts.match_test
                 && !re.is_match(&test.name)
@@ -226,7 +228,7 @@ pub fn analyze(
                 continue;
             }
             summary.tests += 1;
-            let tr = trace::build(project, &suite, test);
+            let tr = trace::build_with(project, &suite, test, &base);
             let mut env = Env::new(project, suite.unit, &tr);
             if let Some(d) = declaration {
                 env.declared_attackers = d.decl.attackers().collect();
@@ -234,7 +236,7 @@ pub fn analyze(
                 env.declared_privileged = d.decl.privileged_identities().collect();
                 env.deployment_evidence = d.decl.deployment_names().collect();
             }
-            for raw in rules::check_test(project, &suite, &tr, &env) {
+            for raw in rules::check_test(project, &suite, &tr, &env, fee_concession) {
                 add(
                     raw,
                     &suite.contract.name,

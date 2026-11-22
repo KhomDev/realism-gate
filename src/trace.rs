@@ -152,6 +152,8 @@ pub fn is_assert_name(name: &str) -> bool {
 pub struct Trace<'p> {
     pub ops: Vec<Op<'p>>,
     pub test: &'p Function,
+    /// The test function's position in the suite's linearization.
+    pub test_pos: usize,
 }
 
 impl<'p> Trace<'p> {
@@ -165,6 +167,94 @@ impl<'p> Trace<'p> {
 
 const MAX_INLINE_DEPTH: usize = 8;
 
+/// The part of a test's trace that does not depend on the test: state
+/// initializers, constructors, `setUp()`, and the callbacks a protocol can
+/// trigger. One suite shares one base across all its tests. Without it, the
+/// callback scan (every function in every contract, per test) made the run
+/// quadratic in the number of test functions.
+pub struct SuiteBase<'p> {
+    setup: Vec<Op<'p>>,
+    callbacks: Vec<Op<'p>>,
+    /// The most-derived definition of each function with a body, by name.
+    positions: std::collections::HashMap<String, usize>,
+}
+
+impl<'p> SuiteBase<'p> {
+    pub fn new(project: &'p Project, suite: &Suite<'p>) -> SuiteBase<'p> {
+        let mut positions = std::collections::HashMap::new();
+        for (pos, located) in suite.linear.iter().enumerate() {
+            for f in &located.contract.functions {
+                if f.body.is_some() {
+                    positions.entry(f.name.clone()).or_insert(pos);
+                }
+            }
+        }
+        let mut b = Builder {
+            project,
+            suite,
+            ops: Vec::new(),
+            stack: Vec::new(),
+        };
+
+        // Most base first: initializers and constructors run base to derived.
+        for (pos, located) in suite.linear.iter().enumerate().rev() {
+            for var in &located.contract.vars {
+                if let Some(init) = &var.init {
+                    b.visit(init, Phase::Setup, located.unit, "<state>");
+                }
+                b.ops.push(Op {
+                    kind: OpKind::Assign {
+                        target: var.name.clone(),
+                        ty: Some(var.ty.clone()),
+                        value: var.init.as_ref(),
+                    },
+                    phase: Phase::Setup,
+                    unit: located.unit,
+                    pos: var.pos,
+                    function: "<state>".to_string(),
+                });
+            }
+            if let Some(ctor) = located
+                .contract
+                .functions
+                .iter()
+                .find(|f| f.kind == FnKind::Constructor)
+            {
+                b.walk_function(pos, ctor, Phase::Setup);
+            }
+        }
+        if let Some((pos, set_up)) = suite.function("setUp") {
+            b.walk_function(pos, set_up, Phase::Setup);
+        }
+        let setup = std::mem::take(&mut b.ops);
+
+        let mut seen: std::collections::HashSet<&str> = std::collections::HashSet::new();
+        for (pos, located) in suite.linear.iter().enumerate() {
+            for f in &located.contract.functions {
+                let callback = matches!(f.kind, FnKind::Fallback | FnKind::Receive)
+                    || (f.kind == FnKind::Function
+                        && f.is_externally_callable()
+                        && !is_test_function(f)
+                        && f.name != "setUp"
+                        && !f.name.starts_with("invariant")
+                        && !f.name.starts_with("test"));
+                if callback && f.body.is_some() && seen.insert(f.name.as_str()) {
+                    b.walk_function(pos, f, Phase::Callback);
+                }
+            }
+        }
+        SuiteBase {
+            setup,
+            callbacks: b.ops,
+            positions,
+        }
+    }
+
+    fn position(&self, name: &str) -> Option<usize> {
+        self.positions.get(name).copied()
+    }
+}
+
 struct Builder<'p, 's> {
     project: &'p Project,
     suite: &'s Suite<'p>,
@@ -174,63 +264,37 @@ struct Builder<'p, 's> {
 }
 
 pub fn build<'p>(project: &'p Project, suite: &Suite<'p>, test: &'p Function) -> Trace<'p> {
+    let base = SuiteBase::new(project, suite);
+    build_with(project, suite, test, &base)
+}
+
+/// Builds one test's trace from a suite base shared by every test in the
+/// suite. `test_pos` is the test's position in the linearization.
+pub fn build_with<'p>(
+    project: &'p Project,
+    suite: &Suite<'p>,
+    test: &'p Function,
+    base: &SuiteBase<'p>,
+) -> Trace<'p> {
+    let found = base
+        .position(&test.name)
+        .or_else(|| suite.function(&test.name).map(|(pos, _)| pos));
+    let test_pos = found.unwrap_or(0);
     let mut b = Builder {
         project,
         suite,
-        ops: Vec::new(),
+        ops: base.setup.clone(),
         stack: Vec::new(),
     };
-
-    // Most base first: initializers and constructors run base to derived.
-    for (pos, located) in suite.linear.iter().enumerate().rev() {
-        for var in &located.contract.vars {
-            if let Some(init) = &var.init {
-                b.visit(init, Phase::Setup, located.unit, "<state>");
-            }
-            b.ops.push(Op {
-                kind: OpKind::Assign {
-                    target: var.name.clone(),
-                    ty: Some(var.ty.clone()),
-                    value: var.init.as_ref(),
-                },
-                phase: Phase::Setup,
-                unit: located.unit,
-                pos: var.pos,
-                function: "<state>".to_string(),
-            });
-        }
-        if let Some(ctor) = located
-            .contract
-            .functions
-            .iter()
-            .find(|f| f.kind == FnKind::Constructor)
-        {
-            b.walk_function(pos, ctor, Phase::Setup);
-        }
+    if found.is_some() {
+        b.walk_function(test_pos, test, Phase::Test);
     }
-    if let Some((pos, set_up)) = suite.function("setUp") {
-        b.walk_function(pos, set_up, Phase::Setup);
+    b.ops.extend(base.callbacks.iter().cloned());
+    Trace {
+        ops: b.ops,
+        test,
+        test_pos,
     }
-    if let Some((pos, _)) = suite.function(&test.name) {
-        b.walk_function(pos, test, Phase::Test);
-    }
-    let mut seen: Vec<&str> = Vec::new();
-    for (pos, located) in suite.linear.iter().enumerate() {
-        for f in &located.contract.functions {
-            let callback = matches!(f.kind, FnKind::Fallback | FnKind::Receive)
-                || (f.kind == FnKind::Function
-                    && f.is_externally_callable()
-                    && !is_test_function(f)
-                    && f.name != "setUp"
-                    && !f.name.starts_with("invariant")
-                    && !f.name.starts_with("test"));
-            if callback && f.body.is_some() && !seen.contains(&f.name.as_str()) {
-                seen.push(&f.name);
-                b.walk_function(pos, f, Phase::Callback);
-            }
-        }
-    }
-    Trace { ops: b.ops, test }
 }
 
 impl<'p> Builder<'p, '_> {

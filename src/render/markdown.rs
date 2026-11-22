@@ -1,7 +1,7 @@
 //! Markdown, for a CI job summary or a pull-request comment. Like the text
 //! format it is for people and may change between releases; parse the JSON.
 
-use super::{TOOL, VERSION, rule_url};
+use super::{TOOL, VERSION, rule_url, sanitize};
 use crate::engine::Report;
 use crate::finding::{Finding, Severity};
 
@@ -10,7 +10,8 @@ use crate::finding::{Finding, Severity};
 const MAX_ROWS: usize = 50;
 
 fn cell(text: &str) -> String {
-    text.split_whitespace()
+    sanitize(text)
+        .split_whitespace()
         .collect::<Vec<_>>()
         .join(" ")
         .replace('|', "\\|")

@@ -230,9 +230,10 @@ fn one(
     report: &Report,
     declaration: Option<&Declaration>,
     suite: &Suite<'_>,
+    base: &trace::SuiteBase<'_>,
     test: &crate::ir::Function,
 ) -> TestFacts {
-    let tr: Trace<'_> = trace::build(project, suite, test);
+    let tr: Trace<'_> = trace::build_with(project, suite, test, base);
     let mut env = Env::new(project, suite.unit, &tr);
     if let Some(d) = declaration {
         env.declared_attackers = d.attackers().collect();
@@ -359,13 +360,14 @@ pub fn collect(
         {
             continue;
         }
+        let base = trace::SuiteBase::new(project, &suite);
         for test in &suite.tests {
             if let Some(re) = &opts.match_test
                 && !re.is_match(&test.name)
             {
                 continue;
             }
-            out.push(one(project, report, declaration, &suite, test));
+            out.push(one(project, report, declaration, &suite, &base, test));
         }
     }
     out

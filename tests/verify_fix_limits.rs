@@ -24,6 +24,7 @@ fn scratch(name: &str) -> PathBuf {
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(dir.join("patched")).unwrap();
     std::fs::create_dir_all(dir.join("test")).unwrap();
+    std::fs::create_dir_all(dir.join("home")).unwrap();
     std::fs::write(dir.join("test/Poc.t.sol"), "contract Poc {}\n").unwrap();
     dir
 }
@@ -46,6 +47,9 @@ fn verify_fix(dir: &Path, sandbox_env: Option<&str>) -> Output {
         .arg("--forge")
         .arg(dir.join("no-such-forge"))
         .current_dir(dir)
+        // A developer's real global Foundry config must not change a test.
+        .env("HOME", dir.join("home"))
+        .env("USERPROFILE", dir.join("home"))
         .env_remove("REALISM_GATE_SANDBOX");
     if let Some(v) = sandbox_env {
         cmd.env("REALISM_GATE_SANDBOX", v);
@@ -115,6 +119,8 @@ fn the_sandbox_flag_is_the_explicit_attestation() {
         .arg(dir.join("patched"))
         .arg("--forge")
         .arg(dir.join("no-such-forge"))
+        .env("HOME", dir.join("home"))
+        .env("USERPROFILE", dir.join("home"))
         .env_remove("REALISM_GATE_SANDBOX")
         .output()
         .expect("binary runs");
