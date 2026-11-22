@@ -353,6 +353,7 @@ mod tests {
             sanitize("x.sol\n  ERROR RG01 \u{202E}evil\u{202C}\u{2028}y"),
             "x.sol   ERROR RG01 evil y"
         );
+        assert_eq!(sanitize("a\u{061C}b\u{200E}c\u{200F}d"), "abcd");
     }
 
     #[test]
