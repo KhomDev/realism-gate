@@ -42,8 +42,9 @@ It is not a failed PoC and it is not a fix.
 ## Bounded runs
 
 The copy is attacker-controlled, so it is capped before and while it is made:
-50 000 files, 512 MiB in total, and 64 directories deep. A tree over any of
-those is refused with an error naming the limit, before forge starts.
+50 000 files, 512 MiB in total, 50 000 directories, and 64 levels deep. A tree
+over any of those is refused with an error naming the limit, before forge
+starts.
 
 Each forge run has a wall-clock limit of 10 minutes and stream caps of 64 MiB
 on stdout and 1 MiB on stderr. A run that exceeds the time or either stream
@@ -86,8 +87,7 @@ A Foundry project can set `ffi = true` and can name an RPC URL. `verify-fix`
 refuses to run when any Foundry config it can check enables `ffi`. The check
 is a TOML parse, not a text heuristic, so spacing, tabs, quoted keys, dotted
 keys, inline tables and profiles it has never heard of cannot change the
-answer. These are checked, and every check happens before a forge process is
-started:
+answer. Four configs are checked:
 
 1. the global config, `~/.foundry/foundry.toml` (`%USERPROFILE%\.foundry\foundry.toml`
    on Windows, with `HOME` as the fallback);
@@ -96,10 +96,34 @@ started:
 4. the copy the `--patch` is applied to, after the apply — a patch that adds
    `ffi = true` is refused.
 
+The global config and the root are parsed before anything is copied, the
+`--patched` tree before it is copied, and the post-patch copy after the apply.
+The global config and both copies are parsed again immediately before **each**
+forge start (so also before the second run).
+
 Any key named `ffi` with the boolean value `true`, anywhere in a parsed
 document, is a refusal. That is deliberately conservative: a profile this
 program does not know about is still covered. A checked config that does not
 parse as TOML is refused too, rather than assumed off.
+
+The same parse enforces `fs_permissions`: every entry must grant exactly
+`access = "read"`. An entry with `access = "write"` or `access = "read-write"`,
+an entry with no `access`, or an `fs_permissions` value that is not an array is
+refused before any forge run. This is the primary control against a cross-run
+bypass: with write access the first PoC run could rewrite the other copy's (or
+the global) config to `ffi = true`, and the second run would then execute ffi.
+The re-parse before the first and the second run is defense in depth for the
+simple rewrite; a lingering process that writes after a check is covered only
+by the container boundary.
+
+A project that grants itself write access is refused even when the PoC does
+not use it; narrow the entry to `access = "read"` for `verify-fix`.
+
+The global config path is resolved from `USERPROFILE` (then `HOME`) on
+Windows and from `HOME` elsewhere. Foundry may resolve the OS known profile
+folder instead, so a config in that folder can differ from the one checked
+when those variables are overridden; `docs/threat-model.md` H5 records that
+residual.
 
 `FOUNDRY_CONFIG` is set on the forge child to the absolute path of a config
 inside the copy that this command checked. If the tree has no `foundry.toml`,
@@ -107,7 +131,7 @@ a minimal `[profile.default]` file is created in the copy and pinned. This is
 deliberate: Foundry loads a `.env` after it starts, and dotenvy does not
 override an already-set variable, so deleting `FOUNDRY_CONFIG` would let a
 `.env` point it at a config the guard never parsed. As defense in depth, a
-`.env` in any copied tree is refused before forge runs; `copy_tree` skips
+`.env` in any copied tree is refused before each forge run; `copy_tree` skips
 dotfiles, so the vector is a `--patch` that creates one.
 
 **Residual, not covered.** Foundry searches upward from the project directory

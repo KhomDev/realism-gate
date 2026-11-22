@@ -122,7 +122,7 @@ fn a_tree_deeper_than_the_copy_limit_is_refused_before_forge_starts() {
     let stderr = String::from_utf8_lossy(&out.stderr);
     assert_eq!(out.status.code(), Some(2), "{stderr}");
     assert!(
-        stderr.contains("64-directory limit") && stderr.contains("will not copy"),
+        stderr.contains("64-level limit") && stderr.contains("will not copy"),
         "{stderr}"
     );
     assert!(!marker.exists(), "forge ran despite the depth cap");

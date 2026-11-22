@@ -216,8 +216,10 @@ fn the_guard_does_not_refuse_a_project_with_ffi_off() {
 
 #[test]
 fn a_global_config_that_enables_ffi_is_refused_before_forge_starts() {
-    // The fake HOME is set by verify_fix(); Foundry reads the same global
-    // file, so a tree with ffi off is still unsafe while this one says true.
+    // verify-fix reads the global config under USERPROFILE (then HOME) on
+    // Windows and HOME elsewhere; the fake home makes it read this file. On
+    // Windows, Foundry may resolve the OS known profile folder instead of
+    // these variables; docs/threat-model.md H5 records that residual.
     let dir = scratch("global");
     let project = dir.join("project");
     std::fs::create_dir_all(dir.join("home/.foundry")).unwrap();
@@ -364,5 +366,99 @@ fn an_oversized_foundry_toml_is_refused_before_forge_starts() {
         "{stderr}"
     );
     assert!(!marker.exists(), "forge ran despite an unreadable config");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+fn fs_config(access: &str) -> String {
+    format!("[profile.default]\nfs_permissions = [{{ access = \"{access}\", path = \".\" }}]\n")
+}
+
+#[test]
+fn write_fs_permissions_are_refused_in_every_config_the_guard_reads() {
+    // The first PoC run could use write fs_permissions to rewrite the other
+    // copy or the global config to ffi = true, and the second run would then
+    // execute ffi. The config must be refused before either run.
+
+    // 1. The root tree.
+    let dir = scratch("fs-root");
+    let project = dir.join("project");
+    std::fs::write(project.join("foundry.toml"), fs_config("write")).unwrap();
+    let (forge, marker) = fake_forge(&dir);
+    let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{stderr}");
+    assert!(stderr.contains("fs_permissions"), "{stderr}");
+    assert!(!marker.exists(), "forge ran despite write fs_permissions");
+    let _ = std::fs::remove_dir_all(&dir);
+
+    // 2. The --patched tree.
+    let dir = scratch("fs-patched");
+    let project = dir.join("project");
+    std::fs::write(project.join("patched/foundry.toml"), fs_config("write")).unwrap();
+    let (forge, marker) = fake_forge(&dir);
+    let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{stderr}");
+    assert!(stderr.contains("fs_permissions"), "{stderr}");
+    assert!(!marker.exists(), "forge ran despite write fs_permissions");
+    let _ = std::fs::remove_dir_all(&dir);
+
+    // 3. The copy after --patch.
+    let dir = scratch("fs-post-patch");
+    let project = dir.join("project");
+    let patch = dir.join("fs.diff");
+    std::fs::write(&patch, replacement_patch(&fs_config("write"))).unwrap();
+    let (forge, marker) = fake_forge(&dir);
+    let out = verify_fix(&project, &forge, None, Some(&patch));
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{stderr}");
+    assert!(stderr.contains("fs_permissions"), "{stderr}");
+    assert!(!marker.exists(), "forge ran despite write fs_permissions");
+    let _ = std::fs::remove_dir_all(&dir);
+
+    // 4. The global config.
+    let dir = scratch("fs-global");
+    let project = dir.join("project");
+    std::fs::create_dir_all(dir.join("home/.foundry")).unwrap();
+    std::fs::write(dir.join("home/.foundry/foundry.toml"), fs_config("write")).unwrap();
+    let (forge, marker) = fake_forge(&dir);
+    let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{stderr}");
+    assert!(stderr.contains("fs_permissions"), "{stderr}");
+    assert!(!marker.exists(), "forge ran despite write fs_permissions");
+    let _ = std::fs::remove_dir_all(&dir);
+
+    // 5. read-write is refused the same way.
+    let dir = scratch("fs-read-write");
+    let project = dir.join("project");
+    std::fs::write(project.join("foundry.toml"), fs_config("read-write")).unwrap();
+    let (forge, marker) = fake_forge(&dir);
+    let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{stderr}");
+    assert!(stderr.contains("read-write"), "{stderr}");
+    assert!(
+        !marker.exists(),
+        "forge ran despite read-write fs_permissions"
+    );
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn read_only_fs_permissions_reach_forge() {
+    // The control: a read-only entry is allowed, so the refusals above are
+    // about write access and not about fs_permissions itself.
+    let dir = scratch("fs-read");
+    let project = dir.join("project");
+    std::fs::write(project.join("foundry.toml"), fs_config("read")).unwrap();
+    let (forge, marker) = fake_forge(&dir);
+    let out = verify_fix(&project, &forge, Some(&project.join("patched")), None);
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        marker.exists(),
+        "a read-only config never reached forge: {stderr}"
+    );
+    assert_eq!(out.status.code(), Some(1), "{stderr}");
     let _ = std::fs::remove_dir_all(&dir);
 }

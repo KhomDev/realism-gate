@@ -10,11 +10,16 @@
 //! that contains `"success": false`, is not a verdict.
 //!
 //! Forge runs on this machine. A project under review is untrusted: it can
-//! enable `ffi` and it can make forge open a connection. This command refuses
-//! to run when any `foundry.toml` in the tree sets `ffi = true`: the root
-//! project, the `--patched` tree, and the copied tree after a `--patch` is
-//! applied are all parsed as TOML, and so is Foundry's global config
-//! (`~/.foundry/foundry.toml`, or `%USERPROFILE%\.foundry\foundry.toml`).
+//! enable `ffi`, grant itself `fs_permissions`, and make forge open a
+//! connection. This command refuses to run when any `foundry.toml` in the tree
+//! sets `ffi = true`, or when any `fs_permissions` entry is not exactly
+//! `access = "read"` (write access would let the first PoC run rewrite the
+//! other tree's or the global config for the second run). The root project,
+//! the `--patched` tree, the copied tree after a `--patch` is applied and
+//! Foundry's global config (`~/.foundry/foundry.toml`, or
+//! `%USERPROFILE%\.foundry\foundry.toml`) are parsed as TOML before the tree
+//! is used. The global config and both copies are parsed again immediately
+//! before each forge start, together with the `.env` check.
 //! `FOUNDRY_CONFIG` is pinned to the absolute path of a checked config in the
 //! copy (a minimal one is created when the tree has none), and a `.env` in a
 //! copied tree is refused: Foundry loads dotenv after it starts and would
@@ -129,25 +134,28 @@ fn verify_with_global_config(
     if req.host.is_none() {
         return Err(VerifyError(HOST_REFUSAL.into()));
     }
-    // Every config forge could read is checked for ffi: the global config
-    // first, then the trees. The check on the copied tree after `--patch` is
-    // applied is the one that covers a patch that adds `ffi = true`.
+    // The global config and the root are checked before anything is copied
+    // (fail fast); the --patched tree is checked before it is copied, and the
+    // post-patch copy after the apply. The global config and both copies are
+    // checked again immediately before each forge start below: the first PoC
+    // run can rewrite the other copy or the global config unless its
+    // fs_permissions are read-only, and a read-only config cannot do it.
     if let Some(path) = global_config {
-        refuse_ffi_file(path, "Foundry's global config")?;
+        refuse_config_file(path, "Foundry's global config")?;
     }
-    refuse_ffi(&req.root, "the project in --root")?;
+    refuse_config_dir(&req.root, "the project in --root")?;
 
     let mut temps = TempDirs::default();
     let baseline = temps.push(copy_of(&req.root)?);
-    refuse_ffi(&baseline, "the copied project")?;
+    refuse_config_dir(&baseline, "the copied project")?;
     refuse_dotenv(&baseline, "the copied project")?;
     let patched = if let Some(dir) = &req.patched_dir {
         if !dir.is_dir() {
             return Err(VerifyError(format!("{}: not a directory", dir.display())));
         }
-        refuse_ffi(dir, "the --patched tree")?;
+        refuse_config_dir(dir, "the --patched tree")?;
         let copy = temps.push(copy_of(dir)?);
-        refuse_ffi(&copy, "the copied --patched tree")?;
+        refuse_config_dir(&copy, "the copied --patched tree")?;
         refuse_dotenv(&copy, "the copied --patched tree")?;
         copy
     } else {
@@ -160,12 +168,30 @@ fn verify_with_global_config(
         }
         let work = temps.push(copy_of(&req.root)?);
         apply_patch(&work, &patch)?;
-        refuse_ffi(&work, "the patched copy")?;
+        refuse_config_dir(&work, "the patched copy")?;
         refuse_dotenv(&work, "the patched copy")?;
         work
     };
 
+    // Before the first run: both copies and the global config.
+    revalidate_trees(
+        global_config,
+        &[
+            (&baseline, "the copied project"),
+            (&patched, "the patched tree"),
+        ],
+    )?;
     let before = run_forge(req, &baseline, "unpatched")?;
+    // Again before the second run. This is the defense-in-depth catch for a
+    // first run that rewrote the other copy or the global config; the
+    // fs_permissions refusal above is the primary control.
+    revalidate_trees(
+        global_config,
+        &[
+            (&patched, "the patched tree"),
+            (&baseline, "the copied project"),
+        ],
+    )?;
     let after = run_forge(req, &patched, "patched")?;
     let detail = format!("unpatched: {}\npatched: {}", before.detail, after.detail);
     if !before.passed {
@@ -366,8 +392,10 @@ fn run_forge(req: &Request, work: &Path, label: &str) -> Result<Side, VerifyErro
         .arg("--match-path")
         .arg(&poc)
         .arg("--json")
-        // Ask forge not to honor a config that turns ffi on, and do not add
-        // an RPC URL. A fork test still uses whatever URL the test names.
+        // FOUNDRY_FFI=false is not a control: Foundry documents the variable
+        // as an explicit exception to env overrides. The TOML parse in
+        // `verify` is what refuses ffi. No RPC URL is added; a fork test still
+        // uses whatever URL the test names.
         .env("FOUNDRY_FFI", "false")
         .env("FOUNDRY_CONFIG", &config)
         .stdin(Stdio::null())
@@ -497,25 +525,16 @@ fn walk_results(v: &Value, out: &mut Vec<bool>) {
     }
 }
 
-/// Whether `dir/foundry.toml` enables `ffi` anywhere. Parsed as TOML, so
-/// spacing, tabs, quoted keys and dotted keys cannot change the answer. Any
-/// table or inline table with a key named `ffi` whose value is the boolean
-/// `true` counts: the scan is deliberately conservative, so a profile this
-/// program has not heard of (or a top-level `ffi`) is refused too.
-fn ffi_enabled(dir: &Path) -> Result<bool, VerifyError> {
-    ffi_in_file(&dir.join("foundry.toml"))
-}
-
-/// The same check for one config file: the global config, or a `foundry.toml`
-/// in a tree. A missing file is not an error (it enables nothing).
+/// Reads one Foundry config with the size and type checks. `None` when the
+/// file does not exist, which enables nothing.
 ///
 /// The size and type are checked before the read. A config is small; a tree
 /// could otherwise ship a huge `foundry.toml` and make this allocate it, and
 /// a FIFO named `foundry.toml` would block.
-fn ffi_in_file(path: &Path) -> Result<bool, VerifyError> {
+fn read_config(path: &Path) -> Result<Option<toml::Value>, VerifyError> {
     let meta = match std::fs::metadata(path) {
         Ok(meta) => meta,
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(false),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(None),
         Err(e) => return Err(VerifyError(format!("{}: {e}", path.display()))),
     };
     if !meta.is_file() {
@@ -535,11 +554,24 @@ fn ffi_in_file(path: &Path) -> Result<bool, VerifyError> {
         .map_err(|e| VerifyError(format!("{}: {e}", path.display())))?;
     let doc: toml::Value = toml::from_str(&text).map_err(|e| {
         VerifyError(format!(
-            "{}: cannot be parsed as TOML, so verify-fix cannot prove ffi is off: {e}",
+            "{}: cannot be parsed as TOML, so verify-fix cannot prove ffi is off and fs_permissions are read-only: {e}",
             path.display()
         ))
     })?;
-    Ok(ffi_set_true(&doc))
+    Ok(Some(doc))
+}
+
+/// Whether `dir/foundry.toml` enables `ffi` anywhere. Parsed as TOML, so
+/// spacing, tabs, quoted keys and dotted keys cannot change the answer. Any
+/// table or inline table with a key named `ffi` whose value is the boolean
+/// `true` counts: the scan is deliberately conservative, so a profile this
+/// program has not heard of (or a top-level `ffi`) is refused too.
+#[cfg(test)]
+fn ffi_enabled(dir: &Path) -> Result<bool, VerifyError> {
+    match read_config(&dir.join("foundry.toml"))? {
+        Some(doc) => Ok(ffi_set_true(&doc)),
+        None => Ok(false),
+    }
 }
 
 fn ffi_set_true(value: &toml::Value) -> bool {
@@ -552,6 +584,47 @@ fn ffi_set_true(value: &toml::Value) -> bool {
     }
 }
 
+/// A problem with an `fs_permissions` entry, or `None` when every entry grants
+/// only reading. Any access other than exactly `"read"`, a missing access, a
+/// non-array value or a non-table entry is refused. Write access would let the
+/// first PoC run rewrite the other tree's or the global config to
+/// `ffi = true`, and the second run would then execute `ffi`.
+fn fs_permissions_problem(value: &toml::Value) -> Option<String> {
+    match value {
+        toml::Value::Table(table) => {
+            for (key, value) in table {
+                if key == "fs_permissions" {
+                    let Some(entries) = value.as_array() else {
+                        return Some("fs_permissions is not an array".to_string());
+                    };
+                    for entry in entries {
+                        let Some(entry) = entry.as_table() else {
+                            return Some("an fs_permissions entry is not a table".to_string());
+                        };
+                        match entry.get("access").and_then(toml::Value::as_str) {
+                            Some("read") => {}
+                            Some(other) => {
+                                return Some(format!("an entry grants access = \"{other}\""));
+                            }
+                            None => {
+                                return Some(
+                                    "an entry has no access (or it is not a string)".into(),
+                                );
+                            }
+                        }
+                    }
+                }
+                if let Some(problem) = fs_permissions_problem(value) {
+                    return Some(problem);
+                }
+            }
+            None
+        }
+        toml::Value::Array(items) => items.iter().find_map(fs_permissions_problem),
+        _ => None,
+    }
+}
+
 fn ffi_error(what: &str) -> VerifyError {
     VerifyError(format!(
         "{what} sets ffi = true. verify-fix will not run a project that can \
@@ -561,16 +634,53 @@ fn ffi_error(what: &str) -> VerifyError {
     ))
 }
 
-fn refuse_ffi(dir: &Path, what: &str) -> Result<(), VerifyError> {
-    if ffi_enabled(dir)? {
-        return Err(ffi_error(&format!("foundry.toml in {what}")));
+fn fs_error(what: &str, problem: &str) -> VerifyError {
+    VerifyError(format!(
+        "{what} sets fs_permissions with {problem}. verify-fix refuses a Foundry config that grants file \
+         write access: the first PoC run could rewrite the other tree's or the global config to \
+         ffi = true, and the second run would execute ffi. Only access = \"read\" entries are \
+         allowed; see docs/verify-fix.md."
+    ))
+}
+
+/// Checks one config file for both controls: `ffi` anywhere, and any
+/// `fs_permissions` entry that is not read-only.
+fn refuse_config_file(path: &Path, what: &str) -> Result<(), VerifyError> {
+    let Some(doc) = read_config(path)? else {
+        return Ok(());
+    };
+    if ffi_set_true(&doc) {
+        return Err(ffi_error(&format!("{what} ({})", path.display())));
+    }
+    if let Some(problem) = fs_permissions_problem(&doc) {
+        return Err(fs_error(&format!("{what} ({})", path.display()), &problem));
     }
     Ok(())
 }
 
-fn refuse_ffi_file(path: &Path, what: &str) -> Result<(), VerifyError> {
-    if ffi_in_file(path)? {
-        return Err(ffi_error(&format!("{what} ({})", path.display())));
+fn refuse_config_dir(dir: &Path, what: &str) -> Result<(), VerifyError> {
+    refuse_config_file(
+        &dir.join("foundry.toml"),
+        &format!("foundry.toml in {what}"),
+    )
+}
+
+/// Re-reads the configs and dotenv files the next forge run can see. This
+/// runs immediately before every forge start: the fs_permissions refusal is
+/// the primary control, but this also catches the simple case where the first
+/// PoC run rewrites the other copy, or the global config, after the initial
+/// check. A lingering process can still write after this check; the container
+/// boundary covers that, as docs/verify-fix.md says.
+fn revalidate_trees(
+    global_config: Option<&Path>,
+    copies: &[(&Path, &str)],
+) -> Result<(), VerifyError> {
+    if let Some(path) = global_config {
+        refuse_config_file(path, "Foundry's global config")?;
+    }
+    for (dir, what) in copies {
+        refuse_config_dir(dir, what)?;
+        refuse_dotenv(dir, what)?;
     }
     Ok(())
 }
@@ -594,7 +704,8 @@ fn refuse_dotenv(dir: &Path, what: &str) -> Result<(), VerifyError> {
 
 /// The absolute path of the config the forge child is pinned to. If the tree
 /// has no `foundry.toml`, a minimal one is created in the copy. The config
-/// has already been checked for `ffi` by `refuse_ffi`; the absolute path is
+/// has already been checked for `ffi` and `fs_permissions` by
+/// `refuse_config_dir`; the absolute path is
 /// what stops a `.env` from redirecting `FOUNDRY_CONFIG` (dotenvy does not
 /// override an already-set variable).
 fn pinned_config(dir: &Path) -> Result<PathBuf, VerifyError> {
@@ -860,14 +971,36 @@ impl Drop for TempDirs {
     }
 }
 
-/// The most files, bytes and directory levels a copied tree may contain. The
-/// project and `--patched` tree are attacker-controlled: without caps, a
-/// hostile repository can fill the disk before forge's own limits apply.
+/// The most files, bytes, directories and directory levels a copied tree may
+/// contain. The project and `--patched` tree are attacker-controlled: without
+/// caps, a hostile repository can fill the disk with files or millions of
+/// empty directories before forge's own limits apply.
 const MAX_COPY_FILES: usize = 50_000;
 const MAX_COPY_BYTES: u64 = 512 * 1024 * 1024;
+const MAX_COPY_DIRS: usize = 50_000;
 const MAX_COPY_DEPTH: usize = 64;
 
 fn copy_tree(from: &Path, to: &Path) -> Result<(), VerifyError> {
+    copy_tree_with_limits(
+        from,
+        to,
+        MAX_COPY_FILES,
+        MAX_COPY_BYTES,
+        MAX_COPY_DIRS,
+        MAX_COPY_DEPTH,
+    )
+}
+
+/// The body of [`copy_tree`] with injectable limits, so the caps can be tested
+/// without generating 50 000 files or directories.
+fn copy_tree_with_limits(
+    from: &Path,
+    to: &Path,
+    max_files: usize,
+    max_bytes: u64,
+    max_dirs: usize,
+    max_depth: usize,
+) -> Result<(), VerifyError> {
     std::fs::create_dir_all(to).map_err(|e| VerifyError(format!("{}: {e}", to.display())))?;
     let skip = [
         "out",
@@ -881,17 +1014,20 @@ fn copy_tree(from: &Path, to: &Path) -> Result<(), VerifyError> {
     struct Budget {
         files: usize,
         bytes: u64,
+        dirs: usize,
     }
     fn walk(
         from: &Path,
         to: &Path,
         skip: &[&str],
         depth: usize,
+        limits: (usize, u64, usize, usize),
         budget: &mut Budget,
     ) -> Result<(), VerifyError> {
-        if depth > MAX_COPY_DEPTH {
+        let (max_files, max_bytes, max_dirs, max_depth) = limits;
+        if depth > max_depth {
             return Err(VerifyError(format!(
-                "{}: directory nesting is deeper than the {MAX_COPY_DEPTH}-directory limit; verify-fix will not copy it",
+                "{}: directory nesting is deeper than the {max_depth}-level limit; verify-fix will not copy it",
                 from.display()
             )));
         }
@@ -907,24 +1043,30 @@ fn copy_tree(from: &Path, to: &Path) -> Result<(), VerifyError> {
             let dest = to.join(entry.file_name());
             let ty = entry.file_type().map_err(|e| VerifyError(e.to_string()))?;
             if ty.is_dir() {
+                budget.dirs += 1;
+                if budget.dirs > max_dirs {
+                    return Err(VerifyError(format!(
+                        "the tree being copied has more than {max_dirs} directories; verify-fix will not copy it"
+                    )));
+                }
                 std::fs::create_dir_all(&dest)
                     .map_err(|e| VerifyError(format!("{}: {e}", dest.display())))?;
-                walk(&entry.path(), &dest, skip, depth + 1, budget)?;
+                walk(&entry.path(), &dest, skip, depth + 1, limits, budget)?;
             } else if ty.is_file() {
                 let len = entry
                     .metadata()
                     .map_err(|e| VerifyError(format!("{}: {e}", entry.path().display())))?
                     .len();
                 budget.files += 1;
-                if budget.files > MAX_COPY_FILES {
+                if budget.files > max_files {
                     return Err(VerifyError(format!(
-                        "the tree being copied has more than {MAX_COPY_FILES} files; verify-fix will not copy it"
+                        "the tree being copied has more than {max_files} files; verify-fix will not copy it"
                     )));
                 }
                 budget.bytes = budget.bytes.saturating_add(len);
-                if budget.bytes > MAX_COPY_BYTES {
+                if budget.bytes > max_bytes {
                     return Err(VerifyError(format!(
-                        "the tree being copied is larger than {MAX_COPY_BYTES} bytes; verify-fix will not copy it"
+                        "the tree being copied is larger than {max_bytes} bytes; verify-fix will not copy it"
                     )));
                 }
                 std::fs::copy(entry.path(), &dest)
@@ -933,8 +1075,19 @@ fn copy_tree(from: &Path, to: &Path) -> Result<(), VerifyError> {
         }
         Ok(())
     }
-    let mut budget = Budget { files: 0, bytes: 0 };
-    walk(from, to, &skip, 1, &mut budget)
+    let mut budget = Budget {
+        files: 0,
+        bytes: 0,
+        dirs: 0,
+    };
+    walk(
+        from,
+        to,
+        &skip,
+        1,
+        (max_files, max_bytes, max_dirs, max_depth),
+        &mut budget,
+    )
 }
 
 fn first_lines(text: &str, n: usize) -> String {
@@ -1365,6 +1518,118 @@ mod tests {
             "{}",
             err.0
         );
+    }
+
+    #[test]
+    fn fs_permissions_must_be_read_only() {
+        let tmp = tempfile::tempdir().unwrap();
+        let path = tmp.path().join("foundry.toml");
+        for (text, needle) in [
+            (
+                "[profile.default]\nfs_permissions = [{ access = \"write\", path = \".\" }]\n",
+                "write",
+            ),
+            (
+                "[profile.default]\nfs_permissions = [{ access = \"read-write\", path = \".\" }]\n",
+                "read-write",
+            ),
+            (
+                "[profile.default]\nfs_permissions = [{ path = \".\" }]\n",
+                "no access",
+            ),
+            (
+                "[profile.default]\nfs_permissions = \"read\"\n",
+                "not an array",
+            ),
+        ] {
+            std::fs::write(&path, text).unwrap();
+            let err = refuse_config_file(&path, "test config").unwrap_err();
+            assert!(
+                err.0.contains("fs_permissions") && err.0.contains(needle),
+                "{text:?}: {}",
+                err.0
+            );
+        }
+        for text in [
+            "[profile.default]\nffi = false\n",
+            "[profile.default]\nfs_permissions = []\n",
+            "[profile.default]\nfs_permissions = [{ access = \"read\", path = \".\" }]\n",
+        ] {
+            std::fs::write(&path, text).unwrap();
+            refuse_config_file(&path, "test config").unwrap();
+        }
+    }
+
+    #[test]
+    fn a_rewritten_tree_or_global_config_is_refused_before_the_next_run() {
+        let tmp = tempfile::tempdir().unwrap();
+        let a = tmp.path().join("a");
+        let b = tmp.path().join("b");
+        std::fs::create_dir_all(&a).unwrap();
+        std::fs::create_dir_all(&b).unwrap();
+        let benign = "[profile.default]\nffi = false\n";
+        std::fs::write(a.join("foundry.toml"), benign).unwrap();
+        std::fs::write(b.join("foundry.toml"), benign).unwrap();
+        let global = tmp.path().join("global.toml");
+        std::fs::write(&global, benign).unwrap();
+        revalidate_trees(Some(&global), &[(&a, "a"), (&b, "b")]).unwrap();
+
+        std::fs::write(b.join("foundry.toml"), "[profile.default]\nffi = true\n").unwrap();
+        let err = revalidate_trees(Some(&global), &[(&a, "a"), (&b, "b")]).unwrap_err();
+        assert!(err.0.contains("ffi"), "{}", err.0);
+
+        std::fs::write(
+            b.join("foundry.toml"),
+            "[profile.default]\nfs_permissions = [{ access = \"write\", path = \".\" }]\n",
+        )
+        .unwrap();
+        let err = revalidate_trees(Some(&global), &[(&a, "a"), (&b, "b")]).unwrap_err();
+        assert!(err.0.contains("fs_permissions"), "{}", err.0);
+
+        std::fs::write(b.join("foundry.toml"), benign).unwrap();
+        std::fs::write(b.join(".env"), "FOUNDRY_CONFIG=evil.toml\n").unwrap();
+        let err = revalidate_trees(Some(&global), &[(&a, "a"), (&b, "b")]).unwrap_err();
+        assert!(err.0.contains(".env"), "{}", err.0);
+        std::fs::remove_file(b.join(".env")).unwrap();
+
+        std::fs::write(&global, "[profile.default]\nffi = true\n").unwrap();
+        let err = revalidate_trees(Some(&global), &[(&a, "a"), (&b, "b")]).unwrap_err();
+        assert!(err.0.contains("global config"), "{}", err.0);
+    }
+
+    #[test]
+    fn the_copy_file_byte_and_directory_caps_are_enforced() {
+        let tmp = tempfile::tempdir().unwrap();
+        let base = tmp.path();
+
+        let files = base.join("files");
+        std::fs::create_dir_all(&files).unwrap();
+        for name in ["a", "b", "c"] {
+            std::fs::write(files.join(name), "x").unwrap();
+        }
+        let err =
+            copy_tree_with_limits(&files, &base.join("files-out"), 2, 1 << 20, 10, 64).unwrap_err();
+        assert!(err.0.contains("2 files"), "{}", err.0);
+
+        let bytes = base.join("bytes");
+        std::fs::create_dir_all(&bytes).unwrap();
+        std::fs::write(bytes.join("a"), "0123456789").unwrap();
+        std::fs::write(bytes.join("b"), "0123456789").unwrap();
+        let err =
+            copy_tree_with_limits(&bytes, &base.join("bytes-out"), 10, 15, 10, 64).unwrap_err();
+        assert!(err.0.contains("15 bytes"), "{}", err.0);
+
+        let dirs = base.join("dirs");
+        std::fs::create_dir_all(dirs.join("a/b/c")).unwrap();
+        let err =
+            copy_tree_with_limits(&dirs, &base.join("dirs-out"), 10, 1 << 20, 2, 64).unwrap_err();
+        assert!(err.0.contains("2 directories"), "{}", err.0);
+
+        let depth = base.join("depth");
+        std::fs::create_dir_all(depth.join("a/b")).unwrap();
+        let err =
+            copy_tree_with_limits(&depth, &base.join("depth-out"), 10, 1 << 20, 10, 1).unwrap_err();
+        assert!(err.0.contains("1-level limit"), "{}", err.0);
     }
 
     #[test]
