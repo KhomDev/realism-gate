@@ -347,8 +347,65 @@ mod tests {
     }
 
     #[test]
-    fn the_sanitizer_keeps_only_newline_and_tab() {
-        assert_eq!(sanitize("a\tb\nc\rd\u{1b}[31m\u{7}"), "a\tb\ncd[31m");
+    fn the_sanitizer_normalizes_whitespace_and_drops_controls_and_bidi() {
+        assert_eq!(sanitize("a\tb\nc\rd\u{1b}[31m\u{7}"), "a b c d[31m");
+        assert_eq!(
+            sanitize("x.sol\n  ERROR RG01 \u{202E}evil\u{202C}\u{2028}y"),
+            "x.sol   ERROR RG01 evil y"
+        );
+    }
+
+    #[test]
+    fn a_newline_or_bidi_in_a_path_cannot_fabricate_a_report_line() {
+        let report = crate::engine::Report {
+            summary: crate::engine::Summary::default(),
+            declaration: None,
+            config: None,
+            changed_since: None,
+            findings: vec![Finding {
+                rule: "RG01",
+                slug: "fake-slug",
+                severity: Severity::Warn,
+                file: "x.sol\n  error RG01 fake".to_string(),
+                line: 1,
+                column: 1,
+                suite: "S\u{202E}".to_string(),
+                tests: vec![],
+                message: "message".to_string(),
+                evidence: "evidence".to_string(),
+                help: "help",
+                suppressed: None,
+                ignored_suppression: None,
+                ignored_reason: None,
+            }],
+            parse_errors: vec![crate::engine::ParseError {
+                file: "p.sol\n  error RG01 parsed".to_string(),
+                message: "bad\u{202E}source".to_string(),
+            }],
+            ignored_policy: vec![],
+            claims: None,
+            claim_binding: None,
+        };
+        let text = render(
+            &report,
+            TextOptions {
+                color: false,
+                show_suppressed: false,
+                fail_on: None,
+                no_fail_on_claims: false,
+            },
+        );
+        assert!(!text.contains('\u{202E}'), "{text}");
+        assert!(
+            text.lines()
+                .all(|line| !line.trim_start().starts_with("error RG01 fake")),
+            "a fabricated finding line survived: {text}"
+        );
+        assert!(
+            text.lines()
+                .all(|line| !line.trim_start().starts_with("error RG01 parsed")),
+            "a fabricated parse-error line survived: {text}"
+        );
     }
 
     #[test]
