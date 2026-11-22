@@ -273,8 +273,9 @@ pub fn check(project: &Project, index: &Index) -> Vec<Raw> {
             .iter()
             .map(|c| c.name.clone())
             .collect();
+        let base = trace::SuiteBase::new(project, &suite);
         for test in &suite.tests {
-            let tr = trace::build(project, &suite, test);
+            let tr = trace::build_with(project, &suite, test, &base);
             let env = Env::new(project, suite.unit, &tr);
             for located in &suite.linear {
                 for var in &located.contract.vars {

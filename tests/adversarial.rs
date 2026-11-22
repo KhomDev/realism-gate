@@ -452,13 +452,14 @@ fn cyrillic_lookalike_identifier_is_not_silently_accepted() {
 // ---------------------------------------------------------------------------
 
 #[test]
-#[ignore = "bug: run time grows faster than linearly with test functions per file (4 000 functions take 48 s)"]
 fn a_five_megabyte_source_file_finishes_and_does_not_panic() {
     // INPUT: about 5 MB of small test functions (about 40 000 of them).
-    // SHOULD: finish within 120 s. ACTUAL: 885 KB (8 000 functions) takes
-    // about 165 s; 4 000 functions take 48 s, 2 000 take 9 s, 1 000 take 1.6 s.
-    // Many small test functions, about 5 MB in total. The CLI's three exit
-    // codes (0, 1, 2) are the only acceptable outcomes; a crash is not.
+    // SHOULD: finish within 120 s. Before the suite trace was memoized the
+    // callback scan ran once per test, so 885 KB (8 000 functions) took about
+    // 165 s and 4 000 functions took 48 s. A suite base is now built once and
+    // shared, which this test pins. Many small test functions, about 5 MB in
+    // total. The CLI's three exit codes (0, 1, 2) are the only acceptable
+    // outcomes; a crash is not.
     let s = Scratch::new("big");
     let mut src = String::from(HEADER);
     src.push_str("contract BigTest is Test {\n    Vault vault = new Vault();\n");
@@ -550,5 +551,141 @@ fn a_very_deeply_nested_expression_does_not_overflow_the_stack() {
         matches!(out.status.code(), Some(0..=2)),
         "exit {:?}",
         out.status
+    );
+}
+
+#[test]
+fn four_thousand_test_functions_finish_within_the_bound() {
+    // The callback scan used to run once per test, so this case was quadratic
+    // in the number of test functions (4 000 took about 48 s in a debug build).
+    // A debug build gets a wider bound than the release suite the timeout is
+    // really about.
+    let bound = if cfg!(debug_assertions) {
+        Duration::from_secs(60)
+    } else {
+        Duration::from_secs(10)
+    };
+    let s = Scratch::new("four-thousand");
+    let mut src = String::from(HEADER);
+    src.push_str("contract ManyTest is Test {\n    Vault vault = new Vault();\n");
+    for i in 0..4_000u64 {
+        src.push_str(&format!(
+            "    function test_n{i}() public {{\n        vm.prank(address(uint160({i} + 1)));\n        vault.setFee({i});\n    }}\n"
+        ));
+    }
+    src.push_str("}\n");
+    let file = s.write("test/Many.t.sol", &src);
+    let (out, elapsed) = run_bounded(
+        &s.0,
+        &[
+            "check",
+            &file.to_string_lossy(),
+            "--no-declaration",
+            "--format",
+            "json",
+        ],
+        Duration::from_secs(120),
+    );
+    assert!(
+        matches!(out.status.code(), Some(0..=2)),
+        "exit {:?}: {}",
+        out.status,
+        String::from_utf8_lossy(&out.stderr)
+    );
+    assert!(
+        elapsed <= bound,
+        "4 000 test functions took {elapsed:?}, over the {bound:?} bound"
+    );
+}
+
+#[test]
+fn an_oversized_source_file_is_refused_by_name_before_it_is_read() {
+    // A 1 GiB file is refused from its metadata, not read and then rejected.
+    // The error names the file and the limit.
+    let s = Scratch::new("huge");
+    let path = s.0.join("test/Huge.t.sol");
+    std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+    let file = std::fs::File::create(&path).unwrap();
+    file.set_len(1024 * 1024 * 1024).unwrap();
+    drop(file);
+    let (out, elapsed) = run_bounded(
+        &s.0,
+        &[
+            "check",
+            &path.to_string_lossy(),
+            "--no-declaration",
+            "--format",
+            "json",
+        ],
+        Duration::from_secs(60),
+    );
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{stderr}");
+    assert!(
+        stderr.contains("Huge.t.sol") && stderr.contains("limit"),
+        "the refusal did not name the file and the limit: {stderr}"
+    );
+    assert!(
+        elapsed < Duration::from_secs(30),
+        "an oversized file was read before it was refused: {elapsed:?}"
+    );
+}
+
+#[test]
+fn control_characters_in_source_never_reach_text_or_markdown_output() {
+    // A Solidity string literal can hold a raw ESC (0x1b): the parser keeps
+    // the bytes, and the rule message and evidence quote them. The render
+    // boundary drops control characters from user-derived fields, so a report
+    // cannot drive the reader's terminal. The tool's own colour codes must
+    // still appear when --color always asks for them.
+    let s = Scratch::new("esc");
+    let file = s.write(
+        "test/Esc.t.sol",
+        &poc(
+            "        vm.createSelectFork(\"http://127.0.0.1/\u{1b}[31m\");\n        assertEq(\"v\u{1b}[31m\", \"v\u{1b}[31m\");",
+        ),
+    );
+    let file_arg = file.to_string_lossy().to_string();
+    let run = |extra: &[&str]| {
+        let mut args = vec!["check", file_arg.as_str(), "--no-declaration", "--color"];
+        args.extend_from_slice(extra);
+        let (out, _) = run_bounded(&s.0, &args, Duration::from_secs(60));
+        out
+    };
+
+    let text = run(&["never", "--format", "text"]);
+    let text_out = String::from_utf8_lossy(&text.stdout);
+    assert!(
+        text_out.contains("RG09"),
+        "the fixture produced no finding: {text_out}"
+    );
+    assert!(
+        !text.stdout.contains(&0x1b),
+        "text output carries a control character"
+    );
+    assert!(
+        text_out.contains("[31m"),
+        "the sanitized text should remain: {text_out}"
+    );
+
+    let markdown = run(&["never", "--format", "markdown"]);
+    assert!(
+        !markdown.stdout.contains(&0x1b),
+        "markdown output carries a control character"
+    );
+
+    let coloured = run(&["always", "--format", "text"]);
+    let coloured_out = String::from_utf8_lossy(&coloured.stdout);
+    assert!(
+        coloured.stdout.windows(4).any(|w| w == b"\x1b[1;"),
+        "the tool's own colour codes are missing with --color always"
+    );
+    assert!(
+        !coloured.stdout.windows(5).any(|w| w == b"\x1b[31m"),
+        "the source's own escape sequence survived in colour output"
+    );
+    assert!(
+        coloured_out.contains("[31m"),
+        "the sanitized source text should remain: {coloured_out}"
     );
 }

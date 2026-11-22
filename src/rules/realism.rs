@@ -224,8 +224,10 @@ fn trace_text(ctx: &Ctx<'_, '_>) -> String {
 /// A sibling test asserts the flow loses money once a fee applies. The
 /// postmortem shape: one test asserts a profit with no fee instruction, and
 /// another asserts the taker delta is negative "under fee drag".
-fn file_concedes_fee_loss(source: &str) -> bool {
-    let l = source.to_ascii_lowercase();
+pub(crate) fn file_concedes_fee_loss(l: &str) -> bool {
+    // `l` is the suite's source, already ASCII-lowercased. The caller
+    // computes this once per suite; doing it per test made a large suite
+    // quadratic.
     // Phrases, not a bare `assertLt` next to the word fee. An upper bound on
     // a profit (`assertLt(profit, 2 ether)`) beside a fee-on-transfer router
     // is still a profit.
@@ -240,8 +242,7 @@ fn file_concedes_fee_loss(source: &str) -> bool {
 pub fn profit_ignores_costs(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
     let body = trace_text(ctx);
     let repaid = fee_repaid(&body);
-    let source = &ctx.project.units[ctx.suite.unit].source;
-    let concession = file_concedes_fee_loss(source);
+    let concession = ctx.fee_concession;
     let costs = computed_costs(ctx);
     // A cost that appears in the same expression as the profit (another
     // assertion subtracting it, for example) is already in the claim.
