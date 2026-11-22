@@ -1,3 +1,4 @@
+#![forbid(unsafe_code)]
 //! MCP stdio server. See `src/mcp.rs` for the tools.
 //!
 //! The binary is `REALISM_GATE_BIN` when set, else a sibling of this
@@ -17,6 +18,18 @@ fn main() {
         let msg = match mcp::read_frame(&mut stdin as &mut dyn BufRead) {
             Ok(Some(v)) => v,
             Ok(None) => break,
+            // A frame the server refused but can answer: report it as a
+            // JSON-RPC error and keep serving. An oversized Content-Length
+            // is the case this exists for, so the process does not die and
+            // the client gets a reason.
+            Err(e) if !e.fatal => {
+                let response = mcp::error_response(-32600, &e.message);
+                if let Err(e) = mcp::write_frame(&mut stdout as &mut dyn Write, &response) {
+                    let _ = writeln!(std::io::stderr(), "realism-gate-mcp: {e}");
+                    std::process::exit(2);
+                }
+                continue;
+            }
             Err(e) => {
                 let _ = writeln!(std::io::stderr(), "realism-gate-mcp: {e}");
                 std::process::exit(2);
