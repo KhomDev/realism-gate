@@ -1,0 +1,15 @@
+# OSS-Fuzz project configuration, following google/oss-fuzz's schema.
+# This is a local copy: no upstream pull request was opened, and nothing was
+# sent anywhere. primary_contact is deliberately a placeholder because the
+# repository records no public maintainer address; replace it before any
+# upstream submission (OSS-Fuzz requires a deliverable email there).
+homepage: "https://github.com/KhomDev/realism-gate"
+main_repo: "https://github.com/KhomDev/realism-gate.git"
+language: rust
+primary_contact: "REPLACE_ME_MAINTAINER_EMAIL"
+sanitizers:
+  - address
+fuzzing_engines:
+  - libfuzzer
+architectures:
+  - x86_64
