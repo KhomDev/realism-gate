@@ -93,8 +93,9 @@ a review lead, not a failed build.
 ### Scoped measurement, 2026-11-24 (PARTIAL)
 
 cargo-mutants 27.1.0 and rustc 1.95.0 (`x86_64-pc-windows-gnu`), on a clean
-clone of `p1/precision-2026-11-24` whose `src/` is the same as `1aa03b3`,
-whole test suite per mutant, `--timeout 180`, `-j 2`. The row set is
+clone of `p1/precision-2026-11-24` whose `src/` is the same as the commit
+titled `build(release): pin the toolchain and make release archives
+reproducible`, whole test suite per mutant, `--timeout 180`, `-j 2`. The row set is
 **partial**: the run was capped after 18 of the 40 listed mutants had produced
 an outcome, all of them in `src/claims/extract.rs`; the other 22 were not
 tested (including every mutant in `src/claims/init.rs`).
