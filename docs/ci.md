@@ -126,9 +126,11 @@ host served the download" to "the `KhomDev/realism-gate` repository and its
 release workflow, as recorded by GitHub's attestation service, plus the `gh`
 binary and the Sigstore trust root". It does not prove the source was audited,
 that the code is correct, or that the repository and its workflow were not
-compromised at build time. It does not cover the `binary` input, which runs a
-caller-supplied executable with no download and no attestation, and is meant for
-testing the action itself.
+compromised at build time. It covers the release archive the action downloads,
+not the action's own `action.yml` and scripts: those come from the ref the
+workflow names (`@v1`, a version tag or a commit SHA). It does not cover the
+`binary` input, which runs a caller-supplied executable with no download and no
+attestation, and is meant for testing the action itself.
 
 The shell logic is `scripts/verify-attestation.sh`; its test
 (`scripts/test-verify-attestation.sh`) uses a fake `gh` and runs on Linux, macOS

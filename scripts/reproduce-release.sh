@@ -67,6 +67,10 @@ for tool in curl tar gzip sha256sum rustup; do
     exit 2
   fi
 done
+if [ "$archive" = zip ] && ! command -v unzip >/dev/null 2>&1; then
+  echo "missing required tool: unzip (needed for the Windows archive)" >&2
+  exit 2
+fi
 if ! rustup run "$toolchain" rustc --version >/dev/null 2>&1; then
   echo "toolchain $toolchain is not installed; run: rustup toolchain install $toolchain --profile minimal" >&2
   exit 2

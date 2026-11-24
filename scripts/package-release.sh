@@ -46,6 +46,10 @@ if [ "$archive" = tar.gz ] && ! tar --version 2>/dev/null | grep -q 'GNU tar'; t
     tar --version 2>/dev/null | head -n1) on this host" >&2
   exit 2
 fi
+if [ "$archive" = zip ] && ! command -v zip >/dev/null 2>&1; then
+  echo "package-release.sh needs zip for the Windows archive, and it is not on PATH" >&2
+  exit 2
+fi
 
 work=""
 cleanup() { if [ -n "$work" ]; then rm -rf "$work"; fi; }

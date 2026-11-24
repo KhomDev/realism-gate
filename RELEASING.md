@@ -201,6 +201,13 @@ archive bytes include mtimes and their compiler version was never recorded;
 for those, run with `--binary-only` and treat any binary mismatch as the
 answer.
 
+**Local windows-gnu rebuilds.** The pinned toolchain on a Windows host can be
+`x86_64-pc-windows-gnu`, whose GNU linker writes the build time into the PE
+header. Two otherwise identical builds then differ by a handful of bytes:
+`TimeDateStamp` at offset 0x88 and the PE `CheckSum` at 0xd8. When comparing
+such builds by hand, add `-C link-arg=-Wl,--no-insert-timestamp`; the release
+workflow's Windows artifact is x86_64-pc-windows-msvc, not this toolchain.
+
 ## What the release workflow does
 
 | Job | What it proves |

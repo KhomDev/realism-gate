@@ -170,7 +170,13 @@ runs:
           # they prove the download is intact, not who built it. The release
           # workflow attests the archive; check that before unpacking and
           # running it. The check fails closed: missing `gh` is an error.
-          bash "$GITHUB_ACTION_PATH/scripts/verify-attestation.sh" "$dir/$name.$ext"
+          gate="$GITHUB_ACTION_PATH/scripts/verify-attestation.sh"
+          # Windows sets GITHUB_ACTION_PATH with backslashes; bash opens a
+          # POSIX path reliably, so convert it where cygpath exists.
+          if command -v cygpath >/dev/null 2>&1; then
+            gate="$(cygpath -u "$GITHUB_ACTION_PATH")/scripts/verify-attestation.sh"
+          fi
+          bash "$gate" "$dir/$name.$ext"
           if [ "$ext" = zip ]; then
             unzip -q -o "$name.zip"
             bin="$dir/$name/realism-gate.exe"

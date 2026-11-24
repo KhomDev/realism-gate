@@ -100,6 +100,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install toolchain
+        # bash on every runner: the Windows default shell is PowerShell, where
+        # $RELEASE_RUST is an empty PowerShell variable, not the env var.
+        shell: bash
         run: rustup toolchain install "$RELEASE_RUST" --profile minimal --target ${{ matrix.target }}
 
       - name: Install musl tools
