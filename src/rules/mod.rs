@@ -3,6 +3,7 @@
 pub mod catalog;
 pub(crate) mod evidence;
 mod injection;
+pub mod measured;
 mod privilege;
 mod realism;
 

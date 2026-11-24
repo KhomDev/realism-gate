@@ -8,6 +8,28 @@ may change in any minor release.
 
 ## [Unreleased]
 
+### Added
+
+- **`rules` and `explain` print measured precision per language.** The rule
+  catalog embeds `eval/solana/measured.json`; a rule with no fresh or held-out
+  label prints `unmeasured`, never 100%. The JSON rule rows gain a `measured`
+  object keyed by language with `status`, `tp`, `fp`, `labelled`, `precision`,
+  `wilson95`, `split` and `population`. The Rust and Anchor TypeScript number
+  is a held-out measurement on public **test suites**, not judged PoCs; the
+  Solidity number uses only the fresh (out-of-sample) corpus. `docs/precision.md`
+  states the population and the limits, and the generated rule pages carry the
+  same line.
+
+### Documentation
+
+- **P1 Rust/Anchor TypeScript measurement.** Four pinned public test suites,
+  174 flags, 133 sampled, 63 held-out labels, Wilson 95% intervals per rule and
+  language. The report says plainly that the corpus is test suites, not PoCs,
+  and records the missing PoC corpus as a gap rather than widening the claim.
+- **Correction.** `docs/precision.md` said the `264ca72` solana-program-library
+  pin had five `program/tests` directories; at that commit only `token-lending`
+  and `governance` have one. The text is corrected.
+
 ## [1.0.4] - 2026-11-22
 
 A security and robustness release, from a self-review of 1.0.3. No rule id,

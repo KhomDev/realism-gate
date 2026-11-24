@@ -1,0 +1,507 @@
+{
+  "schema": "realism-gate.measured/v1",
+  "date": "2026-11-24",
+  "population": "public Rust and Anchor TypeScript test suites. This is not a corpus of judged PoCs or incident reproductions; the report must say so and must not present the result as PoC precision.",
+  "source": "eval/solana/results.json",
+  "frozen_rule_commit": "6019773976706e42e11ceefc2ee1b03496f2df54",
+  "rules": {
+    "RG01": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG02": {
+      "javascript": {
+        "labelled": 5,
+        "tp": 0,
+        "fp": 5,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.4345
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+      },
+      "rust": {
+        "labelled": 21,
+        "tp": 0,
+        "fp": 21,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.1546
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+      },
+      "typescript": {
+        "labelled": 8,
+        "tp": 0,
+        "fp": 8,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.3244
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG03": {
+      "javascript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      },
+      "rust": {
+        "labelled": 6,
+        "tp": 0,
+        "fp": 6,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.3903
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+      },
+      "typescript": {
+        "labelled": 2,
+        "tp": 0,
+        "fp": 2,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.6576
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG04": {
+      "javascript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      },
+      "rust": {
+        "labelled": 6,
+        "tp": 0,
+        "fp": 6,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.3903
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+      },
+      "typescript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG05": {
+      "solidity": {
+        "labelled": 1,
+        "tp": 0,
+        "fp": 1,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ],
+        "status": "measured",
+        "split": "fresh",
+        "population": "Solidity public PoCs (DeFiVulnLabs)"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG06": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG07": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG08": {
+      "javascript": {
+        "labelled": 1,
+        "tp": 1,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.2065,
+          1.0
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+      },
+      "rust": {
+        "labelled": 5,
+        "tp": 5,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.5655,
+          1.0
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+      },
+      "typescript": {
+        "labelled": 5,
+        "tp": 5,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.5655,
+          1.0
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+      },
+      "solidity": {
+        "labelled": 30,
+        "tp": 30,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.8865,
+          1.0
+        ],
+        "status": "measured",
+        "split": "fresh",
+        "population": "Solidity public PoCs (DeFiVulnLabs)"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG09": {
+      "javascript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      },
+      "rust": {
+        "labelled": 1,
+        "tp": 1,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.2065,
+          1.0
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+      },
+      "typescript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG10": {
+      "javascript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      },
+      "rust": {
+        "labelled": 2,
+        "tp": 0,
+        "fp": 2,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.6576
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+      },
+      "typescript": {
+        "labelled": 1,
+        "tp": 0,
+        "fp": 1,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG11": {
+      "javascript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      },
+      "rust": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      },
+      "typescript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      },
+      "solidity": {
+        "labelled": 1,
+        "tp": 1,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.2065,
+          1.0
+        ],
+        "status": "measured",
+        "split": "fresh",
+        "population": "Solidity public PoCs (DeFiVulnLabs)"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG12": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG13": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG14": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG15": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG16": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG17": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG18": {
+      "solidity": {
+        "labelled": 7,
+        "tp": 0,
+        "fp": 7,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.3543
+        ],
+        "status": "measured",
+        "split": "fresh",
+        "population": "Solidity public PoCs (DeFiVulnLabs)"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG19": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG20": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    }
+  }
+}

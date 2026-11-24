@@ -221,9 +221,19 @@ fn an_invalid_declaration_exits_two() {
 fn rules_lists_every_rule() {
     let o = run(&["rules"]);
     let out = stdout(&o);
-    assert_eq!(out.lines().count(), 20);
+    let rule_lines = out.lines().filter(|l| l.starts_with("RG")).count();
+    assert_eq!(rule_lines, 20);
+    let measured_lines = out
+        .lines()
+        .filter(|l| l.trim_start().starts_with("measured:"))
+        .count();
+    assert_eq!(measured_lines, 20, "every rule needs a measured line");
     assert!(out.starts_with("RG01"));
     assert!(out.contains("RG20"));
+    assert!(
+        out.contains("unmeasured"),
+        "a rule with no measurement must say so"
+    );
     let o = run(&["rules", "--format", "json"]);
     let v: serde_json::Value = serde_json::from_slice(&o.stdout).unwrap();
     assert_eq!(v.as_array().unwrap().len(), 20);

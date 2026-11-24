@@ -15,6 +15,17 @@ snake_case). The rerun on the previous 1.0.0 tree, sha ece30fd0..., reproduced
 the same numbers; rg-core says the only change since then is a clippy-only
 rewrite (same digests) plus tests and docs.
 
+**P1 re-measurement, 2026-11-24.** The same pairs, labels, seed and binding
+predicates were re-run with 1.0.4 (release binary sha256
+`972fd0d91c8cb3eae3b8a27b06eb4fc25fe6c38fe1f998409f3af663d27c2cc6`). The
+impact number reproduced: 90/91 = 98.9% [94.0-99.8], with the 91.0% (n=100)
+first-build number still the out-of-sample one to quote first. The results file
+now carries a per-field scorecard: attacker is not interpretable, asset is not
+interpretable with this corpus, and amount, preconditions, cited and fix are
+not checkable. `docs/precision.md` renders the scorecard from
+`results.json`, and `python eval/claims/run.py --check` (and the Rust
+`claims_scorecard_is_current` test) fail if they drift.
+
 Earlier passes are recorded here for provenance only and are not quoted:
 pre-1.0 tree sha 642b9e38... (version string 0.6.1) and 1.0.0 sha d994e0cb...
 both measured 91/100 = 91.0% for impact; the nine misses were profit-like local

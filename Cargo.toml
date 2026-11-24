@@ -10,9 +10,10 @@ readme = "README.md"
 keywords = ["foundry", "solana", "anchor", "security", "poc"]
 categories = ["command-line-utilities", "development-tools::testing"]
 rust-version = "1.95"
-# The published crate is the program and its licence, nothing else: no
-# fixtures, no corpus, no workflows, no evaluation data.
-include = ["/src/**/*.rs", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE", "/CHANGELOG.md"]
+# The published crate is the program, its licence, and the one JSON table the
+# rule catalog embeds (`eval/solana/measured.json`). No fixtures, no corpus,
+# no workflows, no other evaluation data.
+include = ["/src/**/*.rs", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE", "/CHANGELOG.md", "/eval/solana/measured.json"]
 
 # Two binaries, same program: `realism-gate` and the short `rgate`.
 [[bin]]

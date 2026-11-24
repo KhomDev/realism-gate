@@ -655,6 +655,20 @@ pub fn markdown(r: &RuleInfo) -> String {
     out.push_str(&format!("{}\n\n", r.summary));
     out.push_str(&format!("## Why it matters\n\n{}\n\n", r.why));
     out.push_str(&format!("## How to fix it\n\n{}\n\n", r.fix));
+    out.push_str("## Measured precision\n\n");
+    out.push_str(
+        "A rule with no fresh or held-out label is unmeasured, not 100%. Rust and Anchor \
+         TypeScript numbers are held-out labels on public test suites, not PoCs; Solidity uses \
+         the fresh (out-of-sample) corpus.\n\n",
+    );
+    for lang in super::measured::languages(r) {
+        let text = match super::measured::cell(r.id, lang) {
+            Some(c) => super::measured::format_cell(c, true),
+            None => "unmeasured (no measurement)".to_string(),
+        };
+        out.push_str(&format!("- **{lang}:** {text}\n"));
+    }
+    out.push('\n');
     let lang = if r.id == "RG12" || r.id == "RG13" || r.id == "RG14" {
         "yaml"
     } else {

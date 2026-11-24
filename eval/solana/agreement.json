@@ -1,0 +1,27 @@
+{
+  "schema": "realism-gate.solana-agreement/v1",
+  "date": "2026-11-24",
+  "seed": "rg-solana-agreement-2026-11-24",
+  "sample": 20,
+  "labels_file": "eval/solana/agreement/second-pass.jsonl",
+  "reader": "a blinded second AI reader with the same rubric; this is not independent human validation",
+  "raw": {
+    "agree": 19,
+    "n": 20,
+    "rate": 0.95,
+    "wilson95": [0.7639, 0.9911]
+  },
+  "final": {
+    "agree": 20,
+    "n": 20,
+    "rate": 1.0,
+    "wilson95": [0.8389, 1.0]
+  },
+  "disagreement": {
+    "id": "786841c4775e1098",
+    "primary_original": "true-positive",
+    "second": "false-positive",
+    "resolution": "The primary label was corrected to false-positive. The helper comment says it fabricates a settled pull because the real cc-vrf settle needs the Light stack, and the rubric's setup clause applies: the claim/refund tests act on that setup through the program. The paired pull write (2c673195bb4b4e58) was corrected on the same ground."
+  },
+  "note": "The raw rate is the unadjusted agreement before the one adjudication; the final rate reflects the corrected label. Both are published. The correction changed the RG04 held-out cell from 2/6 to 0/6."
+}

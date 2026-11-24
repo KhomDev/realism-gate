@@ -1,7 +1,7 @@
 {
   "schema": "realism-gate.claims.results/v1",
   "generated_by": "eval/claims/run.py",
-  "date": "2026-11-13",
+  "date": "2026-11-24",
   "corpus": {
     "pairs": 120,
     "population": 603,
@@ -28,19 +28,20 @@
     }
   },
   "tool": {
-    "path": "target\\debug\\realism-gate.exe",
-    "version": "realism-gate 1.0.1",
-    "sha256": "65625b56cf34907fa56a9c6510224ff6fb2bea52b18e9da0257eea0a97ad78a8"
+    "path": "target\\release\\realism-gate.exe",
+    "version": "realism-gate 1.0.4",
+    "sha256": "972fd0d91c8cb3eae3b8a27b06eb4fc25fe6c38fe1f998409f3af663d27c2cc6"
   },
   "frozen": {
     "seed": "rg-claims-2026-11-12",
     "pairs_sha256": "82b726174b2c6fa0f041728963ad30b9f0110dd8ed8277be262f41e7785f5503",
     "labels_sha256": "3c9bf7dda17483c2fb25436691b3134973d0a43ba3f5effb4369d3e1e8f3a180",
     "heldout_opened": true,
-    "harness_sha256": "5786af49cbb46bc5d367636e16410e1c2e6f318607ed706b6eff563f338ee864"
+    "harness_sha256": "cb48090187fb72078faab44db41bdb0fc96b342b0286f72c97f1d505720ef9fb"
   },
   "measurements": {
     "impact": {
+      "n": 91,
       "flagged": 91,
       "agree": 90,
       "precision": 0.989,
@@ -53,6 +54,7 @@
       "status": "measured"
     },
     "attacker": {
+      "n": 120,
       "flagged": 120,
       "agree": 0,
       "precision": 0.0,
@@ -64,8 +66,54 @@
       "shown_by_tool_label_gap": 0,
       "status": "not_interpretable",
       "reason": "the rubric labels identity by address-literal presence; realism-gate checks whether the PoC uses that identity to drive the call. The 0.0 is the disagreement rate of a deliberately weak label, not a tool error rate; re-label identity by caller binding before using this field."
+    },
+    "asset": {
+      "n": 0,
+      "flagged": 0,
+      "agree": 0,
+      "precision": null,
+      "wilson95": null,
+      "status": "not_interpretable",
+      "reason": "the incident record names a coarse asset (for example ETH), and the tool's asset predicate is a name match over the PoC and cited list; a label derived from the same text would be circular. No asset precision is claimed."
+    },
+    "amount": {
+      "n": 0,
+      "flagged": 0,
+      "agree": 0,
+      "precision": null,
+      "wilson95": null,
+      "status": "not_checkable",
+      "reason": "the record states a fiat loss and the PoC asserts token balances; conflating the two would be a fabricated label, so no amount precision is claimed."
+    },
+    "preconditions": {
+      "n": 0,
+      "flagged": 0,
+      "agree": 0,
+      "precision": null,
+      "wilson95": null,
+      "status": "not_checkable",
+      "reason": "the incident record does not state preconditions, and the pairs' claims have no preconditions field; there is no label to score."
+    },
+    "cited": {
+      "n": 0,
+      "flagged": 0,
+      "agree": 0,
+      "precision": null,
+      "wilson95": null,
+      "status": "not_checkable",
+      "reason": "the incident record's attack-transaction and analysis links are not contract citations, and the pairs' claims have no cited field; there is no label to score."
+    },
+    "fix": {
+      "n": 0,
+      "flagged": 0,
+      "agree": 0,
+      "precision": null,
+      "wilson95": null,
+      "status": "not_checkable",
+      "reason": "the corpus has no patches, and `check` never applies one; the fix row stays open until `verify-fix` is run, so there is no label to score."
     }
   },
+  "scorecard": "| Field | Status | n | TP | FP | Precision | Note |\n|---|---|---:|---:|---:|---|---|\n| attacker | not_interpretable | 120 | \u2014 | \u2014 | not scored (labels not interpretable) | the rubric labels identity by address-literal presence; realism-gate checks whether the PoC uses that identity to drive the call. The 0.0 is the disagreement rate of a deliberately weak label, not a tool error rate; re-label identity by caller binding before using this field. |\n| impact | measured | 91 | 90 | 1 | 90/91 = 98.9% [94.0-99.8] | in-sample: the nine misses were fixed on this set; the out-of-sample number is 91.0% (n=100) from the first build |\n| asset | not_interpretable | 0 | \u2014 | \u2014 | not scored (labels not interpretable) | the incident record names a coarse asset (for example ETH), and the tool's asset predicate is a name match over the PoC and cited list; a label derived from the same text would be circular. No asset precision is claimed. |\n| amount | not_checkable | 0 | \u2014 | \u2014 | not scored (not checkable) | the record states a fiat loss and the PoC asserts token balances; conflating the two would be a fabricated label, so no amount precision is claimed. |\n| preconditions | not_checkable | 0 | \u2014 | \u2014 | not scored (not checkable) | the incident record does not state preconditions, and the pairs' claims have no preconditions field; there is no label to score. |\n| cited | not_checkable | 0 | \u2014 | \u2014 | not scored (not checkable) | the incident record's attack-transaction and analysis links are not contract citations, and the pairs' claims have no cited field; there is no label to score. |\n| fix | not_checkable | 0 | \u2014 | \u2014 | not scored (not checkable) | the corpus has no patches, and `check` never applies one; the fix row stays open until `verify-fix` is run, so there is no label to score. |\n",
   "per_pair": [
     {
       "id": "defihacklabs:src/test/2017-07/Parity_first_hack_exp.sol",

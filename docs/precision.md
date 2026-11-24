@@ -95,19 +95,35 @@ No rule was added. See "Candidates" below.
 ## Claim binding
 
 Measured for 1.0.0 on 120 public PoC + incident-record pairs (DeFiHackLabs
-@2c99b56, pointers and labels only, fetched by script); 91 flagged rows.
-Corpus, rubric and freeze: [eval/claims](../eval/claims/REPORT.md). Mechanical
-rubric frozen before the held-out split was opened; one reader.
+@2c99b56, pointers and labels only, fetched by script); 91 flagged impact rows.
+The same pairs, labels, seed and binding predicates were re-measured on
+2026-11-24 with 1.0.4 (release binary sha256
+`972fd0d91c8cb3eae3b8a27b06eb4fc25fe6c38fe1f998409f3af663d27c2cc6`), and the
+impact number reproduced. Corpus, rubric and freeze:
+[eval/claims](../eval/claims/REPORT.md). Mechanical rubric frozen before the
+held-out split was opened; one reader.
 
-| Claim field | Build | Precision | n | Wilson 95% |
-|---|---|---:|---:|---|
-| impact | first 1.0.0 build (`d994e0cb`), before any fix | **91.0%** | 100 | [83.8-95.2] |
-| impact | released 1.0.0 (`06eb73f2`), after fixing the nine misses this set exposed | 98.9% | 91 | [94.0-99.8] |
+The scorecard is generated from `eval/claims/results.json`;
+`python eval/claims/run.py --check` asserts this block matches. A status is not
+a zero: `not_interpretable` and `not_checkable` mean there is no label to score.
 
-**Read the first row as the out-of-sample number.** The nine misses (profit
-computed into a local before the assertion) were found on this same 120-pair
-set and then fixed, so the 98.9% is measured on data that shaped the fix. It is
-in-sample. A fresh held-out set is the only way to replace the 91.0%.
+<!-- BEGIN CLAIMS SCORECARD -->
+| Field | Status | n | TP | FP | Precision | Note |
+|---|---|---:|---:|---:|---|---|
+| attacker | not_interpretable | 120 | — | — | not scored (labels not interpretable) | the rubric labels identity by address-literal presence; realism-gate checks whether the PoC uses that identity to drive the call. The 0.0 is the disagreement rate of a deliberately weak label, not a tool error rate; re-label identity by caller binding before using this field. |
+| impact | measured | 91 | 90 | 1 | 90/91 = 98.9% [94.0-99.8] | in-sample: the nine misses were fixed on this set; the out-of-sample number is 91.0% (n=100) from the first build |
+| asset | not_interpretable | 0 | — | — | not scored (labels not interpretable) | the incident record names a coarse asset (for example ETH), and the tool's asset predicate is a name match over the PoC and cited list; a label derived from the same text would be circular. No asset precision is claimed. |
+| amount | not_checkable | 0 | — | — | not scored (not checkable) | the record states a fiat loss and the PoC asserts token balances; conflating the two would be a fabricated label, so no amount precision is claimed. |
+| preconditions | not_checkable | 0 | — | — | not scored (not checkable) | the incident record does not state preconditions, and the pairs' claims have no preconditions field; there is no label to score. |
+| cited | not_checkable | 0 | — | — | not scored (not checkable) | the incident record's attack-transaction and analysis links are not contract citations, and the pairs' claims have no cited field; there is no label to score. |
+| fix | not_checkable | 0 | — | — | not scored (not checkable) | the corpus has no patches, and `check` never applies one; the fix row stays open until `verify-fix` is run, so there is no label to score. |
+<!-- END CLAIMS SCORECARD -->
+
+**Read the first impact row as the out-of-sample number.** The nine misses
+(profit computed into a local before the assertion) were found on this same
+120-pair set and then fixed, so the 98.9% is measured on data that shaped the
+fix. It is in-sample. A fresh held-out set is the only way to replace the
+91.0%; the 2026-11-24 re-run reproduces it but does not make it out-of-sample.
 
 Caveats, from the same report:
 
@@ -116,6 +132,12 @@ Caveats, from the same report:
   no attacker precision is claimed. The label defect is published, not hidden.
 - **`amount` is NOT CHECKABLE by design.** The record states a fiat loss; the
   PoC asserts token balances. All 120 amount rows are not checkable.
+- **`asset` is NOT INTERPRETABLE with this corpus.** The record names a coarse
+  asset, and the tool's predicate is a name match; a label built from the same
+  text would be circular.
+- **`preconditions`, `cited` and `fix` are NOT CHECKABLE here.** The incident
+  records state no preconditions, carry transaction/analysis links rather than
+  contract citations, and contain no patches; `check` never applies a patch.
 - **Two rows are a recall cost, not precision.** The tool marked
   PikeFinance_exp.sol and SWAPPStaking_exp.sol `shown` while the rubric sees no
   evidence. They are not in the precision ratio, so 98.9% is not an upper bound
@@ -124,19 +146,22 @@ Caveats, from the same report:
 - **The three rejection-row fixtures (R-034/35/36)** are pointers plus expected
   status only; their inputs are private and not in this repo.
 
-Quote both rows, or the first one; never the 98.9% alone.
+Quote both impact rows, or the first one; never the 98.9% alone.
 
-**Release provenance.** The measurement was made on the 1.0.0 feature tree that
-was released as tag `v1.0.0`, commit
-`11703a31a7a0fde11d02062222bab152e0d89f5e` (debug binary `06eb73f2…`,
-`eval/claims/results.json`). The tag is the durable provenance; the debug hash
-identifies the measured build, and a release-profile binary hashes differently.
+**Release provenance.** The original measurement was made on the 1.0.0 feature
+tree released as tag `v1.0.0`, commit
+`11703a31a7a0fde11d02062222bab152e0d89f5e` (debug binary `06eb73f2…`). The
+2026-11-24 re-run used the 1.0.4 release binary named above; the claim-binding
+predicates are unchanged, and `eval/claims/results.json` records the tool,
+sha256 and date. The tag is the durable provenance for the original run; a
+debug hash identifies a measured build, and a release-profile binary hashes
+differently.
 
 ## What this does not measure
 
-- **Claim binding beyond the impact field.** The 1.0.0 number above is one
-  field on one corpus; attacker identity is marked not interpretable and the
-  amount field is not checkable by design.
+- **Claim binding beyond the impact field.** The scorecard publishes every
+  field, but only impact is scored: attacker and asset are not interpretable
+  with this corpus, and amount, preconditions, cited and fix are not checkable.
 
 - **Recall.** Nothing here says how many real problems the rules miss. That
   needs PoCs labelled as defective whether or not a rule fired, which this
@@ -255,59 +280,103 @@ as warnings because they were in `setUp` are errors in 0.6.0; the flag id
 does not include severity, so those labels still apply. `eval/results/precision.md`
 has the 0.6.0 rows.
 
-## Rust (Solana) tests
+## Rust (Solana) and Anchor TypeScript tests
 
-Not measured. Every figure above is for Solidity: the Rust frontend is new in
-0.3.0, and there is no public, labelled collection of Solana PoCs comparable
-to DeFiHackLabs to measure it on. Until there is, treat a Rust finding as a
-question to answer, not a verdict.
+### The P1 held-out measurement (2026-11-24)
 
-What was checked instead, before release: the frontend was run over
-[LiteSVM](https://github.com/LiteSVM/litesvm) at `c848c56` and five
-[solana-program-library](https://github.com/solana-labs/solana-program-library)
-test directories at `264ca72` (`token-lending`, `stake-pool`, `governance`,
-`token-swap` and `single-pool`, each `program/tests`):
+**Population: public test suites, not judged PoCs.** The four licensed corpora
+are pinned public Rust and Anchor TypeScript test suites: `coral-xyz/anchor`,
+`solana-developers/program-examples`, `LiteSVM/litesvm`, and the
+`token-lending` and `governance` `program/tests` directories of
+`solana-labs/solana-program-library`. The intended PoC corpus does not exist
+publicly in a form this tool reads: the Neodyme CTF and workshop repositories
+ship exploit **binaries** (`pocs/src/bin/*.rs`), not test functions, and
+`coral-xyz/sealevel-attacks` has no test suite the tool recognizes. Every
+number below is precision on public test suites. It is not PoC precision, and
+it must not be quoted as such.
+
+The rule logic was frozen at realism-gate 1.0.4, commit
+`6019773976706e42e11ceefc2ee1b03496f2df54`, before any label was written. The
+seed is `rg-solana-2026-11-24`; the split is `dev` when
+`sha256(seed|corpus|flag_id)` has an even first 8 hex digits and `heldout`
+otherwise. At most 30 flags per rule per corpus were sampled; 174 flags were
+raised, 133 sampled, and 63 held-out flags labelled (the 70 dev-sampled flags
+are unlabelled). The headline is the held-out table:
+[`eval/solana/RESULTS.md`](../eval/solana/RESULTS.md), generated by
+`eval/solana/measure.py`. The method and labels are in
+[`eval/solana/PREREGISTRATION.md`](../eval/solana/PREREGISTRATION.md).
+
+| Rule | Rust | TypeScript | JavaScript |
+|---|---|---|---|
+| RG02 privileged-step-in-exploit | 0/21 = 0.0% [0.0-15.5] | 0/8 = 0.0% [0.0-32.4] | 0/5 = 0.0% [0.0-43.5] |
+| RG03 deployer-is-attacker | 0/6 = 0.0% [0.0-39.0] | 0/2 = 0.0% [0.0-65.8] | unmeasured |
+| RG04 storage-write | 0/6 = 0.0% [0.0-39.0] | unmeasured | unmeasured |
+| RG08 no-assertion | 5/5 = 100.0% [56.5-100] | 5/5 = 100.0% [56.5-100] | 1/1 = 100.0% [20.6-100] |
+| RG09 tautological-assertion | 1/1 = 100.0% [20.6-100] | unmeasured | unmeasured |
+| RG10 no-baseline | 0/2 = 0.0% [0.0-65.8] | 0/1 = 0.0% [0.0-79.3] | unmeasured |
+| RG11 unpinned-fork | unmeasured | unmeasured | unmeasured |
+
+A rule absent from this table raised no sampled flag on the held-out split, or
+raised only flags on the dev split. It is **unmeasured**, never 100%. RG01,
+RG05, RG06, RG07 and RG12-RG20 fall in that class here.
+
+**Read the zeroes with the population in mind.** These corpora are feature and
+teaching tests. A test that signs as `authority`, `admin` or `buyerWallet` is
+usually testing that role's own function, not claiming an exploit; that is why
+RG02 and RG03 are 0%. RG04 is 0/6: the two flags that first looked like true
+positives are the gacha helper that fabricates a settled `Pull`; the helper's
+own comment says it does so because the real cc-vrf settle needs the Light
+stack, and the claim/refund tests act on that setup through the program. The
+blinded second pass caught the primary reader's misapplication of the rubric's
+setup clause, and both related labels were corrected. RG08 is high because a
+test that asserts nothing is a real defect whether or not it is a PoC;
+`unwrap()` and `await ..rpc()` do not count, as the rule page says. RG10's
+three flags are rent-funding and bounded-balance assertions, not gain claims.
+The measurement answers "what happens when these rules run over public test
+suites"; it does not answer "how often is a Rust or Anchor PoC flag right".
+The PoC corpus remains missing, and the P1 handoff records that gap rather
+than widening the claim.
+
+One reader wrote the labels (AI-assisted, disclosed); a blinded second pass on
+a seeded 20-flag sample is recorded in
+[`eval/solana/agreement.json`](../eval/solana/agreement.json). The raw
+agreement was 19/20 = 95.0% [76.4-99.1]; after the one adjudication it is
+20/20 = 100% [83.9-100]. The correction changed the RG04 held-out cell from
+2/6 to 0/6, and both the raw and final numbers are published. This is not
+independent human validation.
+
+Reproduce:
 
 ```bash
-realism-gate check <checkout> --format json --fail-on never --no-config --no-declaration
+bash eval/solana/fetch.sh
+cargo build --release
+python eval/solana/flags.py target/release/realism-gate
+python eval/solana/measure.py
 ```
 
-All 164 Rust files parsed, and 451 tests drove a harness and were checked,
-in under a second per repository. These are program test suites, not
-PoCs, so a privileged signer or a hand-built account in them is often the
-point of the test. Reading every finding found four patterns that were wrong
-on their own terms, each now fixed and pinned by a test in `tests/rust.rs`:
-a library method inlined as a fixture method of the same name, a keypair's
-`.pubkey()` read as a fixed address, an attacker's own attempt to grant
-itself a role reported as the harness granting it, and a user's
-`owner: alice.pubkey()` field read as a role.
+### What was checked before the P1 measurement
 
-## Anchor TypeScript tests
-
-Not measured either, for the same reason: no labelled corpus of Anchor PoCs.
-The same robustness check was run before 0.4.0, over the TypeScript tests of
-[Anchor](https://github.com/coral-xyz/anchor) itself at `33868ff` (the whole checkout: its
-`tests/` suites, the TypeScript client's tests and the documentation's
-examples),
+Before 1.0, the frontend was run over [LiteSVM](https://github.com/LiteSVM/litesvm)
+at `c848c56`, [solana-program-library](https://github.com/solana-labs/solana-program-library)
+at `264ca72`, [Anchor](https://github.com/coral-xyz/anchor) at `33868ff` and
 [program-examples](https://github.com/solana-developers/program-examples) at
-`c0cafc5` (Anchor, bankrun and LiteSVM tests) and LiteSVM's own Node tests at
-`c848c56`:
+`c0cafc5`. At `264ca72`, only `token-lending` and `governance` have a
+`program/tests` directory; the earlier text's claim of five directories
+(`stake-pool`, `token-swap` and `single-pool` included) was wrong for that
+commit and is corrected here. All discovered Rust and TypeScript files parsed;
+451 Rust tests and 292 TypeScript tests in 118 suites drove a harness and were
+checked. These are program test suites, not PoCs, so a privileged signer or a
+hand-built account is often the point of the test.
 
-```bash
-realism-gate check <checkout> --format json --fail-on never --no-config --no-declaration
-```
-
-229 files import a Solana package; all parsed, and 292 tests in 118 suites
-drove a harness and were checked. Running the same checkouts also confirmed
-that the Rust results did not move: LiteSVM's and the five
-solana-program-library suites' Rust findings are identical to 0.3.0's. As
-with Rust, these are feature tests, not PoCs: an admin-signed instruction or
-a test without an assertion is often what they mean to do. Reading every
-finding found five patterns that were wrong on their own terms, each now
-fixed and pinned by a test in `tests/typescript.rs`: the provider wallet
-counted as the signer of every transaction it only paid for, `assert.ok(false)`
-after a call that should throw read as a tautology, a flag set by an event
-callback read as a constant, a `localhost` URL held in a constant read as a
-live cluster, and a helper read labelled `"Beginning"` and `"Resulting"` not
-seen as a before-and-after pair. A setup test titled `airdrop payer` is now
-read as setup too.
+Reading every finding found four Rust patterns and five TypeScript patterns
+that were wrong on their own terms, each now fixed and pinned by a test in
+`tests/rust.rs` and `tests/typescript.rs`: a library method inlined as a
+fixture method of the same name; a keypair's `.pubkey()` read as a fixed
+address; an attacker's own attempt to grant itself a role reported as the
+harness granting it; a user's `owner: alice.pubkey()` field read as a role;
+the provider wallet counted as the signer of every transaction it only paid
+for; `assert.ok(false)` after a call that should throw read as a tautology; a
+flag set by an event callback read as a constant; a `localhost` URL held in a
+constant read as a live cluster; and a helper read labelled `"Beginning"` and
+`"Resulting"` not seen as a before-and-after pair. A setup test titled
+`airdrop payer` is now read as setup too.
