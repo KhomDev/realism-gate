@@ -54,6 +54,10 @@ inputs:
     description: Token for the PR comment and for fetching the base commit.
     required: false
     default: ${{ github.token }}
+  verify-attestation:
+    description: Verify the downloaded release archive's build provenance with `gh attestation verify` before running it. Fails closed when `gh` is missing or verification fails. Set false only for a release published without attestations.
+    required: false
+    default: "true"
   binary:
     description: For testing this action. A realism-gate binary to run instead of downloading one.
     required: false
@@ -118,6 +122,8 @@ runs:
         RG_VERSION: ${{ inputs.version }}
         RG_ACTION_REF: ${{ github.action_ref }}
         RG_BINARY: ${{ inputs.binary }}
+        RG_VERIFY_ATTESTATION: ${{ inputs.verify-attestation }}
+        GH_TOKEN: ${{ inputs.github-token }}
         # The release this copy of the action belongs to. tests/docs.rs keeps
         # it equal to the crate version, so `@v1` runs the newest v1 release.
         RG_DEFAULT_VERSION: v1.0.4
@@ -160,6 +166,11 @@ runs:
           else
             shasum -a 256 -c check.txt
           fi
+          # SHA256SUMS and the archive come from the same release, so together
+          # they prove the download is intact, not who built it. The release
+          # workflow attests the archive; check that before unpacking and
+          # running it. The check fails closed: missing `gh` is an error.
+          bash "$GITHUB_ACTION_PATH/scripts/verify-attestation.sh" "$dir/$name.$ext"
           if [ "$ext" = zip ]; then
             unzip -q -o "$name.zip"
             bin="$dir/$name/realism-gate.exe"

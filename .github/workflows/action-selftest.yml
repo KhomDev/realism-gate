@@ -32,6 +32,12 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      # The attestation gate is shell, so it runs the same way on all three
+      # runners. It uses a fake `gh`: no network, no release.
+      - name: Attestation gate self-test
+        shell: bash
+        run: bash scripts/test-verify-attestation.sh
+
       - name: Install toolchain
         run: rustup toolchain install stable --profile minimal
 
