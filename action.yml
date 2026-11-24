@@ -173,7 +173,7 @@ runs:
           gate="$GITHUB_ACTION_PATH/scripts/verify-attestation.sh"
           # Windows sets GITHUB_ACTION_PATH with backslashes; bash opens a
           # POSIX path reliably, so convert it where cygpath exists.
-          if command -v cygpath >/dev/null 2>&1; then
+          if [ "${RUNNER_OS:-}" = Windows ] && command -v cygpath >/dev/null 2>&1; then
             gate="$(cygpath -u "$GITHUB_ACTION_PATH")/scripts/verify-attestation.sh"
           fi
           bash "$gate" "$dir/$name.$ext"
