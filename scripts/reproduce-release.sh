@@ -123,7 +123,13 @@ test -d "$released_dir"
 
 (
   cd "$src"
-  export RUSTFLAGS="$(bash "$src/scripts/reproducible-rustflags.sh" "$src")"
+  # Tags from before the reproducible-build change have no mapping script;
+  # build without it and say so. --binary-only is the mode for those tags.
+  if [ -f "$src/scripts/reproducible-rustflags.sh" ]; then
+    export RUSTFLAGS="$(bash "$src/scripts/reproducible-rustflags.sh" "$src")"
+  else
+    echo "note: $tag predates scripts/reproducible-rustflags.sh; building without path remapping"
+  fi
   rustup run "$toolchain" cargo build --release --locked --target "$target"
 )
 rebuilt_dir="$src/target/$target/release"
@@ -150,31 +156,36 @@ for bin in $bins; do
   fi
 done
 
-mkdir -p "$work/repacked"
-bash "$src/scripts/package-release.sh" assemble "$version" "$target" "$archive" "$rebuilt_dir" "$work/repacked" >/dev/null
-if [ "$archive" = tar.gz ]; then
-  rebuilt_archive="$work/repacked/$name.tar.gz"
-else
-  rebuilt_archive="$work/repacked/$name.zip"
-fi
-rebuilt_archive_sha="$(sha256sum "$rebuilt_archive" | cut -d' ' -f1)"
-entry_sha="$(grep " \./$name.$archive\$" "$work/SHA256SUMS" | cut -d' ' -f1)"
-
-echo
-echo "archive comparison:"
-echo "  released entry   $entry_sha"
-echo "  rebuilt archive  $rebuilt_archive_sha"
-if [ "$rebuilt_archive_sha" = "$entry_sha" ]; then
-  echo "  MATCH    the rebuilt archive is byte-identical to the released entry"
-else
-  echo "  DIFFERS  the rebuilt archive is not byte-identical"
-  if [ "$binary_only" -eq 1 ]; then
-    echo "           --binary-only: archive difference is reported, not fatal"
+if [ "$binary_only" -eq 0 ] && [ -f "$src/scripts/package-release.sh" ]; then
+  mkdir -p "$work/repacked"
+  bash "$src/scripts/package-release.sh" assemble "$version" "$target" "$archive" "$rebuilt_dir" "$work/repacked" >/dev/null
+  if [ "$archive" = tar.gz ]; then
+    rebuilt_archive="$work/repacked/$name.tar.gz"
   else
+    rebuilt_archive="$work/repacked/$name.zip"
+  fi
+  rebuilt_archive_sha="$(sha256sum "$rebuilt_archive" | cut -d' ' -f1)"
+  entry_sha="$(grep " \./$name.$archive\$" "$work/SHA256SUMS" | cut -d' ' -f1)"
+
+  echo
+  echo "archive comparison:"
+  echo "  released entry   $entry_sha"
+  echo "  rebuilt archive  $rebuilt_archive_sha"
+  if [ "$rebuilt_archive_sha" = "$entry_sha" ]; then
+    echo "  MATCH    the rebuilt archive is byte-identical to the released entry"
+  else
+    echo "  DIFFERS  the rebuilt archive is not byte-identical"
     echo "           (the binary comparison above is still meaningful; the"
     echo "           difference is packaging metadata or the toolchain/environment)"
     status=1
   fi
+elif [ "$binary_only" -eq 1 ]; then
+  echo
+  echo "archive comparison: skipped (--binary-only)"
+else
+  echo
+  echo "archive comparison: skipped ($tag predates scripts/package-release.sh)" >&2
+  status=1
 fi
 
 echo
