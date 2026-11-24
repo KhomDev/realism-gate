@@ -24,6 +24,10 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
+  # Pinned, not `stable`: a tag must be rebuildable later by
+  # scripts/reproduce-release.sh with the same compiler. Keep
+  # .github/workflows/reproduce-release.yml equal to this value.
+  RELEASE_RUST: "1.95.0"
 
 jobs:
   # A release whose tag does not match the crate version, or whose tests fail,
@@ -53,16 +57,16 @@ jobs:
           echo "version $version (ref $REF_TYPE $REF_NAME)"
 
       - name: Install toolchain
-        run: rustup toolchain install stable --profile minimal --component clippy,rustfmt
+        run: rustup toolchain install "$RELEASE_RUST" --profile minimal --component clippy,rustfmt
 
       - name: Format check
-        run: cargo fmt --all -- --check
+        run: cargo "+$RELEASE_RUST" fmt --all -- --check
 
       - name: Clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo "+$RELEASE_RUST" clippy --all-targets --all-features -- -D warnings
 
       - name: Test
-        run: cargo test --locked
+        run: cargo "+$RELEASE_RUST" test --locked
 
   build:
     name: build (${{ matrix.target }})
@@ -70,14 +74,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
-      id-token: write
-      attestations: write
     strategy:
       fail-fast: false
       matrix:
         include:
-          # Static musl binaries run on any Linux distribution.
-          - os: ubuntu-latest
+          # Static musl binaries run on any Linux distribution. The label is
+          # pinned rather than `ubuntu-latest`: the linker version is part of
+          # the build, and the reproducibility check rebuilds on 24.04.
+          - os: ubuntu-24.04
             target: x86_64-unknown-linux-musl
             archive: tar.gz
           - os: ubuntu-24.04-arm
@@ -96,7 +100,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install toolchain
-        run: rustup toolchain install stable --profile minimal --target ${{ matrix.target }}
+        run: rustup toolchain install "$RELEASE_RUST" --profile minimal --target ${{ matrix.target }}
 
       - name: Install musl tools
         if: contains(matrix.target, 'musl')
@@ -105,7 +109,19 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Build
-        run: cargo build --release --locked --target ${{ matrix.target }}
+        shell: bash
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -eu
+          # The Linux binaries are the ones scripts/reproduce-release.sh
+          # compares, so normalize the absolute paths they would otherwise
+          # embed. scripts/reproducible-rustflags.sh is the single source of
+          # this mapping; the reproduce workflow calls it too.
+          if [[ "$TARGET" == *-linux-musl ]]; then
+            export RUSTFLAGS="$(bash scripts/reproducible-rustflags.sh "$PWD")"
+          fi
+          cargo "+$RELEASE_RUST" build --release --locked --target "$TARGET"
 
       - name: Package
         shell: bash
@@ -140,12 +156,6 @@ jobs:
           rm -rf "$name"
           ls -l
 
-      - name: Attest build provenance
-        if: github.ref_type == 'tag'
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
-        with:
-          subject-path: dist/*
-
       - name: Upload artifacts
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -156,13 +166,51 @@ jobs:
   checksums:
     name: checksums
     needs: build
-    runs-on: ubuntu-latest
+    # Pinned: GNU tar and gzip versions are part of the archive bytes, and the
+    # reproducibility workflow rebuilds on the same image.
+    runs-on: ubuntu-24.04
+    # The attestation must cover the archives that are actually published, so
+    # it is created here, after the deterministic repacking, not per build job.
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
       - name: Download every archive
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: dist
           merge-multiple: true
+
+      - name: Repack deterministically
+        shell: bash
+        env:
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          set -eu
+          # The build jobs' archives carry each runner's mtimes and tar
+          # defaults. Repack every one with one fixed mtime, uid/gid, and
+          # sorted order, using the script the reproduce workflow also uses,
+          # so a rebuild can produce the same bytes.
+          mkdir -p stage dist-normalized
+          targets="x86_64-unknown-linux-musl:tar.gz aarch64-unknown-linux-musl:tar.gz x86_64-apple-darwin:tar.gz aarch64-apple-darwin:tar.gz x86_64-pc-windows-msvc:zip"
+          for entry in $targets; do
+            target="${entry%:*}"
+            archive="${entry##*:}"
+            name="realism-gate-$VERSION-$target"
+            if [ "$archive" = zip ]; then
+              unzip -q "dist/$name.zip" -d stage
+            else
+              tar xzf "dist/$name.tar.gz" -C stage
+            fi
+            test -d "stage/$name"
+            bash scripts/package-release.sh repackage "$VERSION" "$target" "$archive" stage dist-normalized
+          done
+          rm -rf dist
+          mv dist-normalized dist
+          ls -l dist
 
       - name: SHA256SUMS
         shell: bash
@@ -172,6 +220,16 @@ jobs:
           test "$(ls ./*.tar.gz ./*.zip | wc -l)" = 5
           sha256sum ./*.tar.gz ./*.zip > SHA256SUMS
           cat SHA256SUMS
+
+      - name: Attest the published archives
+        if: github.ref_type == 'tag'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          # Only the five archives the action downloads and checks; the
+          # SHA256SUMS file next to them is written in the step above.
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.zip
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -257,6 +315,15 @@ jobs:
           server). `cargo binstall` installs all three. Linux builds are static
           (musl).
           EOF
+          # Unquoted on purpose: these values come from the workflow.
+          {
+            echo
+            echo "Built with rustc $RELEASE_RUST and repacked deterministically, so the"
+            echo "archives can be compared with a local rebuild. From a checkout of this"
+            echo "repository:"
+            echo
+            echo "    scripts/reproduce-release.sh $GITHUB_REF_NAME x86_64-unknown-linux-musl"
+          } >> notes.md
 
       - name: Create the release
         uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4

@@ -150,23 +150,64 @@ Run from a clean checkout of `main`.
     gh release view vX.Y.Z
     scripts/release-assets.sh vX.Y.Z
     ```
-13. `cargo publish` is a separate, manual step; it is not part of the release
+13. **Check the release is reproducible.** Run the rebuild workflow and confirm
+    it reports `reproducible: YES`:
+    ```bash
+    gh workflow run reproduce-release.yml -f tag=vX.Y.Z
+    gh run watch
+    ```
+    A mismatch is a packaging or toolchain defect: do not move `v1` until it
+    is understood. (Releases before the pinned-toolchain change used a moving
+    `stable` and plain tar/zip; they cannot pass, and `--binary-only` records
+    the binary result for them.)
+14. `cargo publish` is a separate, manual step; it is not part of the release
     workflow. A release is not done while crates.io is behind: after
     publishing, `verify-release.yml` installs the published release from
     crates.io, from the archives and through the action.
-14. Move the floating Action tag to the release, and only then:
+15. Move the floating Action tag to the release, and only then:
     ```bash
     git tag -f -a v1 -m "v1: floating major tag, now vX.Y.Z" <commit>
     git push --force origin v1
     ```
 
+## Reproducible archives
+
+A release is built to be rebuildable, and the published archives carry the
+metadata that makes that check meaningful:
+
+- **Toolchain pinned to 1.95.0**, in `release.yml` (`RELEASE_RUST`) and
+  `reproduce-release.yml`. `stable` moved between releases and cannot recreate
+  an old binary.
+- **Linux builds remap absolute paths** with `scripts/reproducible-rustflags.sh`:
+  the workspace becomes `/build/realism-gate`, the cargo registry and git
+  checkouts become `/cargo/registry` and `/cargo/git`.
+- **Archives are repacked deterministically** in the `checksums` job from the
+  build jobs' transport archives: one mtime (`SOURCE_DATE_EPOCH`, default
+  1980-01-01), uid/gid 0, sorted entries, `gzip -n`, `zip -X -@`. The job runs
+  on `ubuntu-24.04` because the tar/gzip/zip versions are part of the bytes.
+- **The attestation is created after the repack**, in the same job, over the
+  five archives that are actually published.
+
+`scripts/reproduce-release.sh TAG TARGET` downloads the tag's source archive,
+the release archive and `SHA256SUMS`, verifies the archive against
+`SHA256SUMS`, rebuilds with the pinned toolchain, and compares both every
+binary's SHA256 and the repacked archive's SHA256 with the released entry. Exit
+0 means both matched. `.github/workflows/reproduce-release.yml` runs it on
+`ubuntu-24.04`.
+
+This is a forward guarantee. Releases up to 1.0.4 were built with whatever
+`stable` was on the runner and packaged with plain `tar czf`/`7z`, so their
+archive bytes include mtimes and their compiler version was never recorded;
+for those, run with `--binary-only` and treat any binary mismatch as the
+answer.
+
 ## What the release workflow does
 
 | Job | What it proves |
 |---|---|
-| `verify` | the tag matches `Cargo.toml`; fmt, clippy and tests pass |
+| `verify` | the tag matches `Cargo.toml`; fmt, clippy and tests pass on the pinned toolchain |
 | `build` | five targets build; each archive carries every binary declared in `Cargo.toml` |
-| `checksums` | exactly five archives, one `SHA256SUMS` |
+| `checksums` | the five archives are repacked deterministically, exactly five remain, `SHA256SUMS` is written, and the provenance attestation covers those five |
 | `install-test` | the archive and the `cargo binstall` metadata install on Linux, macOS and Windows, and every declared binary is present |
 | `release` | on a tag only: notes from the changelog, assets, build provenance |
 
