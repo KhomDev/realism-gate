@@ -134,11 +134,17 @@ def run_unit(binary: str, unit: dict, corpus: dict) -> tuple[dict, list[dict], d
     args = [binary, "check", *files, "--no-declaration", "--no-config",
             "--format", "json", "--fail-on", "never"]
     out = subprocess.run(args, cwd=base, capture_output=True)
-    if out.returncode != 0:
+    # Exit 2 with "no test suite found" is the tool saying it read no test:
+    # the JSON report is still written, with zero suites. That is an RQ1 data
+    # point, not a failure. Any other non-zero exit is.
+    no_suite = out.returncode == 2 and b"no test suite found" in out.stderr
+    if out.returncode != 0 and not no_suite:
         sys.stderr.write(out.stderr.decode("utf-8", "replace"))
         raise SystemExit(f"{unit['id']}: realism-gate exited {out.returncode}")
     report = json.loads(out.stdout.decode("utf-8"))
     summary = report["summary"]
+    if no_suite and summary["suites"] != 0:
+        raise SystemExit(f"{unit['id']}: exit 2 with {summary['suites']} suites")
     flags = []
     for f in report.get("findings", []):
         if "suppressed" in f:
@@ -167,6 +173,7 @@ def run_unit(binary: str, unit: dict, corpus: dict) -> tuple[dict, list[dict], d
         "kind": unit["kind"],
         "language": language(rel_files(unit)[0]) or "other",
         "files_given": files,
+        "files_read": summary["files"],
         "tests_checked": summary["tests"],
         "suites_checked": summary["suites"],
         "parse_errors": len(report.get("parse_errors", [])),
