@@ -140,11 +140,12 @@ held-out 40 were not). Two false positives were fixed:
    a `main` call, and only the unit's first file is auto-wrapped.
 2. A test title saying the attack is blocked (`blocks`, `blocked`, `denies`,
    `cannot`, `does not allow`, `not allowed`, `must fail`) is a control test,
-   so the identity/state rules do not fire on it.
+   so the identity/state rules do not fire on it; a leading check mark (the
+   secure-suite convention) is included.
 
 No rule was changed on the basis of a held-out flag. Round 2 freezes at
-commit `da476b9` with binary
-`f93734d7a83a83d4fe0d82b124dbd638aa686e61ab49363838bdee04092f354c`. The
+commit `fcba51d` with binary
+`795211eccc5ade1327bd0285c6e52543136cf7cd92f3b23e9cecfe8e7ee5bad8`. The
 held-out split is labelled first, then dev, under the same rubric. The 1.2.0
 numbers and this round's numbers are reported separately; the 1.2.0 run stays
 in `runs/v1.2.0.jsonl`.

@@ -1,7 +1,7 @@
 {
   "schema": "realism-gate.solana-poc-corpus/v2",
   "seed": "rg-solana-poc-v2-2026-11-25",
-  "frozen_rule_commit": "da476b9996e7e84ef937d85c9affa5cf08c0192f",
+  "frozen_rule_commit": "fcba51d5a16d162d2fab7395c3a82643daaebf50",
   "frozen_rule_version": "1.3.0",
   "collected": "2026-11-25",
   "corpora": {
@@ -538,5 +538,5 @@
       "updated_at": "2026-10-01T03:55:10Z"
     }
   },
-  "frozen_binary_sha256": "f93734d7a83a83d4fe0d82b124dbd638aa686e61ab49363838bdee04092f354c"
+  "frozen_binary_sha256": "795211eccc5ade1327bd0285c6e52543136cf7cd92f3b23e9cecfe8e7ee5bad8"
 }
