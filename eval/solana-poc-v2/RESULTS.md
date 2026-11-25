@@ -145,3 +145,11 @@ No human has labelled this corpus. `labels/HUMAN_PACKET.md` is the blind
 packet for the 32 held-out flags and `score_human.py` scores a returned CSV for
 agreement and Cohen's kappa; until a human returns it, the labels are one AI
 reader's and the article says so.
+
+### 1.4.0 readability check (no new labels)
+
+`readability.py` ran the 1.4.0 binary over both corpora through their pinned
+caches without writing a frozen run file. P1: J 6/12 (the 8/12 target is still
+missed), X 82/82, NC 5/5; v2: J 25/28, X 48/53. The unreadable unit ids are
+printed by the script. No label was read to produce this check and no
+precision cell changes.
