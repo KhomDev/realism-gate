@@ -171,6 +171,10 @@ pub struct CheckArgs {
     /// Git commit of `--target` to read. The working tree is not trusted.
     #[arg(long, value_name = "REV", requires = "target")]
     pub target_commit: Option<String>,
+    /// Print the entry-point authority model for DIR and exit. Debug output:
+    /// a deterministic JSON document. No rule runs, and no test is read.
+    #[arg(long, value_name = "DIR")]
+    pub dump_program: Option<PathBuf>,
     /// The configuration file. Defaults to ./realism-gate.toml if present.
     #[arg(long, value_name = "FILE")]
     pub config: Option<PathBuf>,
@@ -519,6 +523,16 @@ fn wrap_fragment(src: &str, ext: &str) -> String {
 }
 
 fn check(args: CheckArgs) -> Result<ExitCode, String> {
+    if let Some(target) = &args.dump_program {
+        // Debug output for the program model. It reads only `target` and
+        // returns before any test file, declaration or config is read, so the
+        // check path is unchanged when the flag is absent.
+        let model = rg_program::ProgramModel::resolve(target)
+            .map_err(|error| format!("--dump-program: {error}"))?;
+        print!("{}", model.to_json_pretty());
+        println!();
+        return Ok(ExitCode::SUCCESS);
+    }
     let cwd = std::env::current_dir().map_err(|e| format!("current directory: {e}"))?;
     let paths = if args.paths.is_empty() {
         // Foundry keeps tests in test/, Cargo in tests/.

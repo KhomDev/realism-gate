@@ -108,6 +108,7 @@ path = "src/bin/realism-gate-mcp.rs"
 rg-ir.workspace = true
 rg-frontend-sol.workspace = true
 rg-model.workspace = true
+rg-program.workspace = true
 rg-rules.workspace = true
 rg-exec.workspace = true
 rg-render.workspace = true

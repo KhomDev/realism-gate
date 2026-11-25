@@ -2383,6 +2383,7 @@ dependencies = [
  "rg-frontend-sol",
  "rg-ir",
  "rg-model",
+ "rg-program",
  "rg-render",
  "rg-rules",
  "serde",
@@ -2530,7 +2531,12 @@ dependencies = [
 name = "rg-program"
 version = "1.4.0"
 dependencies = [
- "rg-ir",
+ "proc-macro2",
+ "serde",
+ "serde_json",
+ "solar-parse",
+ "syn 2.0.119",
+ "tempfile",
 ]
 
 [[package]]
