@@ -128,10 +128,12 @@ def arena_units() -> list[dict]:
             outcome = "invalid"
         else:
             outcome = "unlabelled"
-        sev = next((l for l in labels if l in ("Critical", "High", "Medium", "Low", "info")), None)
-        if sev is None:
-            m = re.search(r"\[(Critical|High|Medium|Low|info)\]", it["title"], re.I)
-            sev = m.group(1).capitalize() if m else "unstated"
+        m = re.search(r"\[(Critical|High|Medium|Low|info)\]", it["title"], re.I)
+        if m:
+            sev, sev_src = m.group(1).capitalize(), "issue-title-bracket"
+        else:
+            sev = next((l for l in labels if l in ("Critical", "High", "Medium", "Low", "info")), "unstated")
+            sev_src = "issue-label"
         body = it["body"]
         units.append({
             "id": f"J-arena-{num}",
@@ -150,6 +152,7 @@ def arena_units() -> list[dict]:
             }],
             "outcome": outcome,
             "severity": sev,
+            "severity_source": sev_src,
             "outcome_source": "arena-maintainer-labels",
             "outcome_evidence": "Maintainer labels: " + ", ".join(labels),
             "outcome_url": ARENA_ISSUE_URL.format(num),
@@ -238,6 +241,7 @@ def rustfund_units() -> list[dict]:
                 }],
                 "outcome": "valid",
                 "severity": sev.capitalize(),
+                "severity_source": "results-group-severity-field",
                 "duplicate_in_group": dup,
                 "selected_issue": g["selectedIssueId"],
                 "outcome_source": "codehawks-results",
@@ -278,6 +282,7 @@ def c4_units() -> list[dict]:
         }],
         "outcome": "valid",
         "severity": "Low",
+        "severity_source": "report-section-heading",
         "outcome_source": "code4rena-report",
         "outcome_evidence": 'Report lists "L-07" under "Low Risk" with an executable Rust test',
         "outcome_url": C4_PAGE,
@@ -390,9 +395,36 @@ def dedupe(units: list[dict]) -> None:
         key = u["files"][0].get("block_sha256") or u["files"][0].get("sha256_norm")
         u["dedupe_key"] = key
         if key in seen:
-            u["duplicate_of"] = seen[key]
+            u["content_duplicate_of"] = seen[key]
         else:
             seen[key] = u["id"]
+
+
+def assign_groups(units: list[dict]) -> None:
+    """A judged finding group is one J unit; submissions inside it are not.
+
+    CodeHawks RustFund: one representative per report group (first by sorted
+    unit id); the rest carry duplicate_of = the representative. Arena and
+    Code4rena units are each their own judged finding (group_size 1). X and N
+    units carry null group fields.
+    """
+    groups: dict[str, list[dict]] = {}
+    for u in units:
+        if u["source"] == "codehawks-rustfund":
+            groups.setdefault(u["files"][0]["group"], []).append(u)
+    for gid, members in groups.items():
+        members.sort(key=lambda x: x["id"])
+        rep = members[0]["id"]
+        for u in members:
+            u["group_id"] = gid
+            u["group_size"] = len(members)
+            u["duplicate_of"] = None if u["id"] == rep else rep
+    for u in units:
+        if u["source"] == "codehawks-rustfund":
+            continue
+        u["group_id"] = None
+        u["group_size"] = 1 if u["tier"] == "J" else None
+        u["duplicate_of"] = None
 
 
 def main(argv: list[str]) -> int:
@@ -404,9 +436,10 @@ def main(argv: list[str]) -> int:
     if len(ids) != len(set(ids)):
         raise SystemExit("duplicate unit ids")
     dedupe(units)
+    assign_groups(units)
     for u in units:
         u["split"] = split_of(u["id"])
-    counted = [u for u in units if "duplicate_of" not in u]
+    counted = [u for u in units if "content_duplicate_of" not in u]
     by_tier: dict[str, int] = {}
     for u in counted:
         by_tier[u["tier"]] = by_tier.get(u["tier"], 0) + 1
@@ -417,6 +450,10 @@ def main(argv: list[str]) -> int:
     for u in counted:
         by_platform[u["platform"]] = by_platform.get(u["platform"], 0) + 1
     j = [u for u in counted if u["tier"] == "J"]
+    j_distinct = [u for u in j if u.get("duplicate_of") is None]
+    j_distinct_by_source: dict[str, int] = {}
+    for u in j_distinct:
+        j_distinct_by_source[u["source"]] = j_distinct_by_source.get(u["source"], 0) + 1
     j_by_source: dict[str, int] = {}
     j_by_platform: dict[str, int] = {}
     for u in j:
@@ -447,7 +484,10 @@ def main(argv: list[str]) -> int:
         "excluded": EXCLUDED,
         "counts": {
             "units": len(units),
-            "duplicates": len(units) - len(counted),
+            "content_duplicates": len(units) - len(counted),
+            "J_submissions": len(j),
+            "J_distinct_findings": len(j_distinct),
+            "J_distinct_by_source": dict(sorted(j_distinct_by_source.items())),
             "counted_by_tier": dict(sorted(by_tier.items())),
             "counted_by_source": dict(sorted(by_source.items())),
             "counted_by_platform": dict(sorted(by_platform.items())),

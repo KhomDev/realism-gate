@@ -9,10 +9,11 @@ gitignored `.corpus/solana-poc-v3/`.
 
 ## Result in one paragraph, with the uncomfortable part first
 
-The fresh public judged-Solana universe is **59 coded J units, not 60**, and it
-is **80% one beginner contest**: 47 from CodeHawks First Flight #36 (RustFund),
-11 from the Solana Audit Arena's remaining labelled issues, 1 from Code4rena
-Jupiter Lend. X is 60 (all Arena unlabelled submissions) and N is 16. Because
+The fresh public judged-Solana universe is **59 coded J submissions, not 60,
+across 20 distinct judged findings**, and it is **80% one beginner contest**:
+47 submissions (8 findings) from CodeHawks First Flight #36 (RustFund), 11
+findings from the Solana Audit Arena's remaining labelled issues, 1 from
+Code4rena Jupiter Lend. X is 60 (all Arena unlabelled submissions) and N is 16. Because
 the four candidate classes named in the prompt (Code4rena, Sherlock, Cantina,
 CodeHawks, Hats, Immunefi, audit firms, Solana-specific, incident repos) were
 each searched and the fresh coded supply is this thin, **the 40% source cap
@@ -107,6 +108,13 @@ J by split: DEV 18, V1 14, V2 16, FINAL 11.
 J share by source: RustFund 79.66%, Arena 18.64%, Code4rena 1.69%.
 J share by platform: CodeHawks 79.66%, Arena 18.64%, Code4rena 1.69%.
 
+**Distinct judged findings:** the 47 RustFund submissions span only 8 report
+groups (16+8+8+5+4+3+2+1 submissions), so the corpus has **20 distinct J
+findings**: Arena 11 + RustFund 8 + Code4rena 1. Each RustFund group has one
+representative unit (first by sorted unit id); the other 39 units carry
+`duplicate_of` pointing at it. At the distinct-finding level the shares are
+Arena 55%, RustFund 40%, Code4rena 5%.
+
 ## Cap and FINAL arithmetic (the blocker)
 
 - §10 needs the FINAL slice to hold >= 30 J units from >= 3 sources with no
@@ -122,6 +130,11 @@ J share by platform: CodeHawks 79.66%, Arena 18.64%, Code4rena 1.69%.
   reachable** from the public fresh data found. The corpus keeps every unit and
   reports the shares rather than trimming to a cap-compliant subset that would
   carry almost no data.
+- Under the corrected unit discipline (one judged finding group = one J unit),
+  the whole corpus holds only **20 distinct J findings**, so §10's >= 30 FINAL J
+  minimum is unreachable by construction. The submission-based arithmetic above
+  is kept as reported; a strict 40%-per-origin cap on 20 distinct findings still
+  admits at most 5 (2 Arena + 2 RustFund + 1 Code4rena).
 
 ## Excluded candidates that looked promising
 

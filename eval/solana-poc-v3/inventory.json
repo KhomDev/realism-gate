@@ -39,12 +39,16 @@
       ],
       "outcome": "valid",
       "severity": "Medium",
+      "severity_source": "issue-title-bracket",
       "outcome_source": "arena-maintainer-labels",
       "outcome_evidence": "Maintainer labels: Valid, Medium",
       "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/141",
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "1ab85c71377a04abd59e656ad600d66a9d132f06cd927c2bee6d84b3b31039c4",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -65,13 +69,17 @@
         }
       ],
       "outcome": "valid",
-      "severity": "High",
+      "severity": "Critical",
+      "severity_source": "issue-title-bracket",
       "outcome_source": "arena-maintainer-labels",
       "outcome_evidence": "Maintainer labels: Valid, High",
       "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/144",
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "de1dce2416d549abc89f2aaf98343bb6c424234aea97a20cb978df432a677ce7",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -92,13 +100,17 @@
         }
       ],
       "outcome": "valid",
-      "severity": "Low",
+      "severity": "Medium",
+      "severity_source": "issue-title-bracket",
       "outcome_source": "arena-maintainer-labels",
       "outcome_evidence": "Maintainer labels: Valid, Low",
       "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/147",
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "891cea4d1b45bb062643f6bf1184e64697a417210a2f90f276585498739c3ad7",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -120,12 +132,16 @@
       ],
       "outcome": "valid",
       "severity": "Low",
+      "severity_source": "issue-title-bracket",
       "outcome_source": "arena-maintainer-labels",
       "outcome_evidence": "Maintainer labels: Valid, Low",
       "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/163",
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "7bb37aa3e4e37cef22b1e1df7662ceb87aabd11cb534842bcf5bed7dfee52315",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -147,12 +163,16 @@
       ],
       "outcome": "valid",
       "severity": "Low",
+      "severity_source": "issue-title-bracket",
       "outcome_source": "arena-maintainer-labels",
       "outcome_evidence": "Maintainer labels: Valid, Low",
       "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/187",
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "11823e383b4fde7489005645c014fab694a2473d8bb2ca14e1bcc34d1645ecdc",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -173,13 +193,17 @@
         }
       ],
       "outcome": "valid",
-      "severity": "Low",
+      "severity": "High",
+      "severity_source": "issue-title-bracket",
       "outcome_source": "arena-maintainer-labels",
       "outcome_evidence": "Maintainer labels: Valid, Low",
       "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/201",
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "7b2035d6f344976e0d01834075b299f04b904feaa8c1427fddebb21a334765f8",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -200,13 +224,17 @@
         }
       ],
       "outcome": "valid",
-      "severity": "Medium",
+      "severity": "High",
+      "severity_source": "issue-title-bracket",
       "outcome_source": "arena-maintainer-labels",
       "outcome_evidence": "Maintainer labels: Valid, Medium",
       "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/203",
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "08c759ef0b77ed3cdd439f6bbfc66d89fe271a8abc135e484e8b8a1483fc1468",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -227,13 +255,17 @@
         }
       ],
       "outcome": "valid",
-      "severity": "info",
+      "severity": "Medium",
+      "severity_source": "issue-title-bracket",
       "outcome_source": "arena-maintainer-labels",
       "outcome_evidence": "Maintainer labels: Valid, info",
       "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/210",
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "575ece7f9deb2fcec916054f17470ce8a3e537fd8a920a8138620cc83e2709ed",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -255,12 +287,16 @@
       ],
       "outcome": "duplicate",
       "severity": "Medium",
+      "severity_source": "issue-title-bracket",
       "outcome_source": "arena-maintainer-labels",
       "outcome_evidence": "Maintainer labels: duplicate",
       "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/270",
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "a8b26649235db173ca32c2c8fe0819e603a2903977c73237f7f3cd8ad308373d",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -281,13 +317,17 @@
         }
       ],
       "outcome": "valid",
-      "severity": "info",
+      "severity": "Low",
+      "severity_source": "issue-title-bracket",
       "outcome_source": "arena-maintainer-labels",
       "outcome_evidence": "Maintainer labels: Valid, info",
       "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/280",
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "1da6bac5f2292328cee0d0230d34138d8633050d0e6201280d77435b1020e88e",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -309,12 +349,16 @@
       ],
       "outcome": "valid",
       "severity": "Critical",
+      "severity_source": "issue-title-bracket",
       "outcome_source": "arena-maintainer-labels",
       "outcome_evidence": "Maintainer labels: duplicate, Valid",
       "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/281",
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "d97e579df5bc9d6635dbbe3633df8c8bf20b2af3fe7f71ad0516117093274cfa",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -337,6 +381,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "9d41c2bc16437b91dd80be3dbb8ae81d26dca9eef2d609956d7b6381cbbfa49d",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -359,6 +406,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "5633e526d8ec5371d269c90014ca1cb657248f1115883988689eb76d6641f646",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -381,6 +431,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "0b9e0c30816e8195a9eb4a94f748491b25dcdf7d683efcc508a9be0070b9ea2b",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -403,6 +456,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "11b356d4eee6652c1d5401c3fef3dab926cb2d82d8dc75fdd166231848aadcfb",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -425,6 +481,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "632b32302aae0eaf16e7bbcb973f8a69a735c494ee905fa8d615bc9a05dd3981",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -447,6 +506,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "ced5ed8de2d2d7bb8194e615c3b946ca28648711858f2a82cc7d2661ce04d475",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -469,6 +531,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "9a68f61e0cc60530ecc0f84ebbeaa9ef45a61a6dbc31eb22f227d376cf0bb446",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -491,6 +556,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "23b494143d13f127073f9e1b3c54d961e094bf437511c90d9c7761f4b72ccac2",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -513,6 +581,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "695a5be9d58e8145a103b1096ef0cb1d8370b29c7a14ac36a6929b278be2408a",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -535,6 +606,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "d10fdb7dbad98ea799d3829491922f00a8f1d621f50a835eb9e901cfa149be45",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -557,6 +631,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "84a5b75365d72c3026b03315739f3002e3e370e2398fc7f37986f5ea423176b2",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -579,6 +656,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "9988c0b906f431f9f393479cedab9906f7b1c4e7aa03ef211d29c8bdcff89191",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -601,6 +681,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "ba24582b78380170b021b942a7ef2c3cf2fcfcde7c07d1ff06b1983ade7ca405",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -623,6 +706,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "22181f41df5dc9ee2a0586fee657e6c6a691ce93b06386fca513bf3c10235492",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -645,6 +731,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "58e65586b62a8e0fb5c9e94550acab3c5337cfcb608c2a9735239b38c9cfa0a9",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -667,6 +756,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "07a4227527001638f151f7d4f5f7a6f791a528f0ac14635c4e3041814d7a1265",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -689,6 +781,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "885e7192bf81d34cfb506e8b7fadbf810eae40667e5147899982d999e018bb3a",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -711,6 +806,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "dc6273172759fbfa7487659d64576891d2aa0f1e801d8c36c619840b40d7615b",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -733,6 +831,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "b8df6bb6a7c514881e5701d142d53df9b9d12e69833c580c0f9bbca20b31715e",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -755,6 +856,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "18d5fd73315fc94376afe263a498c8edf12bcf12fc4f4dcbf10e04826be0b3f3",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -777,6 +881,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "2809bd5fccfc9ce15c7ff6b81c6b9e6bd0164f0b4148af1c3a35d3083268325e",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -799,6 +906,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "8a8f67cbaf2fb1f5a83d11de123a914cea2002154dde5c4a33095641251eb15d",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -821,6 +931,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "758f255bcb5467f00ff697016ce65c9b23e931abc7c5a4fed5c476c06680e5d4",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -843,6 +956,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "9ac70fe6386fcad588074a908531d9190942ad3842f8dc21f7e1f7be9ebda0c1",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -865,6 +981,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "d03f560deedf0378b7b01e604e100f855624a304a9da3e04d6fc0bf9c0c2631b",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -887,6 +1006,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "2c9baab5651aa4544aa64548951d4bff080e2e434c308a6515b894197b878594",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -909,6 +1031,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "ef0a8b7035a2eb64d77e7fc3c5d2a0694987f3c99e571408a37ab6b50173fa25",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -931,6 +1056,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "a89a04e5922acb229f14e09185eff6215acaad1bbdc727da165ab5bb448a2120",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -953,6 +1081,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "3f0d23ff61b8a52e05a6975eaa6eb7f3a98aa10c73d4288d236053b9f203e664",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -975,6 +1106,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "6b88f5091e611fa5b355a760e445ecab75769aa7a92c95a5fe2d7c726733e0bd",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -997,6 +1131,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "63dd8c43dd26d739e265dabf7f5fc331b00e0533b21be545f7857a9c72686f60",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -1019,6 +1156,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "bc2bc45528e9ca69f399eeb0e2fc90c7b1e1066dab7c155696d3394b31ba836d",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1041,6 +1181,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "b790b116afc1913a6fc522bc72ba0a533253b3bada3aa4bdc0aecfcae5e1a8b5",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1063,6 +1206,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "2c61a49fbfaa9807b89d69177ebed443d2576479cd04ecc8da00a3130870b8ef",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1085,6 +1231,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "8fec266a60b0cf5e95152eb298e6f05064ad78f821a763f32845c938cc9bb739",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1107,6 +1256,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "a619fef401024bedccc085d8246a0819f86d221e4d577960ab77744e497a6dd8",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -1129,6 +1281,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "46164968a1655a14cc619c69c8cf1eaabe1467f5d9d4757e0f32f06f6576758a",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1151,6 +1306,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "9a729934f14c2fa2e696efbb5ca3179f63ffb0a0aadd9addff4fab6058fb7afe",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1173,6 +1331,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "c465b8a882fc58138b30d0fe7463f877130e1d576b3bcc592f8a35463edefa98",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -1195,6 +1356,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "f707fef2e1bfaff953e6fad9b379c6745633796d26833b7228e31606af68c858",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1217,6 +1381,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "4e415c1017ab28c6dabbb558c9b62ce383f7e722266979d2d3553fc8454065d2",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -1239,6 +1406,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "2bf9412db6d11f9bee8df0c8f2b99cb882b3ea9747105dbb3bff0d6523c88f54",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1261,6 +1431,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "095399e5a250e5dee588c1f58357877091daeee2cd4d5898c07099234284cee8",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1283,6 +1456,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "b87a427c6479f389c677e8b023049d3c5c0f8c9646df691255f0ffee8676daf1",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1305,6 +1481,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "942bb8760403e7a89c3024f50b715e1339b1ae4864403a526847d30e73b89a54",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1327,6 +1506,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "26906ac2698186f74adb1765f57591ea1ecfc6a27eabfb0e1395a4020fb6db29",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1349,6 +1531,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "0e30d333bd756065e5fbdacd244a7ce20a1f2200464bdb0d0b8417c91c210eda",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -1371,6 +1556,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "9c3e8ddd5a92d1b774048da73cfa3bc1994c01d0f73c1c495a69f38ddcf98cc6",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -1393,6 +1581,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "71dcb860039aeb254ea5460579fd69f1a9163a38e72e38636a1368423de844f9",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1415,6 +1606,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "d4c304651a9d59fdd7ee0caff8c04ae65c03046e0532c3a183bc07361534a58d",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -1437,6 +1631,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "32302b10e1ff78792a5dd3200157624a012cda315d7c67e5690ecb5ba4a49b38",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1459,6 +1656,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "6023e49919de514907bb4aeff003bd9babb43e8aaacdbcaac104bf626be0290d",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -1481,6 +1681,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "89a72ffcf775100b2c82fb8ac749ade4c7cee4a4452687e7a16a43aa5246e50d",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -1503,6 +1706,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "5b491303e24e762bb558d889e911af48a9d266991263acd20cf5c58b7412a7c0",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -1525,6 +1731,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "809a2b27e15183d7a34e583b1e144aae07bd60a379e0c5a435c704071427fed8",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1547,6 +1756,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "bbd1bce3bda01ce3fb134661e7fee162f0c5ce039e22a1de35443516c19e33e5",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -1569,6 +1781,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "59f5db0693c6ab6832af1f9511956ad40b04981a10bbf7cf869399f9609f94a7",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1591,6 +1806,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "10e27c8dcf36389e6e9123980a60b8b98f15a1b96e95d73c7f9c52851fa67836",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1613,6 +1831,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "c485104da0c4e21da7c2a5116b13318c40c312e8e4a1bf1bf9288bf652c9e6a2",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -1635,6 +1856,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "a267499f553b396b34bffcc6525f096001925491fe4c2098dc9802524a86afbf",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1657,6 +1881,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8nocdu10005l2038ids6cn3",
       "outcome_source": "codehawks-results",
@@ -1665,6 +1890,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "78cc3dcde764242a281c39774a3701329390d0a683883c9c45d51a0e9727ad1f",
+      "group_id": "cma4aay4j0001jv041qus0o2n",
+      "group_size": 8,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -1687,6 +1915,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8nocdu10005l2038ids6cn3",
       "outcome_source": "codehawks-results",
@@ -1695,6 +1924,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "4f3b96dde8afad0c881be8e04c1b40c3b07c6bf3a789d595c201402f4abc7cff",
+      "group_id": "cma4aay4j0001jv041qus0o2n",
+      "group_size": 8,
+      "duplicate_of": "J-ch-rustfund-cm8is6eow000bl803cbxrxs0a",
       "split": "V2"
     },
     {
@@ -1717,6 +1949,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8nocdu10005l2038ids6cn3",
       "outcome_source": "codehawks-results",
@@ -1725,6 +1958,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "9c4cb8b3115ae26dde9f4bfa60c974447a95f72ca5bb345ce7cf2ae53ff52dc2",
+      "group_id": "cma4aay4j0001jv041qus0o2n",
+      "group_size": 8,
+      "duplicate_of": "J-ch-rustfund-cm8is6eow000bl803cbxrxs0a",
       "split": "V1"
     },
     {
@@ -1747,6 +1983,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": false,
       "selected_issue": "cm8nocdu10005l2038ids6cn3",
       "outcome_source": "codehawks-results",
@@ -1755,6 +1992,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "07cdae3cc3b3829db5dd6c2de652d1bf34d3f5cc118debb2bf6f103edb83d782",
+      "group_id": "cma4aay4j0001jv041qus0o2n",
+      "group_size": 8,
+      "duplicate_of": "J-ch-rustfund-cm8is6eow000bl803cbxrxs0a",
       "split": "V2"
     },
     {
@@ -1777,6 +2017,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8nocdu10005l2038ids6cn3",
       "outcome_source": "codehawks-results",
@@ -1785,6 +2026,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "b4e63d83d7b8fd7d95de121d999306579768f38c00cd7f1ca9170d8bdf2ff262",
+      "group_id": "cma4aay4j0001jv041qus0o2n",
+      "group_size": 8,
+      "duplicate_of": "J-ch-rustfund-cm8is6eow000bl803cbxrxs0a",
       "split": "FINAL"
     },
     {
@@ -1807,6 +2051,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8nocdu10005l2038ids6cn3",
       "outcome_source": "codehawks-results",
@@ -1815,6 +2060,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "85757a9aebee8281025cafd5fd6d9f881a9f13ee7a341f71d94fa00f02748e8d",
+      "group_id": "cma4aay4j0001jv041qus0o2n",
+      "group_size": 8,
+      "duplicate_of": "J-ch-rustfund-cm8is6eow000bl803cbxrxs0a",
       "split": "DEV"
     },
     {
@@ -1837,6 +2085,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8nocdu10005l2038ids6cn3",
       "outcome_source": "codehawks-results",
@@ -1845,6 +2094,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "0f5c4d3ef0bdf0c7a4fa218e64b2327135005d7fcf28cf9db77ce965a9edf613",
+      "group_id": "cma4aay4j0001jv041qus0o2n",
+      "group_size": 8,
+      "duplicate_of": "J-ch-rustfund-cm8is6eow000bl803cbxrxs0a",
       "split": "DEV"
     },
     {
@@ -1867,6 +2119,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8nocdu10005l2038ids6cn3",
       "outcome_source": "codehawks-results",
@@ -1875,6 +2128,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "42056086ec0a986a8b14cef3fbb4d9d081d4a642de716220b9096537c9b4400c",
+      "group_id": "cma4aay4j0001jv041qus0o2n",
+      "group_size": 8,
+      "duplicate_of": "J-ch-rustfund-cm8is6eow000bl803cbxrxs0a",
       "split": "V1"
     },
     {
@@ -1897,6 +2153,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8qagpgt0003jp03e1iwwybk",
       "outcome_source": "codehawks-results",
@@ -1905,6 +2162,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "f424585a951bc844cebea78e588a7b20d71dba02276d3e6216178d6d9ce1c80a",
+      "group_id": "cma4aay620003jv04y29c98kp",
+      "group_size": 4,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -1927,6 +2187,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8qagpgt0003jp03e1iwwybk",
       "outcome_source": "codehawks-results",
@@ -1935,6 +2196,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "4f2b7d990d683f551ff7f80bb502f46f3afb6d0f9aa4d20adf26f31d85b90dfa",
+      "group_id": "cma4aay620003jv04y29c98kp",
+      "group_size": 4,
+      "duplicate_of": "J-ch-rustfund-cm8isoiz90005jy03jexzkcqd",
       "split": "FINAL"
     },
     {
@@ -1957,6 +2221,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8qagpgt0003jp03e1iwwybk",
       "outcome_source": "codehawks-results",
@@ -1965,6 +2230,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "b2f0de4bd807f7856f90fa5ecb9ecb18d8e2dfb595ca08506d5c2a5b1985149d",
+      "group_id": "cma4aay620003jv04y29c98kp",
+      "group_size": 4,
+      "duplicate_of": "J-ch-rustfund-cm8isoiz90005jy03jexzkcqd",
       "split": "V2"
     },
     {
@@ -1987,6 +2255,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": false,
       "selected_issue": "cm8qagpgt0003jp03e1iwwybk",
       "outcome_source": "codehawks-results",
@@ -1995,6 +2264,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "6fdb976c5c2667bfb6e04e2c3f504f019da914e75785c9bcd2ec1a58bc07cea2",
+      "group_id": "cma4aay620003jv04y29c98kp",
+      "group_size": 4,
+      "duplicate_of": "J-ch-rustfund-cm8isoiz90005jy03jexzkcqd",
       "split": "V2"
     },
     {
@@ -2017,6 +2289,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2025,6 +2298,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "941944744eec228354ec9ba428cfd52e5bbfcad6f7a29f61b9150ef35332f6cc",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -2047,6 +2323,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2055,6 +2332,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "7c2fbeb50b6fe5d1119f3b779968e5f4f09dbcaaaecd4811ea238455249a405b",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
       "split": "V1"
     },
     {
@@ -2077,6 +2357,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2085,6 +2366,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "7867c796862b7e9a042607f45252126d8741476ec40024c5f5139c3a42df4ca2",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
       "split": "V1"
     },
     {
@@ -2107,6 +2391,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": false,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2115,6 +2400,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "2ceff13a83dd4e4bdb8c464e439072e4643a6bf68a748ff96f40e361a9841bde",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
       "split": "FINAL"
     },
     {
@@ -2137,6 +2425,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2145,6 +2434,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "7a60fcaaa4db28d1e87e4c3c5e44d7d7b81c7bf36e6602a96428be198be87e61",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
       "split": "FINAL"
     },
     {
@@ -2167,6 +2459,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2175,6 +2468,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "a8895fe4b92d11fb6a148780174d933c741e594a6c1015b97712467efdca742c",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
       "split": "DEV"
     },
     {
@@ -2197,6 +2493,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2205,6 +2502,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "c7573f3437b88cafa98717d8f2b298b9d21301db51398fcfef2ac560d2cfb0a7",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
       "split": "V2"
     },
     {
@@ -2227,6 +2527,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2235,6 +2536,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "3b6afcb0664cf173cca16fc8895c1fdee832ece71a43a11c3cc5ffbbf084b65a",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
       "split": "V1"
     },
     {
@@ -2257,6 +2561,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2265,6 +2570,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "a044844073e7782f71a0947fe6e46c06671288a5e7b43bbab7b2e6a238be3bb5",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
       "split": "FINAL"
     },
     {
@@ -2287,6 +2595,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2295,6 +2604,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "3683f2ca60a73433ac10b04d2544f1cadc8bb443715f623bf3f2cb0d210db01b",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
       "split": "V2"
     },
     {
@@ -2317,6 +2629,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2325,6 +2638,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "1771e4fe8ffa3c400f9ede392c146e00ca4b33718d68c38c7bf6e6fd367d8698",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
       "split": "FINAL"
     },
     {
@@ -2347,6 +2663,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2355,6 +2672,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "9e5e247e975e337731ece52b7d6403e84e3332a45be26f7909d1ba86a5868c28",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
       "split": "DEV"
     },
     {
@@ -2377,6 +2697,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2385,6 +2706,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "d5b97544357d07421f7c8d18bf9ab96a4463e3db730a5eaf438197a109b8fa53",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
       "split": "V2"
     },
     {
@@ -2407,6 +2731,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2415,6 +2740,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "d4200e0ab620889e9737b3cf8b3462efd0b26ee668ff4a25c87d2995fc701161",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
       "split": "DEV"
     },
     {
@@ -2437,6 +2765,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2445,6 +2774,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "f3cc97f79961781eac2d9c3d3bcdde65ee480e39de764eaf6046f1d3ab1fa3e5",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
       "split": "DEV"
     },
     {
@@ -2467,6 +2799,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8lna3800003l403frndishc",
       "outcome_source": "codehawks-results",
@@ -2475,6 +2808,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "efac37d1e4591bcf24b2bf714470e261dc7e2fb8cd59234edca07894d87cd7c9",
+      "group_id": "cma4aay8b0007jv04np6r0gyz",
+      "group_size": 16,
+      "duplicate_of": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
       "split": "V1"
     },
     {
@@ -2497,6 +2833,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8qmjysn0005ih03as1zx7vv",
       "outcome_source": "codehawks-results",
@@ -2505,6 +2842,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "92e8f69842b9d7858604849a07ca541f32eb06b93be0428b62c92ddc3512f506",
+      "group_id": "cma4aayd5000hjv04dwaviprl",
+      "group_size": 5,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -2527,6 +2867,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8qmjysn0005ih03as1zx7vv",
       "outcome_source": "codehawks-results",
@@ -2535,6 +2876,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "55a04b95738ac349143583709d54a2266e4491ae5cc1e69d2b6d687c5b9a63b8",
+      "group_id": "cma4aayd5000hjv04dwaviprl",
+      "group_size": 5,
+      "duplicate_of": "J-ch-rustfund-cm8j96d6y0005ld03kybscumn",
       "split": "V2"
     },
     {
@@ -2557,6 +2901,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8qmjysn0005ih03as1zx7vv",
       "outcome_source": "codehawks-results",
@@ -2565,6 +2910,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "58c642bee1c4fe3bb1f9903e8916c8b672841eff8b59f7ce068a5423f63b4215",
+      "group_id": "cma4aayd5000hjv04dwaviprl",
+      "group_size": 5,
+      "duplicate_of": "J-ch-rustfund-cm8j96d6y0005ld03kybscumn",
       "split": "FINAL"
     },
     {
@@ -2587,6 +2935,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8qmjysn0005ih03as1zx7vv",
       "outcome_source": "codehawks-results",
@@ -2595,6 +2944,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "36cc10d0881c3ac35143ae206099ff0e24aa0a99b150041f53bfe2cf6f855700",
+      "group_id": "cma4aayd5000hjv04dwaviprl",
+      "group_size": 5,
+      "duplicate_of": "J-ch-rustfund-cm8j96d6y0005ld03kybscumn",
       "split": "V1"
     },
     {
@@ -2617,6 +2969,7 @@
       ],
       "outcome": "valid",
       "severity": "High",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": false,
       "selected_issue": "cm8qmjysn0005ih03as1zx7vv",
       "outcome_source": "codehawks-results",
@@ -2625,6 +2978,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "f1491a38f229f13193d1c8221b8e350c02a85a4e215d3cdbe87ca1a77c8a4262",
+      "group_id": "cma4aayd5000hjv04dwaviprl",
+      "group_size": 5,
+      "duplicate_of": "J-ch-rustfund-cm8j96d6y0005ld03kybscumn",
       "split": "DEV"
     },
     {
@@ -2647,6 +3003,7 @@
       ],
       "outcome": "valid",
       "severity": "Medium",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8qcj32l0005l203euigc2tj",
       "outcome_source": "codehawks-results",
@@ -2655,6 +3012,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "e257b716a232234a1b61e0d2cf9c8a1b9fa6ad73abed339e01a0bdabe0f75e3f",
+      "group_id": "cma4aay770005jv044smoiz4b",
+      "group_size": 2,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -2677,6 +3037,7 @@
       ],
       "outcome": "valid",
       "severity": "Medium",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": false,
       "selected_issue": "cm8qcj32l0005l203euigc2tj",
       "outcome_source": "codehawks-results",
@@ -2685,6 +3046,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "dbc7c20a81b4fa634abeba3e250f12e56b97b702469f03ac570a994c8c115913",
+      "group_id": "cma4aay770005jv044smoiz4b",
+      "group_size": 2,
+      "duplicate_of": "J-ch-rustfund-cm8qanxid0005jr09wzy44iig",
       "split": "FINAL"
     },
     {
@@ -2707,6 +3071,7 @@
       ],
       "outcome": "valid",
       "severity": "Medium",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8q9zuml0003i903gwf47vs3",
       "outcome_source": "codehawks-results",
@@ -2715,6 +3080,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "c066bba692c69f9e99121458fe8899706633ced854d571ab784150655bf591f6",
+      "group_id": "cma4aayac000bjv04leoy8lmu",
+      "group_size": 8,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -2737,6 +3105,7 @@
       ],
       "outcome": "valid",
       "severity": "Medium",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8q9zuml0003i903gwf47vs3",
       "outcome_source": "codehawks-results",
@@ -2745,6 +3114,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "bc651f060cfafa828ee60e0138113d57c1ee61b6306b857cbf7aa56a127fc617",
+      "group_id": "cma4aayac000bjv04leoy8lmu",
+      "group_size": 8,
+      "duplicate_of": "J-ch-rustfund-cm8ioyz2n000hjx03pbkk3d10",
       "split": "V1"
     },
     {
@@ -2767,6 +3139,7 @@
       ],
       "outcome": "valid",
       "severity": "Medium",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8q9zuml0003i903gwf47vs3",
       "outcome_source": "codehawks-results",
@@ -2775,6 +3148,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "0d3f116bfd3fda83c0f572bf651e99100136b7550aefb45dba4e7361d925fb99",
+      "group_id": "cma4aayac000bjv04leoy8lmu",
+      "group_size": 8,
+      "duplicate_of": "J-ch-rustfund-cm8ioyz2n000hjx03pbkk3d10",
       "split": "V2"
     },
     {
@@ -2797,6 +3173,7 @@
       ],
       "outcome": "valid",
       "severity": "Medium",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8q9zuml0003i903gwf47vs3",
       "outcome_source": "codehawks-results",
@@ -2805,6 +3182,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "9fd2697b4400b5dce019b415fc28b32eb25cc84d045521a2306ee4df0a7ce8dd",
+      "group_id": "cma4aayac000bjv04leoy8lmu",
+      "group_size": 8,
+      "duplicate_of": "J-ch-rustfund-cm8ioyz2n000hjx03pbkk3d10",
       "split": "V2"
     },
     {
@@ -2827,6 +3207,7 @@
       ],
       "outcome": "valid",
       "severity": "Medium",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8q9zuml0003i903gwf47vs3",
       "outcome_source": "codehawks-results",
@@ -2835,6 +3216,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "e72f34780606229f366459dd32b148e8764bf2d0bf60e79fab9e3aff5bf731c5",
+      "group_id": "cma4aayac000bjv04leoy8lmu",
+      "group_size": 8,
+      "duplicate_of": "J-ch-rustfund-cm8ioyz2n000hjx03pbkk3d10",
       "split": "DEV"
     },
     {
@@ -2857,6 +3241,7 @@
       ],
       "outcome": "valid",
       "severity": "Medium",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8q9zuml0003i903gwf47vs3",
       "outcome_source": "codehawks-results",
@@ -2865,6 +3250,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "35d98876085ef6704a95bf09f47920f22991198c0b64e7b7e4bb5a08662afdc7",
+      "group_id": "cma4aayac000bjv04leoy8lmu",
+      "group_size": 8,
+      "duplicate_of": "J-ch-rustfund-cm8ioyz2n000hjx03pbkk3d10",
       "split": "DEV"
     },
     {
@@ -2887,6 +3275,7 @@
       ],
       "outcome": "valid",
       "severity": "Medium",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": false,
       "selected_issue": "cm8q9zuml0003i903gwf47vs3",
       "outcome_source": "codehawks-results",
@@ -2895,6 +3284,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "63c5204457dcb4bc392861329c4bd7a9ab1af7900051d0d0139479e3cd99227e",
+      "group_id": "cma4aayac000bjv04leoy8lmu",
+      "group_size": 8,
+      "duplicate_of": "J-ch-rustfund-cm8ioyz2n000hjx03pbkk3d10",
       "split": "V2"
     },
     {
@@ -2917,6 +3309,7 @@
       ],
       "outcome": "valid",
       "severity": "Medium",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8q9zuml0003i903gwf47vs3",
       "outcome_source": "codehawks-results",
@@ -2925,6 +3318,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "15d72abd92ae46c9ce84545706f479a4d3b25d0b87e38452e32d82ff28082238",
+      "group_id": "cma4aayac000bjv04leoy8lmu",
+      "group_size": 8,
+      "duplicate_of": "J-ch-rustfund-cm8ioyz2n000hjx03pbkk3d10",
       "split": "DEV"
     },
     {
@@ -2947,6 +3343,7 @@
       ],
       "outcome": "valid",
       "severity": "Low",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": false,
       "selected_issue": "cm8qa2k2v000bi903n5aubvrz",
       "outcome_source": "codehawks-results",
@@ -2955,6 +3352,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "1473c9d58a390b5a99bc494e13904e41ef11489df7ded0d771225acfa75c8cf6",
+      "group_id": "cma4aay9k0009jv04j6p6ak7s",
+      "group_size": 1,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -2977,6 +3377,7 @@
       ],
       "outcome": "valid",
       "severity": "Low",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8q2oogz000bjv03cz4yeq5i",
       "outcome_source": "codehawks-results",
@@ -2985,6 +3386,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "ae7fca3431b127073ead0bbfa6b5873c74bbfc897f25fcb1e22cdf4cb278ac7c",
+      "group_id": "cma4aaybg000djv0405gl08ft",
+      "group_size": 3,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -3007,6 +3411,7 @@
       ],
       "outcome": "valid",
       "severity": "Low",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": false,
       "selected_issue": "cm8q2oogz000bjv03cz4yeq5i",
       "outcome_source": "codehawks-results",
@@ -3015,6 +3420,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "28ab47b90186cd397e3ee48c8900871fd3ce601900c8fd2ae08dbd430f30b472",
+      "group_id": "cma4aaybg000djv0405gl08ft",
+      "group_size": 3,
+      "duplicate_of": "J-ch-rustfund-cm8p0d5zq0005jm038sqvhgus",
       "split": "V1"
     },
     {
@@ -3037,6 +3445,7 @@
       ],
       "outcome": "valid",
       "severity": "Low",
+      "severity_source": "results-group-severity-field",
       "duplicate_in_group": true,
       "selected_issue": "cm8q2oogz000bjv03cz4yeq5i",
       "outcome_source": "codehawks-results",
@@ -3045,6 +3454,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "ee6710b81f358e68af8e20ac60e702cb4893248bbb970d5d1c845e77e66f2d21",
+      "group_id": "cma4aaybg000djv0405gl08ft",
+      "group_size": 3,
+      "duplicate_of": "J-ch-rustfund-cm8p0d5zq0005jm038sqvhgus",
       "split": "V1"
     },
     {
@@ -3065,12 +3477,16 @@
       ],
       "outcome": "valid",
       "severity": "Low",
+      "severity_source": "report-section-heading",
       "outcome_source": "code4rena-report",
       "outcome_evidence": "Report lists \"L-07\" under \"Low Risk\" with an executable Rust test",
       "outcome_url": "https://code4rena.com/reports/2026-02-jupiter-lend",
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "185bb424322f424488cbdd6c4dcbae4591e173431ad1c1d58f7ef5623d59ee42",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -3092,6 +3508,9 @@
       "unlicensed": true,
       "reused_source": "same repository as v2 units; this file is not one of them",
       "dedupe_key": "3d551a237ad87f2e4933cc44aa2949197df61f52cfe7982dcd3df7b3f39bc37a",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -3113,6 +3532,9 @@
       "unlicensed": true,
       "reused_source": "same repository as v2 units; this file is not one of them",
       "dedupe_key": "b944bbaa75fe9b518dfc7d171280b01e91e4a2e326f4f127a106583e7d61ee29",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -3134,6 +3556,9 @@
       "unlicensed": true,
       "reused_source": "same repository as v2 units; this file is not one of them",
       "dedupe_key": "e203a296fc6ad7e73ebd0e70464dc23b811fe902a799bbd7c74c3e8ffc583a19",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -3155,6 +3580,9 @@
       "unlicensed": true,
       "reused_source": "same repository as v2 units; this file is not one of them",
       "dedupe_key": "d474ac65c8195adfe59d6f56f6e36f333752e40095c3fb95509a1e08824e9a66",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -3176,6 +3604,9 @@
       "unlicensed": true,
       "reused_source": "same repository as v2 units; this file is not one of them",
       "dedupe_key": "16a1aaa114fe9b2d93c3f9c3af47a252ea465a9e72d2e0a78864617639438feb",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     },
     {
@@ -3197,6 +3628,9 @@
       "unlicensed": true,
       "reused_source": "same repository as v2 units; this file is not one of them",
       "dedupe_key": "6e79a8e40639d3aee535f3e56199e11ba1f07082808b4f0994e0f8130f813d1f",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -3218,6 +3652,9 @@
       "unlicensed": true,
       "reused_source": "same repository as v2 units; this file is not one of them",
       "dedupe_key": "f99b96f35039116ccbb17a66230f00d14e14c3c54ab16802bd4595ca30606d84",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -3239,6 +3676,9 @@
       "unlicensed": true,
       "reused_source": "same repository as v2 units; this file is not one of them",
       "dedupe_key": "cf7bab2909dabbdfefd71992b3622747be1db24d1c5cb2c56fb5de12bf0eae4a",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -3260,6 +3700,9 @@
       "unlicensed": true,
       "reused_source": "same repository as v2 units; this file is not one of them",
       "dedupe_key": "f4ac2ef5d3c6bfe24cc2f0432a783d17816876c0e0aff6b9c17cc405c64762ed",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -3281,6 +3724,9 @@
       "unlicensed": true,
       "reused_source": "same repository as v2 units; this file is not one of them",
       "dedupe_key": "5a3980d0eba0390e58153b82f057464d51fae953b406beeaf38d804f08d034b7",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -3302,6 +3748,9 @@
       "unlicensed": true,
       "reused_source": "same repository as v2 units; this file is not one of them",
       "dedupe_key": "6863f4ddd9abbf81edaae2512e8d617a890418fc497ecffc2ee686fd68c2e482",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V2"
     },
     {
@@ -3323,6 +3772,9 @@
       "unlicensed": true,
       "reused_source": "same repository as v2 units; this file is not one of them",
       "dedupe_key": "754d747f554f64e841411e381d792f3480e192b84cc3fc19ae250c74a0d9f38d",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -3344,6 +3796,9 @@
       "unlicensed": true,
       "reused_source": "same repository as v2 units; this file is not one of them",
       "dedupe_key": "f525fbb576ad53473672486968968b7e57ef6a94f38dec33067d5110592f4e96",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -3365,6 +3820,9 @@
       "unlicensed": true,
       "reused_source": "same repository as v2 units; this file is not one of them",
       "dedupe_key": "0cc40a3984d057f5a33125f18aea86a3d8dfaf8e1ebb7dc67e13d702c22f513b",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "DEV"
     },
     {
@@ -3386,6 +3844,9 @@
       "unlicensed": true,
       "reused_source": "same repository as v2 units; this file is not one of them",
       "dedupe_key": "149dea1659ce1368afa34fae80f2950f15a40ea8e6fd048c7e6f2119d076ae87",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "V1"
     },
     {
@@ -3406,6 +3867,9 @@
       "license": "none",
       "unlicensed": true,
       "dedupe_key": "f371cdbb5fc92eddcfd216340c5580600111fe30cbf11de166b3d95074cc7175",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
       "split": "FINAL"
     }
   ],
@@ -3503,7 +3967,14 @@
   ],
   "counts": {
     "units": 135,
-    "duplicates": 0,
+    "content_duplicates": 0,
+    "J_submissions": 59,
+    "J_distinct_findings": 20,
+    "J_distinct_by_source": {
+      "arena": 11,
+      "code4rena-jupiter-lend": 1,
+      "codehawks-rustfund": 8
+    },
     "counted_by_tier": {
       "J": 59,
       "N": 16,

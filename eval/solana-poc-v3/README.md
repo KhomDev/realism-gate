@@ -6,12 +6,20 @@ search log and the inventory are committed before any `p2/*` code reads a unit.
 
 ## Status
 
-**Collection closed 2026-11-25, not sealed, not run.** Counted units: **J 59,
-X 60, N 16** (135 before per-tier counts, 0 content duplicates). Split: DEV 51,
-V1 28, V2 29, FINAL 27. The J universe is 80% one source (CodeHawks RustFund,
-47), so the 40% source rule and §10's FINAL minimum of 30 J cannot both hold;
-the arithmetic is in `SEARCH_LOG.md`. The first seal is the Round-1 freeze; any
-unit added after a round starts joins a later slice only.
+**Collection closed 2026-11-25, not sealed, not run.** Counted units: **J 59
+submissions = 20 distinct judged findings** (Arena 11, CodeHawks RustFund 8
+groups, Code4rena 1), X 60, N 16. Split: DEV 51, V1 28, V2 29, FINAL 27. The 47
+RustFund submissions are 8 groups and 80% of J by submission, so the 40% source
+rule and §10's FINAL minimum of 30 J cannot both hold; under the corrected unit
+discipline the whole corpus holds only 20 distinct J findings, so a 30-unit
+FINAL minimum is unreachable outright. The arithmetic is in `SEARCH_LOG.md`.
+
+Every unit carries `group_id`, `group_size` and `duplicate_of` when it belongs
+to a multi-submission judging group (RustFund: one representative per group,
+first by sorted unit id; the other 39 point at it). Arena and Code4rena J units
+are their own finding group (`group_size` 1). `severity_source` records where
+the J severity came from: the Arena issue-title bracket, the CodeHawks results
+group field, or the Code4rena report heading.
 
 Files: `inventory.json` (units, pins, splits, outcomes), `build_inventory.py`
 (rebuilds and `--check`s it from the cache), `fetch.py` (fetches every pin;
