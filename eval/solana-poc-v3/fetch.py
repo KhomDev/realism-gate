@@ -83,7 +83,7 @@ def fetch_url(url: str, dest: Path, expected: str) -> None:
 def gh_api(path: str) -> str:
     for cmd in (["gh", "api", path], ["gh.exe", "api", path]):
         try:
-            out = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+            out = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
         except FileNotFoundError:
             continue
         if out.returncode == 0:
@@ -128,7 +128,7 @@ def repos_fetch(units: list[dict]) -> None:
         dest = CACHE / "repos" / dirname
         if dest.is_dir():
             head = subprocess.run(["git", "-C", str(dest), "rev-parse", "HEAD"],
-                                  capture_output=True, text=True)
+                                  capture_output=True, text=True, encoding="utf-8", errors="replace")
             if head.returncode == 0 and head.stdout.strip() == commit:
                 continue
             shutil.rmtree(dest)
@@ -137,7 +137,7 @@ def repos_fetch(units: list[dict]) -> None:
         subprocess.run(["git", "-C", str(dest), "remote", "add", "origin",
                         f"https://github.com/{repo}.git"], check=True)
         got = subprocess.run(["git", "-C", str(dest), "fetch", "-q", "--depth", "1",
-                              "origin", commit], capture_output=True, text=True)
+                              "origin", commit], capture_output=True, text=True, encoding="utf-8", errors="replace")
         if got.returncode != 0:
             raise SystemExit(f"{repo}@{commit}: fetch failed: {got.stderr.strip()}")
         subprocess.run(["git", "-C", str(dest), "checkout", "-q", "FETCH_HEAD"], check=True)
@@ -232,7 +232,7 @@ def verify(units: list[dict]) -> list[str]:
                     errors.append(f"{u['id']}: missing {f['path']}")
                     continue
                 head = subprocess.run(["git", "-C", str(base), "rev-parse", "HEAD"],
-                                      capture_output=True, text=True)
+                                      capture_output=True, text=True, encoding="utf-8", errors="replace")
                 if head.returncode != 0 or head.stdout.strip() != f["commit"]:
                     errors.append(f"{u['id']}: repo not at pinned commit")
                     continue
