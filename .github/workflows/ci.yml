@@ -4,6 +4,10 @@ on:
   push:
     branches: [main, "release/**"]
   pull_request:
+  # Work branches (p2/*) do not trigger the push filter and there is no PR
+  # for them, so the operator-approved CI has to be started by hand with
+  # `gh workflow run ci.yml --ref <branch>`. main/release pushes are unchanged.
+  workflow_dispatch:
 
 permissions:
   contents: read
