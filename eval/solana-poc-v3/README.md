@@ -6,8 +6,16 @@ search log and the inventory are committed before any `p2/*` code reads a unit.
 
 ## Status
 
-**Collecting.** No unit is sealed or run yet. The first seal is the Round-1
-freeze; any unit added after a round starts joins a later slice only.
+**Collection closed 2026-11-25, not sealed, not run.** Counted units: **J 59,
+X 60, N 16** (135 before per-tier counts, 0 content duplicates). Split: DEV 51,
+V1 28, V2 29, FINAL 27. The J universe is 80% one source (CodeHawks RustFund,
+47), so the 40% source rule and §10's FINAL minimum of 30 J cannot both hold;
+the arithmetic is in `SEARCH_LOG.md`. The first seal is the Round-1 freeze; any
+unit added after a round starts joins a later slice only.
+
+Files: `inventory.json` (units, pins, splits, outcomes), `build_inventory.py`
+(rebuilds and `--check`s it from the cache), `fetch.py` (fetches every pin;
+`--check` verifies offline), `SEARCH_LOG.md` (every query and rejection).
 
 ## Tiers and targets
 

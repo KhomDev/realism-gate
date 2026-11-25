@@ -2,26 +2,3552 @@
   "schema": "realism-gate.solana-poc-inventory/v3",
   "date": "2026-11-25",
   "salt": "rg-solana-v3-salt-2b03962612050c100daeb8128706254e",
+  "collected": "2026-11-25",
   "split_rule": "int(sha256(salt + '|' + unit_id)[:8], 16) % 100: 0-39 DEV, 40-59 V1, 60-74 V2, 75-99 FINAL",
-  "tiers": {
-    "J": "coded PoC with a published platform or sponsor outcome",
-    "X": "exploit-by-construction reproduction with no platform judgement",
-    "N": "negative control: secure-path test or a PoC a judge rejected for the PoC being wrong"
-  },
   "kinds": {
     "test-file": "a test file (Rust #[test]/#[tokio::test] or TS it/test) meant to drive a harness",
-    "test-fragment": "statements or an it()/#[test] block meant to be added to an existing test",
+    "test-fragment": "a fenced block (issue or report) meant to be added to an existing test",
     "rust-unit-test": "a Rust #[test] that calls program functions directly, driving no Solana harness",
-    "script": "a TS/JS script run with node (no it/test), e.g. a CTF client or a replaced deploy script",
-    "binary-main": "a Rust binary with fn main (PoC framework or CTF client)",
-    "ctf-solve-program": "an on-chain attacker program (entrypoint), not a test"
+    "script": "a TS/JS script run with node (no it/test)",
+    "binary-main": "a Rust binary with fn main",
+    "ctf-solve-program": "an on-chain attacker program (entrypoint)"
   },
-  "units": [],
-  "excluded": [],
+  "source_notes": {
+    "arena": "Solana Audit Arena, GitHub issues. v2 used issues 9,12,20,25,26,40,49,56,66,99,140,142,143,148,149,150,155,156,160,165,166,167,170,186,200,228,233-236,239,243,244,246,249,255,265,275,277,279,289,303,305,319 and dropped 278; none is reused.",
+    "codehawks-rustfund": "CodeHawks First Flight #36 results, archived snapshot. Every issue in the published report groups is a judged submission; issues other than selectedIssueId are published duplicates.",
+    "code4rena-jupiter-lend": "Code4rena public report 2026-02. L-07 is the only finding with an executable test.",
+    "zolldyk": "secure-path comparison and edge-case tests; the exploit-demo.ts files are v2 X units and are not reused.",
+    "rustfund": "the contest program's own test suite (secure path)."
+  },
+  "units": [
+    {
+      "id": "J-arena-141",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 141,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/141",
+          "body_sha256": "da35dfd5465af6227df62f60791527a3e138594ff7509645d9ff90b1a52f2709",
+          "block": 3,
+          "lang": "rust",
+          "block_sha256": "1ab85c71377a04abd59e656ad600d66a9d132f06cd927c2bee6d84b3b31039c4"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "outcome_source": "arena-maintainer-labels",
+      "outcome_evidence": "Maintainer labels: Valid, Medium",
+      "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/141",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "1ab85c71377a04abd59e656ad600d66a9d132f06cd927c2bee6d84b3b31039c4",
+      "split": "DEV"
+    },
+    {
+      "id": "J-arena-144",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 144,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/144",
+          "body_sha256": "01cf8abbc0ace3e20cf8a2c5d89ff699e0bb4e185e56d2f0c890e165bf160352",
+          "block": 2,
+          "lang": "rust",
+          "block_sha256": "de1dce2416d549abc89f2aaf98343bb6c424234aea97a20cb978df432a677ce7"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "outcome_source": "arena-maintainer-labels",
+      "outcome_evidence": "Maintainer labels: Valid, High",
+      "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/144",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "de1dce2416d549abc89f2aaf98343bb6c424234aea97a20cb978df432a677ce7",
+      "split": "DEV"
+    },
+    {
+      "id": "J-arena-147",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 147,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/147",
+          "body_sha256": "02aaa977b3f3f187d692ca37425026e55df8ad43200a36011de990dd6ed87509",
+          "block": 1,
+          "lang": "toml",
+          "block_sha256": "891cea4d1b45bb062643f6bf1184e64697a417210a2f90f276585498739c3ad7"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Low",
+      "outcome_source": "arena-maintainer-labels",
+      "outcome_evidence": "Maintainer labels: Valid, Low",
+      "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/147",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "891cea4d1b45bb062643f6bf1184e64697a417210a2f90f276585498739c3ad7",
+      "split": "V1"
+    },
+    {
+      "id": "J-arena-163",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 163,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/163",
+          "body_sha256": "74761c12b4333c627ff4b2ae0e800739955fa0422761ff285b69fad494a62deb",
+          "block": 3,
+          "lang": "rust",
+          "block_sha256": "7bb37aa3e4e37cef22b1e1df7662ceb87aabd11cb534842bcf5bed7dfee52315"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Low",
+      "outcome_source": "arena-maintainer-labels",
+      "outcome_evidence": "Maintainer labels: Valid, Low",
+      "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/163",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "7bb37aa3e4e37cef22b1e1df7662ceb87aabd11cb534842bcf5bed7dfee52315",
+      "split": "DEV"
+    },
+    {
+      "id": "J-arena-187",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 187,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/187",
+          "body_sha256": "a2c14ffd6fcb1faacab29738bfe6ae6d9cf1eabe85c05349f98ea79cdfb1c9b9",
+          "block": 1,
+          "lang": "rust",
+          "block_sha256": "11823e383b4fde7489005645c014fab694a2473d8bb2ca14e1bcc34d1645ecdc"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Low",
+      "outcome_source": "arena-maintainer-labels",
+      "outcome_evidence": "Maintainer labels: Valid, Low",
+      "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/187",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "11823e383b4fde7489005645c014fab694a2473d8bb2ca14e1bcc34d1645ecdc",
+      "split": "V2"
+    },
+    {
+      "id": "J-arena-201",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 201,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/201",
+          "body_sha256": "a314e901ae617a7af5d280b9f3c3348d0505365cdd7de21fc8e5214a30184d0e",
+          "block": 2,
+          "lang": "rust",
+          "block_sha256": "7b2035d6f344976e0d01834075b299f04b904feaa8c1427fddebb21a334765f8"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Low",
+      "outcome_source": "arena-maintainer-labels",
+      "outcome_evidence": "Maintainer labels: Valid, Low",
+      "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/201",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "7b2035d6f344976e0d01834075b299f04b904feaa8c1427fddebb21a334765f8",
+      "split": "DEV"
+    },
+    {
+      "id": "J-arena-203",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 203,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/203",
+          "body_sha256": "cd767f41ab7e961825d63675bca0e73409d455e0893339b883bfae26b5f872e7",
+          "block": 2,
+          "lang": "rust",
+          "block_sha256": "08c759ef0b77ed3cdd439f6bbfc66d89fe271a8abc135e484e8b8a1483fc1468"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "outcome_source": "arena-maintainer-labels",
+      "outcome_evidence": "Maintainer labels: Valid, Medium",
+      "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/203",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "08c759ef0b77ed3cdd439f6bbfc66d89fe271a8abc135e484e8b8a1483fc1468",
+      "split": "DEV"
+    },
+    {
+      "id": "J-arena-210",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 210,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/210",
+          "body_sha256": "29c375d172ab6dfcb61197a6210d98523479220c6487c428aecc0771896f91fb",
+          "block": 1,
+          "lang": "rust",
+          "block_sha256": "575ece7f9deb2fcec916054f17470ce8a3e537fd8a920a8138620cc83e2709ed"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "info",
+      "outcome_source": "arena-maintainer-labels",
+      "outcome_evidence": "Maintainer labels: Valid, info",
+      "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/210",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "575ece7f9deb2fcec916054f17470ce8a3e537fd8a920a8138620cc83e2709ed",
+      "split": "FINAL"
+    },
+    {
+      "id": "J-arena-270",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 270,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/270",
+          "body_sha256": "07c1dcf7a0f4ab3003b3e561fc88e8226fe3aa0984fc7cdc3cfa92247ac06e7a",
+          "block": 2,
+          "lang": "ts",
+          "block_sha256": "a8b26649235db173ca32c2c8fe0819e603a2903977c73237f7f3cd8ad308373d"
+        }
+      ],
+      "outcome": "duplicate",
+      "severity": "Medium",
+      "outcome_source": "arena-maintainer-labels",
+      "outcome_evidence": "Maintainer labels: duplicate",
+      "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/270",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "a8b26649235db173ca32c2c8fe0819e603a2903977c73237f7f3cd8ad308373d",
+      "split": "V2"
+    },
+    {
+      "id": "J-arena-280",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 280,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/280",
+          "body_sha256": "87a98766c61fcc72cb6d47fc3e8db176dccd1c32cbf714c7899a6bd0d573841a",
+          "block": 4,
+          "lang": "ts",
+          "block_sha256": "1da6bac5f2292328cee0d0230d34138d8633050d0e6201280d77435b1020e88e"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "info",
+      "outcome_source": "arena-maintainer-labels",
+      "outcome_evidence": "Maintainer labels: Valid, info",
+      "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/280",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "1da6bac5f2292328cee0d0230d34138d8633050d0e6201280d77435b1020e88e",
+      "split": "V1"
+    },
+    {
+      "id": "J-arena-281",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 281,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/281",
+          "body_sha256": "50dfc6f456da2502f911f7f0b6329762b0180fd17485958ddeeb384cd445b8fa",
+          "block": 1,
+          "lang": "typescript",
+          "block_sha256": "d97e579df5bc9d6635dbbe3633df8c8bf20b2af3fe7f71ad0516117093274cfa"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Critical",
+      "outcome_source": "arena-maintainer-labels",
+      "outcome_evidence": "Maintainer labels: duplicate, Valid",
+      "outcome_url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/281",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "d97e579df5bc9d6635dbbe3633df8c8bf20b2af3fe7f71ad0516117093274cfa",
+      "split": "V2"
+    },
+    {
+      "id": "X-arena-2",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 2,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/2",
+          "body_sha256": "ce43375116d71de1741bd1304bca1622b26af3cfe2c3c95058249ff392c39f1d",
+          "block": 3,
+          "lang": "typescript",
+          "block_sha256": "9d41c2bc16437b91dd80be3dbb8ae81d26dca9eef2d609956d7b6381cbbfa49d"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "9d41c2bc16437b91dd80be3dbb8ae81d26dca9eef2d609956d7b6381cbbfa49d",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-3",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 3,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/3",
+          "body_sha256": "56cd4594fec207293d37dbacf16f5b8b438ad71dbffa434e2506ad75009495d3",
+          "block": 2,
+          "lang": "typescript",
+          "block_sha256": "5633e526d8ec5371d269c90014ca1cb657248f1115883988689eb76d6641f646"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "5633e526d8ec5371d269c90014ca1cb657248f1115883988689eb76d6641f646",
+      "split": "V2"
+    },
+    {
+      "id": "X-arena-4",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 4,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/4",
+          "body_sha256": "1172455f57113535b43fc3aeebb93f11db7592857f79b55d947b700837c9c2c0",
+          "block": 2,
+          "lang": "bash",
+          "block_sha256": "0b9e0c30816e8195a9eb4a94f748491b25dcdf7d683efcc508a9be0070b9ea2b"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "0b9e0c30816e8195a9eb4a94f748491b25dcdf7d683efcc508a9be0070b9ea2b",
+      "split": "V2"
+    },
+    {
+      "id": "X-arena-6",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 6,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/6",
+          "body_sha256": "c389ff10cef1f5dfe9cbc95973e011b6baa6f898557674237cca7f38bf07ba21",
+          "block": 0,
+          "lang": "typescript",
+          "block_sha256": "11b356d4eee6652c1d5401c3fef3dab926cb2d82d8dc75fdd166231848aadcfb"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "11b356d4eee6652c1d5401c3fef3dab926cb2d82d8dc75fdd166231848aadcfb",
+      "split": "V1"
+    },
+    {
+      "id": "X-arena-11",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 11,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/11",
+          "body_sha256": "64306fcb2d19edef396a2aa884a4089bba6ccecbaf9114d202d7795c9d7ecb97",
+          "block": 2,
+          "lang": "typescript",
+          "block_sha256": "632b32302aae0eaf16e7bbcb973f8a69a735c494ee905fa8d615bc9a05dd3981"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "632b32302aae0eaf16e7bbcb973f8a69a735c494ee905fa8d615bc9a05dd3981",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-13",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 13,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/13",
+          "body_sha256": "8a0b1a57cd486eef57eb6dcd5f0d7ee3396106a6855b0491be165edd93f26263",
+          "block": 0,
+          "lang": "bash",
+          "block_sha256": "ced5ed8de2d2d7bb8194e615c3b946ca28648711858f2a82cc7d2661ce04d475"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "ced5ed8de2d2d7bb8194e615c3b946ca28648711858f2a82cc7d2661ce04d475",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-arena-16",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 16,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/16",
+          "body_sha256": "39fd5eebbeb3e2ea7e1bbd6f91d2e448e08d507172f2b78e130dee1dc9e3c9f1",
+          "block": 1,
+          "lang": "typescript",
+          "block_sha256": "9a68f61e0cc60530ecc0f84ebbeaa9ef45a61a6dbc31eb22f227d376cf0bb446"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "9a68f61e0cc60530ecc0f84ebbeaa9ef45a61a6dbc31eb22f227d376cf0bb446",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-18",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 18,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/18",
+          "body_sha256": "1ea1c3db73c23c79940b1bce60a3044110d0d351e529fe51799e027b8df56c22",
+          "block": 0,
+          "lang": "ts",
+          "block_sha256": "23b494143d13f127073f9e1b3c54d961e094bf437511c90d9c7761f4b72ccac2"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "23b494143d13f127073f9e1b3c54d961e094bf437511c90d9c7761f4b72ccac2",
+      "split": "V1"
+    },
+    {
+      "id": "X-arena-19",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 19,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/19",
+          "body_sha256": "ed2ecb0dd0f8e4480898a17e01fcb07be6effc6e85bfbfeaf3bd42cc9b4157cd",
+          "block": 2,
+          "lang": "ts",
+          "block_sha256": "695a5be9d58e8145a103b1096ef0cb1d8370b29c7a14ac36a6929b278be2408a"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "695a5be9d58e8145a103b1096ef0cb1d8370b29c7a14ac36a6929b278be2408a",
+      "split": "V1"
+    },
+    {
+      "id": "X-arena-21",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 21,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/21",
+          "body_sha256": "ff25f118f15d82255dfe7d3afd57e817d42d29ed357c9e68e2ade4e06f9b2a68",
+          "block": 1,
+          "lang": "typescript",
+          "block_sha256": "d10fdb7dbad98ea799d3829491922f00a8f1d621f50a835eb9e901cfa149be45"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "d10fdb7dbad98ea799d3829491922f00a8f1d621f50a835eb9e901cfa149be45",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-41",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 41,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/41",
+          "body_sha256": "d31de15268b3631b02e3a6589a2e35e81f27fbe0bd283b6e5160e5d5726504ff",
+          "block": 1,
+          "lang": "typescript",
+          "block_sha256": "84a5b75365d72c3026b03315739f3002e3e370e2398fc7f37986f5ea423176b2"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "84a5b75365d72c3026b03315739f3002e3e370e2398fc7f37986f5ea423176b2",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-arena-42",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 42,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/42",
+          "body_sha256": "af6f4ceeb0887893b4de681984a626cfe4f89f4228317360903087f024d9df43",
+          "block": 0,
+          "lang": "typescript",
+          "block_sha256": "9988c0b906f431f9f393479cedab9906f7b1c4e7aa03ef211d29c8bdcff89191"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "9988c0b906f431f9f393479cedab9906f7b1c4e7aa03ef211d29c8bdcff89191",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-arena-43",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 43,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/43",
+          "body_sha256": "f09760bb3a72648aa81bc157d0b15a4db5342e7d98a16bea1e8e3301eadb2509",
+          "block": 0,
+          "lang": "typescript",
+          "block_sha256": "ba24582b78380170b021b942a7ef2c3cf2fcfcde7c07d1ff06b1983ade7ca405"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "ba24582b78380170b021b942a7ef2c3cf2fcfcde7c07d1ff06b1983ade7ca405",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-arena-44",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 44,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/44",
+          "body_sha256": "a0791a9566b655a6026441bce5bf60fd51e417361cf970c732613f5aeb752e4f",
+          "block": 0,
+          "lang": "typescript",
+          "block_sha256": "22181f41df5dc9ee2a0586fee657e6c6a691ce93b06386fca513bf3c10235492"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "22181f41df5dc9ee2a0586fee657e6c6a691ce93b06386fca513bf3c10235492",
+      "split": "V1"
+    },
+    {
+      "id": "X-arena-45",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 45,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/45",
+          "body_sha256": "b2f81342e1f7845ad75af0366a6f3796fbcea05456e522b1215ed81e8d5c2025",
+          "block": 5,
+          "lang": "typescript",
+          "block_sha256": "58e65586b62a8e0fb5c9e94550acab3c5337cfcb608c2a9735239b38c9cfa0a9"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "58e65586b62a8e0fb5c9e94550acab3c5337cfcb608c2a9735239b38c9cfa0a9",
+      "split": "V1"
+    },
+    {
+      "id": "X-arena-46",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 46,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/46",
+          "body_sha256": "070f8943b473ad1e6775c04028205157b00b2e0c2d9ac00f524ebff1ec02c3ee",
+          "block": 0,
+          "lang": "TypeScript",
+          "block_sha256": "07a4227527001638f151f7d4f5f7a6f791a528f0ac14635c4e3041814d7a1265"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "07a4227527001638f151f7d4f5f7a6f791a528f0ac14635c4e3041814d7a1265",
+      "split": "V2"
+    },
+    {
+      "id": "X-arena-47",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 47,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/47",
+          "body_sha256": "abe8600afe2a48ede6b72677df37ec728ed2b058f16c0ae87a06ac1a4c175b75",
+          "block": 0,
+          "lang": "TypeScript",
+          "block_sha256": "885e7192bf81d34cfb506e8b7fadbf810eae40667e5147899982d999e018bb3a"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "885e7192bf81d34cfb506e8b7fadbf810eae40667e5147899982d999e018bb3a",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-arena-48",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 48,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/48",
+          "body_sha256": "969c06aea907c182e75f75279d88d6ec91f972cc1889848c0f94d40faf4cd5a0",
+          "block": 0,
+          "lang": "TypeScript",
+          "block_sha256": "dc6273172759fbfa7487659d64576891d2aa0f1e801d8c36c619840b40d7615b"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "dc6273172759fbfa7487659d64576891d2aa0f1e801d8c36c619840b40d7615b",
+      "split": "V2"
+    },
+    {
+      "id": "X-arena-51",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 51,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/51",
+          "body_sha256": "f979bf8efa456c707bd1883041ed5e446ebe7553535678d01fa480d6b2eb15dd",
+          "block": 0,
+          "lang": "typescript",
+          "block_sha256": "b8df6bb6a7c514881e5701d142d53df9b9d12e69833c580c0f9bbca20b31715e"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "b8df6bb6a7c514881e5701d142d53df9b9d12e69833c580c0f9bbca20b31715e",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-57",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 57,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/57",
+          "body_sha256": "5cbd0b6feead723d34bcf28cb98802c4c656e833f0edd13ddb00ee0afe6732bf",
+          "block": 3,
+          "lang": "typescript",
+          "block_sha256": "18d5fd73315fc94376afe263a498c8edf12bcf12fc4f4dcbf10e04826be0b3f3"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "18d5fd73315fc94376afe263a498c8edf12bcf12fc4f4dcbf10e04826be0b3f3",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-59",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 59,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/59",
+          "body_sha256": "c558e6ad85b3d21688d5ee3681e10abd95692f7260d6daee2c4e17d05f7ee09b",
+          "block": 2,
+          "lang": "typescript",
+          "block_sha256": "2809bd5fccfc9ce15c7ff6b81c6b9e6bd0164f0b4148af1c3a35d3083268325e"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "2809bd5fccfc9ce15c7ff6b81c6b9e6bd0164f0b4148af1c3a35d3083268325e",
+      "split": "V2"
+    },
+    {
+      "id": "X-arena-61",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 61,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/61",
+          "body_sha256": "bfe8ba15abe521e18ba1b8952b7036ac9cb044cf83ff82ffc93308a6c1cb451b",
+          "block": 4,
+          "lang": "ts",
+          "block_sha256": "8a8f67cbaf2fb1f5a83d11de123a914cea2002154dde5c4a33095641251eb15d"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "8a8f67cbaf2fb1f5a83d11de123a914cea2002154dde5c4a33095641251eb15d",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-62",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 62,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/62",
+          "body_sha256": "ea91c505bb62f74cb2e2ddc6276029f888fccccf9181802779908fc2938e252a",
+          "block": 1,
+          "lang": "rust",
+          "block_sha256": "758f255bcb5467f00ff697016ce65c9b23e931abc7c5a4fed5c476c06680e5d4"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "758f255bcb5467f00ff697016ce65c9b23e931abc7c5a4fed5c476c06680e5d4",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-63",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 63,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/63",
+          "body_sha256": "65e053e43317e7c2638339b621af8b0374a878fc7db183e2fc2a96b1543de38c",
+          "block": 3,
+          "lang": "typescript",
+          "block_sha256": "9ac70fe6386fcad588074a908531d9190942ad3842f8dc21f7e1f7be9ebda0c1"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "9ac70fe6386fcad588074a908531d9190942ad3842f8dc21f7e1f7be9ebda0c1",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-arena-64",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 64,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/64",
+          "body_sha256": "58c5943e5a1820e2257549181a98d24a06c3ef815ec71f770e19a5cb87a034bd",
+          "block": 1,
+          "lang": "rust",
+          "block_sha256": "d03f560deedf0378b7b01e604e100f855624a304a9da3e04d6fc0bf9c0c2631b"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "d03f560deedf0378b7b01e604e100f855624a304a9da3e04d6fc0bf9c0c2631b",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-arena-67",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 67,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/67",
+          "body_sha256": "557986a685b0791374763b135992084e11cd79d7759e1bc6b2ef9183179e11f3",
+          "block": 1,
+          "lang": "rust",
+          "block_sha256": "2c9baab5651aa4544aa64548951d4bff080e2e434c308a6515b894197b878594"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "2c9baab5651aa4544aa64548951d4bff080e2e434c308a6515b894197b878594",
+      "split": "V2"
+    },
+    {
+      "id": "X-arena-68",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 68,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/68",
+          "body_sha256": "fcce9d7dc3dada585c283c38648962605afd3eb18f87e280fbfdd642d18d355c",
+          "block": 4,
+          "lang": "typescript",
+          "block_sha256": "ef0a8b7035a2eb64d77e7fc3c5d2a0694987f3c99e571408a37ab6b50173fa25"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "ef0a8b7035a2eb64d77e7fc3c5d2a0694987f3c99e571408a37ab6b50173fa25",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-69",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 69,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/69",
+          "body_sha256": "a20d71855d7d37f5c0cb33ccd471b721c76e030873ab15499b03f687120a66f4",
+          "block": 3,
+          "lang": "ts",
+          "block_sha256": "a89a04e5922acb229f14e09185eff6215acaad1bbdc727da165ab5bb448a2120"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "a89a04e5922acb229f14e09185eff6215acaad1bbdc727da165ab5bb448a2120",
+      "split": "V1"
+    },
+    {
+      "id": "X-arena-71",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 71,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/71",
+          "body_sha256": "9a7ec794b97930ad2964a956eb912f6e64c263bf37226d77b8b9eae006176b09",
+          "block": 3,
+          "lang": "typescript",
+          "block_sha256": "3f0d23ff61b8a52e05a6975eaa6eb7f3a98aa10c73d4288d236053b9f203e664"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "3f0d23ff61b8a52e05a6975eaa6eb7f3a98aa10c73d4288d236053b9f203e664",
+      "split": "V1"
+    },
+    {
+      "id": "X-arena-73",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 73,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/73",
+          "body_sha256": "c946030168f6a62dcd457cf1c433805d25d678d45617796baa2183b68dfa0781",
+          "block": 1,
+          "lang": "rust",
+          "block_sha256": "6b88f5091e611fa5b355a760e445ecab75769aa7a92c95a5fe2d7c726733e0bd"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "6b88f5091e611fa5b355a760e445ecab75769aa7a92c95a5fe2d7c726733e0bd",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-75",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 75,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/75",
+          "body_sha256": "704a7352aaf0e9fea347ab9ebadf4a6d0e06887fac48d81b434b3ffff27c4dbd",
+          "block": 0,
+          "lang": "rust",
+          "block_sha256": "63dd8c43dd26d739e265dabf7f5fc331b00e0533b21be545f7857a9c72686f60"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "63dd8c43dd26d739e265dabf7f5fc331b00e0533b21be545f7857a9c72686f60",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-arena-77",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 77,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/77",
+          "body_sha256": "f8ca0364c170f1183f1bdd241bb35a91cdc5da2d972a1e53163a45e558f6dca3",
+          "block": 0,
+          "lang": "rust",
+          "block_sha256": "bc2bc45528e9ca69f399eeb0e2fc90c7b1e1066dab7c155696d3394b31ba836d"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "bc2bc45528e9ca69f399eeb0e2fc90c7b1e1066dab7c155696d3394b31ba836d",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-78",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 78,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/78",
+          "body_sha256": "931ddf810078cefd99c780b96f1cb254106e626eb0852abdc8ab568b5337f5f3",
+          "block": 4,
+          "lang": "ts",
+          "block_sha256": "b790b116afc1913a6fc522bc72ba0a533253b3bada3aa4bdc0aecfcae5e1a8b5"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "b790b116afc1913a6fc522bc72ba0a533253b3bada3aa4bdc0aecfcae5e1a8b5",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-82",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 82,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/82",
+          "body_sha256": "49ad905c1e921830d8296206e1cd123e8adde615dde75cc48452d23c0e18e55b",
+          "block": 3,
+          "lang": "ts",
+          "block_sha256": "2c61a49fbfaa9807b89d69177ebed443d2576479cd04ecc8da00a3130870b8ef"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "2c61a49fbfaa9807b89d69177ebed443d2576479cd04ecc8da00a3130870b8ef",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-84",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 84,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/84",
+          "body_sha256": "c385d26c208d53bfd18feed8bda9497faa256277e56f0b92724574806b7050d3",
+          "block": 2,
+          "lang": "typescript",
+          "block_sha256": "8fec266a60b0cf5e95152eb298e6f05064ad78f821a763f32845c938cc9bb739"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "8fec266a60b0cf5e95152eb298e6f05064ad78f821a763f32845c938cc9bb739",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-85",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 85,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/85",
+          "body_sha256": "26977a66ae5c44357810b4b81b5af7092c5e3fe48ab9e3aa86d9166fea33aad4",
+          "block": 5,
+          "lang": "rust",
+          "block_sha256": "a619fef401024bedccc085d8246a0819f86d221e4d577960ab77744e497a6dd8"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "a619fef401024bedccc085d8246a0819f86d221e4d577960ab77744e497a6dd8",
+      "split": "V2"
+    },
+    {
+      "id": "X-arena-90",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 90,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/90",
+          "body_sha256": "6f6b28af31b89ff0755b0a640b8f2f35adfbd48a1d4fe059306fa2c0be2c5b69",
+          "block": 1,
+          "lang": "Rust",
+          "block_sha256": "46164968a1655a14cc619c69c8cf1eaabe1467f5d9d4757e0f32f06f6576758a"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "46164968a1655a14cc619c69c8cf1eaabe1467f5d9d4757e0f32f06f6576758a",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-101",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 101,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/101",
+          "body_sha256": "b3f4ab2edda74e61dbdd54fc1173d7474f9e1824ff2401330587a664379bc164",
+          "block": 4,
+          "lang": "ts",
+          "block_sha256": "9a729934f14c2fa2e696efbb5ca3179f63ffb0a0aadd9addff4fab6058fb7afe"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "9a729934f14c2fa2e696efbb5ca3179f63ffb0a0aadd9addff4fab6058fb7afe",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-102",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 102,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/102",
+          "body_sha256": "bfecbfe8e1b1b3cd1572e293d06bb5c1aeb78547d7bc022d1229fc2e830cc44e",
+          "block": 5,
+          "lang": "ts",
+          "block_sha256": "c465b8a882fc58138b30d0fe7463f877130e1d576b3bcc592f8a35463edefa98"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "c465b8a882fc58138b30d0fe7463f877130e1d576b3bcc592f8a35463edefa98",
+      "split": "V1"
+    },
+    {
+      "id": "X-arena-103",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 103,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/103",
+          "body_sha256": "17339618a3e57d2578d1d0ff76471ff01121407914f88182e7d931fc748f7ad2",
+          "block": 3,
+          "lang": "ts",
+          "block_sha256": "f707fef2e1bfaff953e6fad9b379c6745633796d26833b7228e31606af68c858"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "f707fef2e1bfaff953e6fad9b379c6745633796d26833b7228e31606af68c858",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-104",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 104,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/104",
+          "body_sha256": "ecc56e5ee8d19fa328fc002bf5acbad96ff654df3589e43aa6e9aa2cfe32c2a2",
+          "block": 4,
+          "lang": "ts",
+          "block_sha256": "4e415c1017ab28c6dabbb558c9b62ce383f7e722266979d2d3553fc8454065d2"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "4e415c1017ab28c6dabbb558c9b62ce383f7e722266979d2d3553fc8454065d2",
+      "split": "V1"
+    },
+    {
+      "id": "X-arena-105",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 105,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/105",
+          "body_sha256": "914645a40883ad085a2661ad7e5ab00ff66fc43eee6d7643dfa5b1f561bac3c6",
+          "block": 5,
+          "lang": "ts",
+          "block_sha256": "2bf9412db6d11f9bee8df0c8f2b99cb882b3ea9747105dbb3bff0d6523c88f54"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "2bf9412db6d11f9bee8df0c8f2b99cb882b3ea9747105dbb3bff0d6523c88f54",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-106",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 106,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/106",
+          "body_sha256": "972d03a8b4ebfc8abc665ac26f67e4d8ed9ca10b3e73cb14213d56af1012bf3a",
+          "block": 6,
+          "lang": "ts",
+          "block_sha256": "095399e5a250e5dee588c1f58357877091daeee2cd4d5898c07099234284cee8"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "095399e5a250e5dee588c1f58357877091daeee2cd4d5898c07099234284cee8",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-110",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 110,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/110",
+          "body_sha256": "df6589af54d53b9cdc375ebe5628745f02d48d855e8e5eebf37871b9ae8897a0",
+          "block": 0,
+          "lang": "rust",
+          "block_sha256": "b87a427c6479f389c677e8b023049d3c5c0f8c9646df691255f0ffee8676daf1"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "b87a427c6479f389c677e8b023049d3c5c0f8c9646df691255f0ffee8676daf1",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-118",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 118,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/118",
+          "body_sha256": "9144e47ef9671e872655dfb3fa9a571641fc2e63de70b197bff9be3464df9204",
+          "block": 4,
+          "lang": "ts",
+          "block_sha256": "942bb8760403e7a89c3024f50b715e1339b1ae4864403a526847d30e73b89a54"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "942bb8760403e7a89c3024f50b715e1339b1ae4864403a526847d30e73b89a54",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-131",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 131,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/131",
+          "body_sha256": "79e9a0422204b5f4050552c6eed4b966e8dd9871d0eb895547a26616f324b1b8",
+          "block": 1,
+          "lang": "Rust",
+          "block_sha256": "26906ac2698186f74adb1765f57591ea1ecfc6a27eabfb0e1395a4020fb6db29"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "26906ac2698186f74adb1765f57591ea1ecfc6a27eabfb0e1395a4020fb6db29",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-135",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 135,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/135",
+          "body_sha256": "c344c6a26af18e208cb6bcf8078c83cf86454b003a42da7ece5316833443dda5",
+          "block": 0,
+          "lang": "typescript",
+          "block_sha256": "0e30d333bd756065e5fbdacd244a7ce20a1f2200464bdb0d0b8417c91c210eda"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "0e30d333bd756065e5fbdacd244a7ce20a1f2200464bdb0d0b8417c91c210eda",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-arena-136",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 136,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/136",
+          "body_sha256": "328c7c6b0e5eaa1088bb39547b3543d8772628cf26366d893f8c6dd449a28f20",
+          "block": 2,
+          "lang": "typescript",
+          "block_sha256": "9c3e8ddd5a92d1b774048da73cfa3bc1994c01d0f73c1c495a69f38ddcf98cc6"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "9c3e8ddd5a92d1b774048da73cfa3bc1994c01d0f73c1c495a69f38ddcf98cc6",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-arena-151",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 151,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/151",
+          "body_sha256": "89cd58f7d13f535c28fe902154b9e8b4c4deef949ace153722b2f172ba638894",
+          "block": 3,
+          "lang": "rust",
+          "block_sha256": "71dcb860039aeb254ea5460579fd69f1a9163a38e72e38636a1368423de844f9"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "71dcb860039aeb254ea5460579fd69f1a9163a38e72e38636a1368423de844f9",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-157",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 157,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/157",
+          "body_sha256": "4eba97b4189ad66efb280b98be8d74950f0ee4226e9b61dcef946b37493976fd",
+          "block": 1,
+          "lang": "typescript",
+          "block_sha256": "d4c304651a9d59fdd7ee0caff8c04ae65c03046e0532c3a183bc07361534a58d"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "d4c304651a9d59fdd7ee0caff8c04ae65c03046e0532c3a183bc07361534a58d",
+      "split": "V2"
+    },
+    {
+      "id": "X-arena-158",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 158,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/158",
+          "body_sha256": "022e597db3fa5548fca91ed0ca7e9afe164a623b582a79ae20f0108c46f2f9cf",
+          "block": 2,
+          "lang": "rust",
+          "block_sha256": "32302b10e1ff78792a5dd3200157624a012cda315d7c67e5690ecb5ba4a49b38"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "32302b10e1ff78792a5dd3200157624a012cda315d7c67e5690ecb5ba4a49b38",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-159",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 159,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/159",
+          "body_sha256": "10109d8ab542e07f9d309fc2722cc124d1740e69388997fce016671f6f011aec",
+          "block": 6,
+          "lang": "rust",
+          "block_sha256": "6023e49919de514907bb4aeff003bd9babb43e8aaacdbcaac104bf626be0290d"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "6023e49919de514907bb4aeff003bd9babb43e8aaacdbcaac104bf626be0290d",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-arena-164",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 164,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/164",
+          "body_sha256": "2b7fab64933e87fe4827c91b463700631291628439abe281030a6dec1fb325c9",
+          "block": 3,
+          "lang": "typescript",
+          "block_sha256": "89a72ffcf775100b2c82fb8ac749ade4c7cee4a4452687e7a16a43aa5246e50d"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "89a72ffcf775100b2c82fb8ac749ade4c7cee4a4452687e7a16a43aa5246e50d",
+      "split": "V1"
+    },
+    {
+      "id": "X-arena-168",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 168,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/168",
+          "body_sha256": "c945c783f75c43a3dd382268971ce4493f1c550abcfeb0aace9fb2846868ad85",
+          "block": 1,
+          "lang": "typescript",
+          "block_sha256": "5b491303e24e762bb558d889e911af48a9d266991263acd20cf5c58b7412a7c0"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "5b491303e24e762bb558d889e911af48a9d266991263acd20cf5c58b7412a7c0",
+      "split": "V2"
+    },
+    {
+      "id": "X-arena-175",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 175,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/175",
+          "body_sha256": "9c2c6cc3973fec29d4f83cb701eda6323a96585a5ccd06a9d780a48982abb8ea",
+          "block": 2,
+          "lang": "rust",
+          "block_sha256": "809a2b27e15183d7a34e583b1e144aae07bd60a379e0c5a435c704071427fed8"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "809a2b27e15183d7a34e583b1e144aae07bd60a379e0c5a435c704071427fed8",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-178",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 178,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/178",
+          "body_sha256": "c80ca79d6a1c185f47ac4da044abf1b9462fdf47c9cf0e6870618e37cffdc7f7",
+          "block": 1,
+          "lang": "rust",
+          "block_sha256": "bbd1bce3bda01ce3fb134661e7fee162f0c5ce039e22a1de35443516c19e33e5"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "bbd1bce3bda01ce3fb134661e7fee162f0c5ce039e22a1de35443516c19e33e5",
+      "split": "V1"
+    },
+    {
+      "id": "X-arena-181",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 181,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/181",
+          "body_sha256": "325bc945d051b8a1202925392e656384885ea0a0a3bdc7ceae8a7c052ab67e8c",
+          "block": 0,
+          "lang": "rust",
+          "block_sha256": "59f5db0693c6ab6832af1f9511956ad40b04981a10bbf7cf869399f9609f94a7"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "59f5db0693c6ab6832af1f9511956ad40b04981a10bbf7cf869399f9609f94a7",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-190",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 190,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/190",
+          "body_sha256": "1560173a22fbb26f9b08df3bc3462e54c65e1ebaf1f5dffb898c500dac7ec2aa",
+          "block": 1,
+          "lang": "rust",
+          "block_sha256": "10e27c8dcf36389e6e9123980a60b8b98f15a1b96e95d73c7f9c52851fa67836"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "10e27c8dcf36389e6e9123980a60b8b98f15a1b96e95d73c7f9c52851fa67836",
+      "split": "DEV"
+    },
+    {
+      "id": "X-arena-192",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 192,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/192",
+          "body_sha256": "5b6f6524166f9f3d7426ff7803af09bb5dbfeaf25d92381484ece6be3cc661ad",
+          "block": 2,
+          "lang": "rust",
+          "block_sha256": "c485104da0c4e21da7c2a5116b13318c40c312e8e4a1bf1bf9288bf652c9e6a2"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "c485104da0c4e21da7c2a5116b13318c40c312e8e4a1bf1bf9288bf652c9e6a2",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-arena-196",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "issue": 196,
+          "url": "https://github.com/Frankcastleauditor/Solana-Audit-Arena/issues/196",
+          "body_sha256": "527870520cdb907d4931788ca9b8399a0fd8496f46b6895d0ebb7377bbdd649f",
+          "block": 2,
+          "lang": "rust",
+          "block_sha256": "a267499f553b396b34bffcc6525f096001925491fe4c2098dc9802524a86afbf"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "a267499f553b396b34bffcc6525f096001925491fe4c2098dc9802524a86afbf",
+      "split": "DEV"
+    },
+    {
+      "id": "J-ch-rustfund-cm8is6eow000bl803cbxrxs0a",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay4j0001jv041qus0o2n",
+          "issue_id": "cm8is6eow000bl803cbxrxs0a",
+          "block": 0,
+          "lang": "typescript",
+          "block_sha256": "78cc3dcde764242a281c39774a3701329390d0a683883c9c45d51a0e9727ad1f"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8nocdu10005l2038ids6cn3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "78cc3dcde764242a281c39774a3701329390d0a683883c9c45d51a0e9727ad1f",
+      "split": "FINAL"
+    },
+    {
+      "id": "J-ch-rustfund-cm8j3stqs000pl803et6jdcm4",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay4j0001jv041qus0o2n",
+          "issue_id": "cm8j3stqs000pl803et6jdcm4",
+          "block": 1,
+          "lang": "javascript",
+          "block_sha256": "4f3b96dde8afad0c881be8e04c1b40c3b07c6bf3a789d595c201402f4abc7cff"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8nocdu10005l2038ids6cn3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "4f3b96dde8afad0c881be8e04c1b40c3b07c6bf3a789d595c201402f4abc7cff",
+      "split": "V2"
+    },
+    {
+      "id": "J-ch-rustfund-cm8m6lbgz000djy03sp34e6ce",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay4j0001jv041qus0o2n",
+          "issue_id": "cm8m6lbgz000djy03sp34e6ce",
+          "block": 0,
+          "lang": "ts",
+          "block_sha256": "9c4cb8b3115ae26dde9f4bfa60c974447a95f72ca5bb345ce7cf2ae53ff52dc2"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8nocdu10005l2038ids6cn3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "9c4cb8b3115ae26dde9f4bfa60c974447a95f72ca5bb345ce7cf2ae53ff52dc2",
+      "split": "V1"
+    },
+    {
+      "id": "J-ch-rustfund-cm8nocdu10005l2038ids6cn3",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay4j0001jv041qus0o2n",
+          "issue_id": "cm8nocdu10005l2038ids6cn3",
+          "block": 2,
+          "lang": "TypeScript",
+          "block_sha256": "07cdae3cc3b3829db5dd6c2de652d1bf34d3f5cc118debb2bf6f103edb83d782"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": false,
+      "selected_issue": "cm8nocdu10005l2038ids6cn3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "07cdae3cc3b3829db5dd6c2de652d1bf34d3f5cc118debb2bf6f103edb83d782",
+      "split": "V2"
+    },
+    {
+      "id": "J-ch-rustfund-cm8ory4360005lg036yeswxzh",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay4j0001jv041qus0o2n",
+          "issue_id": "cm8ory4360005lg036yeswxzh",
+          "block": 1,
+          "lang": "soldity",
+          "block_sha256": "b4e63d83d7b8fd7d95de121d999306579768f38c00cd7f1ca9170d8bdf2ff262"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8nocdu10005l2038ids6cn3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "b4e63d83d7b8fd7d95de121d999306579768f38c00cd7f1ca9170d8bdf2ff262",
+      "split": "FINAL"
+    },
+    {
+      "id": "J-ch-rustfund-cm8q8fqe90005l803njg1ffr5",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay4j0001jv041qus0o2n",
+          "issue_id": "cm8q8fqe90005l803njg1ffr5",
+          "block": 1,
+          "lang": "typescript",
+          "block_sha256": "85757a9aebee8281025cafd5fd6d9f881a9f13ee7a341f71d94fa00f02748e8d"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8nocdu10005l2038ids6cn3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "85757a9aebee8281025cafd5fd6d9f881a9f13ee7a341f71d94fa00f02748e8d",
+      "split": "DEV"
+    },
+    {
+      "id": "J-ch-rustfund-cm8qd5lmb0005jo039fcjnbfc",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay4j0001jv041qus0o2n",
+          "issue_id": "cm8qd5lmb0005jo039fcjnbfc",
+          "block": 1,
+          "lang": "javascript",
+          "block_sha256": "0f5c4d3ef0bdf0c7a4fa218e64b2327135005d7fcf28cf9db77ce965a9edf613"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8nocdu10005l2038ids6cn3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "0f5c4d3ef0bdf0c7a4fa218e64b2327135005d7fcf28cf9db77ce965a9edf613",
+      "split": "DEV"
+    },
+    {
+      "id": "J-ch-rustfund-cm8qhwwdz0003l403u7bjbbub",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay4j0001jv041qus0o2n",
+          "issue_id": "cm8qhwwdz0003l403u7bjbbub",
+          "block": 1,
+          "lang": "TypeScript",
+          "block_sha256": "42056086ec0a986a8b14cef3fbb4d9d081d4a642de716220b9096537c9b4400c"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8nocdu10005l2038ids6cn3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "42056086ec0a986a8b14cef3fbb4d9d081d4a642de716220b9096537c9b4400c",
+      "split": "V1"
+    },
+    {
+      "id": "J-ch-rustfund-cm8isoiz90005jy03jexzkcqd",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay620003jv04y29c98kp",
+          "issue_id": "cm8isoiz90005jy03jexzkcqd",
+          "block": 0,
+          "lang": "rust",
+          "block_sha256": "f424585a951bc844cebea78e588a7b20d71dba02276d3e6216178d6d9ce1c80a"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8qagpgt0003jp03e1iwwybk",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "f424585a951bc844cebea78e588a7b20d71dba02276d3e6216178d6d9ce1c80a",
+      "split": "DEV"
+    },
+    {
+      "id": "J-ch-rustfund-cm8nnad860005ju03jj3zx4so",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay620003jv04y29c98kp",
+          "issue_id": "cm8nnad860005ju03jj3zx4so",
+          "block": 2,
+          "lang": "TypeScript",
+          "block_sha256": "4f2b7d990d683f551ff7f80bb502f46f3afb6d0f9aa4d20adf26f31d85b90dfa"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8qagpgt0003jp03e1iwwybk",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "4f2b7d990d683f551ff7f80bb502f46f3afb6d0f9aa4d20adf26f31d85b90dfa",
+      "split": "FINAL"
+    },
+    {
+      "id": "J-ch-rustfund-cm8p4jfl40009jx03xsf3etnz",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay620003jv04y29c98kp",
+          "issue_id": "cm8p4jfl40009jx03xsf3etnz",
+          "block": 1,
+          "lang": "TypeScript",
+          "block_sha256": "b2f0de4bd807f7856f90fa5ecb9ecb18d8e2dfb595ca08506d5c2a5b1985149d"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8qagpgt0003jp03e1iwwybk",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "b2f0de4bd807f7856f90fa5ecb9ecb18d8e2dfb595ca08506d5c2a5b1985149d",
+      "split": "V2"
+    },
+    {
+      "id": "J-ch-rustfund-cm8qagpgt0003jp03e1iwwybk",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay620003jv04y29c98kp",
+          "issue_id": "cm8qagpgt0003jp03e1iwwybk",
+          "block": 0,
+          "lang": "js",
+          "block_sha256": "6fdb976c5c2667bfb6e04e2c3f504f019da914e75785c9bcd2ec1a58bc07cea2"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": false,
+      "selected_issue": "cm8qagpgt0003jp03e1iwwybk",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "6fdb976c5c2667bfb6e04e2c3f504f019da914e75785c9bcd2ec1a58bc07cea2",
+      "split": "V2"
+    },
+    {
+      "id": "J-ch-rustfund-cm8ja5wpf0005la03r663m6lq",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8ja5wpf0005la03r663m6lq",
+          "block": 1,
+          "lang": "JavaScript",
+          "block_sha256": "941944744eec228354ec9ba428cfd52e5bbfcad6f7a29f61b9150ef35332f6cc"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "941944744eec228354ec9ba428cfd52e5bbfcad6f7a29f61b9150ef35332f6cc",
+      "split": "FINAL"
+    },
+    {
+      "id": "J-ch-rustfund-cm8k08ltv0003l503bln8d7un",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8k08ltv0003l503bln8d7un",
+          "block": 2,
+          "lang": "TypeScript",
+          "block_sha256": "7c2fbeb50b6fe5d1119f3b779968e5f4f09dbcaaaecd4811ea238455249a405b"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "7c2fbeb50b6fe5d1119f3b779968e5f4f09dbcaaaecd4811ea238455249a405b",
+      "split": "V1"
+    },
+    {
+      "id": "J-ch-rustfund-cm8ka9z530003l803rkxop62k",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8ka9z530003l803rkxop62k",
+          "block": 0,
+          "lang": "typescript",
+          "block_sha256": "7867c796862b7e9a042607f45252126d8741476ec40024c5f5139c3a42df4ca2"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "7867c796862b7e9a042607f45252126d8741476ec40024c5f5139c3a42df4ca2",
+      "split": "V1"
+    },
+    {
+      "id": "J-ch-rustfund-cm8lna3800003l403frndishc",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8lna3800003l403frndishc",
+          "block": 2,
+          "lang": "TypeScript",
+          "block_sha256": "2ceff13a83dd4e4bdb8c464e439072e4643a6bf68a748ff96f40e361a9841bde"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": false,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "2ceff13a83dd4e4bdb8c464e439072e4643a6bf68a748ff96f40e361a9841bde",
+      "split": "FINAL"
+    },
+    {
+      "id": "J-ch-rustfund-cm8m5uwcu0005jp03pmaohs0c",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8m5uwcu0005jp03pmaohs0c",
+          "block": 2,
+          "lang": "ts",
+          "block_sha256": "7a60fcaaa4db28d1e87e4c3c5e44d7d7b81c7bf36e6602a96428be198be87e61"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "7a60fcaaa4db28d1e87e4c3c5e44d7d7b81c7bf36e6602a96428be198be87e61",
+      "split": "FINAL"
+    },
+    {
+      "id": "J-ch-rustfund-cm8mv5hi3000blb036becpc5l",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8mv5hi3000blb036becpc5l",
+          "block": 0,
+          "lang": "Solidity",
+          "block_sha256": "a8895fe4b92d11fb6a148780174d933c741e594a6c1015b97712467efdca742c"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "a8895fe4b92d11fb6a148780174d933c741e594a6c1015b97712467efdca742c",
+      "split": "DEV"
+    },
+    {
+      "id": "J-ch-rustfund-cm8n09o9f0005jz03x7pb4w4h",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8n09o9f0005jz03x7pb4w4h",
+          "block": 1,
+          "lang": "typescript",
+          "block_sha256": "c7573f3437b88cafa98717d8f2b298b9d21301db51398fcfef2ac560d2cfb0a7"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "c7573f3437b88cafa98717d8f2b298b9d21301db51398fcfef2ac560d2cfb0a7",
+      "split": "V2"
+    },
+    {
+      "id": "J-ch-rustfund-cm8nngokt0005l303g7d1eg8r",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8nngokt0005l303g7d1eg8r",
+          "block": 0,
+          "lang": "TypeScript",
+          "block_sha256": "3b6afcb0664cf173cca16fc8895c1fdee832ece71a43a11c3cc5ffbbf084b65a"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "3b6afcb0664cf173cca16fc8895c1fdee832ece71a43a11c3cc5ffbbf084b65a",
+      "split": "V1"
+    },
+    {
+      "id": "J-ch-rustfund-cm8o1trdu0005l4031w2l45wy",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8o1trdu0005l4031w2l45wy",
+          "block": 1,
+          "lang": "solidity",
+          "block_sha256": "a044844073e7782f71a0947fe6e46c06671288a5e7b43bbab7b2e6a238be3bb5"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "a044844073e7782f71a0947fe6e46c06671288a5e7b43bbab7b2e6a238be3bb5",
+      "split": "FINAL"
+    },
+    {
+      "id": "J-ch-rustfund-cm8oresdc0003k703knl9oy76",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8oresdc0003k703knl9oy76",
+          "block": 1,
+          "lang": "solidity",
+          "block_sha256": "3683f2ca60a73433ac10b04d2544f1cadc8bb443715f623bf3f2cb0d210db01b"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "3683f2ca60a73433ac10b04d2544f1cadc8bb443715f623bf3f2cb0d210db01b",
+      "split": "V2"
+    },
+    {
+      "id": "J-ch-rustfund-cm8p1y84t0005jx03ls9q4xwb",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8p1y84t0005jx03ls9q4xwb",
+          "block": 2,
+          "lang": "TypeScript",
+          "block_sha256": "1771e4fe8ffa3c400f9ede392c146e00ca4b33718d68c38c7bf6e6fd367d8698"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "1771e4fe8ffa3c400f9ede392c146e00ca4b33718d68c38c7bf6e6fd367d8698",
+      "split": "FINAL"
+    },
+    {
+      "id": "J-ch-rustfund-cm8p6wi8q0003ld03sm6nqul7",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8p6wi8q0003ld03sm6nqul7",
+          "block": 1,
+          "lang": "typescript",
+          "block_sha256": "9e5e247e975e337731ece52b7d6403e84e3332a45be26f7909d1ba86a5868c28"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "9e5e247e975e337731ece52b7d6403e84e3332a45be26f7909d1ba86a5868c28",
+      "split": "DEV"
+    },
+    {
+      "id": "J-ch-rustfund-cm8q3303n0005ib03hcrcbu9i",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8q3303n0005ib03hcrcbu9i",
+          "block": 0,
+          "lang": "javascript",
+          "block_sha256": "d5b97544357d07421f7c8d18bf9ab96a4463e3db730a5eaf438197a109b8fa53"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "d5b97544357d07421f7c8d18bf9ab96a4463e3db730a5eaf438197a109b8fa53",
+      "split": "V2"
+    },
+    {
+      "id": "J-ch-rustfund-cm8qalxm7000bjp038bw9omum",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8qalxm7000bjp038bw9omum",
+          "block": 0,
+          "lang": "js",
+          "block_sha256": "d4200e0ab620889e9737b3cf8b3462efd0b26ee668ff4a25c87d2995fc701161"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "d4200e0ab620889e9737b3cf8b3462efd0b26ee668ff4a25c87d2995fc701161",
+      "split": "DEV"
+    },
+    {
+      "id": "J-ch-rustfund-cm8qautbo0005l203efzefo51",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8qautbo0005l203efzefo51",
+          "block": 2,
+          "lang": "javascript",
+          "block_sha256": "f3cc97f79961781eac2d9c3d3bcdde65ee480e39de764eaf6046f1d3ab1fa3e5"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "f3cc97f79961781eac2d9c3d3bcdde65ee480e39de764eaf6046f1d3ab1fa3e5",
+      "split": "DEV"
+    },
+    {
+      "id": "J-ch-rustfund-cm8qbuq460005l403y5a9s3s7",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay8b0007jv04np6r0gyz",
+          "issue_id": "cm8qbuq460005l403y5a9s3s7",
+          "block": 1,
+          "lang": "javascript",
+          "block_sha256": "efac37d1e4591bcf24b2bf714470e261dc7e2fb8cd59234edca07894d87cd7c9"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8lna3800003l403frndishc",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "efac37d1e4591bcf24b2bf714470e261dc7e2fb8cd59234edca07894d87cd7c9",
+      "split": "V1"
+    },
+    {
+      "id": "J-ch-rustfund-cm8j96d6y0005ld03kybscumn",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aayd5000hjv04dwaviprl",
+          "issue_id": "cm8j96d6y0005ld03kybscumn",
+          "block": 1,
+          "lang": "javascript",
+          "block_sha256": "92e8f69842b9d7858604849a07ca541f32eb06b93be0428b62c92ddc3512f506"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8qmjysn0005ih03as1zx7vv",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "92e8f69842b9d7858604849a07ca541f32eb06b93be0428b62c92ddc3512f506",
+      "split": "V1"
+    },
+    {
+      "id": "J-ch-rustfund-cm8ku0vlz0005jo03xctug360",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aayd5000hjv04dwaviprl",
+          "issue_id": "cm8ku0vlz0005jo03xctug360",
+          "block": 4,
+          "lang": "Rust",
+          "block_sha256": "55a04b95738ac349143583709d54a2266e4491ae5cc1e69d2b6d687c5b9a63b8"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8qmjysn0005ih03as1zx7vv",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "55a04b95738ac349143583709d54a2266e4491ae5cc1e69d2b6d687c5b9a63b8",
+      "split": "V2"
+    },
+    {
+      "id": "J-ch-rustfund-cm8m67pc10005lg038bpreqar",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aayd5000hjv04dwaviprl",
+          "issue_id": "cm8m67pc10005lg038bpreqar",
+          "block": 0,
+          "lang": "TypeScript",
+          "block_sha256": "58c642bee1c4fe3bb1f9903e8916c8b672841eff8b59f7ce068a5423f63b4215"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8qmjysn0005ih03as1zx7vv",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "58c642bee1c4fe3bb1f9903e8916c8b672841eff8b59f7ce068a5423f63b4215",
+      "split": "FINAL"
+    },
+    {
+      "id": "J-ch-rustfund-cm8p56j8a0005lb03pkk7was3",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aayd5000hjv04dwaviprl",
+          "issue_id": "cm8p56j8a0005lb03pkk7was3",
+          "block": 1,
+          "lang": "TypeScript",
+          "block_sha256": "36cc10d0881c3ac35143ae206099ff0e24aa0a99b150041f53bfe2cf6f855700"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8qmjysn0005ih03as1zx7vv",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "36cc10d0881c3ac35143ae206099ff0e24aa0a99b150041f53bfe2cf6f855700",
+      "split": "V1"
+    },
+    {
+      "id": "J-ch-rustfund-cm8qmjysn0005ih03as1zx7vv",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aayd5000hjv04dwaviprl",
+          "issue_id": "cm8qmjysn0005ih03as1zx7vv",
+          "block": 1,
+          "lang": "typescript",
+          "block_sha256": "f1491a38f229f13193d1c8221b8e350c02a85a4e215d3cdbe87ca1a77c8a4262"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "duplicate_in_group": false,
+      "selected_issue": "cm8qmjysn0005ih03as1zx7vv",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"High Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "f1491a38f229f13193d1c8221b8e350c02a85a4e215d3cdbe87ca1a77c8a4262",
+      "split": "DEV"
+    },
+    {
+      "id": "J-ch-rustfund-cm8qanxid0005jr09wzy44iig",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay770005jv044smoiz4b",
+          "issue_id": "cm8qanxid0005jr09wzy44iig",
+          "block": 0,
+          "lang": "javascript",
+          "block_sha256": "e257b716a232234a1b61e0d2cf9c8a1b9fa6ad73abed339e01a0bdabe0f75e3f"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8qcj32l0005l203euigc2tj",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"Medium Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "e257b716a232234a1b61e0d2cf9c8a1b9fa6ad73abed339e01a0bdabe0f75e3f",
+      "split": "DEV"
+    },
+    {
+      "id": "J-ch-rustfund-cm8qcj32l0005l203euigc2tj",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay770005jv044smoiz4b",
+          "issue_id": "cm8qcj32l0005l203euigc2tj",
+          "block": 1,
+          "lang": "javascript",
+          "block_sha256": "dbc7c20a81b4fa634abeba3e250f12e56b97b702469f03ac570a994c8c115913"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "duplicate_in_group": false,
+      "selected_issue": "cm8qcj32l0005l203euigc2tj",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"Medium Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "dbc7c20a81b4fa634abeba3e250f12e56b97b702469f03ac570a994c8c115913",
+      "split": "FINAL"
+    },
+    {
+      "id": "J-ch-rustfund-cm8ioyz2n000hjx03pbkk3d10",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aayac000bjv04leoy8lmu",
+          "issue_id": "cm8ioyz2n000hjx03pbkk3d10",
+          "block": 1,
+          "lang": "javascript",
+          "block_sha256": "c066bba692c69f9e99121458fe8899706633ced854d571ab784150655bf591f6"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8q9zuml0003i903gwf47vs3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"Medium Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "c066bba692c69f9e99121458fe8899706633ced854d571ab784150655bf591f6",
+      "split": "DEV"
+    },
+    {
+      "id": "J-ch-rustfund-cm8lqhv5l0003i803mincq3lm",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aayac000bjv04leoy8lmu",
+          "issue_id": "cm8lqhv5l0003i803mincq3lm",
+          "block": 1,
+          "lang": "diff",
+          "block_sha256": "bc651f060cfafa828ee60e0138113d57c1ee61b6306b857cbf7aa56a127fc617"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8q9zuml0003i903gwf47vs3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"Medium Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "bc651f060cfafa828ee60e0138113d57c1ee61b6306b857cbf7aa56a127fc617",
+      "split": "V1"
+    },
+    {
+      "id": "J-ch-rustfund-cm8nei2rc0005la0304awcnfy",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aayac000bjv04leoy8lmu",
+          "issue_id": "cm8nei2rc0005la0304awcnfy",
+          "block": 1,
+          "lang": "TypeScript",
+          "block_sha256": "0d3f116bfd3fda83c0f572bf651e99100136b7550aefb45dba4e7361d925fb99"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8q9zuml0003i903gwf47vs3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"Medium Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "0d3f116bfd3fda83c0f572bf651e99100136b7550aefb45dba4e7361d925fb99",
+      "split": "V2"
+    },
+    {
+      "id": "J-ch-rustfund-cm8o17st90003ji03hcg43zus",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aayac000bjv04leoy8lmu",
+          "issue_id": "cm8o17st90003ji03hcg43zus",
+          "block": 1,
+          "lang": "Solidity",
+          "block_sha256": "9fd2697b4400b5dce019b415fc28b32eb25cc84d045521a2306ee4df0a7ce8dd"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8q9zuml0003i903gwf47vs3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"Medium Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "9fd2697b4400b5dce019b415fc28b32eb25cc84d045521a2306ee4df0a7ce8dd",
+      "split": "V2"
+    },
+    {
+      "id": "J-ch-rustfund-cm8os5lz70005jw03qe7ho9um",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aayac000bjv04leoy8lmu",
+          "issue_id": "cm8os5lz70005jw03qe7ho9um",
+          "block": 1,
+          "lang": "javascript",
+          "block_sha256": "e72f34780606229f366459dd32b148e8764bf2d0bf60e79fab9e3aff5bf731c5"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8q9zuml0003i903gwf47vs3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"Medium Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "e72f34780606229f366459dd32b148e8764bf2d0bf60e79fab9e3aff5bf731c5",
+      "split": "DEV"
+    },
+    {
+      "id": "J-ch-rustfund-cm8ppeudx0007lb036u01eydy",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aayac000bjv04leoy8lmu",
+          "issue_id": "cm8ppeudx0007lb036u01eydy",
+          "block": 1,
+          "lang": "diff",
+          "block_sha256": "35d98876085ef6704a95bf09f47920f22991198c0b64e7b7e4bb5a08662afdc7"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8q9zuml0003i903gwf47vs3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"Medium Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "35d98876085ef6704a95bf09f47920f22991198c0b64e7b7e4bb5a08662afdc7",
+      "split": "DEV"
+    },
+    {
+      "id": "J-ch-rustfund-cm8q9zuml0003i903gwf47vs3",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aayac000bjv04leoy8lmu",
+          "issue_id": "cm8q9zuml0003i903gwf47vs3",
+          "block": 2,
+          "lang": "javascript",
+          "block_sha256": "63c5204457dcb4bc392861329c4bd7a9ab1af7900051d0d0139479e3cd99227e"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "duplicate_in_group": false,
+      "selected_issue": "cm8q9zuml0003i903gwf47vs3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"Medium Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "63c5204457dcb4bc392861329c4bd7a9ab1af7900051d0d0139479e3cd99227e",
+      "split": "V2"
+    },
+    {
+      "id": "J-ch-rustfund-cm8qar4hu0005la03a4oqas98",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aayac000bjv04leoy8lmu",
+          "issue_id": "cm8qar4hu0005la03a4oqas98",
+          "block": 0,
+          "lang": "js",
+          "block_sha256": "15d72abd92ae46c9ce84545706f479a4d3b25d0b87e38452e32d82ff28082238"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8q9zuml0003i903gwf47vs3",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"Medium Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "15d72abd92ae46c9ce84545706f479a4d3b25d0b87e38452e32d82ff28082238",
+      "split": "DEV"
+    },
+    {
+      "id": "J-ch-rustfund-cm8qa2k2v000bi903n5aubvrz",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aay9k0009jv04j6p6ak7s",
+          "issue_id": "cm8qa2k2v000bi903n5aubvrz",
+          "block": 1,
+          "lang": "javascript",
+          "block_sha256": "1473c9d58a390b5a99bc494e13904e41ef11489df7ded0d771225acfa75c8cf6"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Low",
+      "duplicate_in_group": false,
+      "selected_issue": "cm8qa2k2v000bi903n5aubvrz",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"Low Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "1473c9d58a390b5a99bc494e13904e41ef11489df7ded0d771225acfa75c8cf6",
+      "split": "V2"
+    },
+    {
+      "id": "J-ch-rustfund-cm8p0d5zq0005jm038sqvhgus",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aaybg000djv0405gl08ft",
+          "issue_id": "cm8p0d5zq0005jm038sqvhgus",
+          "block": 0,
+          "lang": "TypeScript",
+          "block_sha256": "ae7fca3431b127073ead0bbfa6b5873c74bbfc897f25fcb1e22cdf4cb278ac7c"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Low",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8q2oogz000bjv03cz4yeq5i",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"Low Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "ae7fca3431b127073ead0bbfa6b5873c74bbfc897f25fcb1e22cdf4cb278ac7c",
+      "split": "V2"
+    },
+    {
+      "id": "J-ch-rustfund-cm8q2oogz000bjv03cz4yeq5i",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aaybg000djv0405gl08ft",
+          "issue_id": "cm8q2oogz000bjv03cz4yeq5i",
+          "block": 1,
+          "lang": "javascript",
+          "block_sha256": "28ab47b90186cd397e3ee48c8900871fd3ce601900c8fd2ae08dbd430f30b472"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Low",
+      "duplicate_in_group": false,
+      "selected_issue": "cm8q2oogz000bjv03cz4yeq5i",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"Low Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "28ab47b90186cd397e3ee48c8900871fd3ce601900c8fd2ae08dbd430f30b472",
+      "split": "V1"
+    },
+    {
+      "id": "J-ch-rustfund-cm8qapvqh0005js03sk2qcj66",
+      "source": "codehawks-rustfund",
+      "platform": "codehawks",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-json-block",
+          "url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+          "page_sha256": "63beb9b1d12e9fee8268c19eaed08b8728c6fef798504f2d16b7fd1602ecaf24",
+          "group": "cma4aaybg000djv0405gl08ft",
+          "issue_id": "cm8qapvqh0005js03sk2qcj66",
+          "block": 0,
+          "lang": "js",
+          "block_sha256": "ee6710b81f358e68af8e20ac60e702cb4893248bbb970d5d1c845e77e66f2d21"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Low",
+      "duplicate_in_group": true,
+      "selected_issue": "cm8q2oogz000bjv03cz4yeq5i",
+      "outcome_source": "codehawks-results",
+      "outcome_evidence": "Results page heading \"Low Risk Findings\"; submission in the judged report",
+      "outcome_url": "https://web.archive.org/web/20260128075213id_/https://codehawks.cyfrin.io/c/2025-03-rustfund/results",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "ee6710b81f358e68af8e20ac60e702cb4893248bbb970d5d1c845e77e66f2d21",
+      "split": "V1"
+    },
+    {
+      "id": "J-c4-jupiter-lend-L07",
+      "source": "code4rena-jupiter-lend",
+      "platform": "code4rena",
+      "tier": "J",
+      "kind": "rust-unit-test",
+      "files": [
+        {
+          "kind": "page-pre-block",
+          "url": "https://code4rena.com/reports/2026-02-jupiter-lend",
+          "page_sha256": "d18a5c7c23af528b984e9c7b73a57ad242041b5aaa74e582ed0be71c82c71176",
+          "finding": "L-07",
+          "pre_index": 11,
+          "block_sha256": "185bb424322f424488cbdd6c4dcbae4591e173431ad1c1d58f7ef5623d59ee42"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Low",
+      "outcome_source": "code4rena-report",
+      "outcome_evidence": "Report lists \"L-07\" under \"Low Risk\" with an executable Rust test",
+      "outcome_url": "https://code4rena.com/reports/2026-02-jupiter-lend",
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "185bb424322f424488cbdd6c4dcbae4591e173431ad1c1d58f7ef5623d59ee42",
+      "split": "V1"
+    },
+    {
+      "id": "N-arena-stake-flow-tests-stake-flow-ts",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "Frankcastleauditor/Solana-Audit-Arena",
+          "commit": "81eaf902d971cc0a87c8107b23bf12c1d30525e0",
+          "path": "stake-flow/tests/stake-flow.ts",
+          "sha256_norm": "3d551a237ad87f2e4933cc44aa2949197df61f52cfe7982dcd3df7b3f39bc37a"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "reused_source": "same repository as v2 units; this file is not one of them",
+      "dedupe_key": "3d551a237ad87f2e4933cc44aa2949197df61f52cfe7982dcd3df7b3f39bc37a",
+      "split": "FINAL"
+    },
+    {
+      "id": "N-arena-x402-meridian-tests-permit2-ts",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "Frankcastleauditor/Solana-Audit-Arena",
+          "commit": "81eaf902d971cc0a87c8107b23bf12c1d30525e0",
+          "path": "x402-Meridian/tests/permit2.ts",
+          "sha256_norm": "b944bbaa75fe9b518dfc7d171280b01e91e4a2e326f4f127a106583e7d61ee29"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "reused_source": "same repository as v2 units; this file is not one of them",
+      "dedupe_key": "b944bbaa75fe9b518dfc7d171280b01e91e4a2e326f4f127a106583e7d61ee29",
+      "split": "DEV"
+    },
+    {
+      "id": "N-arena-x402-meridian-tests-x402-ts",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "Frankcastleauditor/Solana-Audit-Arena",
+          "commit": "81eaf902d971cc0a87c8107b23bf12c1d30525e0",
+          "path": "x402-Meridian/tests/x402.ts",
+          "sha256_norm": "e203a296fc6ad7e73ebd0e70464dc23b811fe902a799bbd7c74c3e8ffc583a19"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "reused_source": "same repository as v2 units; this file is not one of them",
+      "dedupe_key": "e203a296fc6ad7e73ebd0e70464dc23b811fe902a799bbd7c74c3e8ffc583a19",
+      "split": "V1"
+    },
+    {
+      "id": "N-arena-x402-meridian-tests-x402-permit2-ts",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "Frankcastleauditor/Solana-Audit-Arena",
+          "commit": "81eaf902d971cc0a87c8107b23bf12c1d30525e0",
+          "path": "x402-Meridian/tests/x402_permit2.ts",
+          "sha256_norm": "d474ac65c8195adfe59d6f56f6e36f333752e40095c3fb95509a1e08824e9a66"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "reused_source": "same repository as v2 units; this file is not one of them",
+      "dedupe_key": "d474ac65c8195adfe59d6f56f6e36f333752e40095c3fb95509a1e08824e9a66",
+      "split": "FINAL"
+    },
+    {
+      "id": "N-arena-zenon-tests-complete-curve-ts",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "Frankcastleauditor/Solana-Audit-Arena",
+          "commit": "81eaf902d971cc0a87c8107b23bf12c1d30525e0",
+          "path": "Zenon/tests/complete-curve.ts",
+          "sha256_norm": "16a1aaa114fe9b2d93c3f9c3af47a252ea465a9e72d2e0a78864617639438feb"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "reused_source": "same repository as v2 units; this file is not one of them",
+      "dedupe_key": "16a1aaa114fe9b2d93c3f9c3af47a252ea465a9e72d2e0a78864617639438feb",
+      "split": "FINAL"
+    },
+    {
+      "id": "N-arena-zenon-tests-trade-tokens-ts",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "Frankcastleauditor/Solana-Audit-Arena",
+          "commit": "81eaf902d971cc0a87c8107b23bf12c1d30525e0",
+          "path": "Zenon/tests/trade-tokens.ts",
+          "sha256_norm": "6e79a8e40639d3aee535f3e56199e11ba1f07082808b4f0994e0f8130f813d1f"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "reused_source": "same repository as v2 units; this file is not one of them",
+      "dedupe_key": "6e79a8e40639d3aee535f3e56199e11ba1f07082808b4f0994e0f8130f813d1f",
+      "split": "V1"
+    },
+    {
+      "id": "N-arena-franksol-programs-stake-v2-tests-test-initialize-rs",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "Frankcastleauditor/Solana-Audit-Arena",
+          "commit": "81eaf902d971cc0a87c8107b23bf12c1d30525e0",
+          "path": "FrankSol/programs/stake_v2/tests/test_initialize.rs",
+          "sha256_norm": "f99b96f35039116ccbb17a66230f00d14e14c3c54ab16802bd4595ca30606d84"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "reused_source": "same repository as v2 units; this file is not one of them",
+      "dedupe_key": "f99b96f35039116ccbb17a66230f00d14e14c3c54ab16802bd4595ca30606d84",
+      "split": "V2"
+    },
+    {
+      "id": "N-arena-franksol-programs-yield-generator-tests-test-yield-generator-rs",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "Frankcastleauditor/Solana-Audit-Arena",
+          "commit": "81eaf902d971cc0a87c8107b23bf12c1d30525e0",
+          "path": "FrankSol/programs/yield_generator/tests/test_yield_generator.rs",
+          "sha256_norm": "cf7bab2909dabbdfefd71992b3622747be1db24d1c5cb2c56fb5de12bf0eae4a"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "reused_source": "same repository as v2 units; this file is not one of them",
+      "dedupe_key": "cf7bab2909dabbdfefd71992b3622747be1db24d1c5cb2c56fb5de12bf0eae4a",
+      "split": "DEV"
+    },
+    {
+      "id": "N-arena-solana-autonomix-relay402-tests-1-program-ts",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "Frankcastleauditor/Solana-Audit-Arena",
+          "commit": "81eaf902d971cc0a87c8107b23bf12c1d30525e0",
+          "path": "Solana_Autonomix/relay402/tests/1-program.ts",
+          "sha256_norm": "f4ac2ef5d3c6bfe24cc2f0432a783d17816876c0e0aff6b9c17cc405c64762ed"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "reused_source": "same repository as v2 units; this file is not one of them",
+      "dedupe_key": "f4ac2ef5d3c6bfe24cc2f0432a783d17816876c0e0aff6b9c17cc405c64762ed",
+      "split": "V2"
+    },
+    {
+      "id": "N-arena-solana-autonomix-relay402-tests-2-e2e-ts",
+      "source": "arena",
+      "platform": "solana-audit-arena",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "Frankcastleauditor/Solana-Audit-Arena",
+          "commit": "81eaf902d971cc0a87c8107b23bf12c1d30525e0",
+          "path": "Solana_Autonomix/relay402/tests/2-e2e.ts",
+          "sha256_norm": "5a3980d0eba0390e58153b82f057464d51fae953b406beeaf38d804f08d034b7"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "reused_source": "same repository as v2 units; this file is not one of them",
+      "dedupe_key": "5a3980d0eba0390e58153b82f057464d51fae953b406beeaf38d804f08d034b7",
+      "split": "V2"
+    },
+    {
+      "id": "N-zolldyk-patterns-01-missing-validation-tests-pinocchio-comparison-ts",
+      "source": "zolldyk",
+      "platform": "teaching-repo",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "Zolldyk/anchor-pinochio-security-template",
+          "commit": "3cf8950271e85b0291e943516f15f17c74510a08",
+          "path": "patterns/01-missing-validation/tests/pinocchio-comparison.ts",
+          "sha256_norm": "6863f4ddd9abbf81edaae2512e8d617a890418fc497ecffc2ee686fd68c2e482"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "reused_source": "same repository as v2 units; this file is not one of them",
+      "dedupe_key": "6863f4ddd9abbf81edaae2512e8d617a890418fc497ecffc2ee686fd68c2e482",
+      "split": "V2"
+    },
+    {
+      "id": "N-zolldyk-patterns-02-authority-checks-tests-pinocchio-comparison-ts",
+      "source": "zolldyk",
+      "platform": "teaching-repo",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "Zolldyk/anchor-pinochio-security-template",
+          "commit": "3cf8950271e85b0291e943516f15f17c74510a08",
+          "path": "patterns/02-authority-checks/tests/pinocchio-comparison.ts",
+          "sha256_norm": "754d747f554f64e841411e381d792f3480e192b84cc3fc19ae250c74a0d9f38d"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "reused_source": "same repository as v2 units; this file is not one of them",
+      "dedupe_key": "754d747f554f64e841411e381d792f3480e192b84cc3fc19ae250c74a0d9f38d",
+      "split": "DEV"
+    },
+    {
+      "id": "N-zolldyk-patterns-03-unsafe-arithmetic-tests-pinocchio-comparison-ts",
+      "source": "zolldyk",
+      "platform": "teaching-repo",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "Zolldyk/anchor-pinochio-security-template",
+          "commit": "3cf8950271e85b0291e943516f15f17c74510a08",
+          "path": "patterns/03-unsafe-arithmetic/tests/pinocchio-comparison.ts",
+          "sha256_norm": "f525fbb576ad53473672486968968b7e57ef6a94f38dec33067d5110592f4e96"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "reused_source": "same repository as v2 units; this file is not one of them",
+      "dedupe_key": "f525fbb576ad53473672486968968b7e57ef6a94f38dec33067d5110592f4e96",
+      "split": "DEV"
+    },
+    {
+      "id": "N-zolldyk-patterns-03-unsafe-arithmetic-tests-edge-cases-ts",
+      "source": "zolldyk",
+      "platform": "teaching-repo",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "Zolldyk/anchor-pinochio-security-template",
+          "commit": "3cf8950271e85b0291e943516f15f17c74510a08",
+          "path": "patterns/03-unsafe-arithmetic/tests/edge-cases.ts",
+          "sha256_norm": "0cc40a3984d057f5a33125f18aea86a3d8dfaf8e1ebb7dc67e13d702c22f513b"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "reused_source": "same repository as v2 units; this file is not one of them",
+      "dedupe_key": "0cc40a3984d057f5a33125f18aea86a3d8dfaf8e1ebb7dc67e13d702c22f513b",
+      "split": "DEV"
+    },
+    {
+      "id": "N-zolldyk-patterns-03-unsafe-arithmetic-tests-token-manipulation-ts",
+      "source": "zolldyk",
+      "platform": "teaching-repo",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "Zolldyk/anchor-pinochio-security-template",
+          "commit": "3cf8950271e85b0291e943516f15f17c74510a08",
+          "path": "patterns/03-unsafe-arithmetic/tests/token-manipulation.ts",
+          "sha256_norm": "149dea1659ce1368afa34fae80f2950f15a40ea8e6fd048c7e6f2119d076ae87"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "reused_source": "same repository as v2 units; this file is not one of them",
+      "dedupe_key": "149dea1659ce1368afa34fae80f2950f15a40ea8e6fd048c7e6f2119d076ae87",
+      "split": "V1"
+    },
+    {
+      "id": "N-rustfund-tests-rustfund-ts",
+      "source": "rustfund",
+      "platform": "codehawks",
+      "tier": "N",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "CodeHawks-Contests/2025-03-rustfund",
+          "commit": "b5dd7b0ec01471667ae3a02520701aae405ac857",
+          "path": "tests/rustfund.ts",
+          "sha256_norm": "f371cdbb5fc92eddcfd216340c5580600111fe30cbf11de166b3d95074cc7175"
+        }
+      ],
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "f371cdbb5fc92eddcfd216340c5580600111fe30cbf11de166b3d95074cc7175",
+      "split": "FINAL"
+    }
+  ],
+  "excluded": [
+    {
+      "source": "codehawks-ssswap",
+      "count": 0,
+      "reason": "archived results parsed: 10 valid finding groups, but no submission body contains a test-harness code block (Rust snippets only)"
+    },
+    {
+      "source": "jito-restaking",
+      "count": 5,
+      "reason": "all five findings are used or screened in v2; no fresh unit"
+    },
+    {
+      "source": "code4rena-2025-08-solana-foundation",
+      "count": 8,
+      "reason": "public report has no High/Medium and no test code in any Low/QA item"
+    },
+    {
+      "source": "code4rena-2025-01-pump-science",
+      "count": 3,
+      "reason": "H-01/M-01/M-02 and QA are P1 data; report code blocks are source quotes"
+    },
+    {
+      "source": "code4rena-2026-02-jupiter-lend",
+      "count": 14,
+      "reason": "the other 14 report items contain source/fix snippets, not test code"
+    },
+    {
+      "source": "immunefi-bugfix-raydium",
+      "count": 2,
+      "reason": "both Raydium bug-fix reviews publish snippets and a narrative; no runnable test"
+    },
+    {
+      "source": "cantina-tensor",
+      "count": 234,
+      "reason": "234 findings submitted, but Cantina publishes no individual finding or PoC to anonymous readers"
+    },
+    {
+      "source": "hats-finance",
+      "count": 0,
+      "reason": "no Solana competition repository in the hats-finance org; Dappslap has no public findings repo"
+    },
+    {
+      "source": "sherlock",
+      "count": 461,
+      "reason": "only Orderly and WOOFi are Solana; both fully screened in P1 (7+1 coded units, no more)"
+    },
+    {
+      "source": "code4rena-others",
+      "count": 878,
+      "reason": "org listing (881 repos) has three Solana repos besides Anchor 2022; all handled above"
+    },
+    {
+      "source": "arena",
+      "count": 15,
+      "reason": "labelled issues with no harness block in the body"
+    },
+    {
+      "source": "arena",
+      "count": 164,
+      "reason": "unlabelled issues with no harness block, or beyond the 60-unit X target after dedupe"
+    },
+    {
+      "source": "arena",
+      "count": 25,
+      "reason": "labelled Arena issues already used as v2 J units (opened data)"
+    },
+    {
+      "source": "arena",
+      "count": 19,
+      "reason": "unlabelled Arena issues already used as v2 X units (opened data)"
+    },
+    {
+      "source": "solodit",
+      "count": 0,
+      "reason": "Vercel security checkpoint (HTTP 429) on every request; not readable without a browser"
+    },
+    {
+      "source": "codehawks-live",
+      "count": 0,
+      "reason": "codehawks.cyfrin.io live pages return a Vercel security checkpoint; the archived results payload was used instead"
+    },
+    {
+      "source": "codehawks-rustfund",
+      "count": 326,
+      "reason": "all 326 judged submissions parsed; 54 carry a harness block, 47 unique by content"
+    },
+    {
+      "source": "codehawks-rustfund",
+      "count": 7,
+      "reason": "byte-identical harness blocks repeated across submissions (marked duplicate_of)"
+    }
+  ],
   "counts": {
-    "units": 0,
-    "J": 0,
-    "X": 0,
-    "N": 0
-  }
+    "units": 135,
+    "duplicates": 0,
+    "counted_by_tier": {
+      "J": 59,
+      "N": 16,
+      "X": 60
+    },
+    "counted_by_source": {
+      "arena": 81,
+      "code4rena-jupiter-lend": 1,
+      "codehawks-rustfund": 47,
+      "rustfund": 1,
+      "zolldyk": 5
+    },
+    "counted_by_platform": {
+      "code4rena": 1,
+      "codehawks": 48,
+      "solana-audit-arena": 81,
+      "teaching-repo": 5
+    },
+    "J_by_source": {
+      "arena": 11,
+      "code4rena-jupiter-lend": 1,
+      "codehawks-rustfund": 47
+    },
+    "J_by_platform": {
+      "code4rena": 1,
+      "codehawks": 47,
+      "solana-audit-arena": 11
+    },
+    "J_source_share_pct": {
+      "arena": 18.64,
+      "code4rena-jupiter-lend": 1.69,
+      "codehawks-rustfund": 79.66
+    },
+    "J_platform_share_pct": {
+      "code4rena": 1.69,
+      "codehawks": 79.66,
+      "solana-audit-arena": 18.64
+    },
+    "split": {
+      "DEV": 51,
+      "V1": 28,
+      "V2": 29,
+      "FINAL": 27
+    }
+  },
+  "cap_note": "40% is enforced on `source` at collection. Two views are reported because the fresh data is concentrated: origin-level (six sources) and platform-level (arena, codehawks, code4rena, teaching-repo). Under platform-level caps the fresh J universe cannot be counted whole; see SEARCH_LOG.md."
 }
