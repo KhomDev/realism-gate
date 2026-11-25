@@ -1,0 +1,32 @@
+{"id": "3e203943e856d576", "label": "false-positive", "method": "reader", "reason": "a note on a single-payer harness; the rule says it is not evidence of privilege", "rule": "RG03", "split": "heldout"}
+{"id": "321ec47c716be2b7", "label": "false-positive", "method": "reader", "reason": "single-payer deposit; no privileged instruction", "rule": "RG03", "split": "heldout"}
+{"id": "df2c7c020bd22978", "label": "unclear", "method": "reader", "reason": "rentLocked is read from chain state in the context; the tool reads it as test-written, but the assertion can fail", "rule": "RG09", "split": "heldout"}
+{"id": "2b936939a4c645bf", "label": "false-positive", "method": "reader", "reason": "single-payer deposit; no privileged instruction", "rule": "RG03", "split": "heldout"}
+{"id": "6a69f2212fd0c2be", "label": "false-positive", "method": "reader", "reason": "the signer parameter was not resolved; ordinary payer transaction", "rule": "RG03", "split": "heldout"}
+{"id": "25e19e0d3e87b49d", "label": "false-positive", "method": "reader", "reason": "single-payer stake; no privileged instruction", "rule": "RG03", "split": "heldout"}
+{"id": "217402db22417a8d", "label": "false-positive", "method": "reader", "reason": "the admin is the market creator acting on its own market (class 1)", "rule": "RG02", "split": "heldout"}
+{"id": "4e0f7f2672e598cc", "label": "true-positive", "method": "reader", "reason": "the PoC binary prints balances and asserts none", "rule": "RG08", "split": "heldout"}
+{"id": "3d93948736b2cb62", "label": "true-positive", "method": "reader", "reason": "the PoC binary prints balances and asserts none", "rule": "RG08", "split": "heldout"}
+{"id": "bd2020a66b55bdec", "label": "true-positive", "method": "reader", "reason": "the PoC binary prints and asserts none", "rule": "RG08", "split": "heldout"}
+{"id": "510e58eb7b16aae5", "label": "true-positive", "method": "reader", "reason": "the PoC binary prints and asserts none", "rule": "RG08", "split": "heldout"}
+{"id": "bc8d5364f45abca8", "label": "true-positive", "method": "reader", "reason": "the PoC binary prints and asserts none", "rule": "RG08", "split": "heldout"}
+{"id": "f2d61a9cb088c49c", "label": "false-positive", "method": "reader", "reason": "the authority is the local fixture the test initialises its own account with (class 1)", "rule": "RG02", "split": "heldout"}
+{"id": "4b32ac08aabcdf7f", "label": "true-positive", "method": "reader", "reason": "the PoC binary prints and asserts none", "rule": "RG08", "split": "heldout"}
+{"id": "a558b0291fb5e400", "label": "false-positive", "method": "reader", "reason": "the authority is the local fixture the test initialises its own account with (class 1)", "rule": "RG02", "split": "heldout"}
+{"id": "0ca33d77f98787b3", "label": "false-positive", "method": "reader", "reason": "the authority is the local fixture the test initialises its own account with (class 1)", "rule": "RG02", "split": "heldout"}
+{"id": "d2a9d6e673f29b82", "label": "false-positive", "method": "reader", "reason": "the authority is the local fixture the test initialises its own account with (class 1)", "rule": "RG02", "split": "heldout"}
+{"id": "a46ee4ba3b5ffc2a", "label": "false-positive", "method": "reader", "reason": "the authority is the local fixture the test initialises its own account with (class 1)", "rule": "RG02", "split": "heldout"}
+{"id": "981077a41a30d2f7", "label": "true-positive", "method": "reader", "reason": "the PoC binary prints and asserts none", "rule": "RG08", "split": "heldout"}
+{"id": "f0893a6bdfec9b22", "label": "false-positive", "method": "reader", "reason": "the authority is the local fixture the test initialises its own account with (class 1)", "rule": "RG02", "split": "heldout"}
+{"id": "43185b53caffdba5", "label": "false-positive", "method": "reader", "reason": "the authority is the local fixture the test initialises its own account with (class 1)", "rule": "RG02", "split": "heldout"}
+{"id": "b087af6bbd32c491", "label": "true-positive", "method": "reader", "reason": "the PoC binary prints and asserts none", "rule": "RG08", "split": "heldout"}
+{"id": "4bbfe6fbb030004a", "label": "false-positive", "method": "reader", "reason": "the authority is the local fixture the test initialises its own account with (class 1)", "rule": "RG02", "split": "heldout"}
+{"id": "72c5386187cde60c", "label": "false-positive", "method": "reader", "reason": "the authority is the local fixture the test initialises its own account with (class 1)", "rule": "RG02", "split": "heldout"}
+{"id": "1937523bb371df3f", "label": "true-positive", "method": "reader", "reason": "the PoC binary prints and asserts none", "rule": "RG08", "split": "heldout"}
+{"id": "300cc3467e9a7276", "label": "false-positive", "method": "reader", "reason": "the authority is the local fixture the test initialises its own account with (class 1)", "rule": "RG02", "split": "heldout"}
+{"id": "dd94a153c99fa9d0", "label": "true-positive", "method": "reader", "reason": "the PoC binary prints and asserts none", "rule": "RG08", "split": "heldout"}
+{"id": "6e27fc44ab8215ca", "label": "false-positive", "method": "reader", "reason": "the authority is the local fixture the test initialises its own account with (class 1)", "rule": "RG02", "split": "heldout"}
+{"id": "4358160b56fc7177", "label": "false-positive", "method": "reader", "reason": "the authority is the local fixture the test initialises its own account with (class 1)", "rule": "RG02", "split": "heldout"}
+{"id": "78e652810d26fcd0", "label": "false-positive", "method": "reader", "reason": "the authority is the local fixture the test initialises its own account with (class 1)", "rule": "RG02", "split": "heldout"}
+{"id": "e4242404d428b2ac", "label": "false-positive", "method": "reader", "reason": "the deployer calls an ungated function in its own demo (class 1)", "rule": "RG02", "split": "heldout"}
+{"id": "5bdcde8895c5d1aa", "label": "false-positive", "method": "reader", "reason": "the authority signs a token-account setup helper, not the exploit (class 2/3)", "rule": "RG02", "split": "heldout"}

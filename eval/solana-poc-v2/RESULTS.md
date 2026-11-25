@@ -102,3 +102,37 @@ python eval/solana-poc-v2/run.py target/release/realism-gate.exe
 python eval/solana-poc-v2/rq1.py --version 1.2.0
 python eval/solana-poc/recompare.py --json      # in-sample, 1.0.4 vs 1.2.0
 ```
+
+## Round 2 (1.3.0): fresh held-out precision after two dev-split fixes
+
+After the 1.2.0 run, the **dev split only** was read (37 flags; the held-out 40
+were not) and two false positives were fixed: an import-only helper was being
+wrapped as `it("fragment")` and flagged RG08; and a test whose title says the
+attack is blocked (or carries the secure suite's ✓/✔) is a control test. The
+held-out split was then labelled **first**, under the rubric, with the 1.3.0
+binary (`795211ec…`, code `fcba51d`). 63 flags were raised (32 held-out, 31
+dev); the held-out labels are in `labels/heldout.jsonl`.
+
+| Rule | Held-out precision |
+|---|---|
+| RG02 privileged-step-in-exploit | 0/16 = 0.0% [0.0-19.4] |
+| RG03 deployer-is-attacker | 0/5 = 0.0% [0.0-43.4] |
+| RG08 no-assertion | 10/10 = 100% [72.2-100] |
+| RG09 tautological-assertion | 0/0; one unclear, a count |
+| **Pooled** | **10/31 = 32.3% [18.6-49.9]** |
+
+Source-clustered bootstrap for the pooled cell (6 sources, 10,000 draws, seed
+`rg-solana-poc-v2-bootstrap-2026-11-25`): **[10.0-72.7]** — wider than the
+Wilson interval, as the P1 study predicted for clustered flags.
+
+What the labels say, rule by rule. RG08 is right on every held-out flag: the
+PoC-framework binaries print balances and assert nothing. RG02 and RG03 are
+wrong on every held-out flag: the signer is the fee payer of an instruction
+whose account metas mark the role account non-signing (the Merovingio
+`authority` cases), the attacker's own fixture key, or a setup helper. The
+static reader cannot yet tell a payer from a role signer. A rule at `warn`
+with 0/16 and 0/5 fresh precision is noise, so 1.4.0 moves RG01, RG02, RG03,
+RG04 and RG06 to `note` on Solana until a reader can make that distinction.
+
+The judged-readability target for the P1 set remains missed (6/12); nothing in
+round 2 changes coverage (73/81 v2, 93/99 in-sample).
