@@ -375,6 +375,19 @@ fn cases() -> Vec<Case> {
             "pub fn withdraw",
             "anchor-struct",
         ),
+        Case::new(
+            "anchor-context-reference",
+            "vault",
+            "set_admin",
+            Instruction,
+        )
+        .auth(
+            "signer",
+            Some("admin"),
+            "src/lib.rs",
+            "pub admin: Signer<'info>,",
+            "anchor-struct",
+        ),
         Case::new("anchor-instruction-no-context", "vault", "bad", Instruction).auth(
             "unknown",
             None,

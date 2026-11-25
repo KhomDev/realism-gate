@@ -189,7 +189,9 @@ fn context_accounts(function: &ItemFn) -> Result<String, String> {
     let Some(syn::FnArg::Typed(argument)) = function.sig.inputs.first() else {
         return Err(format!("instruction `{name}` has no `Context<T>` argument"));
     };
-    let Type::Path(path) = &*argument.ty else {
+    // Newer Anchor accepts `ctx: &mut Context<T>`; references, parens and
+    // groups around the path carry no accounts information.
+    let Type::Path(path) = strip_type_wrappers(&argument.ty) else {
         return Err(format!("instruction `{name}` has no `Context<T>` argument"));
     };
     // `Context<...>` may be written bare or as `anchor_lang::context::Context`.
@@ -221,6 +223,15 @@ fn context_accounts(function: &ItemFn) -> Result<String, String> {
         _ => Err(format!(
             "instruction `{name}`'s accounts type is not a named struct"
         )),
+    }
+}
+
+fn strip_type_wrappers(ty: &Type) -> &Type {
+    match ty {
+        Type::Reference(reference) => strip_type_wrappers(&reference.elem),
+        Type::Paren(paren) => strip_type_wrappers(&paren.elem),
+        Type::Group(group) => strip_type_wrappers(&group.elem),
+        _ => ty,
     }
 }
 
@@ -1280,6 +1291,12 @@ mod tests {
         )
         .unwrap();
         assert_eq!(context_accounts(&function).unwrap(), "Withdraw");
+        // Newer Anchor accepts `&mut Context<T>`.
+        let function: ItemFn = syn::parse_str(
+            "pub fn set_admin(ctx: &mut Context<SetAdmin>, new_admin: Pubkey) -> Result<()> { Ok(()) }",
+        )
+        .unwrap();
+        assert_eq!(context_accounts(&function).unwrap(), "SetAdmin");
     }
 
     #[test]
