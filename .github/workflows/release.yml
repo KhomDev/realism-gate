@@ -168,7 +168,9 @@ jobs:
 
   checksums:
     name: checksums
-    needs: build
+    # verify is listed so needs.verify.outputs.version is defined here; a job
+    # can only read the outputs of jobs it names in needs.
+    needs: [verify, build]
     # Pinned: GNU tar and gzip versions are part of the archive bytes, and the
     # reproducibility workflow rebuilds on the same image.
     runs-on: ubuntu-24.04
