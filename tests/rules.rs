@@ -299,7 +299,7 @@ fn rust_rg01_attacker_holds_privilege() {
 fn rust_rg02_privileged_signer() {
     expect(
         "tests/fixtures/bad/RG02_privileged_signer.rs",
-        &[("RG02", Warn, 28)],
+        &[("RG02", Note, 28)],
     );
 }
 
@@ -307,7 +307,7 @@ fn rust_rg02_privileged_signer() {
 fn rust_rg03_payer_is_deployer() {
     expect(
         "tests/fixtures/bad/RG03_payer_is_deployer.rs",
-        &[("RG03", Warn, 19)],
+        &[("RG03", Note, 19)],
     );
 }
 
@@ -336,10 +336,10 @@ fn rust_rg06_token_balance_injection() {
 }
 
 #[test]
-fn rust_rg08_no_assertion_error_and_print_only_warning() {
+fn rust_rg08_no_assertion_and_print_only_are_both_warn() {
     expect(
         "tests/fixtures/bad/RG08_no_assertion.rs",
-        &[("RG08", Error, 21), ("RG08", Warn, 27)],
+        &[("RG08", Warn, 21), ("RG08", Warn, 27)],
     );
 }
 
@@ -347,7 +347,7 @@ fn rust_rg08_no_assertion_error_and_print_only_warning() {
 fn rust_rg09_tautological_assertion() {
     expect(
         "tests/fixtures/bad/RG09_tautological_assertion.rs",
-        &[("RG09", Error, 22), ("RG09", Error, 23)],
+        &[("RG09", Warn, 22), ("RG09", Warn, 23)],
     );
 }
 
@@ -379,7 +379,7 @@ fn ts_rg01_attacker_holds_privilege() {
 fn ts_rg02_privileged_signer() {
     expect(
         "tests/fixtures/bad/RG02_privileged_signer.ts",
-        &[("RG02", Warn, 23)],
+        &[("RG02", Note, 23)],
     );
 }
 
@@ -387,7 +387,7 @@ fn ts_rg02_privileged_signer() {
 fn ts_rg03_payer_is_deployer() {
     expect(
         "tests/fixtures/bad/RG03_payer_is_deployer.ts",
-        &[("RG03", Warn, 14)],
+        &[("RG03", Note, 14)],
     );
 }
 
@@ -416,10 +416,10 @@ fn ts_rg06_token_balance_injection() {
 }
 
 #[test]
-fn ts_rg08_no_assertion_error_and_print_only_warning() {
+fn ts_rg08_no_assertion_and_print_only_are_both_warn() {
     expect(
         "tests/fixtures/bad/RG08_no_assertion.ts",
-        &[("RG08", Error, 11), ("RG08", Warn, 15)],
+        &[("RG08", Warn, 11), ("RG08", Warn, 15)],
     );
 }
 
@@ -427,7 +427,7 @@ fn ts_rg08_no_assertion_error_and_print_only_warning() {
 fn ts_rg09_tautological_assertion() {
     expect(
         "tests/fixtures/bad/RG09_tautological_assertion.ts",
-        &[("RG09", Error, 17), ("RG09", Error, 18)],
+        &[("RG09", Warn, 17), ("RG09", Warn, 18)],
     );
 }
 
@@ -501,7 +501,7 @@ fn without_a_declaration_role_holders_and_keepers_are_flagged() {
         .iter()
         .map(|(r, s, _, l)| (r.as_str(), *s, *l))
         .collect();
-    // mallet holds a granted role; keeper reads as one.
+    // mallet holds a granted role; keeper reads as one. Solidity keeps `warn`.
     assert_eq!(rules, vec![("RG02", Warn, 26), ("RG02", Warn, 28)]);
 }
 

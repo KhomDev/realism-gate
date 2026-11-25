@@ -1,4 +1,4 @@
-# Evidence card: realism-gate 1.2.0
+# Evidence card: realism-gate 1.4.0
 
 What this PoC shows, claim by claim, with the hashes a reader needs to check that
 nothing changed. **Signed by nothing.** Every field is a hash of a file, or a value
@@ -6,7 +6,7 @@ the rerun command reproduces.
 
 | Field | Value |
 |---|---|
-| tool | `realism-gate 1.2.0` |
+| tool | `realism-gate 1.4.0` |
 | rule set | RG01-RG20, sha256 `ae1794ca39ec7159` |
 | PoC | sha256 `646772314298b370` (`test/ShadowVault.t.sol`) |
 | report | sha256 `0b5fba2ac3b7fa82` (`finding.md`) |

@@ -469,12 +469,18 @@ What changed in the rules (details: CHANGELOG 1.2.0):
 ### Severity floor
 
 A rule ships at `error` on Solana only when its **fresh** held-out Wilson 95%
-lower bound is at least 0.80. In-sample cells cannot lift a rule over the
-floor; a cell with fewer than five labels is a count, not a rate. RG01
-(16.7%), RG04 (0%) and RG06 (0%) therefore ship at `note` on Solana in 1.2.0.
-`tests/precision_floor.rs` reads `eval/solana/measured.json` and fails when a
-fresh measured cell for a rule that ships at `error` has a lower bound below
-0.80.
+lower bound is at least 0.80, and only when a fresh cell with at least five
+labels exists at all. In-sample cells cannot lift a rule over the floor; a
+cell with fewer than five labels is a count, not a rate. The 1.2.0 P1 cells
+put RG01 (16.7%), RG04 (0%) and RG06 (0%) at `note`; the 1.3.0 v2 held-out
+round added RG02 (0/16) and RG03 (0/5), so both moved to `note` in 1.4.0. RG08
+is 10/10, whose lower bound is 0.7225, and RG09 has one fresh flag labelled
+unclear; neither clears the floor, so both ship at `warn` and **no Solana rule
+ships at `error` in 1.4.0**. RG08 returns to `error` at 16/16, where the lower
+bound reaches 0.8064. `tests/precision_floor.rs` reads
+`eval/solana/measured.json` and `eval/solana-poc-v2/measured.json`: a Solana
+`error` rule with no fresh cell of n >= 5, or with a fresh lower bound below
+0.80, fails the test.
 
 ### Status of the re-measurement
 
@@ -482,7 +488,9 @@ The corpus is sealed and committed. The frozen 1.2.0 run's RQ1 coverage and
 the in-sample 1.0.4 vs 1.2.0 comparison are in
 [`eval/solana-poc-v2/RESULTS.md`](../eval/solana-poc-v2/RESULTS.md): fresh v2
 judged readability 25/28 = 89.3% [72.8-96.3]; in-sample P1 judged readability
-6/12 (target 8/12, missed). The v2 flags are sampled but not labelled, so the
-fresh per-rule precision cells and their bootstrap intervals do not exist yet;
-when they do they are added here with n, Wilson and the source-clustered
-bootstrap, and the P1 numbers above are left as they stand.
+6/12 (target 8/12, missed). Round 2 labelled the held-out split with the 1.3.0
+binary: RG02 0/16 = 0.0% [0.0-19.4], RG03 0/5 = 0.0% [0.0-43.4], RG08 10/10 =
+100% [72.2-100], RG09 one flag labelled unclear, pooled 10/31 = 32.3%
+[18.6-49.9] with a source-clustered bootstrap of [10.0-72.7]. The committed
+cells are in `eval/solana-poc-v2/measured.json`; the P1 numbers above are left
+as they stand.

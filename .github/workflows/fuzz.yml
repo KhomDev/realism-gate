@@ -37,7 +37,11 @@ jobs:
 
       - name: Fuzz ${{ matrix.target }} for five minutes
         working-directory: fuzz
-        run: cargo +nightly fuzz run ${{ matrix.target }} -- -max_total_time=300
+        # cargo-fuzz derives its default target from the triple it was built
+        # for, and the prebuilt binary from install-action is a musl build.
+        # A musl target links libc statically, which ASan refuses, so pin the
+        # gnu triple explicitly. See the 2026-11-23 red `fuzz` run.
+        run: cargo +nightly fuzz run --target x86_64-unknown-linux-gnu ${{ matrix.target }} -- -max_total_time=300
 
       - name: Upload crashing inputs
         if: failure()

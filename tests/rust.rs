@@ -63,7 +63,7 @@ fn a_shared_helper_finding_is_placed_where_the_test_calls_it() {
     let r = report(&["tests/fixtures/rust_shared"], None, &Options::default());
     assert_eq!(
         active(&r),
-        vec![("RG02", Warn, "tests/fixtures/rust_shared/exploit.rs", 11)]
+        vec![("RG02", Note, "tests/fixtures/rust_shared/exploit.rs", 11)]
     );
     let f = &r.findings[0];
     assert_eq!(f.tests, vec!["test_pause_then_withdraw"]);
@@ -99,7 +99,7 @@ fn a_declaration_names_the_attacker_and_silences_the_declared_role() {
         active(&without),
         vec![(
             "RG02",
-            Warn,
+            Note,
             "tests/fixtures/rust_declaration/keeper_harvest.rs",
             33
         )]

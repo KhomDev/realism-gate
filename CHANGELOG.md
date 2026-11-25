@@ -8,6 +8,41 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-25
+
+### Changed (severity)
+
+- **RG02 and RG03 ship at `note` on Solana.** The 1.3.0 fresh held-out round
+  measured RG02 at 0/16 and RG03 at 0/5: the remaining flags are the fee payer
+  of an instruction whose accounts mark the role account non-signing, the
+  attacker's own fixture key, or a setup helper. A rule at `warn` with zero
+  fresh precision is noise. RG01, RG04 and RG06 were already notes. The
+  Solidity severities are unchanged.
+- **RG08 and RG09 ship at `warn` on Solana; no Solana rule ships at `error`
+  in this release.** The floor is a fresh held-out Wilson lower bound of at
+  least 0.80. RG08 is right 10/10 on the v2 held-out split, but 10/10 has a
+  lower bound of 0.7225, so `error` is not supported yet; it returns there at
+  16/16, where the lower bound reaches 0.8064. RG09's only fresh flag was
+  labelled unclear, so it has no rate at all. `warn` is reported and is not a
+  CI failure under the default `--fail-on error`.
+- The floor is now enforced against the fresh measurement: `measure.py` in
+  `eval/solana-poc-v2/` regenerates `measured.json` from the committed
+  held-out labels, and `tests/precision_floor.rs` reads it. A Solana rule at
+  `error` with no fresh cell of n >= 5 fails the test, so an unmeasured error
+  rule cannot ship. Previously the test read a file with no fresh cells and
+  passed vacuously.
+
+### Fixed (CI)
+
+- **The weekly `fuzz` workflow names the GNU triple.** The prebuilt
+  cargo-fuzz installed by `install-action` is a musl binary, and cargo-fuzz
+  derives its default build target from its own triple; a musl target links
+  libc statically, which the sanitizer refuses ("sanitizer is incompatible
+  with statically linked libc"). `cargo fuzz run --target
+  x86_64-unknown-linux-gnu` pins the dynamic-libc target. The fix is proven
+  locally by inspection only: this branch has not been pushed, so no green
+  `fuzz` run id exists yet.
+
 ### Fixed (P1-C precision round, proposed 1.3.0)
 
 - **A helper file with no test is no longer read as a fragment.** The script

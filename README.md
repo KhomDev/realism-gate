@@ -25,7 +25,7 @@ makes. Each row is bound to evidence in the PoC and gets one of four statuses:
 <!-- BEGIN:example-claims -->
 
 ```text
-realism-gate 1.2.0  ·  1 file  ·  1 suite  ·  4 tests
+realism-gate 1.4.0  ·  1 file  ·  1 suite  ·  4 tests
 
 test/ShadowVault.t.sol
   note   RG03 deployer-is-attacker  test/ShadowVault.t.sol:57:26  ShadowVaultTest::test_healthyDistribution_shipsSurplus
@@ -162,7 +162,7 @@ The test deploys a vault and then drains it as admin, with `deal` writing the va
 <!-- BEGIN:example -->
 
 ```text
-realism-gate 1.2.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.4.0  ·  1 file  ·  1 suite  ·  1 test
 
 test/VaultDrain.t.sol
   warn   RG11 unpinned-fork  test/VaultDrain.t.sol:17:9  VaultDrainTest::test_attackerDrainsVault
@@ -232,7 +232,7 @@ Same rule ids, same output. Rust harnesses (solana-program-test, LiteSVM, Mollus
 <!-- BEGIN:example-rust -->
 
 ```text
-realism-gate 1.2.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.4.0  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault_drain.rs
   warn   RG11 unpinned-fork  tests/vault_drain.rs:21:15  vault_drain::test_attacker_drains_vault
@@ -244,7 +244,7 @@ tests/vault_drain.rs
          --output-file <FILE>`) and load it from the file, and say in the report why that slot
          is representative.
 
-  warn   RG02 privileged-step-in-exploit  tests/vault_drain.rs:30:5  vault_drain::test_attacker_drains_vault
+  note   RG02 privileged-step-in-exploit  tests/vault_drain.rs:30:5  vault_drain::test_attacker_drains_vault
          The exploit sends a transaction signed by `admin`: the name `admin` reads as the
          `admin` role. An attacker cannot produce that signature. Declare the role in an
          operator realism.yaml outside the repo under review if the claim relies on that role
@@ -267,7 +267,7 @@ tests/vault_drain.rs
          ↳ assert!(svm.get_balance(&attacker.pubkey()).unwrap() > 0);
          → Read the same quantity before and after, and assert on the difference.
 
-SUMMARY  0 errors  ·  3 warnings  ·  1 note  ·  0 suppressed
+SUMMARY  0 errors  ·  2 warnings  ·  2 notes  ·  0 suppressed
 RESULT   FAIL  (fails on note and above)
 
 realism-gate reads the test; it does not run it. A clean result means no known
@@ -280,7 +280,7 @@ shows why a rule exists and how it can be wrong.
 <!-- BEGIN:example-anchor -->
 
 ```text
-realism-gate 1.2.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.4.0  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault-drain.ts
   warn   RG11 unpinned-fork  tests/vault-drain.ts:13:21  vault::lets the attacker drain the vault
@@ -292,7 +292,7 @@ tests/vault-drain.ts
          --output-file <FILE>`) and load it from the file, and say in the report why that slot
          is representative.
 
-  warn   RG02 privileged-step-in-exploit  tests/vault-drain.ts:27:11  vault::lets the attacker drain the vault
+  note   RG02 privileged-step-in-exploit  tests/vault-drain.ts:27:11  vault::lets the attacker drain the vault
          The exploit sends a transaction signed by `admin`: the name `admin` reads as the
          `admin` role. An attacker cannot produce that signature. Declare the role in an
          operator realism.yaml outside the repo under review if the claim relies on that role
@@ -315,7 +315,7 @@ tests/vault-drain.ts
          ↳ expect(Number(await context.banksClient.getBalance(attacker.publicKey))).to.be.greaterThan(0)
          → Read the same quantity before and after, and assert on the difference.
 
-SUMMARY  0 errors  ·  3 warnings  ·  1 note  ·  0 suppressed
+SUMMARY  0 errors  ·  2 warnings  ·  2 notes  ·  0 suppressed
 RESULT   FAIL  (fails on note and above)
 
 realism-gate reads the test; it does not run it. A clean result means no known

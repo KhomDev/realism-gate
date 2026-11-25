@@ -915,6 +915,12 @@ fn explain_text(r: &rules::RuleInfo) -> String {
         r.why,
         r.fix
     );
+    if r.solana_severity() != r.severity {
+        out.push_str(&format!(
+            "\nOn Solana (Rust and Anchor TypeScript tests): {} (severity floor, docs/precision.md)\n",
+            r.solana_severity().as_str()
+        ));
+    }
     out.push_str(&format!(
         "\nMeasured precision\n  {}\n  Population: Rust and Anchor TypeScript = public test \
          suites, not PoCs; Solidity = fresh corpus; `unmeasured` is not 100%.\n",

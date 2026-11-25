@@ -136,3 +136,12 @@ RG04 and RG06 to `note` on Solana until a reader can make that distinction.
 
 The judged-readability target for the P1 set remains missed (6/12); nothing in
 round 2 changes coverage (73/81 v2, 93/99 in-sample).
+
+The dev split has **no committed label file**: it was read to find the two
+fixes and is not a measurement. Only the held-out labels are committed
+(`labels/heldout.jsonl`); `measure.py` reads nothing else.
+
+No human has labelled this corpus. `labels/HUMAN_PACKET.md` is the blind
+packet for the 32 held-out flags and `score_human.py` scores a returned CSV for
+agreement and Cohen's kappa; until a human returns it, the labels are one AI
+reader's and the article says so.
