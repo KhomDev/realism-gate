@@ -1,0 +1,790 @@
+//! Who is who in a Solana test: the attacker's keypair, the harness's payer,
+//! a role holder, an ordinary user, and the program's own accounts.
+//!
+//! As in Solidity, this is read from names and data flow, never from the
+//! program: an account is the protocol's when the test derives it as a PDA,
+//! addresses it by a fixed public key, or names it for protocol state
+//! (`vault`, `pool`, `config`). A `realism.yaml` declaration overrides the
+//! attacker heuristic.
+
+use super::harness::{self, Event};
+use super::trace::{Call, OpKind, Trace, is_identity_shaped, key};
+use crate::identity::{
+    compact, is_attacker_name, is_grant_method, is_mock_name, is_user_name, role_word, words,
+};
+use crate::ir::{Expr, ExprKind};
+use crate::project::Project;
+use std::collections::{BTreeMap, BTreeSet};
+
+/// What an account or keypair is presumed to be.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Class {
+    /// The harness's fee payer: `payer` from `ProgramTest::start()`,
+    /// `context.payer`, or an Anchor provider's `provider.wallet`.
+    Payer,
+    Attacker,
+    /// An ordinary user: a victim, a depositor, `alice`.
+    User,
+    /// A test double.
+    Mock,
+    /// An account of the protocol under test. The string says why.
+    Protocol(String),
+    /// The address of a program the test loads.
+    Program,
+    Unknown,
+}
+
+/// Words that name protocol state rather than a person.
+const PROTOCOL_WORDS: &[&str] = &[
+    "vault",
+    "pool",
+    "reserve",
+    "reserves",
+    "market",
+    "state",
+    "config",
+    "global",
+    "treasury",
+    "obligation",
+    "escrow",
+    "oracle",
+    "amm",
+    "bank",
+    "lending",
+    "protocol",
+    "custody",
+    "pda",
+];
+
+/// Calls that derive a program-derived address.
+const PDA_CALLS: &[&str] = &[
+    "find_program_address",
+    "find_program_address_sync",
+    "create_program_address",
+    "try_find_program_address",
+    "get_program_address",
+];
+
+/// Calls that build a fixed public key from a literal.
+const FIXED_KEY_CALLS: &[&str] = &[
+    "pubkey!",
+    "from_str",
+    "from_str_const",
+    "new_from_array",
+    "new_const",
+];
+
+/// Calls that make a fresh, empty keypair or address.
+const FRESH_CALLS: &[&str] = &["new_unique", "new", "generate", "default"];
+
+/// Crates whose `ID` is a well-known program, not the program under test.
+const LIBRARY_CRATES: &[&str] = &[
+    "system_program",
+    "spl_token",
+    "spl_token_2022",
+    "spl_associated_token_account",
+    "token_program",
+    "anchor_spl",
+    "sysvar",
+    "bpf_loader",
+    "bpf_loader_upgradeable",
+    "native_loader",
+    "compute_budget",
+    "stake",
+    "vote",
+    "address_lookup_table",
+    "memo",
+];
+
+/// The well-known program ids `@solana/web3.js` and `@solana/spl-token`
+/// export, which are not the program under test.
+const LIBRARY_IDS: &[&str] = &[
+    "TOKEN_PROGRAM_ID",
+    "TOKEN_2022_PROGRAM_ID",
+    "ASSOCIATED_TOKEN_PROGRAM_ID",
+    "MEMO_PROGRAM_ID",
+    "BPF_LOADER_PROGRAM_ID",
+    "BPF_LOADER_UPGRADEABLE_PROGRAM_ID",
+    "SYSTEM_PROGRAM_ID",
+    "COMPUTE_BUDGET_PROGRAM_ID",
+];
+
+/// Words that name the harness's fee payer under a TypeScript provider:
+/// `provider.wallet`, `provider.publicKey`.
+const WALLET_WORDS: &[&str] = &["wallet", "provider"];
+
+/// A role assignment the harness makes.
+#[derive(Debug, Clone)]
+pub struct Grant {
+    pub grantee: String,
+    pub text: String,
+    pub op: usize,
+}
+
+/// The name of the called function, for `f(..)`, `a::f(..)` or `x.f(..)`.
+/// A macro keeps its `!`: `pubkey!(..)` is not `kp.pubkey()`.
+fn callee_name(e: &Expr) -> Option<&str> {
+    let ExprKind::Call { callee, .. } = &e.kind else {
+        return None;
+    };
+    match &callee.kind {
+        ExprKind::Ident(p) | ExprKind::Type(p) => Some(p.rsplit("::").next().unwrap_or(p)),
+        ExprKind::Member(_, m) => Some(m),
+        _ => None,
+    }
+}
+
+/// The call wrapped by `.unwrap()`, `.expect(..)` and `?`-free chains.
+fn peel_unwrap(e: &Expr) -> &Expr {
+    if let ExprKind::Call { callee, .. } = &e.kind
+        && let ExprKind::Member(base, m) = &callee.kind
+        && matches!(m.as_str(), "unwrap" | "expect" | "unwrap_or_default" | "0")
+    {
+        return peel_unwrap(base);
+    }
+    if let ExprKind::Member(base, m) = &e.kind
+        && m == "0"
+    {
+        return peel_unwrap(base);
+    }
+    // TypeScript's `findProgramAddressSync(..)[0]`.
+    if let ExprKind::Index(base, idx) = &e.kind
+        && matches!(idx.as_slice(), [i] if i.text.trim() == "0")
+    {
+        return peel_unwrap(base);
+    }
+    e
+}
+
+/// The names of the instruction builders an expression uses, following helper
+/// parameters to the caller's argument and locals a few levels deep:
+/// `new Transaction().add(ix)` reaches `set_oracle_ix`; an Anchor
+/// `program.methods.setFee(..)` yields `setFee`. Account arguments are not
+/// read, so an `overflow_ix(&owner.pubkey())` is not mistaken for a gated
+/// instruction because its argument is called `owner`.
+fn instruction_names(
+    env: &Env<'_>,
+    op: &super::trace::Op<'_>,
+    e: &Expr,
+    depth: usize,
+    out: &mut String,
+) {
+    if depth > 32 {
+        return;
+    }
+    let e = op.resolved(e);
+    if let ExprKind::Call { callee, .. } = &e.kind {
+        let (name, path) = match &callee.kind {
+            ExprKind::Member(_, m) => (m.clone(), String::new()),
+            ExprKind::Ident(p) | ExprKind::Type(p) => {
+                (p.rsplit("::").next().unwrap_or(p).to_string(), p.clone())
+            }
+            _ => (String::new(), String::new()),
+        };
+        let builder = !name.is_empty()
+            && (name.ends_with("_ix")
+                || name.ends_with("_ixs")
+                || path.contains("instruction")
+                || e.text.contains(".methods"));
+        if builder {
+            out.push_str(&name);
+            out.push(' ');
+        }
+    }
+    if depth < 3 {
+        let name = match &e.kind {
+            ExprKind::Ident(n) => Some(n),
+            ExprKind::Member(_, m) => Some(m),
+            _ => None,
+        };
+        if let Some(name) = name {
+            for v in env.assigns.get(name).into_iter().flatten() {
+                instruction_names(env, op, v, depth + 1, out);
+            }
+        }
+    }
+    for c in e.children() {
+        instruction_names(env, op, c, depth + 1, out);
+    }
+}
+
+/// A word in `name` that marks a role, unless the name also says whose it
+/// is: `user_authority` and `attacker_owner` are not roles.
+pub fn role_of(name: &str) -> Option<String> {
+    let base = name.rsplit("::").next().unwrap_or(name);
+    let ws = words(base);
+    if ws.iter().any(|w| w == "payer") || is_attacker_name(base) || is_user_name(base) {
+        return None;
+    }
+    role_word(base)
+}
+
+/// Facts about the identities a test uses, gathered from its whole trace.
+#[derive(Debug, Default)]
+pub struct Env<'p> {
+    pub assigns: BTreeMap<String, Vec<&'p Expr>>,
+    /// `const` and `static` items of the files the test reads.
+    pub consts: BTreeMap<String, &'p Expr>,
+    /// Keys of the program ids the test loads.
+    pub programs: BTreeSet<String>,
+    pub grants: Vec<Grant>,
+    pub declared_attackers: BTreeSet<String>,
+    pub declared_privileged: BTreeSet<String>,
+    pub declared_victims: BTreeSet<String>,
+}
+
+impl<'p> Env<'p> {
+    pub fn new(project: &'p Project, trace: &Trace<'p>) -> Env<'p> {
+        let mut env = Env::default();
+        let mut units: BTreeSet<usize> = trace.ops.iter().map(|op| op.unit).collect();
+        units.insert(trace.unit);
+        for u in units {
+            if let Some(file) = &project.units[u].solana {
+                for (name, value) in &file.consts {
+                    env.consts.entry(name.clone()).or_insert(value);
+                }
+            }
+        }
+        for op in &trace.ops {
+            match &op.kind {
+                OpKind::Assign { target, value } => {
+                    if let Some(v) = value {
+                        env.assigns.entry(target.clone()).or_default().push(v);
+                    }
+                }
+                OpKind::Call(c) => {
+                    if let Some(Event::LoadProgram { id, .. }) = harness::event(c) {
+                        env.programs.insert(op.key(id));
+                    }
+                }
+            }
+        }
+        // Grants need the classes above, so they come second.
+        for (i, op, c) in trace.calls() {
+            if c.fields.is_empty() && is_grant_method(&c.name) {
+                // spl_token's set_authority(token_program, account,
+                // new_authority, kind, owner, signers): only the new
+                // authority is granted anything.
+                let grantees: Vec<&Expr> = if c.name == "set_authority" && c.args.len() >= 5 {
+                    vec![&c.args[2]]
+                } else {
+                    c.args.iter().collect()
+                };
+                for arg in grantees {
+                    if !is_identity_shaped(arg) {
+                        continue;
+                    }
+                    let k = op.key(arg);
+                    if matches!(env.class_of(&k), Class::Protocol(_) | Class::Program) {
+                        continue;
+                    }
+                    env.grants.push(Grant {
+                        grantee: k,
+                        text: c.expr.text.clone(),
+                        op: i,
+                    });
+                }
+            }
+            // `Initialize { admin: attacker.pubkey(), .. }`: a role field set
+            // in a struct that builds or reconfigures the protocol. An Anchor
+            // builder's accounts object is named by its instruction:
+            // `program.methods.initialize().accounts({ admin: .. })`.
+            let fields: &[(String, Expr)] = if !c.fields.is_empty() && is_configuring(&c.name) {
+                c.fields
+            } else {
+                configuring_accounts(c)
+            };
+            for (field, value) in fields {
+                // `owner` and `authority` also say whose account it is:
+                // `owner: alice.pubkey()` is alice's account, not a role.
+                let holder_field = matches!(field.as_str(), "owner" | "authority");
+                if role_of(field).is_some()
+                    && is_identity_shaped(value)
+                    && !(holder_field && env.class_of(&op.key(value)) == Class::User)
+                {
+                    env.grants.push(Grant {
+                        grantee: op.key(value),
+                        text: format!("{field}: {}", compact(&value.text)),
+                        op: i,
+                    });
+                }
+            }
+            // A plain instruction-builder call that initialises or reconfigures
+            // the program hands roles to the keys it names, even when the
+            // helper's body is not in the test tree:
+            // `init_vault_ix(&admin.pubkey(), &keeper.pubkey())`. Only a key
+            // whose name reads as a role is taken, so an init that names the
+            // user's own account does not make that user privileged.
+            if c.fields.is_empty() && is_configuring(&c.name) {
+                for arg in c.args {
+                    if !is_identity_shaped(arg) {
+                        continue;
+                    }
+                    let k = op.key(arg);
+                    if matches!(env.class_of(&k), Class::Protocol(_) | Class::Program) {
+                        continue;
+                    }
+                    if role_of(&k).is_some() || env.declared_privileged.contains(&k) {
+                        env.grants.push(Grant {
+                            grantee: k,
+                            text: c.expr.text.clone(),
+                            op: i,
+                        });
+                    }
+                }
+            }
+            // A role-named key that signs a transaction whose instruction reads
+            // as access-controlled (`set_oracle_ix`, `pause_ix`, `admin_*`) is
+            // shown holding that role by the program call itself.
+            if let Some(harness::Event::Transaction {
+                signers,
+                instructions,
+                ..
+            }) = harness::event(c)
+            {
+                let mut text = String::new();
+                for ix in instructions {
+                    instruction_names(&env, op, ix, 0, &mut text);
+                }
+                if instruction_looks_gated(&text) {
+                    for s in signers {
+                        for k in op.keys(s) {
+                            if (role_of(&k).is_some() || env.declared_privileged.contains(&k))
+                                && !env.grants.iter().any(|g| g.grantee == k && g.op == i)
+                            {
+                                env.grants.push(Grant {
+                                    grantee: k,
+                                    text: c.expr.text.clone(),
+                                    op: i,
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        env
+    }
+
+    fn values(&self, k: &str) -> Vec<&'p Expr> {
+        self.assigns.get(k).cloned().unwrap_or_default()
+    }
+
+    pub fn is_attacker(&self, k: &str) -> bool {
+        self.class_of(k) == Class::Attacker
+    }
+
+    pub fn class_of(&self, k: &str) -> Class {
+        self.class_depth(k, 0)
+    }
+
+    /// The class of an address written inline rather than through a local:
+    /// `Pubkey::from_str(PRICE).unwrap()`, `Pubkey::find_program_address(..).0`.
+    pub fn class_of_expr(&self, e: &Expr) -> Option<Class> {
+        match callee_name(peel_unwrap(e)) {
+            Some(n) if PDA_CALLS.contains(&n) => {
+                Some(Class::Protocol("a program-derived address".to_string()))
+            }
+            Some(n) if FIXED_KEY_CALLS.contains(&n) => {
+                Some(Class::Protocol("a fixed address".to_string()))
+            }
+            _ => None,
+        }
+    }
+
+    fn class_depth(&self, k: &str, depth: usize) -> Class {
+        if depth > 6 {
+            return Class::Unknown;
+        }
+        if self.declared_attackers.contains(k) {
+            return Class::Attacker;
+        }
+        let values = self.values(k);
+        // Derivation comes before names: an account the program derives is
+        // the program's state, whoever it describes (`attacker_position`).
+        for v in &values {
+            let v = peel_unwrap(v);
+            match callee_name(v) {
+                Some(n) if PDA_CALLS.contains(&n) => {
+                    return Class::Protocol("a program-derived address".to_string());
+                }
+                Some(n) if n.starts_with("get_associated_token_address") => {
+                    if let ExprKind::Call { args, .. } = &v.kind
+                        && let Some(owner) = args.first()
+                    {
+                        let owner_class = self.class_depth(&key(owner), depth + 1);
+                        return match owner_class {
+                            Class::Unknown => Class::Unknown,
+                            other => other,
+                        };
+                    }
+                }
+                _ => {}
+            }
+        }
+        if self.declared_attackers.is_empty() && is_attacker_name(k) {
+            return Class::Attacker;
+        }
+        let base = k.rsplit("::").next().unwrap_or(k);
+        let ws = words(base);
+        if ws.iter().any(|w| w == "payer") {
+            return Class::Payer;
+        }
+        if is_mock_name(base) {
+            return Class::Mock;
+        }
+        if is_user_name(base) || self.declared_victims.contains(k) {
+            return Class::User;
+        }
+        if ws.iter().any(|w| WALLET_WORDS.contains(&w.as_str())) {
+            return Class::Payer;
+        }
+        if self.programs.contains(k) {
+            return Class::Program;
+        }
+        if self.is_fixed(k) {
+            return Class::Protocol("a fixed address".to_string());
+        }
+        if let Some(w) = ws.iter().find(|w| PROTOCOL_WORDS.contains(&w.as_str())) {
+            return Class::Protocol(format!("the name reads as `{w}` state"));
+        }
+        for v in &values {
+            if is_identity_shaped(v) {
+                let alias = key(v);
+                if alias != k {
+                    let c = self.class_depth(&alias, depth + 1);
+                    if c != Class::Unknown {
+                        return c;
+                    }
+                }
+            }
+        }
+        Class::Unknown
+    }
+
+    /// Whether `k` is a fixed address written in the test:
+    /// `pubkey!("..")`, `Pubkey::from_str(..)`, `new PublicKey("..")`.
+    pub fn is_fixed(&self, k: &str) -> bool {
+        let fixed = |e: &Expr| callee_name(e).is_some_and(|n| FIXED_KEY_CALLS.contains(&n));
+        self.values(k).iter().any(|v| fixed(v)) || self.consts.get(k).is_some_and(|v| fixed(v))
+    }
+
+    /// Whether `k` was made fresh by the test: `Keypair::new()`,
+    /// `Pubkey::new_unique()`.
+    pub fn is_fresh(&self, k: &str) -> bool {
+        self.values(k).iter().any(|v| {
+            let v = peel_unwrap(v);
+            matches!(&v.kind, ExprKind::Call { callee, args, .. }
+                if args.is_empty()
+                    && matches!(&callee.kind, ExprKind::Ident(p) if p.split("::").count() >= 2
+                        && FRESH_CALLS.contains(&p.rsplit("::").next().unwrap_or(""))))
+        })
+    }
+
+    /// Why `k` is presumed to hold a role, if it is.
+    pub fn privileged(&self, k: &str) -> Option<String> {
+        self.privileged_depth(k, 0)
+    }
+
+    fn privileged_depth(&self, k: &str, depth: usize) -> Option<String> {
+        if depth > 6 {
+            return None;
+        }
+        if self.declared_privileged.contains(k) {
+            return Some(format!("`{k}` is declared privileged in realism.yaml"));
+        }
+        if self.is_attacker(k) {
+            return None;
+        }
+        // A keypair the test itself generates holds no protocol role until
+        // the test gives it one: a name is not a grant. The attacker's own
+        // account (`let owner = Keypair::new()`), or a vault it initialises
+        // as its own authority, is the attacker, not a privileged insider.
+        // A grant from a program call, a role field, or a declaration still
+        // makes it privileged.
+        if self.is_fresh(k) && !self.grants.iter().any(|g| g.grantee == k) {
+            return None;
+        }
+        if let Some(w) = role_of(k) {
+            return Some(format!("the name `{k}` reads as the `{w}` role"));
+        }
+        if let Some(g) = self.grants.iter().find(|g| g.grantee == k) {
+            return Some(format!(
+                "the harness gives `{k}` a role: `{}`",
+                crate::snippet(&g.text, 80)
+            ));
+        }
+        for v in self.values(k) {
+            if is_identity_shaped(v) {
+                let alias = key(v);
+                if alias != k
+                    && let Some(p) = self.privileged_depth(&alias, depth + 1)
+                {
+                    return Some(p);
+                }
+            }
+        }
+        None
+    }
+
+    /// Whether an expression names the program under test: a loaded
+    /// program's id, `crate::ID`, `program_id`, or `my_program::ID`.
+    pub fn is_program_under_test(&self, e: &Expr) -> bool {
+        let k = key(e);
+        if self.programs.contains(&k) {
+            return true;
+        }
+        let path = match callee_name(e) {
+            Some("id") => match &e.kind {
+                ExprKind::Call { callee, .. } => key(callee),
+                _ => k.clone(),
+            },
+            _ => k.clone(),
+        };
+        let segs: Vec<&str> = path.split("::").collect();
+        match segs.as_slice() {
+            [one] if LIBRARY_IDS.contains(one) => false,
+            ["program_id"] | ["ID"] | ["id"] | ["crate", "ID"] | ["crate", "id"] => true,
+            [.., krate, "ID" | "id"] => !LIBRARY_CRATES.contains(krate),
+            [one] => words(one).iter().any(|w| w == "program") && !LIBRARY_CRATES.contains(one),
+            _ => false,
+        }
+    }
+
+    /// Whether `e` is a compile-time constant in this test: a literal, a
+    /// `const` item, an arithmetic combination of constants, or a local whose
+    /// every assignment is a constant.
+    pub fn is_constant(&self, e: &Expr) -> bool {
+        self.is_constant_depth(e, 0)
+    }
+
+    fn is_constant_depth(&self, e: &Expr, depth: usize) -> bool {
+        if depth > 6 {
+            return false;
+        }
+        match &e.kind {
+            ExprKind::Lit(_) => true,
+            ExprKind::Unary(_, inner) => self.is_constant_depth(inner, depth + 1),
+            ExprKind::Binary(l, _, r) => {
+                self.is_constant_depth(l, depth + 1) && self.is_constant_depth(r, depth + 1)
+            }
+            ExprKind::Ident(path) => {
+                let last = path.rsplit("::").next().unwrap_or(path);
+                if self.consts.contains_key(path.as_str())
+                    || (last.len() > 1
+                        && last
+                            .chars()
+                            .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit() || c == '_'))
+                {
+                    return true;
+                }
+                // A local assigned more than one value is a flag that changes
+                // as the test runs (`called = true` in an event callback).
+                let values = self.values(path);
+                let first = values.first().map(|v| compact(&v.text));
+                !values.is_empty()
+                    && values.iter().all(|v| {
+                        Some(compact(&v.text)) == first && self.is_constant_depth(v, depth + 1)
+                    })
+            }
+            _ => false,
+        }
+    }
+}
+
+/// The accounts of an Anchor builder whose instruction builds or
+/// reconfigures the protocol, as an object literal:
+/// `program.methods.initialize().accounts({ admin: attacker.publicKey })`.
+fn configuring_accounts<'p>(c: &Call<'p>) -> &'p [(String, Expr)] {
+    let Some(Event::Transaction {
+        accounts: Some(accounts),
+        instructions,
+        ..
+    }) = harness::event(c)
+    else {
+        return &[];
+    };
+    let configuring = instructions
+        .iter()
+        .any(|ix| callee_name(ix).is_some_and(is_configuring));
+    match &accounts.kind {
+        ExprKind::Call {
+            callee, options, ..
+        } if configuring && matches!(&callee.kind, ExprKind::Type(t) if t.is_empty()) => options,
+        _ => &[],
+    }
+}
+
+/// Whether a struct or call name builds or reconfigures the protocol:
+/// `Initialize`, `InitPool`, `UpdateConfig`, `SetAdmin`.
+fn is_configuring(name: &str) -> bool {
+    words(name).iter().any(|w| {
+        matches!(
+            w.as_str(),
+            "init"
+                | "initialize"
+                | "initialise"
+                | "config"
+                | "configure"
+                | "create"
+                | "setup"
+                | "set"
+                | "update"
+                | "change"
+                | "transfer"
+                | "new"
+        )
+    })
+}
+
+/// Instruction text that reads as gated: `sweep_ix`, `set_fee`, `admin_withdraw`.
+///
+/// The RG03 severity decision needs this, and so does the environment's
+/// role-grant classification; it lives here because both read the environment.
+pub fn instruction_looks_gated(text: &str) -> bool {
+    let lower = text.to_ascii_lowercase();
+    const NEEDLES: &[&str] = &[
+        "sweep",
+        "rescue",
+        "pause",
+        "unpause",
+        "upgrade",
+        "admin",
+        "authority",
+        "owner",
+        "set_",
+        "setfee",
+        "set_fee",
+        "grant",
+        "revoke",
+        "migrate",
+        "emergency",
+    ];
+    NEEDLES.iter().any(|n| lower.contains(n))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::solana::trace::{Scopes, build};
+
+    fn with_env(src: &str, check: impl Fn(&Env<'_>)) {
+        let p = Project::from_sources(&[("tests/t.rs", src)]);
+        let scopes = Scopes::new(&p);
+        let file = p.units[0].solana.as_ref().unwrap();
+        let test = file.functions.iter().find(|f| f.test).unwrap();
+        let trace = build(&scopes, 0, test);
+        let env = Env::new(&p, &trace);
+        check(&env);
+    }
+
+    #[test]
+    fn classes_from_names_and_derivations() {
+        with_env(
+            r#"
+            const POOL: Pubkey = pubkey!("11111111111111111111111111111111");
+            #[test]
+            fn test_a() {
+                let attacker = Keypair::new();
+                let (vault, _bump) = Pubkey::find_program_address(&[b"vault", attacker.pubkey().as_ref()], &program_id);
+                let (position, _) = Pubkey::find_program_address(&[b"pos"], &program_id);
+                let attacker_ata = get_associated_token_address(&attacker.pubkey(), &mint);
+                let ata = get_associated_token_address(&alice.pubkey(), &mint);
+                let thing = Pubkey::new_unique();
+                let kp = attacker.insecure_clone();
+            }
+        "#,
+            |env| {
+                assert_eq!(env.class_of("attacker"), Class::Attacker);
+                assert!(matches!(env.class_of("vault"), Class::Protocol(_)));
+                assert!(matches!(env.class_of("position"), Class::Protocol(_)));
+                assert_eq!(env.class_of("attacker_ata"), Class::Attacker);
+                assert_eq!(env.class_of("ata"), Class::User);
+                assert_eq!(env.class_of("thing"), Class::Unknown);
+                assert!(env.is_fresh("thing"));
+                assert_eq!(env.class_of("kp"), Class::Attacker);
+                assert_eq!(env.class_of("payer"), Class::Payer);
+                assert!(matches!(env.class_of("POOL"), Class::Protocol(_)));
+            },
+        );
+    }
+
+    #[test]
+    fn roles_from_names_and_grants() {
+        with_env(
+            r#"
+            #[test]
+            fn test_a() {
+                let ix = Initialize { admin: bob.pubkey(), payer: payer.pubkey() };
+                set_authority(&spl_token::ID, &mint, Some(&carol.pubkey()), AuthorityType::MintTokens, &payer.pubkey(), &[]).unwrap();
+                let signer = &admin;
+            }
+        "#,
+            |env| {
+                assert!(env.privileged("admin").is_some());
+                assert!(env.privileged("upgrade_authority").is_some());
+                assert!(env.privileged("user_authority").is_none());
+                assert!(env.privileged("payer").is_none());
+                assert!(
+                    env.privileged("bob")
+                        .unwrap()
+                        .contains("admin: bob.pubkey()")
+                );
+                assert!(env.privileged("carol").is_some());
+                assert!(env.privileged("signer").is_some());
+            },
+        );
+    }
+
+    #[test]
+    fn the_program_under_test_is_recognised_by_its_id() {
+        with_env(
+            r#"
+            #[test]
+            fn test_a() { let mut pt = ProgramTest::new("vault", vault_program::ID, None); }
+        "#,
+            |env| {
+                let e = |s: &str| {
+                    crate::solana::parse_rust::parse_source("x.rs", &format!("fn f() {{ {s}; }}"))
+                };
+                for (src, want) in [
+                    ("vault_program::ID", true),
+                    ("crate::ID", true),
+                    ("program_id", true),
+                    ("spl_token::ID", false),
+                    ("system_program::id()", false),
+                    ("my_program::id()", true),
+                ] {
+                    let unit = e(src);
+                    let f = &unit.solana.as_ref().unwrap().functions[0];
+                    let crate::ir::StmtKind::Expr(expr) = &f.body[0].kind else {
+                        panic!()
+                    };
+                    assert_eq!(env.is_program_under_test(expr), want, "{src}");
+                }
+            },
+        );
+    }
+
+    #[test]
+    fn constants() {
+        with_env(
+            "const AMOUNT: u64 = 5; #[test] fn test_a() { let x = 100; let y = x * 2; let z = svm.get_balance(&a); }",
+            |env| {
+                let parsed = crate::solana::parse_rust::parse_source(
+                    "x.rs",
+                    "fn f() { (AMOUNT, y, LAMPORTS_PER_SOL, z, 3 + AMOUNT); }",
+                );
+                let f = &parsed.solana.as_ref().unwrap().functions[0];
+                let crate::ir::StmtKind::Expr(e) = &f.body[0].kind else {
+                    panic!()
+                };
+                let ExprKind::Tuple(items) = &e.kind else {
+                    panic!()
+                };
+                let got: Vec<bool> = items.iter().map(|i| env.is_constant(i)).collect();
+                assert_eq!(got, vec![true, true, true, false, true]);
+            },
+        );
+    }
+}

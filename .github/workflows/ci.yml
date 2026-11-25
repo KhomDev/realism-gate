@@ -68,15 +68,20 @@ jobs:
         shell: bash
         run: |
           set -eu
-          cargo package --list --locked > /tmp/files.txt
+          cargo package -p realism-gate --list --locked > /tmp/files.txt
           cat /tmp/files.txt
-          if grep -vE '^(src/.*\.rs|Cargo\.toml|Cargo\.toml\.orig|Cargo\.lock|README\.md|LICENSE|CHANGELOG\.md|eval/solana/measured\.json|\.cargo_vcs_info\.json)$' /tmp/files.txt; then
+          if grep -vE '^(src/.*\.rs|Cargo\.toml|Cargo\.toml\.orig|Cargo\.lock|README\.md|LICENSE|CHANGELOG\.md|\.cargo_vcs_info\.json)$' /tmp/files.txt; then
             echo "::error::unexpected files in the crate"
             exit 1
           fi
 
-      - name: Publish dry run (builds from the packaged crate)
-        run: cargo publish --dry-run --locked
+      # Verified `cargo publish` rewrites the path dependencies to their
+      # crates.io versions, and the workspace sub-crates are `publish = false`
+      # until they are published in dependency order (PACKAGING.md). Until then
+      # this job proves the binary crate packages; the release workflow builds
+      # the packaged set from the checkout.
+      - name: Package the binary crate
+        run: cargo package -p realism-gate --no-verify --locked
 
   # --------------------------------------------------------------------- MSRV
   msrv:
@@ -206,7 +211,7 @@ jobs:
         shell: bash
         run: |
           set -eu
-          if grep -rniE '(TcpStream|UdpSocket|TcpListener|std::net|reqwest|hyper|ureq|attohttpc|isahc)' src/ ; then
+          if grep -rniE '(TcpStream|UdpSocket|TcpListener|std::net|reqwest|hyper|ureq|attohttpc|isahc)' src/ crates/*/src/ ; then
             echo "::error::network code found in src/"
             exit 1
           fi

@@ -36,10 +36,10 @@ jobs:
         continue-on-error: true
         run: |
           cargo mutants \
-            --file 'src/rules/*.rs' \
-            --file 'src/claims/*.rs' \
+            --file 'crates/rg-rules/src/rules/*.rs' \
+            --file 'crates/rg-model/src/claims/*.rs' \
             --file 'src/bind/*.rs' \
-            --file 'src/verify_fix.rs' \
+            --file 'crates/rg-exec/src/lib.rs' \
             --timeout 120
 
       - name: Record the survival rate

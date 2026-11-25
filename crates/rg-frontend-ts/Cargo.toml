@@ -1,0 +1,18 @@
+[package]
+name = "rg-frontend-ts"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Anchor TypeScript frontend for realism-gate: lowers oxc's AST into the shared IR."
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+# Published sub-crates are an approval-gated release step; see PACKAGING.md.
+publish = false
+
+[dependencies]
+rg-ir.workspace = true
+oxc_allocator.workspace = true
+oxc_ast.workspace = true
+oxc_parser.workspace = true
+oxc_span.workspace = true

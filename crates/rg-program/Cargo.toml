@@ -1,0 +1,14 @@
+[package]
+name = "rg-program"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Entry-point authority model for realism-gate (skeleton; filled by RG-A1)."
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+# Published sub-crates are an approval-gated release step; see PACKAGING.md.
+publish = false
+
+[dependencies]
+rg-ir.workspace = true

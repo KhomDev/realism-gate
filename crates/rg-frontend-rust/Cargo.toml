@@ -1,0 +1,16 @@
+[package]
+name = "rg-frontend-rust"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Rust frontend for realism-gate: lowers solana-program-test, LiteSVM and Mollusk tests with syn."
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+# Published sub-crates are an approval-gated release step; see PACKAGING.md.
+publish = false
+
+[dependencies]
+rg-ir.workspace = true
+proc-macro2.workspace = true
+syn.workspace = true

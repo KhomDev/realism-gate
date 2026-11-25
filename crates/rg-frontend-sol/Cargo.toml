@@ -1,0 +1,15 @@
+[package]
+name = "rg-frontend-sol"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Solidity frontend for realism-gate: lowers solar's AST into the shared IR."
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+# Published sub-crates are an approval-gated release step; see PACKAGING.md.
+publish = false
+
+[dependencies]
+rg-ir.workspace = true
+solar-parse.workspace = true
