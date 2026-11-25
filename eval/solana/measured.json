@@ -1,11 +1,33 @@
 {
   "schema": "realism-gate.measured/v1",
-  "date": "2026-11-24",
-  "population": "public Rust and Anchor TypeScript test suites. This is not a corpus of judged PoCs or incident reproductions; the report must say so and must not present the result as PoC precision.",
-  "source": "eval/solana/results.json",
+  "date": "2026-11-25",
+  "population": "public Solana PoCs (held-out split; eval/solana-poc): judged contest PoCs and exploit-by-construction tests. Cells with n<5 (any language) are counts only. The test-suite measurement is eval/solana/RESULTS.md.",
+  "source": "eval/solana-poc/results.json",
   "frozen_rule_commit": "6019773976706e42e11ceefc2ee1b03496f2df54",
   "rules": {
     "RG01": {
+      "rust": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language"
+      },
+      "typescript": {
+        "labelled": 12,
+        "tp": 2,
+        "fp": 10,
+        "unclear": 0,
+        "precision": 0.1667,
+        "wilson95": [
+          0.047,
+          0.448
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language"
+      },
       "solidity": {
         "status": "unmeasured",
         "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
@@ -16,47 +38,37 @@
       }
     },
     "RG02": {
-      "javascript": {
-        "labelled": 5,
-        "tp": 0,
-        "fp": 5,
-        "unclear": 0,
-        "precision": 0.0,
-        "wilson95": [
-          0.0,
-          0.4345
-        ],
-        "status": "measured",
-        "split": "heldout",
-        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
-      },
       "rust": {
-        "labelled": 21,
-        "tp": 0,
-        "fp": 21,
+        "labelled": 5,
+        "tp": 1,
+        "fp": 4,
         "unclear": 0,
-        "precision": 0.0,
+        "precision": 0.2,
         "wilson95": [
-          0.0,
-          0.1546
+          0.0362,
+          0.6245
         ],
         "status": "measured",
         "split": "heldout",
-        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)"
       },
       "typescript": {
-        "labelled": 8,
-        "tp": 0,
-        "fp": 8,
+        "labelled": 25,
+        "tp": 7,
+        "fp": 18,
         "unclear": 0,
-        "precision": 0.0,
+        "precision": 0.28,
         "wilson95": [
-          0.0,
-          0.3244
+          0.1428,
+          0.4758
         ],
         "status": "measured",
         "split": "heldout",
-        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language"
       },
       "solidity": {
         "status": "unmeasured",
@@ -68,29 +80,63 @@
       }
     },
     "RG03": {
-      "javascript": {
-        "labelled": 0,
-        "tp": 0,
-        "fp": 0,
-        "unclear": 0,
-        "precision": null,
-        "wilson95": null,
-        "status": "unmeasured",
-        "reason": "no sampled flag on the held-out split"
-      },
       "rust": {
-        "labelled": 6,
+        "labelled": 1,
         "tp": 0,
-        "fp": 6,
+        "fp": 1,
         "unclear": 0,
         "precision": 0.0,
         "wilson95": [
           0.0,
-          0.3903
+          0.7935
         ],
         "status": "measured",
         "split": "heldout",
-        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "count_only": true
+      },
+      "typescript": {
+        "labelled": 1,
+        "tp": 0,
+        "fp": 1,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "count_only": true
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language"
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus"
+      }
+    },
+    "RG04": {
+      "rust": {
+        "labelled": 14,
+        "tp": 0,
+        "fp": 14,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.2153
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)"
       },
       "typescript": {
         "labelled": 2,
@@ -104,51 +150,12 @@
         ],
         "status": "measured",
         "split": "heldout",
-        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "count_only": true
       },
-      "solidity": {
-        "status": "unmeasured",
-        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
-      },
-      "move": {
-        "status": "unmeasured",
-        "reason": "no labelled Move corpus"
-      }
-    },
-    "RG04": {
       "javascript": {
-        "labelled": 0,
-        "tp": 0,
-        "fp": 0,
-        "unclear": 0,
-        "precision": null,
-        "wilson95": null,
         "status": "unmeasured",
-        "reason": "no sampled flag on the held-out split"
-      },
-      "rust": {
-        "labelled": 6,
-        "tp": 0,
-        "fp": 6,
-        "unclear": 0,
-        "precision": 0.0,
-        "wilson95": [
-          0.0,
-          0.3903
-        ],
-        "status": "measured",
-        "split": "heldout",
-        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
-      },
-      "typescript": {
-        "labelled": 0,
-        "tp": 0,
-        "fp": 0,
-        "unclear": 0,
-        "precision": null,
-        "wilson95": null,
-        "status": "unmeasured",
-        "reason": "no sampled flag on the held-out split"
+        "reason": "the rule raised no flag on a PoC in this language"
       },
       "solidity": {
         "status": "unmeasured",
@@ -160,6 +167,18 @@
       }
     },
     "RG05": {
+      "rust": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language"
+      },
+      "typescript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language"
+      },
       "solidity": {
         "labelled": 1,
         "tp": 0,
@@ -172,7 +191,8 @@
         ],
         "status": "measured",
         "split": "fresh",
-        "population": "Solidity public PoCs (DeFiVulnLabs)"
+        "population": "Solidity public PoCs (DeFiVulnLabs)",
+        "count_only": true
       },
       "move": {
         "status": "unmeasured",
@@ -180,6 +200,28 @@
       }
     },
     "RG06": {
+      "rust": {
+        "labelled": 6,
+        "tp": 0,
+        "fp": 6,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.3903
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)"
+      },
+      "typescript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language"
+      },
       "solidity": {
         "status": "unmeasured",
         "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md"
@@ -200,47 +242,37 @@
       }
     },
     "RG08": {
-      "javascript": {
-        "labelled": 1,
-        "tp": 1,
-        "fp": 0,
-        "unclear": 0,
-        "precision": 1.0,
-        "wilson95": [
-          0.2065,
-          1.0
-        ],
-        "status": "measured",
-        "split": "heldout",
-        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
-      },
       "rust": {
-        "labelled": 5,
-        "tp": 5,
+        "labelled": 6,
+        "tp": 6,
         "fp": 0,
         "unclear": 0,
         "precision": 1.0,
         "wilson95": [
-          0.5655,
+          0.6097,
           1.0
         ],
         "status": "measured",
         "split": "heldout",
-        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)"
       },
       "typescript": {
-        "labelled": 5,
-        "tp": 5,
-        "fp": 0,
+        "labelled": 24,
+        "tp": 23,
+        "fp": 1,
         "unclear": 0,
-        "precision": 1.0,
+        "precision": 0.9583,
         "wilson95": [
-          0.5655,
-          1.0
+          0.7976,
+          0.9926
         ],
         "status": "measured",
         "split": "heldout",
-        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language"
       },
       "solidity": {
         "labelled": 30,
@@ -262,39 +294,27 @@
       }
     },
     "RG09": {
-      "javascript": {
-        "labelled": 0,
-        "tp": 0,
-        "fp": 0,
-        "unclear": 0,
-        "precision": null,
-        "wilson95": null,
-        "status": "unmeasured",
-        "reason": "no sampled flag on the held-out split"
-      },
       "rust": {
-        "labelled": 1,
-        "tp": 1,
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language"
+      },
+      "typescript": {
+        "labelled": 7,
+        "tp": 7,
         "fp": 0,
         "unclear": 0,
         "precision": 1.0,
         "wilson95": [
-          0.2065,
+          0.6457,
           1.0
         ],
         "status": "measured",
         "split": "heldout",
-        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)"
       },
-      "typescript": {
-        "labelled": 0,
-        "tp": 0,
-        "fp": 0,
-        "unclear": 0,
-        "precision": null,
-        "wilson95": null,
+      "javascript": {
         "status": "unmeasured",
-        "reason": "no sampled flag on the held-out split"
+        "reason": "the rule raised no flag on a PoC in this language"
       },
       "solidity": {
         "status": "unmeasured",
@@ -306,16 +326,6 @@
       }
     },
     "RG10": {
-      "javascript": {
-        "labelled": 0,
-        "tp": 0,
-        "fp": 0,
-        "unclear": 0,
-        "precision": null,
-        "wilson95": null,
-        "status": "unmeasured",
-        "reason": "no sampled flag on the held-out split"
-      },
       "rust": {
         "labelled": 2,
         "tp": 0,
@@ -328,7 +338,8 @@
         ],
         "status": "measured",
         "split": "heldout",
-        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "count_only": true
       },
       "typescript": {
         "labelled": 1,
@@ -342,7 +353,12 @@
         ],
         "status": "measured",
         "split": "heldout",
-        "population": "public Rust/Anchor TypeScript test suites (not PoCs)"
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "count_only": true
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language"
       },
       "solidity": {
         "status": "unmeasured",
@@ -354,35 +370,17 @@
       }
     },
     "RG11": {
-      "javascript": {
-        "labelled": 0,
-        "tp": 0,
-        "fp": 0,
-        "unclear": 0,
-        "precision": null,
-        "wilson95": null,
-        "status": "unmeasured",
-        "reason": "no sampled flag on the held-out split"
-      },
       "rust": {
-        "labelled": 0,
-        "tp": 0,
-        "fp": 0,
-        "unclear": 0,
-        "precision": null,
-        "wilson95": null,
         "status": "unmeasured",
-        "reason": "no sampled flag on the held-out split"
+        "reason": "the rule raised no flag on a PoC in this language"
       },
       "typescript": {
-        "labelled": 0,
-        "tp": 0,
-        "fp": 0,
-        "unclear": 0,
-        "precision": null,
-        "wilson95": null,
         "status": "unmeasured",
-        "reason": "no sampled flag on the held-out split"
+        "reason": "the rule raised no flag on a PoC in this language"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language"
       },
       "solidity": {
         "labelled": 1,
@@ -396,7 +394,8 @@
         ],
         "status": "measured",
         "split": "fresh",
-        "population": "Solidity public PoCs (DeFiVulnLabs)"
+        "population": "Solidity public PoCs (DeFiVulnLabs)",
+        "count_only": true
       },
       "move": {
         "status": "unmeasured",

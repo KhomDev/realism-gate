@@ -197,22 +197,44 @@ def solidity_cells() -> dict[str, dict]:
     return out
 
 
+POC_RESULTS = ROOT / "eval" / "solana-poc" / "results.json"
+POC_POPULATION = "public Solana PoCs (held-out split; eval/solana-poc)"
+COUNT_ONLY_BELOW = 5
+
+
 def measured_view(doc: dict) -> dict:
-    """The compact view the `rules`/`explain` implementation reads."""
+    """The compact view the `rules`/`explain` implementation reads.
+
+    Since 2026-11-25 the Rust/TypeScript/JavaScript cells come from the held-out
+    split of the Solana PoC study (`eval/solana-poc/results.json`), not from the
+    test-suite measurement in this directory, which stays in RESULTS.md. A cell
+    with fewer than five labels is marked `count_only`, as the PoC
+    preregistration requires.
+    """
     solidity = solidity_cells()
+    poc = json.loads(POC_RESULTS.read_text(encoding="utf-8"))
     rules = {}
     for rule in [f"RG{i:02}" for i in range(1, 21)]:
         cells = {}
-        for lang, cell in doc["heldout"].get(rule, {}).items():
-            cell = dict(cell)
+        for lang, cell in poc["rq2_precision"]["heldout"].get(rule, {}).items():
             if cell.get("status") == "measured":
-                cell["split"] = "heldout"
-                cell["population"] = "public Rust/Anchor TypeScript test suites (not PoCs)"
-            cells[lang] = cell
-        cells["solidity"] = solidity.get(rule, {
+                out = {k: cell[k] for k in ("labelled", "tp", "fp", "unclear", "precision", "wilson95")}
+                out["status"] = "measured"
+                out["split"] = "heldout"
+                out["population"] = POC_POPULATION
+                if cell["tp"] + cell["fp"] < COUNT_ONLY_BELOW:
+                    out["count_only"] = True
+            else:
+                out = {"status": "unmeasured", "reason": cell.get("reason") or "no held-out PoC label"}
+            cells[lang] = out
+        sol = dict(solidity.get(rule, {
             "status": "unmeasured",
             "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
-        })
+        }))
+        # The same n<5 rule applies to every language, not only the PoC cells.
+        if sol.get("status") == "measured" and sol["tp"] + sol["fp"] < COUNT_ONLY_BELOW:
+            sol["count_only"] = True
+        cells["solidity"] = sol
         cells["move"] = {
             "status": "unmeasured",
             "reason": "no labelled Move corpus",
@@ -220,10 +242,11 @@ def measured_view(doc: dict) -> dict:
         rules[rule] = cells
     return {
         "schema": "realism-gate.measured/v1",
-        "date": doc["date"],
-        "population": doc["population"],
-        "source": "eval/solana/results.json",
-        "frozen_rule_commit": doc["frozen_rule_commit"],
+        "date": poc["date"],
+        "population": POC_POPULATION + ": judged contest PoCs and exploit-by-construction tests. "
+        "Cells with n<5 (any language) are counts only. The test-suite measurement is eval/solana/RESULTS.md.",
+        "source": "eval/solana-poc/results.json",
+        "frozen_rule_commit": poc["frozen_rule_commit"],
         "rules": rules,
     }
 

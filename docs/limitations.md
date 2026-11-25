@@ -61,8 +61,10 @@ A tool that checks proofs should be exact about what it does not check.
 - Cluster settings (`solana-test-validator --clone`, a snapshot) are
   invisible, as `foundry.toml` is for Solidity.
 - RG07 is not checked: Solana harnesses have no call mocking.
-- The P1 precision measurement is on public test suites, not judged PoCs; the
-  PoC corpus is still missing, so the number is not PoC precision
+- Precision on public Solana PoCs is measured in `eval/solana-poc/`: the tool
+  reads 1 of 12 judged contest PoCs (fragments, scripts and unit tests that
+  drive no harness are not read) and 72 of 82 exploit-by-construction PoCs; the
+  identity rules (RG01, RG02, RG04, RG06) are mostly wrong on PoCs
   ([precision](precision.md#rust-solana-and-anchor-typescript-tests)).
 
 ## In Anchor TypeScript tests
@@ -87,8 +89,10 @@ A tool that checks proofs should be exact about what it does not check.
 - Assertions are chai's `assert` and `expect`, node's `assert` and jest's
   `expect`. `should`-style assertions and custom assertion helpers outside
   `tests/` are not recognised.
-- The P1 precision measurement is on public test suites, not judged PoCs; the
-  PoC corpus is still missing, so the number is not PoC precision
+- Precision on public Solana PoCs is measured in `eval/solana-poc/`: the tool
+  reads 1 of 12 judged contest PoCs (fragments, scripts and unit tests that
+  drive no harness are not read) and 72 of 82 exploit-by-construction PoCs; the
+  identity rules (RG01, RG02, RG04, RG06) are mostly wrong on PoCs
   ([precision](precision.md#rust-solana-and-anchor-typescript-tests)).
 
 ## Economic rules (RG15-RG18)

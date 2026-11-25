@@ -794,8 +794,9 @@ fn list_rules(format: ListFormat) -> String {
             }
             out.push_str(
                 "\nmeasured = TP/(TP+FP) with a Wilson 95% interval. Rust and Anchor \
-                 TypeScript are held-out labels on public test suites, not PoCs; Solidity \
-                 uses the fresh corpus. `unmeasured` is not 100%. See docs/precision.md.\n",
+                 TypeScript are held-out labels on public Solana PoCs (n<5: count only); \
+                 Solidity uses the fresh corpus. `unmeasured` is not 100%. See \
+                 docs/precision.md.\n",
             );
             out
         }

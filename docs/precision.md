@@ -320,9 +320,10 @@ RG04 and RG06 are mostly wrong: they fire on the attacker's own accounts, on
 secure-path control tests and on setup fixtures. The flags cluster within
 units and sources, so the intervals are narrower than they should be. One
 reader labelled (AI-assisted, disclosed) and a blinded AI second pass agreed on
-29 of 30; this is not independent human validation. The `rules`/`explain`
-measured field still embeds the P1 test-suite numbers; it is not switched to
-these in this branch.
+29 of 30; this is not independent human validation. Since 1.1.0 the
+`rules`/`explain` measured field embeds these held-out PoC cells (cells with
+fewer than five labels print as counts); the P1 test-suite numbers below stay
+published here and in `eval/solana/RESULTS.md`.
 
 ### The P1 held-out measurement (2026-11-24)
 
