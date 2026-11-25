@@ -8,26 +8,51 @@ The library crates are `publish = false` for now. Flipping them to publishable
 and publishing them is an approval-gated release step, not something a build
 does on its own.
 
-## What can be proved locally
+## What is measured on this workspace
 
-The binary crate can be packaged without verification, and the packaged set
-can be built:
+`cargo package -p realism-gate --list --locked` succeeds and prints the
+package contents (22 files: `src/**/*.rs`, `Cargo.toml`, `Cargo.lock`,
+`README.md`, `LICENSE`, `CHANGELOG.md`).
 
-```sh
-cargo package -p realism-gate --no-verify --locked
-cargo build --release -p realism-gate --locked
+`cargo build --release -p realism-gate --locked` succeeds: the packaged set of
+crates builds from the workspace.
+
+Plain `cargo package -p realism-gate --no-verify --locked` **fails**, and this
+is expected on cargo 1.95.0:
+
+```text
+error: failed to prepare local package for uploading
+Caused by:
+  no matching package named `rg-exec` found
+  location searched: crates.io index
 ```
 
-`cargo package -p realism-gate` with verification (and `cargo publish
---dry-run`) fails today, and this is expected: Cargo rewrites the path
-dependencies to their crates.io versions, and `rg-ir`, `rg-model`, `rg-rules`
-and the rest are not on crates.io yet. The error is `no matching package named
-'rg-ir' found`.
+Cargo rewrites a path dependency to its crates.io version before writing the
+archive and resolves that version first. `--no-verify` skips the build, not the
+resolution. The same failure appears one crate down (`rg-frontend-sol` needs
+`rg-ir`); only `rg-ir`, which has no workspace dependencies, packages plainly:
+
+```sh
+cargo package -p rg-ir --no-verify --locked   # writes rg-ir-1.4.0.crate
+```
+
+So a verified `cargo package` (and `cargo publish --dry-run`) becomes possible
+only after the sub-crates are published in dependency order. That is an
+approval-gated outward action and this workspace does not attempt it.
+
+## Rehearsing the archives locally
+
+`scripts/package-order.sh` produces the `.crate` archive for every crate, in
+dependency order, without publishing anything. It passes a temporary
+`[patch.crates-io]` section that maps each workspace crate to its path, which
+lets Cargo resolve the rewritten dependencies while it writes the archives.
+The archives are otherwise the ones the registry would receive. This proves the
+manifest, the file list and the packaging of every crate; it does not make the
+crates publishable.
 
 ## Dependency order for a future verified publish
 
-Publish (or at least make available) the crates in this order; each row depends
-only on rows above it:
+Publish the crates in this order; each row depends only on rows above it:
 
 | Order | Crate | Notes |
 |---|---|---|
@@ -42,9 +67,6 @@ only on rows above it:
 | 6 | `rg-exec` | independent |
 | 7 | `rg-render` | depends on `rg-ir`, `rg-model`, `rg-rules` |
 | 8 | `realism-gate` | depends on all of the above |
-
-`scripts/package-order.sh` runs the unverified local proof for every crate in
-that order. It does not publish anything.
 
 ## Data embedded in `rg-rules`
 

@@ -75,13 +75,15 @@ jobs:
             exit 1
           fi
 
-      # Verified `cargo publish` rewrites the path dependencies to their
-      # crates.io versions, and the workspace sub-crates are `publish = false`
-      # until they are published in dependency order (PACKAGING.md). Until then
-      # this job proves the binary crate packages; the release workflow builds
-      # the packaged set from the checkout.
+      # Plain `cargo package -p realism-gate --no-verify` fails until the
+      # workspace sub-crates are on crates.io: Cargo rewrites the path
+      # dependencies to their registry versions and resolves them before it
+      # writes the archive (PACKAGING.md). The script packages the same crate
+      # through a temporary [patch.crates-io] mapping, which proves the
+      # archive; publishing stays approval-gated.
       - name: Package the binary crate
-        run: cargo package -p realism-gate --no-verify --locked
+        shell: bash
+        run: bash scripts/package-order.sh realism-gate
 
   # --------------------------------------------------------------------- MSRV
   msrv:

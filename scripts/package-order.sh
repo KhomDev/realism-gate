@@ -1,18 +1,29 @@
 #!/usr/bin/env bash
-# package-order.sh - the local, unverified packaging proof, in dependency order.
+# package-order.sh - produce every .crate archive, in dependency order.
 #
-# This is not a publish. Verification (`cargo package -p <crate>` without
-# --no-verify, and `cargo publish --dry-run`) requires the path dependencies to
-# be available on crates.io, which they are not until the sub-crates are
-# published (an approval-gated release step). See PACKAGING.md.
+# This is not a publish. Plain `cargo package -p realism-gate --no-verify`
+# fails on cargo 1.95.0 with "no matching package named `rg-exec` found":
+# Cargo rewrites path dependencies to their crates.io versions and resolves
+# them before it writes the archive, and the sub-crates are publish = false.
+# Only rg-ir has no workspace dependency and packages plainly.
+#
+# To rehearse the packaging locally, this script passes a temporary
+# [patch.crates-io] section that maps each workspace crate to its path. The
+# archives are the ones the registry would receive; publishing them in this
+# order remains an approval-gated outward action. See PACKAGING.md.
 #
 # Usage:
-#   scripts/package-order.sh            # package every crate with --no-verify
-#   scripts/package-order.sh rg-rules   # one crate
+#   scripts/package-order.sh              # package every crate
+#   scripts/package-order.sh rg-rules     # one crate (patches all the others)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-crates=(
+root="$(pwd)"
+case "$(uname -s)" in
+  MINGW* | MSYS* | CYGWIN*) root="$(cygpath -m "$root")" ;;
+esac
+
+all_crates=(
   rg-ir
   rg-frontend-sol
   rg-frontend-rust
@@ -26,11 +37,22 @@ crates=(
   realism-gate
 )
 
-if [ "$#" -gt 0 ]; then
-  crates=("$@")
+crates=("$@")
+if [ "${#crates[@]}" -eq 0 ]; then
+  crates=("${all_crates[@]}")
 fi
 
+patch_file="$(mktemp)"
+trap 'rm -f "$patch_file"' EXIT
+{
+  echo "[patch.crates-io]"
+  for crate in "${all_crates[@]}"; do
+    [ "$crate" = "realism-gate" ] && continue
+    echo "$crate = { path = \"$root/crates/$crate\" }"
+  done
+} > "$patch_file"
+
 for crate in "${crates[@]}"; do
-  echo "cargo package -p $crate --no-verify --locked"
-  cargo package -p "$crate" --no-verify --locked
+  echo "cargo package -p $crate --no-verify --locked --config <local patch>"
+  cargo package -p "$crate" --no-verify --locked --config "$patch_file"
 done
