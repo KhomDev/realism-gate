@@ -8,6 +8,19 @@ may change in any minor release.
 
 ## [Unreleased]
 
+### Fixed (P1-C precision round, proposed 1.3.0)
+
+- **A helper file with no test is no longer read as a fragment.** The script
+  reader wrapped every import-only helper passed alongside the PoC as
+  `it("fragment")` and flagged RG08 on it. Script mode now requires an
+  executable top-level statement (or a `main` call), and auto-detection only
+  wraps the unit's first file, not its imported helpers.
+- **A test title that says the attack is blocked is a control test.** Titles
+  with `blocks`, `blocked`, `denies`, `cannot`, `does not allow`, `not
+  allowed` or `must fail` join the existing `secure`/`control`/`prevents`/
+  `rejects`/`fails when` class, so RG01/RG02/RG03/RG04/RG06 do not fire on
+  them.
+
 ## [1.2.0] - 2026-11-25
 
 ### Added (P1-C, 1.2.0)

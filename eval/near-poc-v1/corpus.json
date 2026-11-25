@@ -1,0 +1,38 @@
+{
+  "schema": "realism-gate.near-poc-corpus/v1",
+  "collected": "2026-11-25",
+  "seed": "rg-near-poc-2026-11-25",
+  "corpora": {
+    "exorcist": {
+      "repo": "jatinsahijwani/exorcist",
+      "commit": "c7a7b0db2f64459ee0ca815adb6eb39fed60028b",
+      "dir": ".corpus/near-poc-v1/exorcist",
+      "paths": [
+        "."
+      ],
+      "license": "MIT",
+      "listing_sha256": "c47e3cb9fef3f3e3336ce9bcc31c107df36d067d4a49cc665a8b97c5e0936ba8"
+    },
+    "exploit-escrow": {
+      "repo": "danielAsaboro/exploit-escrow",
+      "commit": "3858e82799bbf7082e7e45cb1906517241aef591",
+      "dir": ".corpus/near-poc-v1/exploit-escrow",
+      "paths": [
+        "."
+      ],
+      "license": "none",
+      "listing_sha256": "a4906cc6ba6fc6cc0e14cc05b98b6ca1808c73ee865e3eb66b0b1e49fbae637e"
+    },
+    "baseline-near": {
+      "repo": "skyhighdesignsinc-sudo/baseline-near",
+      "commit": "74bdc452c7d003748a51e72a129ef4e45ae83927",
+      "dir": ".corpus/near-poc-v1/baseline-near",
+      "paths": [
+        "."
+      ],
+      "license": "MIT",
+      "listing_sha256": "a7c66e6a4c480ad839f592cd3ef23d7591a918d12bc0fb464e81b5c77707d122"
+    }
+  },
+  "note": "NEAR PoCs collected for a future frontend. realism-gate 1.2/1.3 has no NEAR reader: it parses Solana Rust, Solidity and Move only. Nothing in this directory is run or measured."
+}

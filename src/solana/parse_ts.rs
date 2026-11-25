@@ -517,12 +517,18 @@ impl<'s> Lower<'s> {
             // the top-level statements, which include the call to main();
             // main's body is inlined there like any helper. When the file has
             // no top-level code, main itself is the test.
-            let function = match self.blocks[0].body {
-                Some(f) => Some(f),
-                None => self
-                    .functions
+            let body_runs = self.blocks[0].body.is_some_and(|f| {
+                self.functions[f]
+                    .body
                     .iter()
-                    .position(|f| f.name == "main" && !f.method),
+                    .any(|s| matches!(s.kind, StmtKind::Expr(_)))
+            });
+            let function = if body_runs {
+                self.blocks[0].body
+            } else {
+                self.functions
+                    .iter()
+                    .position(|f| f.name == "main" && !f.method)
             };
             if let Some(function) = function {
                 let f = &mut self.functions[function];

@@ -1,0 +1,53 @@
+{
+  "schema": "realism-gate.near-poc-inventory/v1",
+  "date": "2026-11-25",
+  "kinds": {
+    "near-workspaces-test": "a Rust #[tokio::test] that deploys NEAR contracts in a near-workspaces sandbox and replays an attack"
+  },
+  "units": [
+    {
+      "id": "X-exorcist-replay",
+      "source": "exorcist",
+      "tier": "X",
+      "kind": "near-workspaces-test",
+      "files": [
+        {
+          "path": "sandbox/tests/replay.rs"
+        }
+      ],
+      "tests": 9,
+      "note": "Replays the Lean model's shortest attack traces against the real vault contracts; every test asserts the replayed state against the model witness. No platform-published outcome."
+    }
+  ],
+  "excluded": [
+    {
+      "source": "exorcist",
+      "path": "sandbox/tests/smoke.rs",
+      "reason": "harness smoke test (proves near-workspaces works), not an exploit"
+    },
+    {
+      "source": "exorcist",
+      "path": "proofs/*.lean",
+      "reason": "formal models and witnesses, not tests; they are the input the replay test consumes"
+    },
+    {
+      "source": "exploit-escrow",
+      "path": "contract/src/lib.rs, target-conformance/, verifier/",
+      "reason": "no near-workspaces PoC test; the self-audit is prose plus Kani harnesses and testnet demos"
+    },
+    {
+      "source": "baseline-near",
+      "path": "e2e/site.spec.mjs",
+      "reason": "web e2e test, not a contract PoC"
+    }
+  ],
+  "counts": {
+    "units": 1,
+    "tests": 9,
+    "judged": 0
+  },
+  "tier_notes": {
+    "J": "none found: no public NEAR contest or bounty publishes judge-grouped coded PoCs in a form this corpus could pin",
+    "X": "exorcist's sandbox replay is the only runnable NEAR exploit test found in the search"
+  }
+}

@@ -249,6 +249,13 @@ pub fn is_control(trace: &Trace<'_>) -> bool {
         "should fail",
         "should_fail",
         "negative",
+        "blocks",
+        "blocked",
+        "denies",
+        "cannot",
+        "does not allow",
+        "not allowed",
+        "must fail",
     ]
     .iter()
     .any(|w| title.contains(w))

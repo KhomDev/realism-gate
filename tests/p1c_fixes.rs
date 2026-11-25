@@ -357,3 +357,19 @@ fn property_adding_an_unrelated_control_test_keeps_the_true_positive() {
     let rules: Vec<&str> = r.active().map(|f| f.rule).collect();
     assert!(rules.contains(&"RG09"), "{rules:?}");
 }
+
+#[test]
+fn class2_a_title_that_says_the_attack_is_blocked_is_a_control_test() {
+    let rules = ts_rules(
+        r#"
+describe("vault", () => {
+  it("✓ blocks the admin substitution", async () => {
+    await program.methods.addAdmin().accounts({ caller: superAdmin.publicKey }).signers([superAdmin]).rpc();
+    assert.ok(true);
+  });
+});
+"#,
+    );
+    assert!(!rules.contains(&"RG02"), "{rules:?}");
+    assert!(!rules.contains(&"RG01"), "{rules:?}");
+}
