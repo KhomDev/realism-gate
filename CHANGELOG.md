@@ -39,9 +39,13 @@ may change in any minor release.
   derives its default build target from its own triple; a musl target links
   libc statically, which the sanitizer refuses ("sanitizer is incompatible
   with statically linked libc"). `cargo fuzz run --target
-  x86_64-unknown-linux-gnu` pins the dynamic-libc target. The fix is proven
-  locally by inspection only: this branch has not been pushed, so no green
-  `fuzz` run id exists yet.
+  x86_64-unknown-linux-gnu` pins the dynamic-libc target. The workflow now
+  builds and fuzzes again (run 45690709031). On that first run the TypeScript
+  target found an input that trips a `debug_assert!` inside the upstream
+  `oxc_parser` 0.146.0 lexer (`trivia_builder.rs:62`, `comment.is_pure()`).
+  Release builds compile debug assertions out, so the shipped binaries do not
+  panic on it; the weekly job stays red until the upstream assertion is fixed
+  or the input is handled, and this entry does not call the fuzz job green.
 
 ### Fixed (P1-C precision round, proposed 1.3.0)
 

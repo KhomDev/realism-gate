@@ -10,6 +10,8 @@ cargo binstall realism-gate
 
 From this commit, before a release exists: `cargo install --git https://github.com/KhomDev/realism-gate --locked`.
 
+> **Research:** [I measured my own audit tools against real exploit proofs, fixed what broke, and measured again](docs/research/2026-11-measure-fix-remeasure.md) (November 2026): how often each rule is right on real Solana PoCs, with n and 95% intervals, and what 1.4.0 changed because of it.
+
 ## 1.0: the claim table
 
 One tool, two questions: **is the PoC built on something only the harness
