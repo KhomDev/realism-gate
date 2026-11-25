@@ -1,0 +1,56 @@
+{
+  "schema": "realism-gate.solana-poc-agreement/v1",
+  "date": "2026-11-25",
+  "seed": "rg-solana-poc-agreement-2026-11-25",
+  "sample": 30,
+  "sample_rule": "the first 30 labelled flags (both splits) ordered by sha256(seed + ':' + flag_id)",
+  "labels_file": "eval/solana-poc/agreement/second-pass.jsonl",
+  "reader": "one blinded second AI reader (a read-only subagent) with the same rubric and source, no first-pass labels; not independent human validation",
+  "raw": {
+    "k": 29,
+    "n": 30,
+    "rate": 0.9667,
+    "wilson95": [
+      0.8333,
+      0.9941
+    ],
+    "agree": 29,
+    "kappa": 0.9268
+  },
+  "final": {
+    "k": 30,
+    "n": 30,
+    "rate": 1.0,
+    "wilson95": [
+      0.8865,
+      1.0
+    ],
+    "agree": 30,
+    "kappa": 1.0
+  },
+  "consistency_corrections": [
+    {
+      "id": "525c45d3bdaad966",
+      "split": "heldout",
+      "from": "false-positive",
+      "to": "true-positive"
+    },
+    {
+      "id": "66f49cf4edacad23",
+      "split": "dev",
+      "from": "false-positive",
+      "to": "true-positive"
+    }
+  ],
+  "consistency_note": "Outside the sample, the same reading was applied to the two other flags where the attacker drains its own account as its authority. These corrections were made after seeing the second pass; the pre-correction labels are in commits 49abd98 and 9b1ced6.",
+  "disagreements": [
+    {
+      "id": "d45fa249f66d98cb",
+      "rule": "RG01",
+      "split": "heldout",
+      "primary_original": "false-positive",
+      "second": "true-positive",
+      "resolution": "The primary label was corrected to true-positive. The source account is initialised with authority = attacker and the attacker signs the transfer, so the test moves the attacker's own points and proves only what the authority holder can do; its claim (a transfer without the victim signing) is not shown. RG01's consequence holds. The other four RG01 'attacker initialises its own account' flags stay false-positive: there the own account is the attack input, not the account whose authority the claim says is bypassed."
+    }
+  ]
+}

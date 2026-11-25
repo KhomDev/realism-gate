@@ -1,0 +1,3263 @@
+{
+  "schema": "realism-gate.solana-poc-results/v1",
+  "date": "2026-11-25",
+  "frozen_rule_commit": "6019773976706e42e11ceefc2ee1b03496f2df54",
+  "frozen_rule_version": "1.0.4",
+  "seed": "rg-solana-poc-2026-11-25",
+  "inputs_sha256": {
+    "eval/solana-poc/corpus.json": "759e5531280cc3a74460eb0c90341da089208b704dcacfbd844ead37818b160e",
+    "eval/solana-poc/inventory.json": "1c25e5125c9cf39fb4360cb1359b5becf644d9344cde97710299ba09ec49c0a8",
+    "eval/solana-poc/runs/v1.0.4.jsonl": "1afa76ef8fe96e4789a8afbbffb9682720f644ce66bfb85a42ca8f563b414b5e",
+    "eval/solana-poc/flags/v1.0.4.jsonl": "2bf1d3576f78f3056ec8f5a315129c9edb6f55feea2a4f0a169602634524fbea",
+    "eval/solana-poc/sample.jsonl": "4d866943c61c062bad9bbaf6b7cb209159f0e915950f3daeb37e30f53c080d19",
+    "eval/solana-poc/labels/dev.jsonl": "8cd9104b642a626af9e288660b9fb46c2bde162d65610f52d1e6a9fcd144fd9d",
+    "eval/solana-poc/labels/heldout.jsonl": "fab8a54cd208d1315a88f223e1314c5872e91c671d880d7673fb4f63b0d7f022"
+  },
+  "counts": {
+    "units_counted": 99,
+    "units_by_tier": {
+      "J": 12,
+      "NC": 5,
+      "X": 82
+    },
+    "duplicates": 4,
+    "excluded_candidates": 309,
+    "flags": 205,
+    "flags_on_pocs": 197,
+    "flags_on_negative_controls": 8,
+    "flags_by_rule_language": {
+      "RG01/typescript": 17,
+      "RG02/rust": 12,
+      "RG02/typescript": 51,
+      "RG03/rust": 2,
+      "RG03/typescript": 5,
+      "RG04/rust": 25,
+      "RG04/typescript": 4,
+      "RG06/rust": 8,
+      "RG08/rust": 11,
+      "RG08/typescript": 45,
+      "RG09/typescript": 11,
+      "RG10/rust": 3,
+      "RG10/typescript": 3
+    },
+    "sampled": 197,
+    "heldout": 106,
+    "dev": 91,
+    "labelled": 197,
+    "units_with_flags": 60
+  },
+  "rq1_coverage": {
+    "by_tier": {
+      "J": {
+        "k": 1,
+        "n": 12,
+        "rate": 0.0833,
+        "wilson95": [
+          0.0149,
+          0.3539
+        ],
+        "tests_checked": 1
+      },
+      "X": {
+        "k": 72,
+        "n": 82,
+        "rate": 0.878,
+        "wilson95": [
+          0.7899,
+          0.9324
+        ],
+        "tests_checked": 289
+      },
+      "J+X": {
+        "k": 73,
+        "n": 94,
+        "rate": 0.7766,
+        "wilson95": [
+          0.6825,
+          0.849
+        ],
+        "tests_checked": 290
+      },
+      "NC": {
+        "k": 5,
+        "n": 5,
+        "rate": 1.0,
+        "wilson95": [
+          0.5655,
+          1.0
+        ],
+        "tests_checked": 45
+      }
+    },
+    "by_kind": {
+      "J": {
+        "rust-unit-test": {
+          "k": 0,
+          "n": 4,
+          "rate": 0.0,
+          "wilson95": [
+            0.0,
+            0.4899
+          ]
+        },
+        "script": {
+          "k": 0,
+          "n": 3,
+          "rate": 0.0,
+          "wilson95": [
+            0.0,
+            0.5615
+          ]
+        },
+        "test-file": {
+          "k": 1,
+          "n": 2,
+          "rate": 0.5,
+          "wilson95": [
+            0.0945,
+            0.9055
+          ]
+        },
+        "test-fragment": {
+          "k": 0,
+          "n": 3,
+          "rate": 0.0,
+          "wilson95": [
+            0.0,
+            0.5615
+          ]
+        }
+      },
+      "X": {
+        "binary-main": {
+          "k": 0,
+          "n": 5,
+          "rate": 0.0,
+          "wilson95": [
+            0.0,
+            0.4345
+          ]
+        },
+        "ctf-solve-program": {
+          "k": 0,
+          "n": 2,
+          "rate": 0.0,
+          "wilson95": [
+            0.0,
+            0.6576
+          ]
+        },
+        "script": {
+          "k": 0,
+          "n": 3,
+          "rate": 0.0,
+          "wilson95": [
+            0.0,
+            0.5615
+          ]
+        },
+        "test-file": {
+          "k": 72,
+          "n": 72,
+          "rate": 1.0,
+          "wilson95": [
+            0.9493,
+            1.0
+          ]
+        }
+      }
+    },
+    "unreadable_reasons": {
+      "J": {
+        "Rust unit test that drives no Solana harness": 4,
+        "TS/JS script, not a test": 3,
+        "fragment pasted in an issue (no test wrapper, or no imports)": 3,
+        "test drives no harness the tool recognises": 1
+      },
+      "X": {
+        "Rust binary with fn main (PoC framework or CTF client)": 5,
+        "TS/JS script, not a test": 3,
+        "on-chain attacker program, not a test": 2
+      }
+    },
+    "unreadable_units": [
+      {
+        "unit": "J-orderly-066",
+        "tier": "J",
+        "kind": "rust-unit-test",
+        "reason": "Rust unit test that drives no Solana harness"
+      },
+      {
+        "unit": "J-orderly-078",
+        "tier": "J",
+        "kind": "test-fragment",
+        "reason": "fragment pasted in an issue (no test wrapper, or no imports)"
+      },
+      {
+        "unit": "J-orderly-080",
+        "tier": "J",
+        "kind": "test-fragment",
+        "reason": "fragment pasted in an issue (no test wrapper, or no imports)"
+      },
+      {
+        "unit": "J-orderly-085",
+        "tier": "J",
+        "kind": "script",
+        "reason": "TS/JS script, not a test"
+      },
+      {
+        "unit": "J-orderly-112",
+        "tier": "J",
+        "kind": "rust-unit-test",
+        "reason": "Rust unit test that drives no Solana harness"
+      },
+      {
+        "unit": "J-orderly-115",
+        "tier": "J",
+        "kind": "rust-unit-test",
+        "reason": "Rust unit test that drives no Solana harness"
+      },
+      {
+        "unit": "J-orderly-140",
+        "tier": "J",
+        "kind": "script",
+        "reason": "TS/JS script, not a test"
+      },
+      {
+        "unit": "J-pump-H02",
+        "tier": "J",
+        "kind": "rust-unit-test",
+        "reason": "Rust unit test that drives no Solana harness"
+      },
+      {
+        "unit": "J-pump-M03",
+        "tier": "J",
+        "kind": "script",
+        "reason": "TS/JS script, not a test"
+      },
+      {
+        "unit": "J-w3m-onre",
+        "tier": "J",
+        "kind": "test-file",
+        "reason": "test drives no harness the tool recognises"
+      },
+      {
+        "unit": "J-woofi-070",
+        "tier": "J",
+        "kind": "test-fragment",
+        "reason": "fragment pasted in an issue (no test wrapper, or no imports)"
+      },
+      {
+        "unit": "X-neo-bugchain-author",
+        "tier": "X",
+        "kind": "binary-main",
+        "reason": "Rust binary with fn main (PoC framework or CTF client)"
+      },
+      {
+        "unit": "X-neo-cashio",
+        "tier": "X",
+        "kind": "binary-main",
+        "reason": "Rust binary with fn main (PoC framework or CTF client)"
+      },
+      {
+        "unit": "X-neo-legitbank-author",
+        "tier": "X",
+        "kind": "binary-main",
+        "reason": "Rust binary with fn main (PoC framework or CTF client)"
+      },
+      {
+        "unit": "X-neo-legitbank-sintemal",
+        "tier": "X",
+        "kind": "binary-main",
+        "reason": "Rust binary with fn main (PoC framework or CTF client)"
+      },
+      {
+        "unit": "X-neo-pool-solve",
+        "tier": "X",
+        "kind": "binary-main",
+        "reason": "Rust binary with fn main (PoC framework or CTF client)"
+      },
+      {
+        "unit": "X-otter-e2e-nft",
+        "tier": "X",
+        "kind": "ctf-solve-program",
+        "reason": "on-chain attacker program, not a test"
+      },
+      {
+        "unit": "X-otter-wallet-king",
+        "tier": "X",
+        "kind": "ctf-solve-program",
+        "reason": "on-chain attacker program, not a test"
+      },
+      {
+        "unit": "X-solhana-ch1",
+        "tier": "X",
+        "kind": "script",
+        "reason": "TS/JS script, not a test"
+      },
+      {
+        "unit": "X-solhana-ch2",
+        "tier": "X",
+        "kind": "script",
+        "reason": "TS/JS script, not a test"
+      },
+      {
+        "unit": "X-solhana-ch3",
+        "tier": "X",
+        "kind": "script",
+        "reason": "TS/JS script, not a test"
+      }
+    ]
+  },
+  "rq2_precision": {
+    "heldout": {
+      "RG01": {
+        "rust": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "typescript": {
+          "labelled": 12,
+          "tp": 2,
+          "fp": 10,
+          "unclear": 0,
+          "n": 12,
+          "precision": 0.1667,
+          "wilson95": [
+            0.047,
+            0.448
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG02": {
+        "rust": {
+          "labelled": 5,
+          "tp": 1,
+          "fp": 4,
+          "unclear": 0,
+          "n": 5,
+          "precision": 0.2,
+          "wilson95": [
+            0.0362,
+            0.6245
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "typescript": {
+          "labelled": 25,
+          "tp": 7,
+          "fp": 18,
+          "unclear": 0,
+          "n": 25,
+          "precision": 0.28,
+          "wilson95": [
+            0.1428,
+            0.4758
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG03": {
+        "rust": {
+          "labelled": 1,
+          "tp": 0,
+          "fp": 1,
+          "unclear": 0,
+          "n": 1,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.7935
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "typescript": {
+          "labelled": 1,
+          "tp": 0,
+          "fp": 1,
+          "unclear": 0,
+          "n": 1,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.7935
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG04": {
+        "rust": {
+          "labelled": 14,
+          "tp": 0,
+          "fp": 14,
+          "unclear": 0,
+          "n": 14,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.2153
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "typescript": {
+          "labelled": 2,
+          "tp": 0,
+          "fp": 2,
+          "unclear": 0,
+          "n": 2,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.6576
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG05": {
+        "rust": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "typescript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG06": {
+        "rust": {
+          "labelled": 6,
+          "tp": 0,
+          "fp": 6,
+          "unclear": 0,
+          "n": 6,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.3903
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "typescript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG08": {
+        "rust": {
+          "labelled": 6,
+          "tp": 6,
+          "fp": 0,
+          "unclear": 0,
+          "n": 6,
+          "precision": 1.0,
+          "wilson95": [
+            0.6097,
+            1.0
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "typescript": {
+          "labelled": 24,
+          "tp": 23,
+          "fp": 1,
+          "unclear": 0,
+          "n": 24,
+          "precision": 0.9583,
+          "wilson95": [
+            0.7976,
+            0.9926
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG09": {
+        "rust": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "typescript": {
+          "labelled": 7,
+          "tp": 7,
+          "fp": 0,
+          "unclear": 0,
+          "n": 7,
+          "precision": 1.0,
+          "wilson95": [
+            0.6457,
+            1.0
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG10": {
+        "rust": {
+          "labelled": 2,
+          "tp": 0,
+          "fp": 2,
+          "unclear": 0,
+          "n": 2,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.6576
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "typescript": {
+          "labelled": 1,
+          "tp": 0,
+          "fp": 1,
+          "unclear": 0,
+          "n": 1,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.7935
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG11": {
+        "rust": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "typescript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      }
+    },
+    "dev": {
+      "RG01": {
+        "rust": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "typescript": {
+          "labelled": 5,
+          "tp": 1,
+          "fp": 4,
+          "unclear": 0,
+          "n": 5,
+          "precision": 0.2,
+          "wilson95": [
+            0.0362,
+            0.6245
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG02": {
+        "rust": {
+          "labelled": 7,
+          "tp": 0,
+          "fp": 7,
+          "unclear": 0,
+          "n": 7,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.3543
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "typescript": {
+          "labelled": 26,
+          "tp": 5,
+          "fp": 21,
+          "unclear": 0,
+          "n": 26,
+          "precision": 0.1923,
+          "wilson95": [
+            0.0851,
+            0.3788
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG03": {
+        "rust": {
+          "labelled": 1,
+          "tp": 0,
+          "fp": 1,
+          "unclear": 0,
+          "n": 1,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.7935
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "typescript": {
+          "labelled": 4,
+          "tp": 0,
+          "fp": 4,
+          "unclear": 0,
+          "n": 4,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.4899
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG04": {
+        "rust": {
+          "labelled": 11,
+          "tp": 0,
+          "fp": 11,
+          "unclear": 0,
+          "n": 11,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.2588
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "typescript": {
+          "labelled": 2,
+          "tp": 0,
+          "fp": 2,
+          "unclear": 0,
+          "n": 2,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.6576
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG05": {
+        "rust": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "typescript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG06": {
+        "rust": {
+          "labelled": 2,
+          "tp": 0,
+          "fp": 2,
+          "unclear": 0,
+          "n": 2,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.6576
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "typescript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG08": {
+        "rust": {
+          "labelled": 5,
+          "tp": 5,
+          "fp": 0,
+          "unclear": 0,
+          "n": 5,
+          "precision": 1.0,
+          "wilson95": [
+            0.5655,
+            1.0
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "typescript": {
+          "labelled": 21,
+          "tp": 20,
+          "fp": 1,
+          "unclear": 0,
+          "n": 21,
+          "precision": 0.9524,
+          "wilson95": [
+            0.7733,
+            0.9915
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG09": {
+        "rust": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "typescript": {
+          "labelled": 4,
+          "tp": 4,
+          "fp": 0,
+          "unclear": 0,
+          "n": 4,
+          "precision": 1.0,
+          "wilson95": [
+            0.5101,
+            1.0
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG10": {
+        "rust": {
+          "labelled": 1,
+          "tp": 0,
+          "fp": 1,
+          "unclear": 0,
+          "n": 1,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.7935
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "typescript": {
+          "labelled": 2,
+          "tp": 0,
+          "fp": 2,
+          "unclear": 0,
+          "n": 2,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.6576
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG11": {
+        "rust": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "typescript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      }
+    },
+    "all": {
+      "RG01": {
+        "rust": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "typescript": {
+          "labelled": 17,
+          "tp": 3,
+          "fp": 14,
+          "unclear": 0,
+          "n": 17,
+          "precision": 0.1765,
+          "wilson95": [
+            0.0619,
+            0.4103
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG02": {
+        "rust": {
+          "labelled": 12,
+          "tp": 1,
+          "fp": 11,
+          "unclear": 0,
+          "n": 12,
+          "precision": 0.0833,
+          "wilson95": [
+            0.0149,
+            0.3539
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "typescript": {
+          "labelled": 51,
+          "tp": 12,
+          "fp": 39,
+          "unclear": 0,
+          "n": 51,
+          "precision": 0.2353,
+          "wilson95": [
+            0.14,
+            0.3676
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG03": {
+        "rust": {
+          "labelled": 2,
+          "tp": 0,
+          "fp": 2,
+          "unclear": 0,
+          "n": 2,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.6576
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "typescript": {
+          "labelled": 5,
+          "tp": 0,
+          "fp": 5,
+          "unclear": 0,
+          "n": 5,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.4345
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG04": {
+        "rust": {
+          "labelled": 25,
+          "tp": 0,
+          "fp": 25,
+          "unclear": 0,
+          "n": 25,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.1332
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "typescript": {
+          "labelled": 4,
+          "tp": 0,
+          "fp": 4,
+          "unclear": 0,
+          "n": 4,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.4899
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG05": {
+        "rust": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "typescript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG06": {
+        "rust": {
+          "labelled": 8,
+          "tp": 0,
+          "fp": 8,
+          "unclear": 0,
+          "n": 8,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.3244
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "typescript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG08": {
+        "rust": {
+          "labelled": 11,
+          "tp": 11,
+          "fp": 0,
+          "unclear": 0,
+          "n": 11,
+          "precision": 1.0,
+          "wilson95": [
+            0.7412,
+            1.0
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "typescript": {
+          "labelled": 45,
+          "tp": 43,
+          "fp": 2,
+          "unclear": 0,
+          "n": 45,
+          "precision": 0.9556,
+          "wilson95": [
+            0.8517,
+            0.9877
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG09": {
+        "rust": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "typescript": {
+          "labelled": 11,
+          "tp": 11,
+          "fp": 0,
+          "unclear": 0,
+          "n": 11,
+          "precision": 1.0,
+          "wilson95": [
+            0.7412,
+            1.0
+          ],
+          "status": "measured",
+          "headline": true
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG10": {
+        "rust": {
+          "labelled": 3,
+          "tp": 0,
+          "fp": 3,
+          "unclear": 0,
+          "n": 3,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.5615
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "typescript": {
+          "labelled": 3,
+          "tp": 0,
+          "fp": 3,
+          "unclear": 0,
+          "n": 3,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.5615
+          ],
+          "status": "measured",
+          "headline": false
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      },
+      "RG11": {
+        "rust": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "typescript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        },
+        "javascript": {
+          "labelled": 0,
+          "tp": 0,
+          "fp": 0,
+          "unclear": 0,
+          "n": 0,
+          "precision": null,
+          "wilson95": null,
+          "status": "unmeasured",
+          "headline": false,
+          "reason": "the rule raised no flag on a PoC in this language"
+        }
+      }
+    },
+    "heldout_by_tier": {
+      "J": {
+        "RG01": {
+          "rust": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          },
+          "typescript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "flags raised, none in this split"
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG02": {
+          "rust": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "flags raised, none in this split"
+          },
+          "typescript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "flags raised, none in this split"
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG03": {
+          "rust": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "flags raised, none in this split"
+          },
+          "typescript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "flags raised, none in this split"
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG04": {
+          "rust": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "flags raised, none in this split"
+          },
+          "typescript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "flags raised, none in this split"
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG05": {
+          "rust": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          },
+          "typescript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG06": {
+          "rust": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "flags raised, none in this split"
+          },
+          "typescript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG08": {
+          "rust": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "flags raised, none in this split"
+          },
+          "typescript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "flags raised, none in this split"
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG09": {
+          "rust": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          },
+          "typescript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "flags raised, none in this split"
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG10": {
+          "rust": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "flags raised, none in this split"
+          },
+          "typescript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "flags raised, none in this split"
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG11": {
+          "rust": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          },
+          "typescript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        }
+      },
+      "X": {
+        "RG01": {
+          "rust": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          },
+          "typescript": {
+            "labelled": 12,
+            "tp": 2,
+            "fp": 10,
+            "unclear": 0,
+            "n": 12,
+            "precision": 0.1667,
+            "wilson95": [
+              0.047,
+              0.448
+            ],
+            "status": "measured",
+            "headline": true
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG02": {
+          "rust": {
+            "labelled": 5,
+            "tp": 1,
+            "fp": 4,
+            "unclear": 0,
+            "n": 5,
+            "precision": 0.2,
+            "wilson95": [
+              0.0362,
+              0.6245
+            ],
+            "status": "measured",
+            "headline": true
+          },
+          "typescript": {
+            "labelled": 25,
+            "tp": 7,
+            "fp": 18,
+            "unclear": 0,
+            "n": 25,
+            "precision": 0.28,
+            "wilson95": [
+              0.1428,
+              0.4758
+            ],
+            "status": "measured",
+            "headline": true
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG03": {
+          "rust": {
+            "labelled": 1,
+            "tp": 0,
+            "fp": 1,
+            "unclear": 0,
+            "n": 1,
+            "precision": 0.0,
+            "wilson95": [
+              0.0,
+              0.7935
+            ],
+            "status": "measured",
+            "headline": false
+          },
+          "typescript": {
+            "labelled": 1,
+            "tp": 0,
+            "fp": 1,
+            "unclear": 0,
+            "n": 1,
+            "precision": 0.0,
+            "wilson95": [
+              0.0,
+              0.7935
+            ],
+            "status": "measured",
+            "headline": false
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG04": {
+          "rust": {
+            "labelled": 14,
+            "tp": 0,
+            "fp": 14,
+            "unclear": 0,
+            "n": 14,
+            "precision": 0.0,
+            "wilson95": [
+              0.0,
+              0.2153
+            ],
+            "status": "measured",
+            "headline": true
+          },
+          "typescript": {
+            "labelled": 2,
+            "tp": 0,
+            "fp": 2,
+            "unclear": 0,
+            "n": 2,
+            "precision": 0.0,
+            "wilson95": [
+              0.0,
+              0.6576
+            ],
+            "status": "measured",
+            "headline": false
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG05": {
+          "rust": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          },
+          "typescript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG06": {
+          "rust": {
+            "labelled": 6,
+            "tp": 0,
+            "fp": 6,
+            "unclear": 0,
+            "n": 6,
+            "precision": 0.0,
+            "wilson95": [
+              0.0,
+              0.3903
+            ],
+            "status": "measured",
+            "headline": true
+          },
+          "typescript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG08": {
+          "rust": {
+            "labelled": 6,
+            "tp": 6,
+            "fp": 0,
+            "unclear": 0,
+            "n": 6,
+            "precision": 1.0,
+            "wilson95": [
+              0.6097,
+              1.0
+            ],
+            "status": "measured",
+            "headline": true
+          },
+          "typescript": {
+            "labelled": 24,
+            "tp": 23,
+            "fp": 1,
+            "unclear": 0,
+            "n": 24,
+            "precision": 0.9583,
+            "wilson95": [
+              0.7976,
+              0.9926
+            ],
+            "status": "measured",
+            "headline": true
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG09": {
+          "rust": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          },
+          "typescript": {
+            "labelled": 7,
+            "tp": 7,
+            "fp": 0,
+            "unclear": 0,
+            "n": 7,
+            "precision": 1.0,
+            "wilson95": [
+              0.6457,
+              1.0
+            ],
+            "status": "measured",
+            "headline": true
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG10": {
+          "rust": {
+            "labelled": 2,
+            "tp": 0,
+            "fp": 2,
+            "unclear": 0,
+            "n": 2,
+            "precision": 0.0,
+            "wilson95": [
+              0.0,
+              0.6576
+            ],
+            "status": "measured",
+            "headline": false
+          },
+          "typescript": {
+            "labelled": 1,
+            "tp": 0,
+            "fp": 1,
+            "unclear": 0,
+            "n": 1,
+            "precision": 0.0,
+            "wilson95": [
+              0.0,
+              0.7935
+            ],
+            "status": "measured",
+            "headline": false
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        },
+        "RG11": {
+          "rust": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          },
+          "typescript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          },
+          "javascript": {
+            "labelled": 0,
+            "tp": 0,
+            "fp": 0,
+            "unclear": 0,
+            "n": 0,
+            "precision": null,
+            "wilson95": null,
+            "status": "unmeasured",
+            "headline": false,
+            "reason": "the rule raised no flag on a PoC in this language"
+          }
+        }
+      }
+    },
+    "pooled": {
+      "heldout": {
+        "labelled": 106,
+        "tp": 46,
+        "fp": 60,
+        "unclear": 0,
+        "n": 106,
+        "precision": 0.434,
+        "wilson95": [
+          0.3436,
+          0.529
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "dev": {
+        "labelled": 91,
+        "tp": 35,
+        "fp": 56,
+        "unclear": 0,
+        "n": 91,
+        "precision": 0.3846,
+        "wilson95": [
+          0.2913,
+          0.4873
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "all": {
+        "labelled": 197,
+        "tp": 81,
+        "fp": 116,
+        "unclear": 0,
+        "n": 197,
+        "precision": 0.4112,
+        "wilson95": [
+          0.3448,
+          0.4809
+        ],
+        "status": "measured",
+        "headline": true
+      }
+    },
+    "pooled_by_rule_heldout": {
+      "RG01": {
+        "labelled": 12,
+        "tp": 2,
+        "fp": 10,
+        "unclear": 0,
+        "n": 12,
+        "precision": 0.1667,
+        "wilson95": [
+          0.047,
+          0.448
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "RG02": {
+        "labelled": 30,
+        "tp": 8,
+        "fp": 22,
+        "unclear": 0,
+        "n": 30,
+        "precision": 0.2667,
+        "wilson95": [
+          0.1418,
+          0.4445
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "RG03": {
+        "labelled": 2,
+        "tp": 0,
+        "fp": 2,
+        "unclear": 0,
+        "n": 2,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.6576
+        ],
+        "status": "measured",
+        "headline": false
+      },
+      "RG04": {
+        "labelled": 16,
+        "tp": 0,
+        "fp": 16,
+        "unclear": 0,
+        "n": 16,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.1936
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "RG05": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "n": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "headline": false
+      },
+      "RG06": {
+        "labelled": 6,
+        "tp": 0,
+        "fp": 6,
+        "unclear": 0,
+        "n": 6,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.3903
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "RG08": {
+        "labelled": 30,
+        "tp": 29,
+        "fp": 1,
+        "unclear": 0,
+        "n": 30,
+        "precision": 0.9667,
+        "wilson95": [
+          0.8333,
+          0.9941
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "RG09": {
+        "labelled": 7,
+        "tp": 7,
+        "fp": 0,
+        "unclear": 0,
+        "n": 7,
+        "precision": 1.0,
+        "wilson95": [
+          0.6457,
+          1.0
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "RG10": {
+        "labelled": 3,
+        "tp": 0,
+        "fp": 3,
+        "unclear": 0,
+        "n": 3,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.5615
+        ],
+        "status": "measured",
+        "headline": false
+      },
+      "RG11": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "n": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "headline": false
+      }
+    },
+    "pooled_by_rule_all": {
+      "RG01": {
+        "labelled": 17,
+        "tp": 3,
+        "fp": 14,
+        "unclear": 0,
+        "n": 17,
+        "precision": 0.1765,
+        "wilson95": [
+          0.0619,
+          0.4103
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "RG02": {
+        "labelled": 63,
+        "tp": 13,
+        "fp": 50,
+        "unclear": 0,
+        "n": 63,
+        "precision": 0.2063,
+        "wilson95": [
+          0.1248,
+          0.3217
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "RG03": {
+        "labelled": 7,
+        "tp": 0,
+        "fp": 7,
+        "unclear": 0,
+        "n": 7,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.3543
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "RG04": {
+        "labelled": 29,
+        "tp": 0,
+        "fp": 29,
+        "unclear": 0,
+        "n": 29,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.117
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "RG05": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "n": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "headline": false
+      },
+      "RG06": {
+        "labelled": 8,
+        "tp": 0,
+        "fp": 8,
+        "unclear": 0,
+        "n": 8,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.3244
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "RG08": {
+        "labelled": 56,
+        "tp": 54,
+        "fp": 2,
+        "unclear": 0,
+        "n": 56,
+        "precision": 0.9643,
+        "wilson95": [
+          0.8788,
+          0.9902
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "RG09": {
+        "labelled": 11,
+        "tp": 11,
+        "fp": 0,
+        "unclear": 0,
+        "n": 11,
+        "precision": 1.0,
+        "wilson95": [
+          0.7412,
+          1.0
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "RG10": {
+        "labelled": 6,
+        "tp": 0,
+        "fp": 6,
+        "unclear": 0,
+        "n": 6,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.3903
+        ],
+        "status": "measured",
+        "headline": true
+      },
+      "RG11": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "n": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "headline": false
+      }
+    },
+    "flags_per_source_heldout": {
+      "ackee-bootcamp": 8,
+      "cs-0xsh1mm3r--solanaplayground": 5,
+      "cs-alphar2--soteria": 5,
+      "cs-corelia-academy--solana-bootcamp": 2,
+      "cs-cybwithflourish--vulnerable.so": 2,
+      "cs-danielasaboro--solana_badger": 26,
+      "cs-e-okelloh--praxis": 4,
+      "cs-justuzair--audits": 2,
+      "cs-kartikvyas1604--safemask": 3,
+      "cs-nathfavour--bytesunchecked": 1,
+      "cs-neocryptoquant--solana-security-template": 5,
+      "cs-parthrathix0--verified-anchor": 12,
+      "cs-sadiqsaidu--solana-security-patterns": 2,
+      "cs-seann2003--lending-audit": 5,
+      "cs-solizardking--clawd-percolator": 1,
+      "cs-tadeoaguilar--solanalearn": 1,
+      "cs-zsh28--rektoff": 4,
+      "solana-security-patterns": 18
+    }
+  },
+  "rq3_outcome": {
+    "status": "exploratory: about ten units; no predictive claim is made",
+    "primary_platform_report": {
+      "table": {
+        "valid": {
+          "flagged": 0,
+          "not_flagged": 4
+        },
+        "invalid": {
+          "flagged": 0,
+          "not_flagged": 6
+        }
+      },
+      "flag_rate_valid": {
+        "k": 0,
+        "n": 4,
+        "rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.4899
+        ]
+      },
+      "flag_rate_invalid": {
+        "k": 0,
+        "n": 6,
+        "rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.3903
+        ]
+      },
+      "fisher_two_sided_p": 1.0,
+      "risk_difference_valid_minus_invalid": {
+        "difference": 0.0,
+        "ci95": [
+          -0.3903,
+          0.4899
+        ]
+      },
+      "units": [
+        "J-orderly-066",
+        "J-orderly-078",
+        "J-orderly-080",
+        "J-orderly-085",
+        "J-orderly-112",
+        "J-orderly-115",
+        "J-orderly-140",
+        "J-pump-H02",
+        "J-pump-M03",
+        "J-woofi-070"
+      ]
+    },
+    "readable_only": {
+      "table": {
+        "valid": {
+          "flagged": 0,
+          "not_flagged": 0
+        },
+        "invalid": {
+          "flagged": 0,
+          "not_flagged": 0
+        }
+      },
+      "flag_rate_valid": {
+        "k": 0,
+        "n": 0,
+        "rate": null,
+        "wilson95": null
+      },
+      "flag_rate_invalid": {
+        "k": 0,
+        "n": 0,
+        "rate": null,
+        "wilson95": null
+      },
+      "fisher_two_sided_p": null,
+      "risk_difference_valid_minus_invalid": {
+        "difference": null,
+        "ci95": null,
+        "note": "a group is empty"
+      },
+      "units": []
+    },
+    "sensitivity_with_self_reported": {
+      "table": {
+        "valid": {
+          "flagged": 1,
+          "not_flagged": 5
+        },
+        "invalid": {
+          "flagged": 0,
+          "not_flagged": 6
+        }
+      },
+      "flag_rate_valid": {
+        "k": 1,
+        "n": 6,
+        "rate": 0.1667,
+        "wilson95": [
+          0.0301,
+          0.5635
+        ]
+      },
+      "flag_rate_invalid": {
+        "k": 0,
+        "n": 6,
+        "rate": 0.0,
+        "wilson95": [
+          0.0,
+          0.3903
+        ]
+      },
+      "fisher_two_sided_p": 1.0,
+      "risk_difference_valid_minus_invalid": {
+        "difference": 0.1667,
+        "ci95": [
+          -0.2468,
+          0.5635
+        ]
+      },
+      "units": [
+        "J-orderly-066",
+        "J-orderly-078",
+        "J-orderly-080",
+        "J-orderly-085",
+        "J-orderly-112",
+        "J-orderly-115",
+        "J-orderly-140",
+        "J-pump-H02",
+        "J-pump-M03",
+        "J-w3m-chainlink",
+        "J-w3m-onre",
+        "J-woofi-070"
+      ]
+    }
+  },
+  "rq4_negative_control": {
+    "pairs": [
+      {
+        "exploit": "X-taented9-01",
+        "secure": "NC-taented9-01",
+        "exploit_flags": 5,
+        "secure_flags": 0,
+        "exploit_tests": 6,
+        "secure_tests": 13,
+        "exploit_rules": {
+          "RG01": 5
+        },
+        "secure_rules": {}
+      },
+      {
+        "exploit": "X-taented9-02",
+        "secure": "NC-taented9-02",
+        "exploit_flags": 8,
+        "secure_flags": 0,
+        "exploit_tests": 6,
+        "secure_tests": 9,
+        "exploit_rules": {
+          "RG01": 2,
+          "RG08": 6
+        },
+        "secure_rules": {}
+      },
+      {
+        "exploit": "X-taented9-03",
+        "secure": "NC-taented9-03",
+        "exploit_flags": 6,
+        "secure_flags": 0,
+        "exploit_tests": 6,
+        "secure_tests": 9,
+        "exploit_rules": {
+          "RG08": 6
+        },
+        "secure_rules": {}
+      },
+      {
+        "exploit": "X-taented9-04",
+        "secure": "NC-taented9-04",
+        "exploit_flags": 5,
+        "secure_flags": 8,
+        "exploit_tests": 5,
+        "secure_tests": 8,
+        "exploit_rules": {
+          "RG08": 5
+        },
+        "secure_rules": {
+          "RG08": 8
+        }
+      },
+      {
+        "exploit": "X-taented9-05",
+        "secure": "NC-taented9-05",
+        "exploit_flags": 5,
+        "secure_flags": 0,
+        "exploit_tests": 5,
+        "secure_tests": 6,
+        "exploit_rules": {
+          "RG08": 5
+        },
+        "secure_rules": {}
+      }
+    ],
+    "exploit_units_flagged": {
+      "k": 5,
+      "n": 5,
+      "rate": 1.0,
+      "wilson95": [
+        0.5655,
+        1.0
+      ]
+    },
+    "secure_units_flagged": {
+      "k": 1,
+      "n": 5,
+      "rate": 0.2,
+      "wilson95": [
+        0.0362,
+        0.6245
+      ]
+    },
+    "exploit_flags_per_checked_test": 1.0357,
+    "secure_flags_per_checked_test": 0.1778,
+    "exploit_flags": 29,
+    "secure_flags": 8,
+    "exploit_tests": 28,
+    "secure_tests": 45,
+    "expectation_held": true
+  },
+  "rq5_comparison": {
+    "population_difference": "P1: public test suites (feature tests of four repositories). This study: public PoCs (judged contest PoCs and exploit-by-construction tests). The populations are not pooled.",
+    "cells": {
+      "RG01/typescript": {
+        "p1_test_suites": null,
+        "poc": {
+          "tp": 2,
+          "n": 12,
+          "precision": 0.1667,
+          "wilson95": [
+            0.047,
+            0.448
+          ],
+          "headline": true
+        }
+      },
+      "RG02/rust": {
+        "p1_test_suites": {
+          "tp": 0,
+          "n": 21,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.1546
+          ]
+        },
+        "poc": {
+          "tp": 1,
+          "n": 5,
+          "precision": 0.2,
+          "wilson95": [
+            0.0362,
+            0.6245
+          ],
+          "headline": true
+        }
+      },
+      "RG02/typescript": {
+        "p1_test_suites": {
+          "tp": 0,
+          "n": 8,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.3244
+          ]
+        },
+        "poc": {
+          "tp": 7,
+          "n": 25,
+          "precision": 0.28,
+          "wilson95": [
+            0.1428,
+            0.4758
+          ],
+          "headline": true
+        }
+      },
+      "RG02/javascript": {
+        "p1_test_suites": {
+          "tp": 0,
+          "n": 5,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.4345
+          ]
+        },
+        "poc": null
+      },
+      "RG03/rust": {
+        "p1_test_suites": {
+          "tp": 0,
+          "n": 6,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.3903
+          ]
+        },
+        "poc": {
+          "tp": 0,
+          "n": 1,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.7935
+          ],
+          "headline": false
+        }
+      },
+      "RG03/typescript": {
+        "p1_test_suites": {
+          "tp": 0,
+          "n": 2,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.6576
+          ]
+        },
+        "poc": {
+          "tp": 0,
+          "n": 1,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.7935
+          ],
+          "headline": false
+        }
+      },
+      "RG04/rust": {
+        "p1_test_suites": {
+          "tp": 0,
+          "n": 6,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.3903
+          ]
+        },
+        "poc": {
+          "tp": 0,
+          "n": 14,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.2153
+          ],
+          "headline": true
+        }
+      },
+      "RG04/typescript": {
+        "p1_test_suites": null,
+        "poc": {
+          "tp": 0,
+          "n": 2,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.6576
+          ],
+          "headline": false
+        }
+      },
+      "RG06/rust": {
+        "p1_test_suites": null,
+        "poc": {
+          "tp": 0,
+          "n": 6,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.3903
+          ],
+          "headline": true
+        }
+      },
+      "RG08/rust": {
+        "p1_test_suites": {
+          "tp": 5,
+          "n": 5,
+          "precision": 1.0,
+          "wilson95": [
+            0.5655,
+            1.0
+          ]
+        },
+        "poc": {
+          "tp": 6,
+          "n": 6,
+          "precision": 1.0,
+          "wilson95": [
+            0.6097,
+            1.0
+          ],
+          "headline": true
+        }
+      },
+      "RG08/typescript": {
+        "p1_test_suites": {
+          "tp": 5,
+          "n": 5,
+          "precision": 1.0,
+          "wilson95": [
+            0.5655,
+            1.0
+          ]
+        },
+        "poc": {
+          "tp": 23,
+          "n": 24,
+          "precision": 0.9583,
+          "wilson95": [
+            0.7976,
+            0.9926
+          ],
+          "headline": true
+        }
+      },
+      "RG08/javascript": {
+        "p1_test_suites": {
+          "tp": 1,
+          "n": 1,
+          "precision": 1.0,
+          "wilson95": [
+            0.2065,
+            1.0
+          ]
+        },
+        "poc": null
+      },
+      "RG09/rust": {
+        "p1_test_suites": {
+          "tp": 1,
+          "n": 1,
+          "precision": 1.0,
+          "wilson95": [
+            0.2065,
+            1.0
+          ]
+        },
+        "poc": null
+      },
+      "RG09/typescript": {
+        "p1_test_suites": null,
+        "poc": {
+          "tp": 7,
+          "n": 7,
+          "precision": 1.0,
+          "wilson95": [
+            0.6457,
+            1.0
+          ],
+          "headline": true
+        }
+      },
+      "RG10/rust": {
+        "p1_test_suites": {
+          "tp": 0,
+          "n": 2,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.6576
+          ]
+        },
+        "poc": {
+          "tp": 0,
+          "n": 2,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.6576
+          ],
+          "headline": false
+        }
+      },
+      "RG10/typescript": {
+        "p1_test_suites": {
+          "tp": 0,
+          "n": 1,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.7935
+          ]
+        },
+        "poc": {
+          "tp": 0,
+          "n": 1,
+          "precision": 0.0,
+          "wilson95": [
+            0.0,
+            0.7935
+          ],
+          "headline": false
+        }
+      }
+    },
+    "pooled": {
+      "p1_test_suites": {
+        "k": 12,
+        "n": 63,
+        "rate": 0.1905,
+        "wilson95": [
+          0.1125,
+          0.3041
+        ]
+      },
+      "poc_heldout": {
+        "k": 46,
+        "n": 106,
+        "rate": 0.434,
+        "wilson95": [
+          0.3436,
+          0.529
+        ]
+      }
+    }
+  },
+  "agreement": {
+    "schema": "realism-gate.solana-poc-agreement/v1",
+    "date": "2026-11-25",
+    "seed": "rg-solana-poc-agreement-2026-11-25",
+    "sample": 30,
+    "sample_rule": "the first 30 labelled flags (both splits) ordered by sha256(seed + ':' + flag_id)",
+    "labels_file": "eval/solana-poc/agreement/second-pass.jsonl",
+    "reader": "one blinded second AI reader (a read-only subagent) with the same rubric and source, no first-pass labels; not independent human validation",
+    "raw": {
+      "k": 29,
+      "n": 30,
+      "rate": 0.9667,
+      "wilson95": [
+        0.8333,
+        0.9941
+      ],
+      "agree": 29,
+      "kappa": 0.9268
+    },
+    "final": {
+      "k": 30,
+      "n": 30,
+      "rate": 1.0,
+      "wilson95": [
+        0.8865,
+        1.0
+      ],
+      "agree": 30,
+      "kappa": 1.0
+    },
+    "consistency_corrections": [
+      {
+        "id": "525c45d3bdaad966",
+        "split": "heldout",
+        "from": "false-positive",
+        "to": "true-positive"
+      },
+      {
+        "id": "66f49cf4edacad23",
+        "split": "dev",
+        "from": "false-positive",
+        "to": "true-positive"
+      }
+    ],
+    "consistency_note": "Outside the sample, the same reading was applied to the two other flags where the attacker drains its own account as its authority. These corrections were made after seeing the second pass; the pre-correction labels are in commits 49abd98 and 9b1ced6.",
+    "disagreements": [
+      {
+        "id": "d45fa249f66d98cb",
+        "rule": "RG01",
+        "split": "heldout",
+        "primary_original": "false-positive",
+        "second": "true-positive",
+        "resolution": "The primary label was corrected to true-positive. The source account is initialised with authority = attacker and the attacker signs the transfer, so the test moves the attacker's own points and proves only what the authority holder can do; its claim (a transfer without the victim signing) is not shown. RG01's consequence holds. The other four RG01 'attacker initialises its own account' flags stay false-positive: there the own account is the attack input, not the account whose authority the claim says is bypassed."
+      }
+    ]
+  },
+  "unmeasured_rules": [
+    "RG05",
+    "RG11"
+  ],
+  "not_claimed": [
+    "Not recall: a defect the rules do not flag is not counted.",
+    "Not a property of later versions; one tree at one commit (1.0.4).",
+    "Not predictive of judging outcomes; RQ3 is exploratory.",
+    "Not independent human validation: one AI-assisted reader and one AI second pass.",
+    "Flags are clustered within units and sources; the Wilson intervals assume independence and are too narrow for clustered data."
+  ]
+}
