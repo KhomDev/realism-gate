@@ -128,12 +128,19 @@ def arena_units() -> list[dict]:
             outcome = "invalid"
         else:
             outcome = "unlabelled"
+        sev_label = next((l for l in labels if l in ("Critical", "High", "Medium", "Low", "info")), None)
         m = re.search(r"\[(Critical|High|Medium|Low|info)\]", it["title"], re.I)
-        if m:
-            sev, sev_src = m.group(1).capitalize(), "issue-title-bracket"
+        sev_title = m.group(1).capitalize() if m else None
+        if sev_label:
+            sev, sev_src = sev_label, "issue-label"
+            conflict = bool(sev_title and sev_title.lower() != sev_label.lower())
         else:
-            sev = next((l for l in labels if l in ("Critical", "High", "Medium", "Low", "info")), "unstated")
-            sev_src = "issue-label"
+            sev = sev_title or "unstated"
+            sev_src = "issue-title-bracket-fallback" if sev_title else "unstated"
+            conflict = False
+        evidence = "Maintainer labels: " + ", ".join(labels)
+        if sev_title and (conflict or not sev_label):
+            evidence += f"; title says [{sev_title}]"
         body = it["body"]
         units.append({
             "id": f"J-arena-{num}",
@@ -152,9 +159,11 @@ def arena_units() -> list[dict]:
             }],
             "outcome": outcome,
             "severity": sev,
+            "severity_title": sev_title,
+            "severity_conflict": conflict,
             "severity_source": sev_src,
             "outcome_source": "arena-maintainer-labels",
-            "outcome_evidence": "Maintainer labels: " + ", ".join(labels),
+            "outcome_evidence": evidence,
             "outcome_url": ARENA_ISSUE_URL.format(num),
             "license": "none",
             "unlicensed": True,
@@ -223,6 +232,12 @@ def rustfund_units() -> list[dict]:
             seen_issue.add(it["id"])
             idx, lang, code = hb[0]
             dup = it["id"] != g["selectedIssueId"]
+            tm = re.search(r"[\[(](Critical|High|Medium|Low|Info)[\])]", it.get("title") or "", re.I)
+            sev_title = tm.group(1).capitalize() if tm else None
+            conflict = bool(sev_title and sev_title.lower() != sev.lower())
+            evidence = f'Results page heading "{sev.capitalize()} Risk Findings"; submission in the judged report'
+            if conflict:
+                evidence += f"; title says [{sev_title}]"
             units.append({
                 "id": f"J-ch-rustfund-{it['id']}",
                 "source": "codehawks-rustfund",
@@ -241,11 +256,13 @@ def rustfund_units() -> list[dict]:
                 }],
                 "outcome": "valid",
                 "severity": sev.capitalize(),
+                "severity_title": sev_title,
+                "severity_conflict": conflict,
                 "severity_source": "results-group-severity-field",
                 "duplicate_in_group": dup,
                 "selected_issue": g["selectedIssueId"],
                 "outcome_source": "codehawks-results",
-                "outcome_evidence": f'Results page heading "{sev.capitalize()} Risk Findings"; submission in the judged report',
+                "outcome_evidence": evidence,
                 "outcome_url": RUSTFUND_PAGE,
                 "license": "none",
                 "unlicensed": True,
@@ -282,6 +299,8 @@ def c4_units() -> list[dict]:
         }],
         "outcome": "valid",
         "severity": "Low",
+        "severity_title": None,
+        "severity_conflict": False,
         "severity_source": "report-section-heading",
         "outcome_source": "code4rena-report",
         "outcome_evidence": 'Report lists "L-07" under "Low Risk" with an executable Rust test',

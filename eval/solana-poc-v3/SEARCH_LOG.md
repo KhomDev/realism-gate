@@ -108,6 +108,14 @@ J by split: DEV 18, V1 14, V2 16, FINAL 11.
 J share by source: RustFund 79.66%, Arena 18.64%, Code4rena 1.69%.
 J share by platform: CodeHawks 79.66%, Arena 18.64%, Code4rena 1.69%.
 
+**Severity source:** the published outcome is the maintainer label, not the
+submitter's title. Six Arena units carry a conflicting title bracket (144
+High/Critical, 147 Low/Medium, 201 Low/High, 203 Medium/High, 210 info/Medium,
+280 info/Low); `severity` follows the label, `severity_title` and
+`severity_conflict` record the author's text, and `outcome_evidence` quotes
+both. Issues 270 and 281 have no severity label and use the title bracket as a
+documented fallback.
+
 **Distinct judged findings:** the 47 RustFund submissions span only 8 report
 groups (16+8+8+5+4+3+2+1 submissions), so the corpus has **20 distinct J
 findings**: Arena 11 + RustFund 8 + Code4rena 1. Each RustFund group has one

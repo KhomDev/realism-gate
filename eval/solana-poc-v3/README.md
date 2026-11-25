@@ -18,8 +18,14 @@ Every unit carries `group_id`, `group_size` and `duplicate_of` when it belongs
 to a multi-submission judging group (RustFund: one representative per group,
 first by sorted unit id; the other 39 point at it). Arena and Code4rena J units
 are their own finding group (`group_size` 1). `severity_source` records where
-the J severity came from: the Arena issue-title bracket, the CodeHawks results
-group field, or the Code4rena report heading.
+the J severity came from. The published judge/platform severity always wins over
+author text: Arena uses the maintainer severity label (`issue-label`; only when
+no severity label exists does it fall back to the title bracket as
+`issue-title-bracket-fallback`), RustFund uses the results group field, and
+Code4rena uses the report heading. `severity_title` keeps the submitter's title
+bracket and `severity_conflict` marks the six Arena units where it differs from
+the judge (144, 147, 201, 203, 210, 280); `outcome_evidence` quotes both when
+they conflict.
 
 Files: `inventory.json` (units, pins, splits, outcomes), `build_inventory.py`
 (rebuilds and `--check`s it from the cache), `fetch.py` (fetches every pin;
