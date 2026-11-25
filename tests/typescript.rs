@@ -2,7 +2,7 @@
 //! traced, where findings are placed, and how suppressions, the CLI and the
 //! rule pages apply to them.
 
-use realism_gate::Severity::Warn;
+use realism_gate::Severity::Note;
 use realism_gate::engine::{Options, Report, analyze};
 use realism_gate::project::{Project, discover};
 use std::path::{Path, PathBuf};
@@ -57,7 +57,7 @@ fn a_helper_in_a_shared_file_is_reported_at_the_call() {
         .collect();
     assert_eq!(
         got,
-        vec![("RG02", Warn, "tests/fixtures/ts_shared/exploit.ts", 15)]
+        vec![("RG02", Note, "tests/fixtures/ts_shared/exploit.ts", 15)]
     );
     assert!(
         r.findings[0]
@@ -84,7 +84,8 @@ fn a_suppression_needs_a_reason_in_typescript_too() {
     let rg09 = r.findings.iter().find(|f| f.rule == "RG09").unwrap();
     assert!(rg09.is_active());
     assert_eq!(rg09.ignored_suppression, Some(18));
-    assert_eq!((r.summary.suppressed, r.summary.errors), (1, 1));
+    // RG09 is a warning on Solana (severity floor), so it is not an error.
+    assert_eq!((r.summary.suppressed, r.summary.errors), (1, 0));
 }
 
 #[test]

@@ -129,3 +129,23 @@ say a little more than P1's, but it is still not a population estimate.
    depth-bounded. The code freeze is re-recorded at `f51ed17` with the binary
    sha in "What is frozen". No v2 unit was labelled, and no v2 flag was
    inspected by the author, before the re-freeze.
+
+## Round 2 (1.3.0): two fixes developed on the dev split only
+
+After the 1.2.0 run, the v2 **dev split** flags were read (37 flags; the
+held-out 40 were not). Two false positives were fixed:
+
+1. A helper file passed alongside a PoC was wrapped as `it("fragment")` and
+   flagged RG08. Script mode now requires an executable top-level statement or
+   a `main` call, and only the unit's first file is auto-wrapped.
+2. A test title saying the attack is blocked (`blocks`, `blocked`, `denies`,
+   `cannot`, `does not allow`, `not allowed`, `must fail`) is a control test,
+   so the identity/state rules do not fire on it; a leading check mark (the
+   secure-suite convention) is included.
+
+No rule was changed on the basis of a held-out flag. Round 2 freezes at
+commit `fcba51d` with binary
+`795211eccc5ade1327bd0285c6e52543136cf7cd92f3b23e9cecfe8e7ee5bad8`. The
+held-out split is labelled first, then dev, under the same rubric. The 1.2.0
+numbers and this round's numbers are reported separately; the 1.2.0 run stays
+in `runs/v1.2.0.jsonl`.

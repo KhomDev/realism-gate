@@ -249,6 +249,15 @@ pub fn is_control(trace: &Trace<'_>) -> bool {
         "should fail",
         "should_fail",
         "negative",
+        "blocks",
+        "blocked",
+        "denies",
+        "cannot",
+        "does not allow",
+        "not allowed",
+        "must fail",
+        "✓",
+        "✔",
     ]
     .iter()
     .any(|w| title.contains(w))
@@ -433,7 +442,7 @@ fn privileged_signer(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
         let Some((signer, why)) = hit else { continue };
         out.push(tx_raw(
             "RG02",
-            Severity::Warn,
+            Severity::Note,
             ctx.op(tx.op),
             format!(
                 "The exploit sends a transaction signed by `{signer}`: {why}. An attacker cannot produce that signature. Declare the role in an operator realism.yaml outside the repo under review if the claim relies on that role acting."
@@ -478,7 +487,7 @@ fn deployer_is_attacker(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
         let gated = instruction_looks_gated(&instruction_text);
         let (severity, message) = if gated {
             (
-                Severity::Warn,
+                Severity::Note,
                 format!(
                     "This exploit transaction is signed only by {}, which also signed the transactions that set the protocol up, and the instruction is named like an access-controlled call. If setting up gave that key any authority, the PoC proves what the deployer can do. Sign the exploit with a separate attacker keypair.",
                     names.join(" and ")
@@ -961,7 +970,7 @@ fn no_assertion(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
         )
     } else {
         (
-            Severity::Error,
+            Severity::Warn,
             format!(
                 "`{}` contains no assertion. It passes whatever the program does; {succeeds} only checks that it did not fail.",
                 test.name
@@ -1031,7 +1040,7 @@ fn tautological_assertion(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
         let Some(reason) = reason else { continue };
         out.push(raw(
             "RG09",
-            Severity::Error,
+            Severity::Warn,
             op,
             format!("This assertion cannot fail: {reason}."),
             &c.expr.text,

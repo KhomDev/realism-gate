@@ -479,7 +479,12 @@ fn load_project(
             ext.as_str(),
             "rs" | "ts" | "mts" | "cts" | "tsx" | "js" | "mjs" | "cjs"
         );
-        let wrap = scripty && !has_top_level_test(&src, &ext) && (force || is_explicit);
+        // Auto-detection is for the unit's main file, not for an imported
+        // helper that happens to have no test: otherwise a helper such as
+        // `helpers.ts` is wrapped as `it("fragment")` and flagged RG08.
+        let primary = files.first().is_some_and(|p| p == f);
+        let wrap =
+            scripty && !has_top_level_test(&src, &ext) && (force || (is_explicit && primary));
         if wrap {
             fragment = true;
             let wrapped = wrap_fragment(&src, &ext);
@@ -910,6 +915,12 @@ fn explain_text(r: &rules::RuleInfo) -> String {
         r.why,
         r.fix
     );
+    if r.solana_severity() != r.severity {
+        out.push_str(&format!(
+            "\nOn Solana (Rust and Anchor TypeScript tests): {} (severity floor, docs/precision.md)\n",
+            r.solana_severity().as_str()
+        ));
+    }
     out.push_str(&format!(
         "\nMeasured precision\n  {}\n  Population: Rust and Anchor TypeScript = public test \
          suites, not PoCs; Solidity = fresh corpus; `unmeasured` is not 100%.\n",
@@ -976,4 +987,46 @@ fn explain_text(r: &rules::RuleInfo) -> String {
     }
     out.push_str(&format!("\n{}\n", render::rule_url(r.id)));
     out
+}
+
+#[cfg(test)]
+mod load_tests {
+    use super::*;
+
+    #[test]
+    fn a_helper_with_no_test_is_not_wrapped_as_a_fragment() {
+        let dir = std::env::temp_dir().join(format!("rg-load-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let main = dir.join("exploit.ts");
+        let helper = dir.join("helpers.ts");
+        std::fs::write(
+            &main,
+            "import * as anchor from \"@coral-xyz/anchor\";\nit(\"drains\", async () => { assert.ok(true); });\n",
+        )
+        .unwrap();
+        std::fs::write(
+            &helper,
+            "import * as anchor from \"@coral-xyz/anchor\";\nexport const x = 1;\n",
+        )
+        .unwrap();
+        let files = vec![main, helper];
+        let (project, _fragment) = load_project(&files, &dir, false, &files).unwrap();
+        let helper_unit = project
+            .units
+            .iter()
+            .find(|u| u.path.ends_with("helpers.ts"))
+            .expect("the helper is parsed");
+        assert!(
+            helper_unit
+                .solana
+                .as_ref()
+                .unwrap()
+                .functions
+                .iter()
+                .all(|f| !f.test),
+            "the helper was wrapped as a test"
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 }

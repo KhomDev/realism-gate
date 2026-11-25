@@ -1,0 +1,139 @@
+{
+  "schema": "realism-gate.measured/v1",
+  "date": "2026-11-25",
+  "population": "public Solana PoCs (held-out split; eval/solana-poc-v2): judged contest PoCs and exploit-by-construction tests. Cells with n<5 are counts only. The corpus and the round are described in eval/solana-poc-v2/RESULTS.md.",
+  "source": "eval/solana-poc-v2/labels/heldout.jsonl + flags/v1.3.0.jsonl",
+  "frozen_rule_commit": "fcba51d",
+  "frozen_version": "1.3.0",
+  "rules": {
+    "RG02": {
+      "rust": {
+        "labelled": 13,
+        "tp": 0,
+        "fp": 13,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.2281
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc-v2)"
+      },
+      "typescript": {
+        "labelled": 3,
+        "tp": 0,
+        "fp": 3,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.5615
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc-v2)"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no labelled flag on a PoC in this language"
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "the rule raised no labelled flag on a PoC in this language"
+      }
+    },
+    "RG03": {
+      "rust": {
+        "labelled": 1,
+        "tp": 0,
+        "fp": 1,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc-v2)"
+      },
+      "typescript": {
+        "labelled": 4,
+        "tp": 0,
+        "fp": 4,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.4899
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc-v2)"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no labelled flag on a PoC in this language"
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "the rule raised no labelled flag on a PoC in this language"
+      }
+    },
+    "RG08": {
+      "rust": {
+        "labelled": 10,
+        "tp": 10,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.7225,
+          1.0
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc-v2)"
+      },
+      "typescript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no labelled flag on a PoC in this language"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no labelled flag on a PoC in this language"
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "the rule raised no labelled flag on a PoC in this language"
+      }
+    },
+    "RG09": {
+      "rust": {
+        "status": "unmeasured",
+        "reason": "the rule raised no labelled flag on a PoC in this language"
+      },
+      "typescript": {
+        "labelled": 1,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 1,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc-v2)"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no labelled flag on a PoC in this language"
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "the rule raised no labelled flag on a PoC in this language"
+      }
+    }
+  }
+}
