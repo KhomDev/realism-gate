@@ -294,6 +294,20 @@ pub fn event<'p>(c: &Call<'p>) -> Option<Event<'p>> {
             }
             return Some(Event::Harness);
         }
+        // The Solana PoC frameworks (Neodyme's poc-framework, OtterSec's
+        // solana-poc-framework): `LocalEnvironment::builder()` builds a local
+        // cluster; `Environment::devnet_client()` et al. read a live one.
+        if owner == "LocalEnvironment" && matches!(last, "builder" | "start" | "new") {
+            return Some(Event::Harness);
+        }
+        if owner == "Environment"
+            && matches!(
+                last,
+                "devnet_client" | "testnet_client" | "localhost_client"
+            )
+        {
+            return Some(Event::LiveRpc);
+        }
         if matches!(
             (owner, last),
             ("AnchorProvider", "env" | "local" | "new")
@@ -347,6 +361,14 @@ pub fn event<'p>(c: &Call<'p>) -> Option<Event<'p>> {
         (m, n) if MOLLUSK_RUNS.contains(&m) && n >= 1 => Some(tx(None, arg(0))),
         // anchor-litesvm: ctx.execute_instruction(ix, &[&user])
         ("execute_instruction" | "execute_instructions", 2) => Some(tx(arg(1), arg(0))),
+        // Solana PoC frameworks: env.execute_as_transaction(&[ix], &[&signer])
+        (
+            "execute_as_transaction"
+            | "execute_as_transactions"
+            | "execute_transactions"
+            | "execute_transaction",
+            2,
+        ) => Some(tx(arg(1), arg(0))),
         // web3.js: connection.sendTransaction(tx, [signers])
         ("send_transaction", 2) => Some(tx(arg(1), arg(0))),
         // Anchor: provider.sendAndConfirm(tx, [signers]), signed by the wallet

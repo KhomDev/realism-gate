@@ -44,6 +44,10 @@ struct Tx<'p> {
 pub struct Ctx<'p, 'a> {
     pub trace: &'a Trace<'p>,
     pub env: &'a Env<'p>,
+    /// The test is a negative/control test: it shows the attack failing, or
+    /// its title says so. The identity and state rules do not fire on it;
+    /// RG08 still does.
+    pub control: bool,
     /// The harness event of each op, where it has one.
     events: Vec<Option<Event<'p>>>,
     txs: Vec<Tx<'p>>,
@@ -147,9 +151,25 @@ impl<'p, 'a> Ctx<'p, 'a> {
                 _ => {}
             }
         }
+        // A Rust unit test that calls program functions directly (`decode`,
+        // `update_settings`, an instruction handler) drives no harness. Model
+        // the direct call as the exploit transaction: the accounts the test
+        // builds are fixtures, and the call is the step.
+        if txs.is_empty() {
+            for (i, _, c) in trace.calls() {
+                if is_program_call(c) {
+                    txs.push(Tx {
+                        op: i,
+                        signers: Vec::new(),
+                        instructions: vec![c.expr],
+                    });
+                }
+            }
+        }
         let mut ctx = Ctx {
             trace,
             env,
+            control: false,
             events,
             txs,
             exploit_start: None,
@@ -177,10 +197,6 @@ impl<'p, 'a> Ctx<'p, 'a> {
         } else {
             "while setting up"
         }
-    }
-
-    fn by_phase(&self, i: usize, exploit: Severity, setup: Severity) -> Severity {
-        if self.is_exploit(i) { exploit } else { setup }
     }
 
     /// Where the exploit begins: the first transaction that does not build
@@ -213,6 +229,48 @@ impl<'p, 'a> Ctx<'p, 'a> {
         }
         ws.iter().any(|w| SETUP_TX_WORDS.contains(&w.as_str()))
     }
+}
+
+/// Whether a test is a negative or control test: it shows the attack failing,
+/// or its title says so. The identity and state rules do not fire on it; RG08
+/// still applies.
+pub fn is_control(trace: &Trace<'_>) -> bool {
+    if trace.test.should_panic {
+        return true;
+    }
+    let title = format!("{} {}", trace.test.name, trace.test.header).to_ascii_lowercase();
+    if [
+        "secure",
+        "control",
+        "prevents",
+        "rejects",
+        "fails when",
+        "fails_when",
+        "should fail",
+        "should_fail",
+        "negative",
+    ]
+    .iter()
+    .any(|w| title.contains(w))
+    {
+        return true;
+    }
+    trace.ops.iter().any(|op| match &op.kind {
+        OpKind::Call(c) => {
+            let text = c.expr.text.to_ascii_lowercase();
+            matches!(c.name.as_str(), "unwrap_err" | "expect_err")
+                || [
+                    "to.be.rejected",
+                    "to.be.reverted",
+                    "assert.throws",
+                    "assert.fail",
+                    ".is_err()",
+                ]
+                .iter()
+                .any(|p| text.contains(p))
+        }
+        _ => false,
+    })
 }
 
 /// Runs every Rust rule on one test.
@@ -293,6 +351,9 @@ fn written_name<'c>(c: &'c Call<'_>) -> &'c str {
 /// RG01: the harness gives the attacker a role, or the attacker is a role
 /// holder's keypair.
 fn attacker_holds_privilege(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
+    if ctx.control {
+        return;
+    }
     let env = ctx.env;
     for g in &env.grants {
         if !env.is_attacker(&g.grantee) {
@@ -300,21 +361,20 @@ fn attacker_holds_privilege(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
         }
         // The attacker granting itself a role in an ordinary transaction is
         // the attack, an access-control bug, not something the harness did.
-        // The grant counts when someone else signs it, or when its
-        // transaction sets the program up: an attacker who initializes the
-        // program as its own admin is its admin.
-        // With no transaction in sight, who grants it is unknown.
+        // The grant counts when someone else signs it. An attacker who
+        // re-initialises the program as its own admin inside the exploit path
+        // took the role through the bug, so it is not a harness grant.
         let Some(tx) = ctx.txs.iter().find(|t| t.op >= g.op) else {
             continue;
         };
-        if tx.signers.iter().any(|s| env.is_attacker(s)) && !ctx.says_setup(tx) {
+        if tx.signers.iter().any(|s| env.is_attacker(s)) {
             continue;
         }
         let op = ctx.op(g.op);
         let text = op.call().map_or("", |c| c.expr.text.as_str());
         out.push(raw(
             "RG01",
-            Severity::Error,
+            Severity::Note,
             op,
             format!(
                 "The harness makes the attacker `{}` a role holder (`{}`). The PoC then proves what that role can do, not what an outsider can.",
@@ -343,7 +403,7 @@ fn attacker_holds_privilege(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
         if let Some(reason) = env.privileged(&source) {
             out.push(raw(
                 "RG01",
-                Severity::Error,
+                Severity::Note,
                 op,
                 format!(
                     "The attacker `{target}` is the keypair of `{source}` ({reason}). Signing as it proves what that role can do."
@@ -356,6 +416,9 @@ fn attacker_holds_privilege(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
 
 /// RG02: a transaction in the exploit is signed by a role holder.
 fn privileged_signer(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
+    if ctx.control {
+        return;
+    }
     let env = ctx.env;
     for tx in &ctx.txs {
         if !ctx.is_exploit(tx.op) {
@@ -381,6 +444,9 @@ fn privileged_signer(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
 
 /// RG03: the exploit is signed only by the keys that built the world.
 fn deployer_is_attacker(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
+    if ctx.control {
+        return;
+    }
     let env = ctx.env;
     let builders: BTreeSet<&String> = ctx
         .txs
@@ -433,7 +499,7 @@ fn deployer_is_attacker(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
 }
 
 /// Instruction text that reads as gated: `sweep_ix`, `set_fee`, `admin_withdraw`.
-fn instruction_looks_gated(text: &str) -> bool {
+pub(crate) fn instruction_looks_gated(text: &str) -> bool {
     let lower = text.to_ascii_lowercase();
     const NEEDLES: &[&str] = &[
         "sweep",
@@ -676,9 +742,45 @@ fn receivers_of<'e>(e: &'e Expr, method: &str, out: &mut Vec<&'e Expr>) {
     }
 }
 
+/// Whether an account written by the test is afterwards handed to an
+/// initialise/create instruction of the program, which makes it a fixture the
+/// program itself sets up rather than a fabricated write.
+fn initialised_after_program_call(ctx: &Ctx<'_, '_>, at: usize, account: &str) -> bool {
+    ctx.trace
+        .ops
+        .iter()
+        .enumerate()
+        .skip(at + 1)
+        .any(|(_, op)| {
+            let Some(c) = op.call() else {
+                return false;
+            };
+            let initialises = words(&c.name).iter().any(|w| {
+                matches!(
+                    w.as_str(),
+                    "init" | "initialize" | "initialise" | "create" | "setup" | "new"
+                )
+            });
+            if !initialises {
+                return false;
+            }
+            c.args
+                .iter()
+                .chain(c.fields.iter().map(|(_, v)| v))
+                .any(|a| {
+                    let mut ids = Vec::new();
+                    collect_idents(a, &mut ids);
+                    op.key(a) == account || ids.iter().any(|id| id == account)
+                })
+        })
+}
+
 /// RG04 and RG06: `set_account` or `add_account` writes an account of the
 /// protocol. Writing its balance is RG06, writing anything else is RG04.
 fn account_writes(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
+    if ctx.control {
+        return;
+    }
     let env = ctx.env;
     for (i, ev) in ctx.events.iter().enumerate() {
         let Some(Event::WriteAccount {
@@ -715,6 +817,21 @@ fn account_writes(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
         };
         let evidence = op.call().map_or(String::new(), |c| c.expr.text.clone());
         let method = op.call().map_or("set_account", written_name);
+        if initialised_after_program_call(ctx, i, &k) {
+            continue;
+        }
+        // A write in setup that sets up the victim's precondition is the
+        // honest boundary: the drained balance never went through the
+        // program's accounting. Keep the finding, at note level, and say so.
+        let (prefix, tail, phase) = if ctx.is_exploit(i) {
+            ("", "", "in the exploit")
+        } else {
+            (
+                "Precondition fabricated: ",
+                " The drained balance never passed through the program's accounting.",
+                "while setting up",
+            )
+        };
         match shape(env, &parts) {
             Shape::Copied | Shape::Program => {}
             s @ (Shape::TokenBalance | Shape::LamportsOnly) => {
@@ -725,22 +842,20 @@ fn account_writes(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
                 };
                 out.push(raw(
                     "RG06",
-                    ctx.by_phase(i, Severity::Error, Severity::Warn),
+                    Severity::Note,
                     op,
                     format!(
-                        "{method} sets {what} of `{k}` ({why}) {}. It transfers nothing and overwrites what the account held, so the program's own accounting never sees it. Fund the attacker and transfer instead.",
-                        ctx.phase_text(i)
+                        "{prefix}{method} sets {what} of `{k}` ({why}) {phase}. It transfers nothing and overwrites what the account held, so the program's own accounting never sees it. Fund the attacker and transfer instead.{tail}"
                     ),
                     &evidence,
                 ));
             }
             Shape::State => out.push(raw(
                 "RG04",
-                ctx.by_phase(i, Severity::Error, Severity::Warn),
+                Severity::Note,
                 op,
                 format!(
-                    "{method} writes the account `{k}` ({why}) {}, bypassing every check the program would make. The PoC has written the state it claims to reach.",
-                    ctx.phase_text(i)
+                    "{prefix}{method} writes the account `{k}` ({why}) {phase}, bypassing every check the program would make. The PoC has written the state it claims to reach.{tail}"
                 ),
                 &evidence,
             )),
@@ -1127,8 +1242,8 @@ impl Funding {
 fn no_baseline(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
     let env = ctx.env;
     let ops = &ctx.trace.ops;
-    // Every measurement read, in order: (op index, canonical text).
-    let mut reads: Vec<(usize, String)> = Vec::new();
+    // Every measurement read, in order: (op index, canonical text, subject).
+    let mut reads: Vec<(usize, String, Subject)> = Vec::new();
     // Which measurements each local was computed from.
     let mut provenance: BTreeMap<String, BTreeMap<String, Subject>> = BTreeMap::new();
     let mut funding: Vec<Funding> = Vec::new();
@@ -1147,8 +1262,8 @@ fn no_baseline(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
                 for a in c.args {
                     reads_in(op, env, a, false, &mut here);
                 }
-                for r in here.into_keys() {
-                    reads.push((i, r));
+                for (r, subject) in here {
+                    reads.push((i, r, subject));
                 }
                 match &ctx.events[i] {
                     Some(Event::Airdrop { target, amount }) => funding.push(Funding {
@@ -1208,8 +1323,8 @@ fn no_baseline(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
                 reads_in(op, env, value, true, &mut from);
                 let mut shallow = BTreeMap::new();
                 reads_in(op, env, value, false, &mut shallow);
-                for r in shallow.into_keys() {
-                    reads.push((i, r));
+                for (r, subject) in shallow {
+                    reads.push((i, r, subject));
                 }
                 let mut names = BTreeSet::new();
                 idents_in(value, &mut names);
@@ -1236,8 +1351,8 @@ fn no_baseline(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
     let occurrences = |r: &str, until: usize| -> Vec<usize> {
         reads
             .iter()
-            .filter(|(i, t)| *i <= until && t == r)
-            .map(|(i, _)| *i)
+            .filter(|(i, t, _)| *i <= until && t == r)
+            .map(|(i, _, _)| *i)
             .collect()
     };
     let aliases = |who: &str| -> BTreeSet<String> {
@@ -1288,9 +1403,20 @@ fn no_baseline(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
                 f.is_baseline_for(claim.bound) && attacks.iter().any(|&w| w > f.op && w < claim.op)
             })
         });
+        // A read of the same account before the attack is a baseline, whatever
+        // the local is called: `let before = svc.get_balance(..)` and
+        // `assert_eq!(vault.lamports, 0)` both measure the starting value.
+        let subject_baselined = claim.reads.iter().any(|(_, subject)| {
+            let who = aliases(&subject.who);
+            reads.iter().any(|(j, _, s)| {
+                *j < first_attack
+                    && s.lamports == subject.lamports
+                    && aliases(&s.who).iter().any(|k| who.contains(k))
+            })
+        });
         // As in Solidity: one claim with a baseline means the test measures
         // a gain, and the others are not reported.
-        if baselined {
+        if baselined || subject_baselined {
             return;
         }
         let op = &ops[claim.op];
@@ -1357,8 +1483,129 @@ fn live_rpc(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
     }
 }
 
+/// Calls that are never a program function: assertions, logging, standard
+/// conversions and collection methods, constructors of standard types. A
+/// call outside this list that the trace could not resolve to the test's own
+/// code is a program call.
+const NOT_PROGRAM_CALLS: &[&str] = &[
+    "unwrap",
+    "unwrap_or",
+    "unwrap_or_default",
+    "unwrap_or_else",
+    "expect",
+    "unwrap_err",
+    "expect_err",
+    "ok",
+    "ok_or",
+    "ok_or_else",
+    "err",
+    "map",
+    "map_err",
+    "and_then",
+    "or_else",
+    "flatten",
+    "clone",
+    "to_string",
+    "to_owned",
+    "into",
+    "as_ref",
+    "as_mut",
+    "borrow",
+    "borrow_mut",
+    "deref",
+    "len",
+    "is_empty",
+    "push",
+    "pop",
+    "insert",
+    "remove",
+    "get",
+    "get_mut",
+    "contains",
+    "iter",
+    "iter_mut",
+    "into_iter",
+    "collect",
+    "filter",
+    "fold",
+    "for_each",
+    "sort",
+    "sort_by",
+    "rev",
+    "extend",
+    "extend_from_slice",
+    "capacity",
+    "first",
+    "last",
+    "split",
+    "join",
+    "new",
+    "default",
+    "from",
+    "try_from",
+    "try_into",
+    "parse",
+    "to_le_bytes",
+    "to_be_bytes",
+    "from_le_bytes",
+    "from_be_bytes",
+    "saturating_add",
+    "saturating_sub",
+    "saturating_mul",
+    "checked_add",
+    "checked_sub",
+    "checked_mul",
+    "checked_div",
+    "wrapping_add",
+    "wrapping_sub",
+    "wrapping_mul",
+    "pow",
+    "min",
+    "max",
+    "abs",
+    "as_u64",
+    "as_i64",
+    "to_u64",
+    "eq",
+    "ne",
+    "cmp",
+    "hash",
+    "run",
+    "start",
+    "finish",
+    "wait",
+    "vec",
+    "format",
+    "write",
+    "writeln",
+];
+
+/// Whether a call is a direct call into program code: unresolved, not a
+/// harness method, not an assertion or log, and not a standard method.
+fn is_program_call(c: &Call<'_>) -> bool {
+    if c.class != CallClass::Other || c.name.is_empty() {
+        return false;
+    }
+    // Instruction builders are not handlers: `set_admin_ix(..)` builds an
+    // instruction the transaction sends later.
+    if c.name.ends_with("_ix") || c.name.ends_with("_ixs") {
+        return false;
+    }
+    if super::harness::METHODS.contains(&c.name.as_str()) {
+        return false;
+    }
+    if c.expr.text.trim_end().ends_with('!') {
+        return false;
+    }
+    !NOT_PROGRAM_CALLS.contains(&c.name.as_str())
+}
+
 /// Whether a test touches a Solana harness at all. A Rust test that never
-/// builds a harness or a transaction is not a PoC, and is not checked.
+/// builds a harness or a transaction is not a PoC, and is not checked. A Rust
+/// test that calls program functions directly is a PoC: the direct call is
+/// modelled as its exploit transaction.
 pub fn uses_harness(ctx: &Ctx<'_, '_>) -> bool {
     ctx.events.iter().any(Option::is_some)
+        || (ctx.trace.dialect == Dialect::Rust
+            && ctx.trace.calls().any(|(_, _, c)| is_program_call(c)))
 }

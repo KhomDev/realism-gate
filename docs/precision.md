@@ -299,14 +299,14 @@ full tables, RQ3 and RQ4: [`eval/solana-poc/RESULTS.md`](../eval/solana-poc/RESU
 |---|---|
 | Judged PoCs the tool reads (RQ1) | 1/12 = 8.3% [1.5-35.4] |
 | Exploit-by-construction PoCs the tool reads | 72/82 = 87.8% [79.0-93.2] |
-| All PoC flags, held-out precision | 46/106 = 43.4% [34.4-52.9] |
-| RG01 held-out precision | 2/12 = 16.7% [4.7-44.8] |
-| RG02 held-out precision | 8/30 = 26.7% [14.2-44.5] |
+| All PoC flags, held-out precision | 46/106 = 43.4% [34.4-52.9]; sources bootstrap [25.0-60.4] |
+| RG01 held-out precision | 2/12 = 16.7% [4.7-44.8]; sources bootstrap [0.0-28.6] |
+| RG02 held-out precision | 8/30 = 26.7% [14.2-44.5]; sources bootstrap [4.3-61.5] |
 | RG03 held-out precision | 0/2 (n<5, count only) |
-| RG04 held-out precision | 0/16 = 0.0% [0.0-19.4] |
-| RG06 held-out precision | 0/6 = 0.0% [0.0-39.0] |
-| RG08 held-out precision | 29/30 = 96.7% [83.3-99.4] |
-| RG09 held-out precision | 7/7 = 100.0% [64.6-100.0] |
+| RG04 held-out precision | 0/16 = 0.0% [0.0-19.4]; sources bootstrap [0.0-0.0] |
+| RG06 held-out precision | 0/6 = 0.0% [0.0-39.0]; sources bootstrap [0.0-0.0] |
+| RG08 held-out precision | 29/30 = 96.7% [83.3-99.4]; sources bootstrap [88.5-100.0] |
+| RG09 held-out precision | 7/7 = 100.0% [64.6-100.0]; sources bootstrap [100.0-100.0] |
 | RG10 held-out precision | 0/3 (n<5, count only) |
 | Never raised on a PoC (unmeasured) | RG05, RG11 |
 | Second-pass agreement, raw | 29/30 = 96.7% [83.3-99.4], kappa 0.9268 |
@@ -424,3 +424,61 @@ flag set by an event callback read as a constant; a `localhost` URL held in a
 constant read as a live cluster; and a helper read labelled `"Beginning"` and
 `"Resulting"` not seen as a before-and-after pair. A setup test titled
 `airdrop payer` is now read as setup too.
+
+## P1-C fixes and the severity floor (2026-11-25)
+
+The P1 PoC study named eight false-positive classes and one coverage gap. The
+1.2.0 rules address them; the P1 numbers above are unchanged and stay the
+record of what 1.0.4 did. The re-measurement has two populations and they are
+never pooled:
+
+- **in-sample**, the same `eval/solana-poc/` PoCs, which the fixes were
+  designed against;
+- **fresh**, `eval/solana-poc-v2/`: 81 counted units (28 judged, 53
+  exploit-by-construction) collected, pinned and hashed before the first
+  `src/` change on the P1-C branch.
+
+What changed in the rules (details: CHANGELOG 1.2.0):
+
+1. **Readers.** A Rust `#[test]` that calls program functions directly is read
+   (the direct call is modelled as the exploit transaction); a Rust `fn main`
+   that drives a PoC framework is read as one test; a TypeScript script that
+   drives an Anchor/web3/LiteSVM client is read as one test; and
+   `check --fragment <file>` wraps a pasted fragment as one test body
+   (`fragment: true` in the output).
+2. **Identity.** A keypair the test generates and never gives a role by a
+   protocol call, a role field or a declaration is not privileged. A role
+   granted by another signer, by an initialise/configure call, or shown by a
+   role-named signer of a gated instruction still is.
+3. **Control tests.** A test that expects failure, or whose title says
+   `secure`/`control`/`prevents`/`rejects`/`fails when`, does not fire RG01,
+   RG02, RG03, RG04 or RG06. RG08 still applies to it.
+4. **Fixtures.** RG04/RG06 do not fire when the test writes an account that a
+   later initialise/create instruction of the program sets up.
+5. **Precondition.** A state write while setting up the victim's precondition
+   is a note-level finding beginning `Precondition fabricated:`; the drained
+   balance never passed through the program's accounting. The rubric in
+   `eval/solana-poc-v2/PREREGISTRATION.md` records the decision.
+6. **RG10** treats any measurement of the same account read before the attack
+   as a baseline, not only a local whose name says `before`.
+7. **RG08's scope** is the rule's own definition, "no assertion on the
+   exploit's outcome" (the exploit part of the trace), and the rubric now says
+   so. A test that asserts nothing at all is still flagged; an assertion in
+   setup does not silence it.
+
+### Severity floor
+
+A rule ships at `error` on Solana only when its **fresh** held-out Wilson 95%
+lower bound is at least 0.80. In-sample cells cannot lift a rule over the
+floor; a cell with fewer than five labels is a count, not a rate. RG01
+(16.7%), RG04 (0%) and RG06 (0%) therefore ship at `note` on Solana in 1.2.0.
+`tests/precision_floor.rs` reads `eval/solana/measured.json` and fails when a
+fresh measured cell for a rule that ships at `error` has a lower bound below
+0.80.
+
+### Status of the re-measurement
+
+The corpus is sealed and committed; the frozen 1.2.0 run, the labels and the
+fresh numbers are not in this section yet. When they exist they are written
+here with n, Wilson and a source-clustered bootstrap interval, and the P1
+numbers above are left as they stand.

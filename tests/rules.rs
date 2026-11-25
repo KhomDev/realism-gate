@@ -291,7 +291,7 @@ fn every_code_rule_has_a_bad_fixture() {
 fn rust_rg01_attacker_holds_privilege() {
     expect(
         "tests/fixtures/bad/RG01_attacker_holds_privilege.rs",
-        &[("RG01", Error, 19)],
+        &[("RG01", Note, 19)],
     );
 }
 
@@ -315,7 +315,7 @@ fn rust_rg03_payer_is_deployer() {
 fn rust_rg04_account_write() {
     expect(
         "tests/fixtures/bad/RG04_account_write.rs",
-        &[("RG04", Error, 26)],
+        &[("RG04", Note, 26)],
     );
 }
 
@@ -331,7 +331,7 @@ fn rust_rg05_mock_program() {
 fn rust_rg06_token_balance_injection() {
     expect(
         "tests/fixtures/bad/RG06_token_balance_injection.rs",
-        &[("RG06", Error, 42)],
+        &[("RG06", Note, 42)],
     );
 }
 
@@ -371,7 +371,7 @@ fn rust_rg11_live_rpc() {
 fn ts_rg01_attacker_holds_privilege() {
     expect(
         "tests/fixtures/bad/RG01_attacker_holds_privilege.ts",
-        &[("RG01", Error, 15)],
+        &[("RG01", Note, 15)],
     );
 }
 
@@ -395,7 +395,7 @@ fn ts_rg03_payer_is_deployer() {
 fn ts_rg04_account_write() {
     expect(
         "tests/fixtures/bad/RG04_account_write.ts",
-        &[("RG04", Error, 22)],
+        &[("RG04", Note, 22)],
     );
 }
 
@@ -411,7 +411,7 @@ fn ts_rg05_mock_program() {
 fn ts_rg06_token_balance_injection() {
     expect(
         "tests/fixtures/bad/RG06_token_balance_injection.ts",
-        &[("RG06", Warn, 21)],
+        &[("RG06", Note, 21)],
     );
 }
 

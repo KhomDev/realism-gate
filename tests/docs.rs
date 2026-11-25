@@ -115,8 +115,18 @@ fn readme_block_is_current(name: &str, dir: &str) {
         format!("<!-- BEGIN:{name} -->"),
         format!("<!-- END:{name} -->"),
     );
+    // RG01, RG04 and RG06 ship at note on Solana until the fresh measurement
+    // supports more (docs/precision.md), so the example asks for note-level
+    // failures; the Solidity example fails either way.
     let out = Command::new(env!("CARGO_BIN_EXE_realism-gate"))
-        .args(["check", "--color", "never", "--no-declaration"])
+        .args([
+            "check",
+            "--color",
+            "never",
+            "--no-declaration",
+            "--fail-on",
+            "note",
+        ])
         .current_dir(root().join(dir))
         .output()
         .unwrap();

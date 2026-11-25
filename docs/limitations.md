@@ -182,3 +182,33 @@ the predicates found their evidence, not that the finding is sound.
 
 For the other half of that question (whether a finding is new, in scope and
 payable), see [priorart](https://github.com/KhomDev/priorart).
+
+## What 1.2.0 still cannot read
+
+The P1-C readers close the judged-PoC gap for tests, fragments, scripts and
+PoC-framework binaries. Two classes stay unreadable on purpose:
+
+- **On-chain attacker programs (a CTF solve program, an `entrypoint!`
+  program).** They are the attack itself, not a proof that a program's tests
+  demonstrate one; the tool checks tests, and a program has no test body to
+  read. `eval/solana-poc-v2/inventory.json` records them as
+  `ctf-solve-program` and the study reports them unreadable with that reason.
+- **A test whose harness sits behind helpers the input does not include.**
+  When the PoC calls a local helper from a file outside the supplied files,
+  the trace cannot follow it. The tool reports the test as checked but the
+  helper's steps are not seen; supply the helper file (or the whole test
+  directory) when the helper is part of the PoC.
+
+A script that drives no recognised client (a pure TypeScript simulation that
+never builds a provider, a connection or a transaction) is also not read: there
+is no exploit transaction to model. The P1-C fresh corpus records which units
+fall in each class in `eval/solana-poc-v2/inventory.json`.
+
+### Fragments
+
+`check --fragment <file>` (or a `.rs`/`.ts`/`.js` file given explicitly that
+has no top-level test) wraps bare statements as one test body. The wrapping
+adds nothing else: imports are not synthesised and a fragment that relies on
+the surrounding test file's imports stays unresolved. The output says
+`fragment: true` so a reader knows the test boundary is the tool's, not the
+author's.

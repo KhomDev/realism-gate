@@ -91,12 +91,20 @@ pub struct Summary {
     pub suppressions_ignored: usize,
 }
 
+fn is_false(b: &bool) -> bool {
+    !*b
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct Report {
     pub summary: Summary,
     pub declaration: Option<String>,
     /// The `realism-gate.toml` that was applied, if any.
     pub config: Option<String>,
+    /// The input was read as a fragment: a test body pasted into an issue,
+    /// wrapped and parsed as one test. Added in 1.2.0.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub fragment: bool,
     pub changed_since: Option<ChangedSince>,
     pub findings: Vec<Finding>,
     pub parse_errors: Vec<ParseError>,
@@ -384,6 +392,7 @@ pub fn analyze(
         summary,
         declaration: declaration.map(|d| d.path.clone()),
         config: None,
+        fragment: false,
         changed_since: None,
         findings,
         parse_errors,
