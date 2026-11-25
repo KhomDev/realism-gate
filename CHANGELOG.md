@@ -8,7 +8,9 @@ may change in any minor release.
 
 ## [Unreleased]
 
-### Added (P1-C, proposed 1.2.0)
+## [1.2.0] - 2026-11-25
+
+### Added (P1-C, 1.2.0)
 
 - **Four readers for the PoCs judges receive.** A Rust `#[test]` that calls
   program functions directly is checked (the direct call is modelled as the
