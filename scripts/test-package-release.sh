@@ -23,12 +23,13 @@ trap 'rm -rf "$work"' EXIT
 bins="$(bash "$repo/scripts/declared-bins.sh")"
 
 stage() {
-  # stage DIR EPOCH: three identical fake binaries with one mtime.
-  local dir="$1" epoch="$2" bin
+  # stage DIR EPOCH [EXT]: three identical fake binaries with one mtime.
+  # EXT is ".exe" for the Windows zip, whose assemble step copies BIN.exe.
+  local dir="$1" epoch="$2" ext="${3:-}" bin
   mkdir -p "$dir"
   for bin in $bins; do
-    printf 'same bytes for %s\n' "$bin" > "$dir/$bin"
-    chmod 755 "$dir/$bin"
+    printf 'same bytes for %s\n' "$bin" > "$dir/$bin$ext"
+    chmod 755 "$dir/$bin$ext"
   done
   find "$dir" -exec touch -d "@$epoch" {} +
 }
@@ -71,8 +72,8 @@ else
 fi
 
 if command -v zip >/dev/null 2>&1 && command -v unzip >/dev/null 2>&1; then
-  stage "$work/za" 1000000000
-  stage "$work/zb" 1600000000
+  stage "$work/za" 1000000000 .exe
+  stage "$work/zb" 1600000000 .exe
   bash "$script" assemble "$version" x86_64-pc-windows-msvc zip "$work/za" "$work/zout-a" >/dev/null
   bash "$script" assemble "$version" x86_64-pc-windows-msvc zip "$work/zb" "$work/zout-b" >/dev/null
   za="$(hash_of "$work/zout-a/realism-gate-$version-x86_64-pc-windows-msvc.zip")"
