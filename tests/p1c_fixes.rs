@@ -373,3 +373,18 @@ describe("vault", () => {
     assert!(!rules.contains(&"RG02"), "{rules:?}");
     assert!(!rules.contains(&"RG01"), "{rules:?}");
 }
+
+#[test]
+fn class2_a_check_marked_secure_test_is_a_control_test() {
+    let rules = ts_rules(
+        r#"
+describe("secure program", () => {
+  it("✓ allows super_admin to add admin", async () => {
+    await program.methods.addAdmin().accounts({ caller: superAdmin.publicKey }).signers([superAdmin]).rpc();
+    assert.ok(true);
+  });
+});
+"#,
+    );
+    assert!(!rules.contains(&"RG02"), "{rules:?}");
+}

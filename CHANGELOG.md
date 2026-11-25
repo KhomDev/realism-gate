@@ -19,7 +19,7 @@ may change in any minor release.
   with `blocks`, `blocked`, `denies`, `cannot`, `does not allow`, `not
   allowed` or `must fail` join the existing `secure`/`control`/`prevents`/
   `rejects`/`fails when` class, so RG01/RG02/RG03/RG04/RG06 do not fire on
-  them.
+  them. A leading ✓/✔ (the secure-suite convention) is included.
 
 ## [1.2.0] - 2026-11-25
 
