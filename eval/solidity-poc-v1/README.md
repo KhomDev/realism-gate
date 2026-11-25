@@ -7,7 +7,24 @@ Solidity is measured on its own slices and never pooled with Solana.
 
 ## Status
 
-**Collecting.** No unit is sealed or run yet.
+**Collection closed 2026-11-25.** Counted units: **J 477 distinct judged
+findings from 112 Code4rena contests** (one report section = one unit; contest
+submissions are recorded per unit as `contest_submissions`), **X 36**
+(18 real-incident reproductions, 18 CTF teaching exploits), **N 30**
+(secure-path tests). Split: DEV 218, V1 103, V2 86, FINAL 136.
+
+J meets the target at source level (477 >= 120, 112 sources, max source 4.4%
+of J) but **100% of J is Code4rena**; the platform share is reported, not
+hidden. X misses 150: DeFiHackLabs and DeFiVulnLabs are opened data (only 9 new
+DeFiHackLabs incident files and 0 new DeFiVulnLabs files since their pinned
+commits), Immunefi publishes 9 Foundry PoCs, and the remaining reachable
+material is 18 distinct CTF teaching exploits. The arithmetic is in
+`SEARCH_LOG.md`.
+
+Every J unit carries a `codebase_id` into the top-level `codebases` map (the
+`code-423n4/<slug>` contest snapshot and its commit): 466 of 477 units pinned,
+11 null because six contests have no reachable sponsor repo. Units with
+`codebase_id: null` are collected but the program model cannot run on them.
 
 ## Tiers and targets
 
@@ -34,8 +51,8 @@ words, tier, and the kind read at collection time; dedupe by hash and URL;
 pointer-plus-hash for unlicensed text; the existing `eval/` corpora are DEV
 and are not reused as fresh.
 
-Sources: Code4rena findings repos (labels include `selected for report`,
-`sufficient quality report`, `satisfactory`, `unsatisfactory`, `invalid`,
-`duplicate-N`), Sherlock judging repos, Cantina public competition reports,
-CodeHawks, Hats, Immunefi audit competitions, audit-firm PoC write-ups,
+Sources searched: Code4rena findings repos (cloned; 2,457 High/Medium report
+sections, 477 with Foundry test code), Sherlock judging repos, Cantina public
+competition reports, CodeHawks, Hats, Immunefi audit competitions,
+audit-firm PoC write-ups,
 DeFiHackLabs/SunWeb3Sec for the X tier.
