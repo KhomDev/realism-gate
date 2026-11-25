@@ -24,6 +24,28 @@ may change in any minor release.
   fresh (out-of-sample) corpus. `docs/precision.md` states the population and
   the limits, and the generated rule pages carry the same line.
 
+### Changed
+
+- **`rules --format json`: `languages` lists `javascript`** for every rule
+  that checks Solana tests. The tool already read JavaScript Anchor/web3.js
+  tests; the list said only `rust` and `typescript`. `eval/results/rules-v0.6.0.json`
+  is regenerated (only `languages` and the new `measured` objects change; the
+  precision tables and the R3 check are unchanged).
+
+### Fixed
+
+- **Release workflow:** the `checksums` job did not list `verify` in `needs`, so
+  the version it repacks with was empty; and `scripts/package-release.sh` wrote
+  the zip to a relative output directory from inside the staging directory.
+  Both were caught by the 1.1.0 dry runs, before any tag. A regression case in
+  `scripts/test-package-release.sh` covers the relative output directory.
+- **Attestation test on Linux/macOS:** the fake `gh` in
+  `scripts/test-verify-attestation.sh` was not executable, so `command -v gh`
+  found the runner's real `gh`. The Action itself runs the script with `bash`
+  and was not affected.
+- **CI package check** now allows `eval/solana/measured.json`, which the crate
+  embeds for `rules`/`explain`.
+
 ### Documentation
 
 - **Solana PoC measurement (P1-A redo, 2026-11-25).** `eval/solana-poc/`

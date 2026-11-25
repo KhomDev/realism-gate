@@ -82,6 +82,13 @@ if command -v zip >/dev/null 2>&1 && command -v unzip >/dev/null 2>&1; then
   else
     bad "zip differs across staging paths and mtimes ($za vs $zb)"
   fi
+  # Regression (1.1.0 dry run 45551949345): the release workflow passes a
+  # relative OUT_DIR, and the zip branch writes from inside the staging dir.
+  if (cd "$work" && bash "$script" assemble "$version" x86_64-pc-windows-msvc zip "$work/za" zout-rel >/dev/null)      && [ "$(hash_of "$work/zout-rel/realism-gate-$version-x86_64-pc-windows-msvc.zip")" = "$za" ]; then
+    ok "zip with a relative OUT_DIR lands in OUT_DIR, same bytes"
+  else
+    bad "zip with a relative OUT_DIR failed or differs"
+  fi
 else
   echo "SKIP: zip determinism (zip and unzip are not both on PATH)"
 fi

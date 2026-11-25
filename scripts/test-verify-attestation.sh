@@ -28,6 +28,9 @@ cat > "$work/bin/gh" <<'EOF'
 printf '%s\n' "$*" >> "$FAKE_GH_LOG"
 exit "${FAKE_GH_EXIT:-0}"
 EOF
+# Executable, or `command -v gh` skips it on Linux/macOS and finds the
+# runner's real gh (Windows Git Bash ignores the mode, which hid this).
+chmod 755 "$work/bin/gh"
 
 fail=0
 ok() { printf 'ok    %s\n' "$1"; }

@@ -70,7 +70,7 @@ jobs:
           set -eu
           cargo package --list --locked > /tmp/files.txt
           cat /tmp/files.txt
-          if grep -vE '^(src/.*\.rs|Cargo\.toml|Cargo\.toml\.orig|Cargo\.lock|README\.md|LICENSE|CHANGELOG\.md|\.cargo_vcs_info\.json)$' /tmp/files.txt; then
+          if grep -vE '^(src/.*\.rs|Cargo\.toml|Cargo\.toml\.orig|Cargo\.lock|README\.md|LICENSE|CHANGELOG\.md|eval/solana/measured\.json|\.cargo_vcs_info\.json)$' /tmp/files.txt; then
             echo "::error::unexpected files in the crate"
             exit 1
           fi

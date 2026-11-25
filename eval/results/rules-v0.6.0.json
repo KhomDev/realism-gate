@@ -5,8 +5,74 @@
       "solidity",
       "rust",
       "typescript",
+      "javascript",
       "move"
     ],
+    "measured": {
+      "javascript": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "move": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no labelled Move corpus",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "rust": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "typescript": {
+        "fp": 10,
+        "labelled": 12,
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "precision": 0.1667,
+        "reason": null,
+        "split": "heldout",
+        "status": "measured",
+        "tp": 2,
+        "unclear": 0,
+        "wilson95": [
+          0.047,
+          0.448
+        ]
+      }
+    },
     "severity": "error",
     "severity_note": "always error",
     "slug": "attacker-holds-privilege",
@@ -20,8 +86,77 @@
       "solidity",
       "rust",
       "typescript",
+      "javascript",
       "move"
     ],
+    "measured": {
+      "javascript": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "move": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no labelled Move corpus",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "rust": {
+        "fp": 4,
+        "labelled": 5,
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "precision": 0.2,
+        "reason": null,
+        "split": "heldout",
+        "status": "measured",
+        "tp": 1,
+        "unclear": 0,
+        "wilson95": [
+          0.0362,
+          0.6245
+        ]
+      },
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "typescript": {
+        "fp": 18,
+        "labelled": 25,
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "precision": 0.28,
+        "reason": null,
+        "split": "heldout",
+        "status": "measured",
+        "tp": 7,
+        "unclear": 0,
+        "wilson95": [
+          0.1428,
+          0.4758
+        ]
+      }
+    },
     "severity": "warn",
     "severity_note": "warn; silenced only by an operator realism.yaml outside the repo under review",
     "slug": "privileged-step-in-exploit",
@@ -34,8 +169,67 @@
     "languages": [
       "solidity",
       "rust",
-      "typescript"
+      "typescript",
+      "javascript"
     ],
+    "measured": {
+      "javascript": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "rust": {
+        "count_only": true,
+        "fp": 1,
+        "labelled": 1,
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "precision": 0.0,
+        "reason": null,
+        "split": "heldout",
+        "status": "measured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "typescript": {
+        "count_only": true,
+        "fp": 1,
+        "labelled": 1,
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "precision": 0.0,
+        "reason": null,
+        "split": "heldout",
+        "status": "measured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ]
+      }
+    },
     "severity": "warn",
     "severity_note": "warn when a call is named like an access-controlled function; note for any other call the deployer makes",
     "slug": "deployer-is-attacker",
@@ -48,8 +242,66 @@
     "languages": [
       "solidity",
       "rust",
-      "typescript"
+      "typescript",
+      "javascript"
     ],
+    "measured": {
+      "javascript": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "rust": {
+        "fp": 14,
+        "labelled": 14,
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "precision": 0.0,
+        "reason": null,
+        "split": "heldout",
+        "status": "measured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": [
+          0.0,
+          0.2153
+        ]
+      },
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "typescript": {
+        "count_only": true,
+        "fp": 2,
+        "labelled": 2,
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "precision": 0.0,
+        "reason": null,
+        "split": "heldout",
+        "status": "measured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": [
+          0.0,
+          0.6576
+        ]
+      }
+    },
     "severity": "error",
     "severity_note": "error in the exploit and in setUp; one step lower when the slot looks like an attacker or user balance",
     "slug": "storage-write",
@@ -62,8 +314,63 @@
     "languages": [
       "solidity",
       "rust",
-      "typescript"
+      "typescript",
+      "javascript"
     ],
+    "measured": {
+      "javascript": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "rust": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "solidity": {
+        "count_only": true,
+        "fp": 1,
+        "labelled": 1,
+        "population": "Solidity public PoCs (DeFiVulnLabs)",
+        "precision": 0.0,
+        "reason": null,
+        "split": "fresh",
+        "status": "measured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "typescript": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      }
+    },
     "severity": "warn",
     "severity_note": "warn; capped below error since 0.2.0 because its measured precision is under 80% (docs/precision.md)",
     "slug": "code-replacement",
@@ -77,8 +384,74 @@
       "solidity",
       "rust",
       "typescript",
+      "javascript",
       "move"
     ],
+    "measured": {
+      "javascript": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "move": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no labelled Move corpus",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "rust": {
+        "fp": 6,
+        "labelled": 6,
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "precision": 0.0,
+        "reason": null,
+        "split": "heldout",
+        "status": "measured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": [
+          0.0,
+          0.3903
+        ]
+      },
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "typescript": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      }
+    },
     "severity": "error",
     "severity_note": "error in the exploit; warn in setUp",
     "slug": "balance-injection",
@@ -91,6 +464,20 @@
     "languages": [
       "solidity"
     ],
+    "measured": {
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      }
+    },
     "severity": "warn",
     "severity_note": "warn",
     "slug": "mocked-call",
@@ -104,8 +491,80 @@
       "solidity",
       "rust",
       "typescript",
+      "javascript",
       "move"
     ],
+    "measured": {
+      "javascript": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "move": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no labelled Move corpus",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "rust": {
+        "fp": 0,
+        "labelled": 6,
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "precision": 1.0,
+        "reason": null,
+        "split": "heldout",
+        "status": "measured",
+        "tp": 6,
+        "unclear": 0,
+        "wilson95": [
+          0.6097,
+          1.0
+        ]
+      },
+      "solidity": {
+        "fp": 0,
+        "labelled": 30,
+        "population": "Solidity public PoCs (DeFiVulnLabs)",
+        "precision": 1.0,
+        "reason": null,
+        "split": "fresh",
+        "status": "measured",
+        "tp": 30,
+        "unclear": 0,
+        "wilson95": [
+          0.8865,
+          1.0
+        ]
+      },
+      "typescript": {
+        "fp": 1,
+        "labelled": 24,
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "precision": 0.9583,
+        "reason": null,
+        "split": "heldout",
+        "status": "measured",
+        "tp": 23,
+        "unclear": 0,
+        "wilson95": [
+          0.7976,
+          0.9926
+        ]
+      }
+    },
     "severity": "error",
     "severity_note": "error; warn when the test logs values it never checks",
     "slug": "no-assertion",
@@ -118,8 +577,62 @@
     "languages": [
       "solidity",
       "rust",
-      "typescript"
+      "typescript",
+      "javascript"
     ],
+    "measured": {
+      "javascript": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "rust": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "typescript": {
+        "fp": 0,
+        "labelled": 7,
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "precision": 1.0,
+        "reason": null,
+        "split": "heldout",
+        "status": "measured",
+        "tp": 7,
+        "unclear": 0,
+        "wilson95": [
+          0.6457,
+          1.0
+        ]
+      }
+    },
     "severity": "error",
     "severity_note": "error",
     "slug": "tautological-assertion",
@@ -133,8 +646,79 @@
       "solidity",
       "rust",
       "typescript",
+      "javascript",
       "move"
     ],
+    "measured": {
+      "javascript": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "move": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no labelled Move corpus",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "rust": {
+        "count_only": true,
+        "fp": 2,
+        "labelled": 2,
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "precision": 0.0,
+        "reason": null,
+        "split": "heldout",
+        "status": "measured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": [
+          0.0,
+          0.6576
+        ]
+      },
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "typescript": {
+        "count_only": true,
+        "fp": 1,
+        "labelled": 1,
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "precision": 0.0,
+        "reason": null,
+        "split": "heldout",
+        "status": "measured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ]
+      }
+    },
     "severity": "warn",
     "severity_note": "warn",
     "slug": "no-baseline",
@@ -147,8 +731,63 @@
     "languages": [
       "solidity",
       "rust",
-      "typescript"
+      "typescript",
+      "javascript"
     ],
+    "measured": {
+      "javascript": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "rust": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "solidity": {
+        "count_only": true,
+        "fp": 0,
+        "labelled": 1,
+        "population": "Solidity public PoCs (DeFiVulnLabs)",
+        "precision": 1.0,
+        "reason": null,
+        "split": "fresh",
+        "status": "measured",
+        "tp": 1,
+        "unclear": 0,
+        "wilson95": [
+          0.2065,
+          1.0
+        ]
+      },
+      "typescript": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "the rule raised no flag on a PoC in this language",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      }
+    },
     "severity": "warn",
     "severity_note": "warn",
     "slug": "unpinned-fork",
@@ -162,8 +801,47 @@
       "solidity",
       "rust",
       "typescript",
+      "javascript",
       "move"
     ],
+    "measured": {
+      "javascript": {
+        "reason": "no measurement",
+        "status": "unmeasured"
+      },
+      "move": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no labelled Move corpus",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "rust": {
+        "reason": "no measurement",
+        "status": "unmeasured"
+      },
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "typescript": {
+        "reason": "no measurement",
+        "status": "unmeasured"
+      }
+    },
     "severity": "error",
     "severity_note": "error",
     "slug": "attacker-in-foreign-transaction",
@@ -177,8 +855,47 @@
       "solidity",
       "rust",
       "typescript",
+      "javascript",
       "move"
     ],
+    "measured": {
+      "javascript": {
+        "reason": "no measurement",
+        "status": "unmeasured"
+      },
+      "move": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no labelled Move corpus",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "rust": {
+        "reason": "no measurement",
+        "status": "unmeasured"
+      },
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "typescript": {
+        "reason": "no measurement",
+        "status": "unmeasured"
+      }
+    },
     "severity": "warn",
     "severity_note": "warn",
     "slug": "unordered-same-block",
@@ -192,8 +909,47 @@
       "solidity",
       "rust",
       "typescript",
+      "javascript",
       "move"
     ],
+    "measured": {
+      "javascript": {
+        "reason": "no measurement",
+        "status": "unmeasured"
+      },
+      "move": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no labelled Move corpus",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "rust": {
+        "reason": "no measurement",
+        "status": "unmeasured"
+      },
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "typescript": {
+        "reason": "no measurement",
+        "status": "unmeasured"
+      }
+    },
     "severity": "note",
     "severity_note": "note",
     "slug": "dependent-precondition",
@@ -206,6 +962,20 @@
     "languages": [
       "solidity"
     ],
+    "measured": {
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      }
+    },
     "severity": "warn",
     "severity_note": "warn",
     "slug": "profit-ignores-costs",
@@ -218,6 +988,20 @@
     "languages": [
       "solidity"
     ],
+    "measured": {
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      }
+    },
     "severity": "warn",
     "severity_note": "warn",
     "slug": "implausible-amount",
@@ -230,6 +1014,20 @@
     "languages": [
       "solidity"
     ],
+    "measured": {
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      }
+    },
     "severity": "warn",
     "severity_note": "warn; silenced for a name listed under deployment.evidence",
     "slug": "unevidenced-setup",
@@ -243,6 +1041,35 @@
       "solidity",
       "move"
     ],
+    "measured": {
+      "move": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no labelled Move corpus",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      },
+      "solidity": {
+        "fp": 7,
+        "labelled": 7,
+        "population": "Solidity public PoCs (DeFiVulnLabs)",
+        "precision": 0.0,
+        "reason": null,
+        "split": "fresh",
+        "status": "measured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": [
+          0.0,
+          0.3543
+        ]
+      }
+    },
     "severity": "warn",
     "severity_note": "warn",
     "slug": "revert-only",
@@ -255,6 +1082,20 @@
     "languages": [
       "solidity"
     ],
+    "measured": {
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      }
+    },
     "severity": "error",
     "severity_note": "error",
     "slug": "setup-hides-storage-write",
@@ -267,6 +1108,20 @@
     "languages": [
       "solidity"
     ],
+    "measured": {
+      "solidity": {
+        "fp": 0,
+        "labelled": 0,
+        "population": null,
+        "precision": null,
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "split": null,
+        "status": "unmeasured",
+        "tp": 0,
+        "unclear": 0,
+        "wilson95": null
+      }
+    },
     "severity": "error",
     "severity_note": "error; runs only when --target and --target-commit are set",
     "slug": "missing-citation",

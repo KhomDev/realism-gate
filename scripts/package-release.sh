@@ -85,6 +85,8 @@ esac
 find "$src_parent/$name" -exec touch -d "@$epoch" {} +
 
 mkdir -p "$out_dir"
+# Absolute, because the zip branch writes from inside $src_parent.
+out_dir="$(cd "$out_dir" && pwd)"
 case "$archive" in
   tar.gz)
     # --sort=name: readdir order must not leak into the archive.
