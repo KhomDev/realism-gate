@@ -169,6 +169,9 @@ fn instruction_names(
     depth: usize,
     out: &mut String,
 ) {
+    if depth > 32 {
+        return;
+    }
     let e = op.resolved(e);
     if let ExprKind::Call { callee, .. } = &e.kind {
         let (name, path) = match &callee.kind {
@@ -201,7 +204,7 @@ fn instruction_names(
         }
     }
     for c in e.children() {
-        instruction_names(env, op, c, depth, out);
+        instruction_names(env, op, c, depth + 1, out);
     }
 }
 
