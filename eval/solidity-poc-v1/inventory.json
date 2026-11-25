@@ -1,0 +1,24 @@
+{
+  "schema": "realism-gate.solidity-poc-inventory/v1",
+  "date": "2026-11-25",
+  "salt": "rg-solidity-v1-salt-e3c5336cedf1f185f432914f5f2ab1ec",
+  "split_rule": "int(sha256(salt + '|' + unit_id)[:8], 16) % 100: 0-39 DEV, 40-59 V1, 60-74 V2, 75-99 FINAL",
+  "tiers": {
+    "J": "coded Foundry PoC with a published platform or sponsor outcome",
+    "X": "exploit-by-construction reproduction with no platform judgement",
+    "N": "negative control: secure-path test or a PoC a judge rejected for the PoC being wrong"
+  },
+  "kinds": {
+    "foundry-test": "a Solidity Foundry test file or test contract",
+    "foundry-script": "a Foundry script/forge script",
+    "hardhat-script": "a Hardhat JS/TS script reproducing an exploit"
+  },
+  "units": [],
+  "excluded": [],
+  "counts": {
+    "units": 0,
+    "J": 0,
+    "X": 0,
+    "N": 0
+  }
+}

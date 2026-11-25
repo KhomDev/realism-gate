@@ -1,0 +1,27 @@
+{
+  "schema": "realism-gate.solana-poc-inventory/v3",
+  "date": "2026-11-25",
+  "salt": "rg-solana-v3-salt-2b03962612050c100daeb8128706254e",
+  "split_rule": "int(sha256(salt + '|' + unit_id)[:8], 16) % 100: 0-39 DEV, 40-59 V1, 60-74 V2, 75-99 FINAL",
+  "tiers": {
+    "J": "coded PoC with a published platform or sponsor outcome",
+    "X": "exploit-by-construction reproduction with no platform judgement",
+    "N": "negative control: secure-path test or a PoC a judge rejected for the PoC being wrong"
+  },
+  "kinds": {
+    "test-file": "a test file (Rust #[test]/#[tokio::test] or TS it/test) meant to drive a harness",
+    "test-fragment": "statements or an it()/#[test] block meant to be added to an existing test",
+    "rust-unit-test": "a Rust #[test] that calls program functions directly, driving no Solana harness",
+    "script": "a TS/JS script run with node (no it/test), e.g. a CTF client or a replaced deploy script",
+    "binary-main": "a Rust binary with fn main (PoC framework or CTF client)",
+    "ctf-solve-program": "an on-chain attacker program (entrypoint), not a test"
+  },
+  "units": [],
+  "excluded": [],
+  "counts": {
+    "units": 0,
+    "J": 0,
+    "X": 0,
+    "N": 0
+  }
+}
