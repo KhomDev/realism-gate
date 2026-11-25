@@ -380,7 +380,7 @@ EXCLUDED = [
     {"source": "codehawks-rustfund", "count": 326,
      "reason": "all 326 judged submissions parsed; 54 carry a harness block, 47 unique by content"},
     {"source": "codehawks-rustfund", "count": 7,
-     "reason": "byte-identical harness blocks repeated across submissions (marked duplicate_of)"},
+     "reason": "seven submissions are listed under two report groups; the first (highest-severity) occurrence is kept and the second skipped"},
 ]
 
 
@@ -458,9 +458,10 @@ def main(argv: list[str]) -> int:
             "split": {s: len([u for u in counted if u["split"] == s]) for s in ("DEV", "V1", "V2", "FINAL")},
         },
         "cap_note": ("40% is enforced on `source` at collection. Two views are reported because the "
-                     "fresh data is concentrated: origin-level (six sources) and platform-level "
-                     "(arena, codehawks, code4rena, teaching-repo). Under platform-level caps the "
-                     "fresh J universe cannot be counted whole; see SEARCH_LOG.md."),
+                     "fresh data is concentrated. J origins: arena 11, codehawks-rustfund 47, "
+                     "code4rena-jupiter-lend 1; J platforms: solana-audit-arena 11, codehawks 47, "
+                     "code4rena 1. A strict 40%-per-J-origin cap admits at most 5 units "
+                     "(2+2+1); see SEARCH_LOG.md for the FINAL arithmetic."),
     }
     text = json.dumps(doc, indent=2, ensure_ascii=False) + "\n"
     out = HERE / "inventory.json"
