@@ -8,6 +8,46 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-25
+
+### Added
+
+- **`rules` and `explain` print measured precision per language.** The rule
+  catalog embeds `eval/solana/measured.json`; a rule with no fresh or held-out
+  label prints `unmeasured`, never 100%. The JSON rule rows gain a `measured`
+  object keyed by language with `status`, `tp`, `fp`, `labelled`, `precision`,
+  `wilson95`, `split`, `population` and, for cells with fewer than five labels,
+  `count_only` (printed as `k/n (n<5, count only)`, never a percentage). The
+  Rust and Anchor TypeScript numbers are the held-out split of the Solana PoC
+  study (`eval/solana-poc/`), not the earlier test-suite measurement, which
+  stays published in `eval/solana/RESULTS.md`; the Solidity number uses only the
+  fresh (out-of-sample) corpus. `docs/precision.md` states the population and
+  the limits, and the generated rule pages carry the same line.
+
+### Documentation
+
+- **Solana PoC measurement (P1-A redo, 2026-11-25).** `eval/solana-poc/`
+  measures the frozen 1.0.4 rules on 99 public Solana PoC units (12 judged,
+  82 exploit-by-construction, 5 patched negative controls) from 45 pinned
+  sources, preregistered before any run or label. The tool reads 1 of 12
+  judged PoCs (8.3% [1.5-35.4]) and 72 of 82 exploit-by-construction ones;
+  held-out precision over all rules is 46/106 = 43.4% [34.4-52.9], with RG08
+  29/30 and RG09 7/7 against RG01 2/12, RG02 8/30, RG04 0/16 and RG06 0/6.
+  `docs/precision.md` carries the summary (checked by `tests/docs.rs`).
+  No rule logic changed.
+- **Correction.** `eval/solana/{README,RESULTS}.md` and `docs/precision.md`
+  said a public Solana PoC corpus does not exist in a form the tool reads.
+  That was wrong: the search checked three repositories and stopped, and the
+  Neodyme workshop PoCs it cited are unsolved templates. The text now says so
+  and links the PoC measurement.
+- **P1 Rust/Anchor TypeScript measurement.** Four pinned public test suites,
+  174 flags, 133 sampled, 63 held-out labels, Wilson 95% intervals per rule and
+  language. The report says plainly that the corpus is test suites, not PoCs,
+  and records the missing PoC corpus as a gap rather than widening the claim.
+- **Correction.** `docs/precision.md` said the `264ca72` solana-program-library
+  pin had five `program/tests` directories; at that commit only `token-lending`
+  and `governance` have one. The text is corrected.
+
 ## [1.0.4] - 2026-11-22
 
 A security and robustness release, from a self-review of 1.0.3. No rule id,
@@ -840,7 +880,9 @@ First release.
 - A pinned public-corpus benchmark (`scripts/bench-corpus.sh`,
   `bench/defihacklabs.json`, `docs/benchmark.md`), re-measured in CI.
 
-[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v1.0.3...HEAD
+[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/KhomDev/realism-gate/compare/v1.0.4...v1.1.0
+[1.0.4]: https://github.com/KhomDev/realism-gate/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/KhomDev/realism-gate/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/KhomDev/realism-gate/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/KhomDev/realism-gate/compare/v1.0.0...v1.0.1

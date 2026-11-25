@@ -1,0 +1,30 @@
+{"id": "e82e9dbb1751a052", "label": "false-positive", "reason": "Asserted value is a pre-attack precondition (victim buffer holds rent), not a gain claim; attacker balance-before is also recorded."}
+{"id": "6927163ac3d89b2e", "label": "false-positive", "reason": "set_account creates the vault fixture in setup(), which is then claimed through the program's own Initialize; the exploit is the withdraw path, not this write."}
+{"id": "a35597131aa00464", "label": "false-positive", "reason": "put() seeds a consistent challenge vault/share state (shares == pool) in setup; the exploits reach the theft through the program's request/fulfill instructions."}
+{"id": "75b382f86fee72d6", "label": "true-positive", "reason": "Test body only awaits an rpc call; no assertion anywhere."}
+{"id": "c3c9da3935f82834", "label": "false-positive", "reason": "Authority's deposit is explicit '[Setup] Initial liquidity' before the front-running exploit; the impact does not depend on that signature."}
+{"id": "4a2245f7740dbca6", "label": "false-positive", "reason": "test_all_basic_operations_work is a feature test; authority lock/unlock is ordinary admin functionality, not an exploit claim."}
+{"id": "f1607af47405fdd5", "label": "true-positive", "reason": "Exploit test body has only console.log and a try/catch that swallows failure; no assertion at all."}
+{"id": "ee87e07146e8ecd5", "label": "true-positive", "reason": "assert.ok(true) cannot fail; RG09 defect holds even in the secure/control test."}
+{"id": "e93c5db0a2428152", "label": "false-positive", "reason": "owner is a test-generated keypair overflowing its own vault; the overflow claim does not depend on a protocol role the attacker lacks."}
+{"id": "1c97a79e22066ee9", "label": "false-positive", "reason": "vaultOwner is a freshly generated test wallet acting on its own vault; underflow impact does not need a privileged signature."}
+{"id": "3cbf56b30aa250dd", "label": "false-positive", "reason": "Vault init by its own test-wallet owner in a secure-path control test (prevents deposit overflow)."}
+{"id": "70c3626bffcec658", "label": "false-positive", "reason": "Vault init by its own test-wallet owner in a secure-path control test (prevents withdraw underflow)."}
+{"id": "f90033ab89bae467", "label": "true-positive", "reason": "assert.ok(true) cannot fail; the 'exploit' only logs and asserts a literal."}
+{"id": "16f823faa4646d88", "label": "true-positive", "reason": "assert.ok(true) cannot fail; RG09 holds regardless of the secure-test context."}
+{"id": "425ba88b65f266bf", "label": "false-positive", "reason": "Pre-loaded store account is the test's own fixture in a secure-path control test showing the attack rejected."}
+{"id": "697155fd68f0158e", "label": "true-positive", "reason": "Test body is only console.log statements; no assertion."}
+{"id": "f766ef3245235fd9", "label": "false-positive", "reason": "Secure-path feature test: admin's first-time init is expected legitimate behaviour, not an exploit claim."}
+{"id": "1c5a72e125ea7453", "label": "false-positive", "reason": "Call sits in the 'Setup liquidation scenario' it-block: admin oracle update is labelled test-only setup for a liquidation feature test."}
+{"id": "70677b1da2690925", "label": "false-positive", "reason": "bank is an arbitrary fixture account given 1 lamport; no balance is injected into a protocol account to fake an exploit gain."}
+{"id": "0af78147aa5fa858", "label": "false-positive", "reason": "out is the test's own zeroed output fixture; the observed effect is written by the program."}
+{"id": "ed99a36876af1fbd", "label": "false-positive", "reason": "legit_coll is the control-case fixture (legit collateral), not the attacker's claimed state."}
+{"id": "259e934dd913a915", "label": "false-positive", "reason": "out is a zeroed output fixture; the program writes the result the test checks."}
+{"id": "c9bf655899fe67d1", "label": "false-positive", "reason": "Vault fixture encodes the stated premise (attacker is admin, not authority); the claimed bug is reached through the program's check."}
+{"id": "87d372abd5b30fac", "label": "false-positive", "reason": "Assertion is a pre-execute precondition (PDA holds rent); the gain is asserted as after-minus-before delta."}
+{"id": "d45fa249f66d98cb", "label": "true-positive", "reason": "Test claims transfer 'without victim signing' but initializes fromAccount with authority=attacker, so success depends on the attacker holding that role."}
+{"id": "ba46ea162f6f0462", "label": "true-positive", "reason": "Body only logs; the try/catch swallows errors and there is no assertion."}
+{"id": "76c77ce926c17a1e", "label": "true-positive", "reason": "Body only logs; the try/catch swallows errors and there is no assertion."}
+{"id": "3fd71e8256e2258b", "label": "true-positive", "reason": "Test body is four console.log lines; no assertion."}
+{"id": "a98c3f480eedb305", "label": "true-positive", "reason": "Summary test only logs; RG08 holds regardless of claim."}
+{"id": "a6bcdb4ed98d856b", "label": "false-positive", "reason": "stolen is attackerBalanceAfter minus attackerBalanceBefore, a difference assertion."}

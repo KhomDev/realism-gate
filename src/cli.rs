@@ -757,17 +757,22 @@ fn ensure_outside(path: &Path, root: &Path, flag: &str) -> Result<(), String> {
 }
 
 fn rule_languages(r: &rules::RuleInfo) -> Vec<&'static str> {
-    if matches!(r.solana, rules::SolanaNotes::Declaration) {
-        return vec!["solidity", "rust", "typescript", "move"];
+    rules::measured::languages(r)
+}
+
+fn measured_json(r: &rules::RuleInfo) -> serde_json::Value {
+    let mut map = serde_json::Map::new();
+    for lang in rule_languages(r) {
+        let value = match rules::measured::cell(r.id, lang) {
+            Some(cell) => serde_json::to_value(cell).expect("measured cell serializes"),
+            None => serde_json::json!({
+                "status": "unmeasured",
+                "reason": "no measurement",
+            }),
+        };
+        map.insert(lang.to_string(), value);
     }
-    let mut langs = vec!["solidity"];
-    if r.checks_solana() {
-        langs.extend(["rust", "typescript"]);
-    }
-    if r.checks_move() {
-        langs.push("move");
-    }
-    langs
+    serde_json::Value::Object(map)
 }
 
 fn list_rules(format: ListFormat) -> String {
@@ -782,7 +787,17 @@ fn list_rules(format: ListFormat) -> String {
                     r.slug,
                     r.title
                 ));
+                out.push_str(&format!(
+                    "      measured: {}\n",
+                    rules::measured::line(r, false)
+                ));
             }
+            out.push_str(
+                "\nmeasured = TP/(TP+FP) with a Wilson 95% interval. Rust and Anchor \
+                 TypeScript are held-out labels on public Solana PoCs (n<5: count only); \
+                 Solidity uses the fresh corpus. `unmeasured` is not 100%. See \
+                 docs/precision.md.\n",
+            );
             out
         }
         ListFormat::Json => {
@@ -797,6 +812,7 @@ fn list_rules(format: ListFormat) -> String {
                         "severity_note": r.severity_note,
                         "summary": r.summary,
                         "languages": rule_languages(r),
+                        "measured": measured_json(r),
                         "url": render::rule_url(r.id),
                     })
                 })
@@ -820,6 +836,11 @@ fn explain_text(r: &rules::RuleInfo) -> String {
         r.why,
         r.fix
     );
+    out.push_str(&format!(
+        "\nMeasured precision\n  {}\n  Population: Rust and Anchor TypeScript = public test \
+         suites, not PoCs; Solidity = fresh corpus; `unmeasured` is not 100%.\n",
+        rules::measured::line(r, true)
+    ));
     if !r.bad.is_empty() {
         out.push_str("\nFires on\n");
         for line in r.bad.lines() {

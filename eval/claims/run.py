@@ -50,6 +50,7 @@ OUT = HERE / "cache" / "claims-out"
 FIXTURES = HERE / "fixtures" / "rejections.yaml"
 Z = 1.959964
 FIELD_PRIORITY = ("impact", "attacker")
+SCORECARD_FIELDS = ("attacker", "impact", "asset", "amount", "preconditions", "cited", "fix")
 
 
 def wilson(k: int, n: int) -> list[float] | None:
@@ -202,6 +203,7 @@ def summarise(per_pair: list[dict]) -> dict:
         agree = sum(1 for f in flagged if f.get("agree"))
         missed = sum(1 for p in per_pair if p["fields"][field].get("missed_evidence_gap"))
         out[field] = {
+            "n": len(flagged),
             "flagged": len(flagged), "agree": agree,
             "precision": round(agree / len(flagged), 4) if flagged else None,
             "wilson95": wilson(agree, len(flagged)),
@@ -219,7 +221,76 @@ def summarise(per_pair: list[dict]) -> dict:
         "whether the PoC uses that identity to drive the call. The 0.0 is the "
         "disagreement rate of a deliberately weak label, not a tool error rate; "
         "re-label identity by caller binding before using this field.")
+    # Fields the 120-pair corpus cannot label. They are published as statuses,
+    # not as zeroes or as a precision.
+    out["asset"] = {
+        "n": 0, "flagged": 0, "agree": 0, "precision": None, "wilson95": None,
+        "status": "not_interpretable",
+        "reason": ("the incident record names a coarse asset (for example ETH), and "
+                   "the tool's asset predicate is a name match over the PoC and cited "
+                   "list; a label derived from the same text would be circular. No "
+                   "asset precision is claimed."),
+    }
+    out["amount"] = {
+        "n": 0, "flagged": 0, "agree": 0, "precision": None, "wilson95": None,
+        "status": "not_checkable",
+        "reason": ("the record states a fiat loss and the PoC asserts token balances; "
+                   "conflating the two would be a fabricated label, so no amount "
+                   "precision is claimed."),
+    }
+    out["preconditions"] = {
+        "n": 0, "flagged": 0, "agree": 0, "precision": None, "wilson95": None,
+        "status": "not_checkable",
+        "reason": ("the incident record does not state preconditions, and the pairs' "
+                   "claims have no preconditions field; there is no label to score."),
+    }
+    out["cited"] = {
+        "n": 0, "flagged": 0, "agree": 0, "precision": None, "wilson95": None,
+        "status": "not_checkable",
+        "reason": ("the incident record's attack-transaction and analysis links are not "
+                   "contract citations, and the pairs' claims have no cited field; there "
+                   "is no label to score."),
+    }
+    out["fix"] = {
+        "n": 0, "flagged": 0, "agree": 0, "precision": None, "wilson95": None,
+        "status": "not_checkable",
+        "reason": ("the corpus has no patches, and `check` never applies one; the fix "
+                   "row stays open until `verify-fix` is run, so there is no label to score."),
+    }
     return out
+
+
+def scorecard_block(measurements: dict) -> str:
+    lines = [
+        "| Field | Status | n | TP | FP | Precision | Note |",
+        "|---|---|---:|---:|---:|---|---|",
+    ]
+    for field in SCORECARD_FIELDS:
+        m = measurements[field]
+        status = m["status"]
+        n = m.get("n", m.get("flagged", 0))
+        if status == "measured":
+            tp = m.get("agree", 0)
+            fp = m.get("flagged", 0) - tp
+            lo, hi = m["wilson95"]
+            prec = f"{tp}/{tp + fp} = {m['precision'] * 100:.1f}% [{lo * 100:.1f}-{hi * 100:.1f}]"
+            note = ("in-sample: the nine misses were fixed on this set; the out-of-sample "
+                    "number is 91.0% (n=100) from the first build")
+            if field != "impact":
+                note = ""
+        elif status == "not_interpretable":
+            tp = fp = None
+            prec = "not scored (labels not interpretable)"
+            note = m.get("reason", "")
+        else:
+            tp = fp = None
+            prec = "not scored (not checkable)"
+            note = m.get("reason", "")
+        lines.append(
+            f"| {field} | {status} | {n} | {tp if tp is not None else '—'} | "
+            f"{fp if fp is not None else '—'} | {prec} | {note} |"
+        )
+    return "\n".join(lines) + "\n"
 
 
 NOT_CLAIMED = [
@@ -298,7 +369,24 @@ def main(argv: list[str]) -> int:
         if doc.get("corpus", {}).get("pairs") != len(load_pairs()["pairs"]):
             print("eval/claims check failed: corpus count drifted", file=sys.stderr)
             return 1
-        print("eval/claims check ok: " + json.dumps(doc.get("measurements")))
+        docs = RG / "docs" / "precision.md"
+        begin = "<!-- BEGIN CLAIMS SCORECARD -->"
+        end = "<!-- END CLAIMS SCORECARD -->"
+        if not docs.is_file():
+            print("eval/claims check failed: docs/precision.md is missing", file=sys.stderr)
+            return 1
+        text = docs.read_text(encoding="utf-8")
+        if begin not in text or end not in text:
+            print("eval/claims check failed: the scorecard markers are missing", file=sys.stderr)
+            return 1
+        got = text.split(begin, 1)[1].split(end, 1)[0].strip()
+        want = doc.get("scorecard", "").strip()
+        if got != want:
+            print("eval/claims check failed: docs/precision.md scorecard drifted", file=sys.stderr)
+            print("--- docs ---\n" + got, file=sys.stderr)
+            print("--- results ---\n" + want, file=sys.stderr)
+            return 1
+        print("eval/claims check ok: scorecard matches docs/precision.md")
         return 0
     if args.self_test:
         return self_test()
@@ -328,7 +416,7 @@ def main(argv: list[str]) -> int:
     out = {
         "schema": "realism-gate.claims.results/v1",
         "generated_by": "eval/claims/run.py",
-        "date": "2026-11-13",
+        "date": "2026-11-24",
         "corpus": corpus_facts(),
         "tool": {"path": str(binary), "version": version, "sha256": sha256_file(binary)},
         "frozen": {"seed": seed(), "pairs_sha256": sha256_file(PAIRS),
@@ -336,6 +424,7 @@ def main(argv: list[str]) -> int:
                    "heldout_opened": args.split in ("heldout", "all"),
                    "harness_sha256": sha256_file(HERE / "run.py")},
         "measurements": measurements,
+        "scorecard": scorecard_block(measurements),
         "per_pair": measured["per_pair"],
         "agreement": (load_labels().get("agreement")),
         "fixtures": fixtures_facts(),

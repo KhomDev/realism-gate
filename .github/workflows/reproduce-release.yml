@@ -1,0 +1,70 @@
+name: reproduce release
+
+# Run by hand after a release is published: rebuilds one target from the
+# release's source archive with the pinned toolchain and compares the rebuilt
+# binaries and archive with the published ones. It writes nothing and creates
+# no release.
+#
+# The archive comparison is meaningful for releases built by the current
+# release workflow (pinned rustc, deterministic repacking). Older releases were
+# built with a moving `stable` and plain tar/zip, so their archive bytes are
+# not expected to match; use binary-only to record the binary result for those.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published release tag, e.g. v1.0.5
+        required: true
+      target:
+        description: Release target to rebuild (must match the runner architecture)
+        required: false
+        default: x86_64-unknown-linux-musl
+      binary-only:
+        description: Compare binaries only; an archive difference is reported, not fatal
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  # Keep equal to the release workflow's RELEASE_RUST.
+  RELEASE_RUST: "1.95.0"
+
+jobs:
+  reproduce:
+    name: reproduce (${{ inputs.target }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install pinned toolchain
+        shell: bash
+        env:
+          TARGET: ${{ inputs.target }}
+        run: rustup toolchain install "$RELEASE_RUST" --profile minimal --target "$TARGET"
+
+      - name: Install musl tools
+        if: contains(inputs.target, 'musl')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
+
+      - name: Rebuild and compare
+        shell: bash
+        env:
+          TAG: ${{ inputs.tag }}
+          TARGET: ${{ inputs.target }}
+          BINARY_ONLY: ${{ inputs.binary-only }}
+          RG_TOOLCHAIN: ${{ env.RELEASE_RUST }}
+        run: |
+          set -eu
+          if [ "$BINARY_ONLY" = "true" ]; then
+            bash scripts/reproduce-release.sh --binary-only "$TAG" "$TARGET"
+          else
+            bash scripts/reproduce-release.sh "$TAG" "$TARGET"
+          fi

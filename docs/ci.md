@@ -13,7 +13,8 @@ test directory: `path: tests/`.
 
 That is the whole setup. The action needs no Rust or Node toolchain: it downloads the
 release binary for the runner (Linux x86-64 and arm64, macOS x86-64 and arm64,
-Windows x86-64), checks it against the release's `SHA256SUMS`, and runs it.
+Windows x86-64), checks it against the release's `SHA256SUMS`, verifies its build
+provenance with `gh attestation verify`, and runs it.
 `@v1` follows the newest 1.x release; pin `@v1.0.0` or a commit SHA if you
 want nothing to move. (The `v0` tag keeps pointing at the last 0.x release;
 it is not moved backwards.)
@@ -75,7 +76,8 @@ What it does on every run:
 | `card` | `false` | Write the evidence card (Markdown and JSON) into the run's output directory; needs `report` or `claims`. |
 | `args` | `""` | Extra arguments for `realism-gate check`, e.g. `--config ci/realism-gate.toml` or `--no-fail-on-claims`. |
 | `github-token` | `github.token` | Used for the comment and to fetch the base commit. |
-| `binary` | `""` | For testing the action: run this binary instead of downloading one. |
+| `verify-attestation` | `true` | Verify the downloaded archive's build provenance with `gh attestation verify` before running it. Fails closed if `gh` is missing or verification fails. |
+| `binary` | `""` | For testing the action: run this binary instead of downloading one. No attestation applies. |
 
 `paths` and `upload-sarif`, the 0.1.0 names, still work.
 
@@ -96,6 +98,44 @@ findings. The claim table is printed in the job log, is in the JSON report
 (`claims`), and is the evidence card when `card` is on. A claim failure does
 set the exit code even when `fail-on: none`; add `--no-fail-on-claims` to
 `args` only if the workflow scores the table itself.
+
+### Checksums, provenance, and the trust boundary
+
+Before the downloaded binary runs, the action performs two checks:
+
+1. **`SHA256SUMS` from the same release.** This proves the archive arrived
+   intact. It does not prove who built it: an attacker who can replace the
+   archive can replace the checksum beside it, and a mirror serves both.
+2. **Build provenance.** The release workflow attests each archive with
+   `actions/attest-build-provenance` after the deterministic repacking, so the
+   attested digest is the published archive's. The action runs
+   `gh attestation verify <archive> --repo KhomDev/realism-gate` before
+   unpacking it. The attestation is a Sigstore record, signed through GitHub
+   Actions' OIDC identity, that binds the archive's digest to a workflow run in
+   this repository. `--repo` makes `gh` require that repository as the signer.
+
+The check is on by default (`verify-attestation: true`) and fails closed: if
+`gh` is not on `PATH`, or verification fails, the action stops before running
+anything. GitHub-hosted runners ship `gh`; on a self-hosted runner, install it,
+or set `verify-attestation: false` only when you accept checksum-only trust (for
+example a release published outside the release workflow, which has no
+attestation to verify). Setting it to `false` prints a notice in the log.
+
+**What the boundary does and does not cover.** It moves trust from "whichever
+host served the download" to "the `KhomDev/realism-gate` repository and its
+release workflow, as recorded by GitHub's attestation service, plus the `gh`
+binary and the Sigstore trust root". It does not prove the source was audited,
+that the code is correct, or that the repository and its workflow were not
+compromised at build time. It covers the release archive the action downloads,
+not the action's own `action.yml` and scripts: those come from the ref the
+workflow names (`@v1`, a version tag or a commit SHA). It does not cover the
+`binary` input, which runs a caller-supplied executable with no download and no
+attestation, and is meant for testing the action itself.
+
+The shell logic is `scripts/verify-attestation.sh`; its test
+(`scripts/test-verify-attestation.sh`) uses a fake `gh` and runs on Linux, macOS
+and Windows in `.github/workflows/action-selftest.yml`. It covers the default,
+the opt-out, a failed verification, a missing `gh`, and an invalid input value.
 
 ### When there is nothing to check
 
@@ -215,6 +255,7 @@ target=x86_64-unknown-linux-musl
 curl -fsSLO "https://github.com/KhomDev/realism-gate/releases/download/$version/realism-gate-${version#v}-$target.tar.gz"
 curl -fsSLO "https://github.com/KhomDev/realism-gate/releases/download/$version/SHA256SUMS"
 sha256sum -c SHA256SUMS --ignore-missing
+gh attestation verify "realism-gate-${version#v}-$target.tar.gz" --repo KhomDev/realism-gate
 tar xzf "realism-gate-${version#v}-$target.tar.gz"
 "./realism-gate-${version#v}-$target/realism-gate" check test --changed-since origin/main
 ```

@@ -25,7 +25,7 @@ makes. Each row is bound to evidence in the PoC and gets one of four statuses:
 <!-- BEGIN:example-claims -->
 
 ```text
-realism-gate 1.0.4  ·  1 file  ·  1 suite  ·  4 tests
+realism-gate 1.1.0  ·  1 file  ·  1 suite  ·  4 tests
 
 test/ShadowVault.t.sol
   note   RG03 deployer-is-attacker  test/ShadowVault.t.sol:57:26  ShadowVaultTest::test_healthyDistribution_shipsSurplus
@@ -162,7 +162,7 @@ The test deploys a vault and then drains it as admin, with `deal` writing the va
 <!-- BEGIN:example -->
 
 ```text
-realism-gate 1.0.4  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.1.0  ·  1 file  ·  1 suite  ·  1 test
 
 test/VaultDrain.t.sol
   warn   RG11 unpinned-fork  test/VaultDrain.t.sol:17:9  VaultDrainTest::test_attackerDrainsVault
@@ -232,7 +232,7 @@ Same rule ids, same output. Rust harnesses (solana-program-test, LiteSVM, Mollus
 <!-- BEGIN:example-rust -->
 
 ```text
-realism-gate 1.0.4  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.1.0  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault_drain.rs
   warn   RG11 unpinned-fork  tests/vault_drain.rs:21:15  vault_drain::test_attacker_drains_vault
@@ -280,7 +280,7 @@ shows why a rule exists and how it can be wrong.
 <!-- BEGIN:example-anchor -->
 
 ```text
-realism-gate 1.0.4  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.1.0  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault-drain.ts
   warn   RG11 unpinned-fork  tests/vault-drain.ts:13:21  vault::lets the attacker drain the vault
@@ -348,7 +348,7 @@ shows why a rule exists and how it can be wrong.
 | [RG19](docs/rules/RG19.md) `setup-hides-storage-write` | error | `setUp()` pranks as a role and writes storage |
 | [RG20](docs/rules/RG20.md) `missing-citation` | error | a cited path, contract or function is missing at `--target-commit` |
 
-`realism-gate explain RG15` prints why a rule exists and how it can be wrong. Each page under `docs/rules/` is generated from the catalog.
+`realism-gate explain RG15` prints why a rule exists and how it can be wrong. Each page under `docs/rules/` is generated from the catalog. Both `rules` and `explain` print the measured/unmeasured status per language: Rust and Anchor TypeScript use a held-out measurement on public **test suites**, not on PoCs, and Solidity uses only the fresh (out-of-sample) corpus. A rule with no fresh or held-out label prints `unmeasured`, never 100%. The Rust/Anchor TypeScript number must not be quoted as PoC precision; see [docs/precision.md](docs/precision.md).
 
 ## Usage
 
@@ -389,7 +389,7 @@ Inputs are capped, and the error names the limit: 8 MiB per source file, 128 MiB
 
 A claim table is narrower than the bug. Binding cannot confirm a role the test does not grant, an asset the PoC never names, an amount stated only in prose, a precondition it has no words for, or a citation without a target commit. The `fix` row is always open until you run `verify-fix`. And the inferred fallback reads only backticked identifiers, the headline's impact verb and the words "any user"/"unprivileged"/role names; everything else is `NOT CHECKABLE`, and an inferred run is never a pass.
 
-A clean result is not a payable finding. The full list is [docs/limitations.md](docs/limitations.md#claims-and-binding). How often a flag was right, on the corpora that were labelled, is [docs/precision.md](docs/precision.md); the claim-binding numbers (impact: 91.0% on the first build, n=100, Wilson 95% [83.8-95.2]; 98.9% after fixing the misses that the same set exposed, so in-sample) and their caveats are [there](docs/precision.md#claim-binding).
+A clean result is not a payable finding. The full list is [docs/limitations.md](docs/limitations.md#claims-and-binding). How often a flag was right, on the corpora that were labelled, is [docs/precision.md](docs/precision.md); the claim-binding numbers (impact: 91.0% on the first build, n=100, Wilson 95% [83.8-95.2]; 98.9% after fixing the misses that the same set exposed, so in-sample) and their caveats are [there](docs/precision.md#claim-binding). The per-field scorecard publishes every field too: attacker and asset are not interpretable with this corpus, and amount, preconditions, cited and fix are not checkable.
 
 ## Related
 

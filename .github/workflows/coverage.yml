@@ -1,0 +1,57 @@
+name: coverage
+
+# A manual measurement, not a gate. It runs the whole test suite under
+# cargo-llvm-cov on the pinned toolchain and writes the summary (regions,
+# functions, lines, branches) to the job summary. docs/test-quality.md quotes
+# the result; CI does not fail on a coverage number.
+#
+# It lives here rather than in ci.yml because the measurement takes longer than
+# the normal jobs and is only needed when the page is re-measured.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  # Keep equal to the release workflow's RELEASE_RUST, so the number describes
+  # the compiler the release is built with.
+  COVERAGE_RUST: "1.95.0"
+
+jobs:
+  coverage:
+    name: cargo llvm-cov
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install pinned toolchain with llvm-tools
+        run: rustup toolchain install "$COVERAGE_RUST" --profile minimal --component llvm-tools-preview
+
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@0b45a05d6949463822299f3a2ec03d7ecec7c958 # cargo-binstall tag
+        with:
+          tool: cargo-llvm-cov
+
+      - name: Measure
+        shell: bash
+        run: |
+          set -eu
+          cargo "+$COVERAGE_RUST" llvm-cov --locked --workspace --summary-only --no-cfg-coverage \
+            | tee coverage.txt
+
+      - name: Record the summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## cargo llvm-cov ($COVERAGE_RUST)"
+            echo
+            echo '```text'
+            cat coverage.txt 2>/dev/null || echo "no coverage.txt was produced; see the step log"
+            echo '```'
+            echo
+            echo "Not a gate. docs/test-quality.md is where the number is discussed."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,2043 @@
+{
+  "schema": "realism-gate.solana-poc-inventory/v1",
+  "date": "2026-11-25",
+  "kinds": {
+    "test-file": "a test file (Rust #[test]/#[tokio::test] or TS it/test) meant to drive a harness",
+    "test-fragment": "statements or an it() block pasted into an issue, meant to be added to an existing test",
+    "rust-unit-test": "a Rust #[test] that calls program functions directly, driving no Solana harness",
+    "script": "a TS/JS script run with node (no it/test), e.g. a CTF client or a replaced deploy script",
+    "binary-main": "a Rust binary with fn main (PoC framework or CTF client)",
+    "ctf-solve-program": "an on-chain attacker program (entrypoint), not a test"
+  },
+  "units": [
+    {
+      "id": "J-orderly-078",
+      "source": "orderly-judging",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "orderly-judging",
+          "md": "001/078.md",
+          "block": 0,
+          "host_source": "orderly-code",
+          "host_dir": "solana-vault/packages/solana/contracts/tests",
+          "name": "sherlock-078.ts",
+          "sha256_norm": "c344b17c0afa735b7efaff03553836737d225390cc2f10b58523da560300bb93"
+        }
+      ],
+      "outcome": "valid",
+      "outcome_source": "platform-report",
+      "outcome_evidence": "in duplicate family 001 whose lead #40 is H-1 in the README.md of sherlock-audit/2024-09-orderly-network-solana-contract-judging (the published Sherlock report: H-1 #40, H-2 #99, M-1 #146); author handle chinepun is in H-1 'Found by'",
+      "placement": "issue says 'Add' with no file; placed in the code repo's tests/ directory",
+      "dedupe_key": "c344b17c0afa735b7efaff03553836737d225390cc2f10b58523da560300bb93",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "J-orderly-080",
+      "source": "orderly-judging",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "orderly-judging",
+          "md": "001/080.md",
+          "block": 0,
+          "host_source": "orderly-code",
+          "host_dir": "solana-vault/packages/solana/contracts/tests",
+          "name": "sherlock-080.ts",
+          "sha256_norm": "790f8d7c075fd471dd0d597b18ec61c080b266e8f34f37b3cc885f99d77b6f88"
+        }
+      ],
+      "outcome": "valid",
+      "outcome_source": "platform-report",
+      "outcome_evidence": "in duplicate family 001 (lead #40 = H-1) of the README.md of sherlock-audit/2024-09-orderly-network-solana-contract-judging (the published Sherlock report: H-1 #40, H-2 #99, M-1 #146); author chinepun credited",
+      "placement": "issue says 'Add' with no file; placed in tests/",
+      "dedupe_key": "790f8d7c075fd471dd0d597b18ec61c080b266e8f34f37b3cc885f99d77b6f88",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "J-orderly-066",
+      "source": "orderly-judging",
+      "tier": "J",
+      "kind": "rust-unit-test",
+      "files": [
+        {
+          "extract": "orderly-judging",
+          "md": "006/066.md",
+          "block": 0,
+          "name": "sherlock-066.rs",
+          "sha256_norm": "abbda69ab30842b048787067beb0ac63def94f9b5e6e016700b9d618e84b8175"
+        }
+      ],
+      "outcome": "invalid",
+      "outcome_source": "platform-report",
+      "outcome_evidence": "family 006 has no issue in the README.md of sherlock-audit/2024-09-orderly-network-solana-contract-judging (the published Sherlock report: H-1 #40, H-2 #99, M-1 #146)",
+      "placement": "a #[cfg(test)] mod for msg_codec.rs; written standalone",
+      "dedupe_key": "abbda69ab30842b048787067beb0ac63def94f9b5e6e016700b9d618e84b8175",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "J-orderly-085",
+      "source": "orderly-judging",
+      "tier": "J",
+      "kind": "script",
+      "files": [
+        {
+          "extract": "orderly-judging",
+          "md": "014/085.md",
+          "block": 0,
+          "host_source": "orderly-code",
+          "host_dir": "solana-vault/packages/solana/contracts/scripts",
+          "name": "05deposit_vault.ts",
+          "sha256_norm": "2d592bd2a13bcc05af25bc62990064c1b886065f66b1e1263b874fe729c40344"
+        }
+      ],
+      "outcome": "invalid",
+      "outcome_source": "platform-report",
+      "outcome_evidence": "family 014 has no issue in the README.md of sherlock-audit/2024-09-orderly-network-solana-contract-judging (the published Sherlock report: H-1 #40, H-2 #99, M-1 #146)",
+      "placement": "issue says 'replace 05deposit_vault.ts'; written over scripts/05deposit_vault.ts in the work copy",
+      "dedupe_key": "2d592bd2a13bcc05af25bc62990064c1b886065f66b1e1263b874fe729c40344",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "J-orderly-140",
+      "source": "orderly-judging",
+      "tier": "J",
+      "kind": "script",
+      "files": [
+        {
+          "extract": "orderly-judging",
+          "md": "014/140.md",
+          "block": 0,
+          "host_source": "orderly-code",
+          "host_dir": "solana-vault/packages/solana/contracts/scripts",
+          "name": "05deposit_vault.ts",
+          "sha256_norm": "a978604a1b8c7e6d5d4a0bb2d42fe8c1c5b7908525cf7363a4f51c291216f4fc"
+        }
+      ],
+      "outcome": "invalid",
+      "outcome_source": "platform-report",
+      "outcome_evidence": "family 014 has no issue in the README.md of sherlock-audit/2024-09-orderly-network-solana-contract-judging (the published Sherlock report: H-1 #40, H-2 #99, M-1 #146)",
+      "placement": "as 085: replaces scripts/05deposit_vault.ts",
+      "dedupe_key": "a978604a1b8c7e6d5d4a0bb2d42fe8c1c5b7908525cf7363a4f51c291216f4fc",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "J-orderly-112",
+      "source": "orderly-judging",
+      "tier": "J",
+      "kind": "rust-unit-test",
+      "files": [
+        {
+          "extract": "orderly-judging",
+          "md": "112.md",
+          "block": 0,
+          "name": "sherlock-112.rs",
+          "sha256_norm": "b590ef095a576cdd7355cde9da6d7352d9a225940d71ed8e0e4e7e027607226f"
+        }
+      ],
+      "outcome": "invalid",
+      "outcome_source": "platform-report",
+      "outcome_evidence": "root-level issue (no family), not in the README.md of sherlock-audit/2024-09-orderly-network-solana-contract-judging (the published Sherlock report: H-1 #40, H-2 #99, M-1 #146)",
+      "placement": "unit tests for the message codec; written standalone",
+      "dedupe_key": "b590ef095a576cdd7355cde9da6d7352d9a225940d71ed8e0e4e7e027607226f",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "J-orderly-115",
+      "source": "orderly-judging",
+      "tier": "J",
+      "kind": "rust-unit-test",
+      "files": [
+        {
+          "extract": "orderly-judging",
+          "md": "115.md",
+          "block": 0,
+          "name": "sherlock-115.rs",
+          "sha256_norm": "8ba29d9c8e4fd08a1f500a3172aba9da07e5d75383114da6808719a20ac9eef4"
+        }
+      ],
+      "outcome": "invalid",
+      "outcome_source": "platform-report",
+      "outcome_evidence": "root-level issue, not in the README.md of sherlock-audit/2024-09-orderly-network-solana-contract-judging (the published Sherlock report: H-1 #40, H-2 #99, M-1 #146)",
+      "placement": "written standalone",
+      "dedupe_key": "8ba29d9c8e4fd08a1f500a3172aba9da07e5d75383114da6808719a20ac9eef4",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "J-woofi-070",
+      "source": "woofi-judging",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "woofi-judging",
+          "md": "070.md",
+          "block": 1,
+          "host_source": "woofi-code",
+          "host_dir": "WOOFi_Solana/tests",
+          "name": "sherlock-070.js",
+          "sha256_norm": "8c672056b7397ec31917d8989740d70aa59e0e25427802ea213829edfac69a0e"
+        }
+      ],
+      "outcome": "invalid",
+      "outcome_source": "platform-report",
+      "outcome_evidence": "root-level issue, not in the README.md of sherlock-audit/2024-08-woofi-solana-deployment-judging (the published Sherlock report: H-1 #29, H-2 #64, M-1 #13, M-2 #54, M-3 #73)",
+      "placement": "an it() block with no file named; placed in WOOFi_Solana/tests/",
+      "dedupe_key": "8c672056b7397ec31917d8989740d70aa59e0e25427802ea213829edfac69a0e",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "J-pump-H02",
+      "source": "pump-science",
+      "tier": "J",
+      "kind": "rust-unit-test",
+      "files": [
+        {
+          "extract": "report:pump-science",
+          "anchor": "h-02-missing-update-of-migration_token_allocation-on-global-struct",
+          "block": 0,
+          "name": "c4-pump-H02.rs",
+          "sha256_norm": "23381b1dfcee2b5ae0a8b6c450dde4eda72a58681720ee0ed93fb102f5c5d500"
+        }
+      ],
+      "outcome": "valid",
+      "outcome_source": "platform-report",
+      "outcome_evidence": "H-02 in https://code4rena.com/reports/2025-01-pump-science",
+      "placement": "a #[test] for state/global.rs; written standalone",
+      "dedupe_key": "23381b1dfcee2b5ae0a8b6c450dde4eda72a58681720ee0ed93fb102f5c5d500",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "J-pump-M03",
+      "source": "pump-science",
+      "tier": "J",
+      "kind": "script",
+      "files": [
+        {
+          "extract": "report:pump-science",
+          "anchor": "m-03-abrupt-fee-transition-from-876-to-1-at-slot-250-due-to-incorrect-linear-decrease-formula",
+          "block": 1,
+          "name": "c4-pump-M03.ts",
+          "sha256_norm": "74985769aad5323f6c39cf7ba0639a93f109817a527d6f9b66df0e7925f75946"
+        }
+      ],
+      "outcome": "valid",
+      "outcome_source": "platform-report",
+      "outcome_evidence": "M-03 in https://code4rena.com/reports/2025-01-pump-science",
+      "placement": "a TypeScript fee simulation; written standalone",
+      "dedupe_key": "74985769aad5323f6c39cf7ba0639a93f109817a527d6f9b66df0e7925f75946",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "J-w3m-onre",
+      "source": "web3-master-audit-reports",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "immunefi/2026-05-onre/PoC.ts",
+          "sha256_norm": "d6dfcb1dbb5d0af6aa7c2fbaf9a82859decdbabe9af4ba0d4d7987193ad0740f"
+        }
+      ],
+      "outcome": "valid",
+      "outcome_source": "self-reported",
+      "outcome_evidence": "repository description of web3-master/audit-reports: 'All submitted and approved issues at code4rena, sherlock and immunefi.'",
+      "note": "imports ../test_helper and ../onre_program.ts, which the portfolio does not contain",
+      "dedupe_key": "d6dfcb1dbb5d0af6aa7c2fbaf9a82859decdbabe9af4ba0d4d7987193ad0740f",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "J-w3m-chainlink",
+      "source": "web3-master-audit-reports",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "immunefi/2026-05-chainlink/poc.spec.ts",
+          "sha256_norm": "fe6c18cf6fb2b891738096c5ddf5d686deffb5222397a6fdbad52bda87d1c843"
+        }
+      ],
+      "outcome": "valid",
+      "outcome_source": "self-reported",
+      "outcome_evidence": "repository description of web3-master/audit-reports: 'All submitted and approved issues at code4rena, sherlock and immunefi.'",
+      "dedupe_key": "fe6c18cf6fb2b891738096c5ddf5d686deffb5222397a6fdbad52bda87d1c843",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-ackee-l6-account-reloading",
+      "source": "ackee-bootcamp",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "Lesson-6/account-reloading/tests/account-reloading.ts",
+          "sha256_norm": "1849e1d0a120e2ae8905ac5c02a95d2a5af2a3722b728bca2c1bf9885873858b"
+        }
+      ],
+      "dedupe_key": "1849e1d0a120e2ae8905ac5c02a95d2a5af2a3722b728bca2c1bf9885873858b",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-ackee-l6-arbitrary-cpi",
+      "source": "ackee-bootcamp",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "Lesson-6/arbitrary-cpi/tests/arbitrary-cpi.ts",
+          "sha256_norm": "1efc1892fb31ca850db76c51f3c8035bb494eb3be0498858e281ddea3207527d"
+        }
+      ],
+      "dedupe_key": "1efc1892fb31ca850db76c51f3c8035bb494eb3be0498858e281ddea3207527d",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-ackee-l6-duplicate-mutable-accounts",
+      "source": "ackee-bootcamp",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "Lesson-6/duplicate-mutable-accounts/tests/duplicate-mutable-accounts.ts",
+          "sha256_norm": "a4ce0fb7c44877f7ebacc22760e24b43603d685747a2d2c50461b8d30ea9779a"
+        }
+      ],
+      "dedupe_key": "a4ce0fb7c44877f7ebacc22760e24b43603d685747a2d2c50461b8d30ea9779a",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-ackee-l6-pda-privileges",
+      "source": "ackee-bootcamp",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "Lesson-6/pda-privileges/tests/pda-privileges.ts",
+          "sha256_norm": "2cdb27a117f1ae81ef4a7a8a0f5f25ef539638457cf2cf82aff5770fe62f626d"
+        }
+      ],
+      "dedupe_key": "2cdb27a117f1ae81ef4a7a8a0f5f25ef539638457cf2cf82aff5770fe62f626d",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-ackee-l6-re-initialization",
+      "source": "ackee-bootcamp",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "Lesson-6/re-initialization/tests/re-initialization.ts",
+          "sha256_norm": "6bdc88beb5d0fed568415ad5e0089b0c2a10ace0c536f7ccaedffb842960baff"
+        }
+      ],
+      "dedupe_key": "6bdc88beb5d0fed568415ad5e0089b0c2a10ace0c536f7ccaedffb842960baff",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-ackee-l6-revival-attack",
+      "source": "ackee-bootcamp",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "Lesson-6/revival-attack/tests/revival-attack.ts",
+          "sha256_norm": "8f39b325c0c5540ba0156249517b294b6de6f71ef031ab494b9b380713cc4ac1"
+        }
+      ],
+      "dedupe_key": "8f39b325c0c5540ba0156249517b294b6de6f71ef031ab494b9b380713cc4ac1",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-ackee-l6-signer-authorization",
+      "source": "ackee-bootcamp",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "Lesson-6/signer-authorization/tests/signer-authorization.ts",
+          "sha256_norm": "37fe9f15550ce0de196d7bca95ab5b4fffc1740c83fe3635e67fc538353865b1"
+        }
+      ],
+      "dedupe_key": "37fe9f15550ce0de196d7bca95ab5b4fffc1740c83fe3635e67fc538353865b1",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-taented9-01",
+      "source": "solana-security-patterns",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "examples/01-missing-account-validation/tests/exploit.ts",
+          "sha256_norm": "7cec933d0b4d72072a84778e7d2d6efc5a3d3894c87964d3322b59e33b4c8d34"
+        }
+      ],
+      "pair": "NC-taented9-01",
+      "dedupe_key": "7cec933d0b4d72072a84778e7d2d6efc5a3d3894c87964d3322b59e33b4c8d34",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-taented9-02",
+      "source": "solana-security-patterns",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "examples/02-signer-authorization/tests/exploit.ts",
+          "sha256_norm": "997c2b63ebc657364a9066ceb4d6260329789738610df22dacbb0e93b833023e"
+        }
+      ],
+      "pair": "NC-taented9-02",
+      "dedupe_key": "997c2b63ebc657364a9066ceb4d6260329789738610df22dacbb0e93b833023e",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-taented9-03",
+      "source": "solana-security-patterns",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "examples/03-arithmetic-overflow/tests/exploit.ts",
+          "sha256_norm": "f4e87e047e1e27dc2b9e6fc49f000b40c209c69387f3bf40ae310afb947cdd4f"
+        }
+      ],
+      "pair": "NC-taented9-03",
+      "dedupe_key": "f4e87e047e1e27dc2b9e6fc49f000b40c209c69387f3bf40ae310afb947cdd4f",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-taented9-04",
+      "source": "solana-security-patterns",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "examples/04-cpi-security/tests/exploit.ts",
+          "sha256_norm": "3f134671e28b9ec5e0fb1e5ffe35d77185438237a6af07062065098eff5bd6be"
+        }
+      ],
+      "pair": "NC-taented9-04",
+      "dedupe_key": "3f134671e28b9ec5e0fb1e5ffe35d77185438237a6af07062065098eff5bd6be",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-taented9-05",
+      "source": "solana-security-patterns",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "examples/05-account-closure/tests/exploit.ts",
+          "sha256_norm": "cf0f1f61dfdcfd73bf1685fcea23c31004c1f8ea4c88ea4e267619ce4af53d26"
+        }
+      ],
+      "pair": "NC-taented9-05",
+      "dedupe_key": "cf0f1f61dfdcfd73bf1685fcea23c31004c1f8ea4c88ea4e267619ce4af53d26",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-otter-wallet-king",
+      "source": "ottersec-devcave-2025",
+      "tier": "X",
+      "kind": "ctf-solve-program",
+      "files": [
+        {
+          "path": "pwn/wallet-king/solve/src/lib.rs",
+          "sha256_norm": "96268717b22617dcdec4908b059c568fdb0ff80914391b98cbb6728419c4dfa5"
+        }
+      ],
+      "dedupe_key": "96268717b22617dcdec4908b059c568fdb0ff80914391b98cbb6728419c4dfa5",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-otter-e2e-nft",
+      "source": "ottersec-devcave-2025",
+      "tier": "X",
+      "kind": "ctf-solve-program",
+      "files": [
+        {
+          "path": "pwn/e2e-nft-trading/solve/src/lib.rs",
+          "sha256_norm": "7fb0356fe88c614630c38e4b5a65f7a94134a2278cbe276fd9ce2f37d5f2ee14"
+        }
+      ],
+      "dedupe_key": "7fb0356fe88c614630c38e4b5a65f7a94134a2278cbe276fd9ce2f37d5f2ee14",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-neo-cashio",
+      "source": "neodyme-solana-ctf",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "cashio-exploit-workshop/poc/src/main.rs",
+          "sha256_norm": "6dd55efd00f3dc5a9366c5de3848f34ef7766c69043488ccdef36398e95943dc"
+        },
+        {
+          "path": "cashio-exploit-workshop/poc/src/lib.rs",
+          "sha256_norm": "ab2264b672a3e93e7042cf2e1e7433790da2d8533536054f16d874131ec50c36"
+        }
+      ],
+      "dedupe_key": "6dd55efd00f3dc5a9366c5de3848f34ef7766c69043488ccdef36398e95943dc",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-neo-bugchain-author",
+      "source": "neodyme-solana-ctf",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "allesctf21/bugchain/solution/author/src/main.rs",
+          "sha256_norm": "4c60859dcd0c384aee94bea367b3fbf3cdb16095b67422b314fc0a264e52a744"
+        },
+        {
+          "path": "allesctf21/bugchain/solution/author/program/src/lib.rs",
+          "sha256_norm": "962e3a0c1bd5eb9d7d08f381d9569d91d47be7ca6171505851f5dec56801189a"
+        }
+      ],
+      "dedupe_key": "4c60859dcd0c384aee94bea367b3fbf3cdb16095b67422b314fc0a264e52a744",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-neo-legitbank-author",
+      "source": "neodyme-solana-ctf",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "allesctf21/legit-bank/solution/author/src/main.rs",
+          "sha256_norm": "6b004302a20206ea1bf6aee7b3f4412be2eb7de6019b455a696f0f592fbcc74d"
+        }
+      ],
+      "dedupe_key": "6b004302a20206ea1bf6aee7b3f4412be2eb7de6019b455a696f0f592fbcc74d",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-neo-legitbank-sintemal",
+      "source": "neodyme-solana-ctf",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "allesctf21/legit-bank/solution/sintemal/solution/src/main.rs",
+          "sha256_norm": "efac2be4b20ddb2c805940574c3348b5c5441b91e5c92846b8da28c39879f3ee"
+        },
+        {
+          "path": "allesctf21/legit-bank/solution/sintemal/bank_initializer/src/lib.rs",
+          "sha256_norm": "23f271d449bb6e8f9775c8f2aa29af18ca648aba6e32620f11c6c01ceaf0d6d5"
+        }
+      ],
+      "dedupe_key": "efac2be4b20ddb2c805940574c3348b5c5441b91e5c92846b8da28c39879f3ee",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-neo-pool-solve",
+      "source": "neodyme-solana-ctf",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "pool/client/framework-solve/src/main.rs",
+          "sha256_norm": "5f673abfc3ec7ce5dc6933ba50a2ba712841e7d173c907ac7584eb52ea127863"
+        },
+        {
+          "path": "pool/client/framework-solve/solve/programs/solve/src/lib.rs",
+          "sha256_norm": "0dbaf98e1a4158ae2bb53cef084d0067d073b76b9f72b6f21cdfe5959a40e9be"
+        }
+      ],
+      "dedupe_key": "5f673abfc3ec7ce5dc6933ba50a2ba712841e7d173c907ac7584eb52ea127863",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-solhana-ch1",
+      "source": "solhana-ctf",
+      "tier": "X",
+      "kind": "script",
+      "files": [
+        {
+          "path": "client/challenge1.js",
+          "sha256_norm": "0751b4e9ca7bc19fa13ccb7d3c8b98053a5afd5045649e53a76f80c1d65ec142"
+        },
+        {
+          "path": "client/util.js",
+          "sha256_norm": "560b3b993b6f0cf3848437ffda5f075531791b2061328c24387b2783ce377096"
+        },
+        {
+          "path": "client/api.js",
+          "sha256_norm": "57892fadd0c5b736cbfc29fd0f008ce554285ba2ee9680c79741a7a84296f8a3"
+        }
+      ],
+      "dedupe_key": "0751b4e9ca7bc19fa13ccb7d3c8b98053a5afd5045649e53a76f80c1d65ec142",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-solhana-ch2",
+      "source": "solhana-ctf",
+      "tier": "X",
+      "kind": "script",
+      "files": [
+        {
+          "path": "client/challenge2.js",
+          "sha256_norm": "605a9f5a26423dcd228bca12897b57f8d90ad1695e75ae7b82e0b3b7035ed607"
+        },
+        {
+          "path": "client/util.js",
+          "sha256_norm": "560b3b993b6f0cf3848437ffda5f075531791b2061328c24387b2783ce377096"
+        },
+        {
+          "path": "client/api.js",
+          "sha256_norm": "57892fadd0c5b736cbfc29fd0f008ce554285ba2ee9680c79741a7a84296f8a3"
+        }
+      ],
+      "dedupe_key": "605a9f5a26423dcd228bca12897b57f8d90ad1695e75ae7b82e0b3b7035ed607",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-solhana-ch3",
+      "source": "solhana-ctf",
+      "tier": "X",
+      "kind": "script",
+      "files": [
+        {
+          "path": "client/challenge3.js",
+          "sha256_norm": "d158100cf55b244d1e6be5675596f279019daa80ed83f0636fed98c062f7eaf3"
+        },
+        {
+          "path": "client/util.js",
+          "sha256_norm": "560b3b993b6f0cf3848437ffda5f075531791b2061328c24387b2783ce377096"
+        },
+        {
+          "path": "client/api.js",
+          "sha256_norm": "57892fadd0c5b736cbfc29fd0f008ce554285ba2ee9680c79741a7a84296f8a3"
+        }
+      ],
+      "dedupe_key": "d158100cf55b244d1e6be5675596f279019daa80ed83f0636fed98c062f7eaf3",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-0xsh1mm3r--solanaplayground-01-signer-check_poc_tests_exploit",
+      "source": "cs-0xsh1mm3r--solanaplayground",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "01-signer-check/poc/tests/exploit.rs",
+          "sha256_norm": "bef8f650deb485692c5af13b3f16944cdc7f50f5a678f67eed6f3cc5e9d0240a"
+        }
+      ],
+      "dedupe_key": "bef8f650deb485692c5af13b3f16944cdc7f50f5a678f67eed6f3cc5e9d0240a",
+      "license": "MIT",
+      "unlicensed": false
+    },
+    {
+      "id": "X-0xsh1mm3r--solanaplayground-02-owner-check_poc_tests_exploit",
+      "source": "cs-0xsh1mm3r--solanaplayground",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "02-owner-check/poc/tests/exploit.rs",
+          "sha256_norm": "13e95ff2920477deb6e9b4f52e8f09c90fe725357f24324706ea32e4bce1e61a"
+        }
+      ],
+      "dedupe_key": "13e95ff2920477deb6e9b4f52e8f09c90fe725357f24324706ea32e4bce1e61a",
+      "license": "MIT",
+      "unlicensed": false
+    },
+    {
+      "id": "X-0xsh1mm3r--solanaplayground-03-account-substitution_poc_tests_exploit",
+      "source": "cs-0xsh1mm3r--solanaplayground",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "03-account-substitution/poc/tests/exploit.rs",
+          "sha256_norm": "508e7278bc9c98a95a3fb6e31b00742b80b5eb9037489a8d225be892312871b4"
+        }
+      ],
+      "dedupe_key": "508e7278bc9c98a95a3fb6e31b00742b80b5eb9037489a8d225be892312871b4",
+      "license": "MIT",
+      "unlicensed": false
+    },
+    {
+      "id": "X-0xsh1mm3r--solanaplayground-04-share-vault_poc_tests_exploit",
+      "source": "cs-0xsh1mm3r--solanaplayground",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "04-share-vault/poc/tests/exploit.rs",
+          "sha256_norm": "db2977a313bccb705cac92e459d2b662ab4d836bf24261e9785395a5b12dc34e"
+        }
+      ],
+      "dedupe_key": "db2977a313bccb705cac92e459d2b662ab4d836bf24261e9785395a5b12dc34e",
+      "license": "MIT",
+      "unlicensed": false
+    },
+    {
+      "id": "X-0xsh1mm3r--solanaplayground-06-redeem-vault_poc_tests_exploit",
+      "source": "cs-0xsh1mm3r--solanaplayground",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "06-redeem-vault/poc/tests/exploit.rs",
+          "sha256_norm": "988a56b8fb82736cf654a2d70a37af5e723a8c2cbf93c5675ab9a674195b69d8"
+        }
+      ],
+      "dedupe_key": "988a56b8fb82736cf654a2d70a37af5e723a8c2cbf93c5675ab9a674195b69d8",
+      "license": "MIT",
+      "unlicensed": false
+    },
+    {
+      "id": "X-alphar2--soteria-programs_amm_amm-vulnerable_tests_integration",
+      "source": "cs-alphar2--soteria",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "programs/amm/amm-vulnerable/tests/integration.rs",
+          "sha256_norm": "541c2b3b1388a775bf108bf951e8fcccbbf7461f4d8bc8d9cf03d32a624011f4"
+        }
+      ],
+      "dedupe_key": "541c2b3b1388a775bf108bf951e8fcccbbf7461f4d8bc8d9cf03d32a624011f4",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-alphar2--soteria-ograms_governance_g-vulnerable_tests_integration",
+      "source": "cs-alphar2--soteria",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "programs/governance/g-vulnerable/tests/integration.rs",
+          "sha256_norm": "13e2af21a181568d643500233051fa3ad26104b9ee29ddfee9b4301c35c411f2"
+        }
+      ],
+      "dedupe_key": "13e2af21a181568d643500233051fa3ad26104b9ee29ddfee9b4301c35c411f2",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-alphar2--soteria-no-escrow_p-vulnerable_tests_exploit_double_take",
+      "source": "cs-alphar2--soteria",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "programs/pino-escrow/p-vulnerable/tests/exploit_double_take.rs",
+          "sha256_norm": "0ff93f9651f409b8a81d12f0da4681bd3484f59752fe0eef3ad3d5c52e022994"
+        }
+      ],
+      "dedupe_key": "0ff93f9651f409b8a81d12f0da4681bd3484f59752fe0eef3ad3d5c52e022994",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-alphar2--soteria-ino-escrow_p-vulnerable_tests_exploit_fake_offer",
+      "source": "cs-alphar2--soteria",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "programs/pino-escrow/p-vulnerable/tests/exploit_fake_offer.rs",
+          "sha256_norm": "53c3d7af1d196a6f1df7b7657b980a80118db3ae27f94ba8fa5453d2b48cb29b"
+        }
+      ],
+      "dedupe_key": "53c3d7af1d196a6f1df7b7657b980a80118db3ae27f94ba8fa5453d2b48cb29b",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-alphar2--soteria-escrow_p-vulnerable_tests_exploit_missing_signer",
+      "source": "cs-alphar2--soteria",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "programs/pino-escrow/p-vulnerable/tests/exploit_missing_signer.rs",
+          "sha256_norm": "67484bf75eda0b9578d6ad7cbc4833e656d6320c5272c1a1783c53cb82116453"
+        }
+      ],
+      "dedupe_key": "67484bf75eda0b9578d6ad7cbc4833e656d6320c5272c1a1783c53cb82116453",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-alphar2--soteria-escrow_p-vulnerable_tests_exploit_wrong_proposer",
+      "source": "cs-alphar2--soteria",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "programs/pino-escrow/p-vulnerable/tests/exploit_wrong_proposer.rs",
+          "sha256_norm": "88cbe4c80c529b73c6ec959c02f602bcb02ff1e9aa675f5cbe41a0b6edfe7f13"
+        }
+      ],
+      "dedupe_key": "88cbe4c80c529b73c6ec959c02f602bcb02ff1e9aa675f5cbe41a0b6edfe7f13",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-ansh-699--poc-tests_poc1_unauthorized_oracle_creation",
+      "source": "cs-ansh-699--poc",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/poc1_unauthorized_oracle_creation.ts",
+          "sha256_norm": "fd98e1d8a8775c67a83481155f238b71bce0c506ba9e56fbe852f677c9889c71"
+        }
+      ],
+      "dedupe_key": "fd98e1d8a8775c67a83481155f238b71bce0c506ba9e56fbe852f677c9889c71",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-cybwithflourish--vulnerable.so-scripts_attacks_04-cpi-reentrancy",
+      "source": "cs-cybwithflourish--vulnerable.so",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "scripts/attacks/04-cpi-reentrancy.ts",
+          "sha256_norm": "dd1c9d325b49940ab1f7d361cf3b1d80070445d494b75d02b4c461e57ada5e35"
+        }
+      ],
+      "dedupe_key": "dd1c9d325b49940ab1f7d361cf3b1d80070445d494b75d02b4c461e57ada5e35",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-captainlevi2k04--solaudits-capstone_bootcamp_4_tests_CollateralFactor-Bug",
+      "source": "cs-captainlevi2k04--solaudits",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "capstone_bootcamp_4/tests/CollateralFactor-Bug.ts",
+          "sha256_norm": "65f65c5f826a358351661174a8d1a2f39e394ebb5d0d7fde01f8b4717375e2b1"
+        }
+      ],
+      "dedupe_key": "65f65c5f826a358351661174a8d1a2f39e394ebb5d0d7fde01f8b4717375e2b1",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-captainlevi2k04--solaudits-capstone_bootcamp_4_tests_UserDeposit-Bug",
+      "source": "cs-captainlevi2k04--solaudits",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "capstone_bootcamp_4/tests/UserDeposit-Bug.ts",
+          "sha256_norm": "bb9896199abb0e5157ac4f4c6a9fde390e561db5b2c8709d68bc1550ca938421"
+        }
+      ],
+      "dedupe_key": "bb9896199abb0e5157ac4f4c6a9fde390e561db5b2c8709d68bc1550ca938421",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-e-okelloh--praxis-tests_e2e_tests_escrow",
+      "source": "cs-e-okelloh--praxis",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/e2e/tests/escrow.rs",
+          "sha256_norm": "d1dd97aeb99e8f2e16c72ab1c5e3d6b3c6d87f387a71f655b4e1da8327ec1334"
+        }
+      ],
+      "dedupe_key": "d1dd97aeb99e8f2e16c72ab1c5e3d6b3c6d87f387a71f655b4e1da8327ec1334",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-justuzair--audits-contests_others_rektoff-metalend_tests_meta-lend",
+      "source": "cs-justuzair--audits",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "contests/others/rektoff-metalend/tests/meta-lend.ts",
+          "sha256_norm": "0c03ca10eac20dca68e01f51c838b490da449303c6ee00d8142d0914d7bdc4e6"
+        }
+      ],
+      "dedupe_key": "0c03ca10eac20dca68e01f51c838b490da449303c6ee00d8142d0914d7bdc4e6",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-kartikvyas1604--safemask-examples_solana-demo",
+      "source": "cs-kartikvyas1604--safemask",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "examples/solana-demo.ts",
+          "sha256_norm": "337404c63cf7e79676bee580dab37272977dc44c8a4210feee49573bcaa0f705"
+        }
+      ],
+      "dedupe_key": "337404c63cf7e79676bee580dab37272977dc44c8a4210feee49573bcaa0f705",
+      "license": "MIT",
+      "unlicensed": false
+    },
+    {
+      "id": "X-nishantcoder108--rust-in-practice-ent_rektoff_capstone_bootcamp_3__tests_meta-lend",
+      "source": "cs-nishantcoder108--rust-in-practice",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "experiment/rektoff/capstone_bootcamp_3_/tests/meta-lend.ts",
+          "sha256_norm": "a5715fee6f916b025b50703b04ac000f6f06c686cd4dd8482fd16f3bff089ff1"
+        }
+      ],
+      "dedupe_key": "a5715fee6f916b025b50703b04ac000f6f06c686cd4dd8482fd16f3bff089ff1",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-parthrathix0--verified-anchor-rust_verified-anchor_tests_runtime_exploits",
+      "source": "cs-parthrathix0--verified-anchor",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "rust/verified-anchor/tests/runtime_exploits.rs",
+          "sha256_norm": "e6488883116e0b1e2901e7ac9146c9ec7e44c8951d2dd00f7053f47f8f2b49ba"
+        }
+      ],
+      "dedupe_key": "e6488883116e0b1e2901e7ac9146c9ec7e44c8951d2dd00f7053f47f8f2b49ba",
+      "license": "Apache-2.0",
+      "unlicensed": false
+    },
+    {
+      "id": "X-seann2003--lending-audit-tests_meta-lend",
+      "source": "cs-seann2003--lending-audit",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/meta-lend.ts",
+          "sha256_norm": "8d3169e3d2f9d8c8185d238cd5c9428939c2496cbe04d8dfb0f45eef6723e191"
+        }
+      ],
+      "dedupe_key": "8d3169e3d2f9d8c8185d238cd5c9428939c2496cbe04d8dfb0f45eef6723e191",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-jmcastellanojimenez--rektoff-capstone-project-tests_meta-lend",
+      "source": "cs-jmcastellanojimenez--rektoff-capstone-project",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/meta-lend.ts",
+          "sha256_norm": "036bcc0a994a7f1f7ac9d0a98507e5d56b044a1495d16de56ebfefcd2b0cf683"
+        }
+      ],
+      "dedupe_key": "036bcc0a994a7f1f7ac9d0a98507e5d56b044a1495d16de56ebfefcd2b0cf683",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-zsh28--rektoff-capstone_tests_meta-lend-exploits",
+      "source": "cs-zsh28--rektoff",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "capstone/tests/meta-lend-exploits.ts",
+          "sha256_norm": "e2d78045b746cd1a42be54d84bf0bef4004d2488d47050f714da20b9279108e0"
+        }
+      ],
+      "dedupe_key": "e2d78045b746cd1a42be54d84bf0bef4004d2488d47050f714da20b9279108e0",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-georgeklein--scale-amm-tests_fee-rounding-exploit-tests",
+      "source": "cs-georgeklein--scale-amm",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/fee-rounding-exploit-tests.ts",
+          "sha256_norm": "cd46f08bd3e11b502c96ef0c92dce6ad0cc607cc73ad7c78e64d52d506f03367"
+        }
+      ],
+      "dedupe_key": "cd46f08bd3e11b502c96ef0c92dce6ad0cc607cc73ad7c78e64d52d506f03367",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-hifey62--solana-security-pitfalls--missing-signer-check_tests_missing-signer-check",
+      "source": "cs-hifey62--solana-security-pitfalls",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "examples/01-missing-signer-check/tests/missing-signer-check.ts",
+          "sha256_norm": "2ad49d32d9851385b6869847508850aac003e34cb35617815743bdeed2677253"
+        }
+      ],
+      "dedupe_key": "2ad49d32d9851385b6869847508850aac003e34cb35617815743bdeed2677253",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-jcabrera702--solana-exploit-lab-tests_challenge_0_signer",
+      "source": "cs-jcabrera702--solana-exploit-lab",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/challenge_0_signer.rs",
+          "sha256_norm": "ec65d1d4cfcdcebd3a98b6a003f02eb73cc8cc8dda8b3d2f194ed19ef0c5b98a"
+        }
+      ],
+      "dedupe_key": "ec65d1d4cfcdcebd3a98b6a003f02eb73cc8cc8dda8b3d2f194ed19ef0c5b98a",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-nathfavour--bytesunchecked-tests_vuln_missing_signer",
+      "source": "cs-nathfavour--bytesunchecked",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/vuln_missing_signer.ts",
+          "sha256_norm": "31912f46ad8d64c5068bf82b4a07d6ea98eb3f3a01ceee56c349279755ed38ef"
+        }
+      ],
+      "dedupe_key": "31912f46ad8d64c5068bf82b4a07d6ea98eb3f3a01ceee56c349279755ed38ef",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-onlybolu--solana-security-examples-tests_authority-checks",
+      "source": "cs-onlybolu--solana-security-examples",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/authority-checks.ts",
+          "sha256_norm": "0845ecc137e4abb990a09cf2a5e909a420f14e20518caa57422be1889698ae77"
+        }
+      ],
+      "dedupe_key": "0845ecc137e4abb990a09cf2a5e909a420f14e20518caa57422be1889698ae77",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-ruxy1212--solana-100-days-mlh-week_12_day_82_attack",
+      "source": "cs-ruxy1212--solana-100-days-mlh",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "week_12/day_82/attack.rs",
+          "sha256_norm": "3f3f3804db5e50df672a8af90621e8bdedb0b7692d4b7552e2db54d6c2d86b56"
+        }
+      ],
+      "dedupe_key": "3f3f3804db5e50df672a8af90621e8bdedb0b7692d4b7552e2db54d6c2d86b56",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-tanishaf28--100-days-of-solana-12_leaky_vault_programs_leaky_vault_tests_attack",
+      "source": "cs-tanishaf28--100-days-of-solana",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "week12/leaky_vault/programs/leaky_vault/tests/attack.rs",
+          "sha256_norm": "3f3f3804db5e50df672a8af90621e8bdedb0b7692d4b7552e2db54d6c2d86b56"
+        }
+      ],
+      "dedupe_key": "3f3f3804db5e50df672a8af90621e8bdedb0b7692d4b7552e2db54d6c2d86b56",
+      "duplicate_of": "X-ruxy1212--solana-100-days-mlh-week_12_day_82_attack",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-tobiayinmiro23--100-days-of-solana-leaky_vault_programs_leaky_vault_tests_attack",
+      "source": "cs-tobiayinmiro23--100-days-of-solana",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "leaky_vault/programs/leaky_vault/tests/attack.rs",
+          "sha256_norm": "3f3f3804db5e50df672a8af90621e8bdedb0b7692d4b7552e2db54d6c2d86b56"
+        }
+      ],
+      "dedupe_key": "3f3f3804db5e50df672a8af90621e8bdedb0b7692d4b7552e2db54d6c2d86b56",
+      "duplicate_of": "X-ruxy1212--solana-100-days-mlh-week_12_day_82_attack",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-sadiqsaidu--solana-security-patterns-rams_01_missing_account_validation_tests_exploit",
+      "source": "cs-sadiqsaidu--solana-security-patterns",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "programs/01_missing_account_validation/tests/exploit.ts",
+          "sha256_norm": "c3a28892f8d279d8dbfe3ee304be2bf2af845879958afbb286cd7fcc5af18f37"
+        }
+      ],
+      "dedupe_key": "c3a28892f8d279d8dbfe3ee304be2bf2af845879958afbb286cd7fcc5af18f37",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-sadiqsaidu--solana-security-patterns-rograms_02_missing_authority_check_tests_exploit",
+      "source": "cs-sadiqsaidu--solana-security-patterns",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "programs/02_missing_authority_check/tests/exploit.ts",
+          "sha256_norm": "8000be9d26c6e087f7c9e8de3c975f7f842de1ddae5729fe74f7b4c36b87ba36"
+        }
+      ],
+      "dedupe_key": "8000be9d26c6e087f7c9e8de3c975f7f842de1ddae5729fe74f7b4c36b87ba36",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-tadeoaguilar--solanalearn-uditing_reference-vulnerable-bank_tests_exploits",
+      "source": "cs-tadeoaguilar--solanalearn",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "07-TestingSecurityAuditing/reference-vulnerable-bank/tests/exploits.ts",
+          "sha256_norm": "8f49c43fc19cc12ebc9202f6a71186a7803397d765ce3fc2dfeff395b93a09c8"
+        }
+      ],
+      "dedupe_key": "8f49c43fc19cc12ebc9202f6a71186a7803397d765ce3fc2dfeff395b93a09c8",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-tobysolutions--solana-defi-course-builders_anchor_programs_vault-bug_tests_exploit",
+      "source": "cs-tobysolutions--solana-defi-course",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "builders/anchor/programs/vault-bug/tests/exploit.rs",
+          "sha256_norm": "b537be170eac9d45ef4cf9196d4b27e1dc3ee247d5266d3fe23f9ddb7cf28291"
+        }
+      ],
+      "dedupe_key": "b537be170eac9d45ef4cf9196d4b27e1dc3ee247d5266d3fe23f9ddb7cf28291",
+      "license": "MIT",
+      "unlicensed": false
+    },
+    {
+      "id": "X-tradewithsg--solana-security-examples-tests_missing-account-validation",
+      "source": "cs-tradewithsg--solana-security-examples",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/missing-account-validation.ts",
+          "sha256_norm": "073c7a99f56f94205a185018db8a8c64b3b403bca368f3210e6baf6024a22a76"
+        }
+      ],
+      "dedupe_key": "073c7a99f56f94205a185018db8a8c64b3b403bca368f3210e6baf6024a22a76",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_bump-seed-canonicalization.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/bump-seed-canonicalization.test.ts",
+          "sha256_norm": "b84ab44e400f786c732ffbc0d6da4010e5674688471f76fa0f47717750cff3e0"
+        }
+      ],
+      "dedupe_key": "b84ab44e400f786c732ffbc0d6da4010e5674688471f76fa0f47717750cff3e0",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_closing-accounts.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/closing-accounts.test.ts",
+          "sha256_norm": "9b1293d1b4ef2e685954b940dbd585a9f3155e7e6a117a5361e2e5e66e4a3479"
+        }
+      ],
+      "dedupe_key": "9b1293d1b4ef2e685954b940dbd585a9f3155e7e6a117a5361e2e5e66e4a3479",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_integer-overflow.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/integer-overflow.test.ts",
+          "sha256_norm": "d0c93420b750a8ba697dd42ffc2711b45f80123ee81d1f7dbff01225b5d077fa"
+        }
+      ],
+      "dedupe_key": "d0c93420b750a8ba697dd42ffc2711b45f80123ee81d1f7dbff01225b5d077fa",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_owner-checks.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/owner-checks.test.ts",
+          "sha256_norm": "9b561a2b4d5b8ee6a7ba631967dcf5e024695055471f3acc943213aa80b3ed2e"
+        }
+      ],
+      "dedupe_key": "9b561a2b4d5b8ee6a7ba631967dcf5e024695055471f3acc943213aa80b3ed2e",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_panic-handling.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/panic-handling.test.ts",
+          "sha256_norm": "a4eb8f8f41fd362cd1cea81a05416191d536955f60eac5fc0df659ab670091d0"
+        }
+      ],
+      "dedupe_key": "a4eb8f8f41fd362cd1cea81a05416191d536955f60eac5fc0df659ab670091d0",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_pda-sharing.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/pda-sharing.test.ts",
+          "sha256_norm": "a182a98b3e97a4bba56add0713732179a632c9d97afd5c9932a74b8d7a5c50b7"
+        }
+      ],
+      "dedupe_key": "a182a98b3e97a4bba56add0713732179a632c9d97afd5c9932a74b8d7a5c50b7",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_pinocchio_arbitrary-cpi.pinocchio.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/pinocchio/arbitrary-cpi.pinocchio.test.ts",
+          "sha256_norm": "d29ad1d4770ea92c3f008e928d205f758497e1dd415b9e45d4cc1f486e9fd93a"
+        }
+      ],
+      "dedupe_key": "d29ad1d4770ea92c3f008e928d205f758497e1dd415b9e45d4cc1f486e9fd93a",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_pinocchio_closing-accounts.pinocchio.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/pinocchio/closing-accounts.pinocchio.test.ts",
+          "sha256_norm": "7bc5387d316da1857562c75adb1d917704c0c74e632de46328f7b3e4f48ee0fd"
+        }
+      ],
+      "dedupe_key": "7bc5387d316da1857562c75adb1d917704c0c74e632de46328f7b3e4f48ee0fd",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_pinocchio_integer-overflow.pinocchio.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/pinocchio/integer-overflow.pinocchio.test.ts",
+          "sha256_norm": "7900c36d86c8f87f5f18932cb4f367354efcd3ce8e6e3f37c7b104edb807472a"
+        }
+      ],
+      "dedupe_key": "7900c36d86c8f87f5f18932cb4f367354efcd3ce8e6e3f37c7b104edb807472a",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_pinocchio_owner-checks.pinocchio.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/pinocchio/owner-checks.pinocchio.test.ts",
+          "sha256_norm": "19f628090102ce1053d4617dfc49c99d58e13a08da9c2d64156906a13ccc0347"
+        }
+      ],
+      "dedupe_key": "19f628090102ce1053d4617dfc49c99d58e13a08da9c2d64156906a13ccc0347",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_pinocchio_reinitialization.pinocchio.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/pinocchio/reinitialization.pinocchio.test.ts",
+          "sha256_norm": "9620ce5467f99136ac101c2925dd93466e600ae4b356536a3ed1abaa36aace84"
+        }
+      ],
+      "dedupe_key": "9620ce5467f99136ac101c2925dd93466e600ae4b356536a3ed1abaa36aace84",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_pinocchio_signer-checks.pinocchio.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/pinocchio/signer-checks.pinocchio.test.ts",
+          "sha256_norm": "5208c31ff990b7796238a9e0727d3ce01b0fbd58aab3d57cf01eab5c00636c11"
+        }
+      ],
+      "dedupe_key": "5208c31ff990b7796238a9e0727d3ce01b0fbd58aab3d57cf01eab5c00636c11",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_pinocchio_type-cosplay.pinocchio.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/pinocchio/type-cosplay.pinocchio.test.ts",
+          "sha256_norm": "c3acd96f20b10210a7521189ef5bbd02c156c642a44e17af697864078894138f"
+        }
+      ],
+      "dedupe_key": "c3acd96f20b10210a7521189ef5bbd02c156c642a44e17af697864078894138f",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_pinocchio_unsafe-rust.pinocchio.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/pinocchio/unsafe-rust.pinocchio.test.ts",
+          "sha256_norm": "b069ba883013389c375660cb852c113d8b9f5ca6daf2e2de9a35f5f511f56c7b"
+        }
+      ],
+      "dedupe_key": "b069ba883013389c375660cb852c113d8b9f5ca6daf2e2de9a35f5f511f56c7b",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_reinitialization-attacks.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/reinitialization-attacks.test.ts",
+          "sha256_norm": "47352004626459308f486cfe7022c5260df898cea97f44357fd29f8caf8bc86c"
+        }
+      ],
+      "dedupe_key": "47352004626459308f486cfe7022c5260df898cea97f44357fd29f8caf8bc86c",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_signer-checks.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/signer-checks.test.ts",
+          "sha256_norm": "cab2d71b8bfe0a6c5b769ddc93f38e6a5ece1d84cdfd032b510d791b7357049c"
+        }
+      ],
+      "dedupe_key": "cab2d71b8bfe0a6c5b769ddc93f38e6a5ece1d84cdfd032b510d791b7357049c",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_type-cosplay.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/type-cosplay.test.ts",
+          "sha256_norm": "baf69cdfaaf5e682c870039cbdf0b9a73040096c6e32d84d1a8387839502bf30"
+        }
+      ],
+      "dedupe_key": "baf69cdfaaf5e682c870039cbdf0b9a73040096c6e32d84d1a8387839502bf30",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-danielasaboro--solana_badger-tests_unsafe-rust.test",
+      "source": "cs-danielasaboro--solana_badger",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/unsafe-rust.test.ts",
+          "sha256_norm": "8cee8a2160e16f3d4cf979bff08cc5cb801ada648ffab4e9891905c57f8a6e8c"
+        }
+      ],
+      "dedupe_key": "8cee8a2160e16f3d4cf979bff08cc5cb801ada648ffab4e9891905c57f8a6e8c",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-corelia-academy--solana-bootcamp-security-ctf_course-registry_solution_tests_test",
+      "source": "cs-corelia-academy--solana-bootcamp",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "exercises/security-ctf/course-registry/solution/tests/test.rs",
+          "sha256_norm": "36587d63c4744ed9c0ec0a94872aa7c7e70012e019e821ce0f446bde1e302bfd"
+        }
+      ],
+      "dedupe_key": "36587d63c4744ed9c0ec0a94872aa7c7e70012e019e821ce0f446bde1e302bfd",
+      "license": "MIT",
+      "unlicensed": false
+    },
+    {
+      "id": "X-corelia-academy--solana-bootcamp-s_security-ctf_savings-vault_solution_tests_test",
+      "source": "cs-corelia-academy--solana-bootcamp",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "exercises/security-ctf/savings-vault/solution/tests/test.rs",
+          "sha256_norm": "8d0678fbeba8fe3c205c6f8b09be3ca756f716b5629927266d90e0e86a475781"
+        }
+      ],
+      "dedupe_key": "8d0678fbeba8fe3c205c6f8b09be3ca756f716b5629927266d90e0e86a475781",
+      "license": "MIT",
+      "unlicensed": false
+    },
+    {
+      "id": "X-corelia-academy--solana-bootcamp-ises_security-ctf_scoreboard_solution_tests_test",
+      "source": "cs-corelia-academy--solana-bootcamp",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "exercises/security-ctf/scoreboard/solution/tests/test.rs",
+          "sha256_norm": "0d27e9c0ec4e5092fa4a83afb6a01c7b8afcda37f03ed76e997677be73b3b800"
+        }
+      ],
+      "dedupe_key": "0d27e9c0ec4e5092fa4a83afb6a01c7b8afcda37f03ed76e997677be73b3b800",
+      "license": "MIT",
+      "unlicensed": false
+    },
+    {
+      "id": "X-corelia-academy--solana-bootcamp-s_security-ctf_ticket-refund_solution_tests_test",
+      "source": "cs-corelia-academy--solana-bootcamp",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "exercises/security-ctf/ticket-refund/solution/tests/test.rs",
+          "sha256_norm": "05595ec70e4472d2902c96c7c29d6183cb638ef5a213ac9f572e451f24146100"
+        }
+      ],
+      "dedupe_key": "05595ec70e4472d2902c96c7c29d6183cb638ef5a213ac9f572e451f24146100",
+      "license": "MIT",
+      "unlicensed": false
+    },
+    {
+      "id": "X-mm88nl-web--casi-app-tests_security-findings",
+      "source": "cs-mm88nl-web--casi-app",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/security-findings.ts",
+          "sha256_norm": "3aba3941921eccbe271fddf20283240255c2464f53320318b1b5b2e4fd30ef41"
+        }
+      ],
+      "dedupe_key": "3aba3941921eccbe271fddf20283240255c2464f53320318b1b5b2e4fd30ef41",
+      "license": "Apache-2.0",
+      "unlicensed": false
+    },
+    {
+      "id": "X-neocryptoquant--solana-security-template-tests_insecure_init",
+      "source": "cs-neocryptoquant--solana-security-template",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/insecure_init.rs",
+          "sha256_norm": "4a15013d01df7a3e0e8bebde738d67823f5b1b3a152d1fdb22e77992b93ab4b1"
+        }
+      ],
+      "dedupe_key": "4a15013d01df7a3e0e8bebde738d67823f5b1b3a152d1fdb22e77992b93ab4b1",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-neocryptoquant--solana-security-template-tests_remaining_accounts",
+      "source": "cs-neocryptoquant--solana-security-template",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/remaining_accounts.rs",
+          "sha256_norm": "dcf78bd922eeb78a64c93ebc1fd9a8bcbfc9a86402720d48f73a97f983f0a67f"
+        }
+      ],
+      "dedupe_key": "dcf78bd922eeb78a64c93ebc1fd9a8bcbfc9a86402720d48f73a97f983f0a67f",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-ubuntu-technologies--solana-security-template-tests_insecure_init",
+      "source": "cs-ubuntu-technologies--solana-security-template",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/insecure_init.rs",
+          "sha256_norm": "4a15013d01df7a3e0e8bebde738d67823f5b1b3a152d1fdb22e77992b93ab4b1"
+        }
+      ],
+      "dedupe_key": "4a15013d01df7a3e0e8bebde738d67823f5b1b3a152d1fdb22e77992b93ab4b1",
+      "duplicate_of": "X-neocryptoquant--solana-security-template-tests_insecure_init",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-ubuntu-technologies--solana-security-template-tests_remaining_accounts",
+      "source": "cs-ubuntu-technologies--solana-security-template",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "tests/remaining_accounts.rs",
+          "sha256_norm": "dcf78bd922eeb78a64c93ebc1fd9a8bcbfc9a86402720d48f73a97f983f0a67f"
+        }
+      ],
+      "dedupe_key": "dcf78bd922eeb78a64c93ebc1fd9a8bcbfc9a86402720d48f73a97f983f0a67f",
+      "duplicate_of": "X-neocryptoquant--solana-security-template-tests_remaining_accounts",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-solizardking--clawd-percolator-lator-prog_tests_poc_v17_lp_redemption_stranding",
+      "source": "cs-solizardking--clawd-percolator",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "programs/percolator-prog/tests/poc_v17_lp_redemption_stranding.rs",
+          "sha256_norm": "8a39b8fe87a07ceed7ce4ae2a575588259dc4b96b4bcfff387fce8436f96a634"
+        }
+      ],
+      "dedupe_key": "8a39b8fe87a07ceed7ce4ae2a575588259dc4b96b4bcfff387fce8436f96a634",
+      "license": "Apache-2.0",
+      "unlicensed": false
+    },
+    {
+      "id": "NC-taented9-01",
+      "source": "solana-security-patterns",
+      "tier": "NC",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "examples/01-missing-account-validation/tests/secure.ts",
+          "sha256_norm": "d364687b351b45b58e402d1700ebf5a0a6c23c9c73cb625824339a1a748b5703"
+        }
+      ],
+      "pair": "X-taented9-01",
+      "dedupe_key": "d364687b351b45b58e402d1700ebf5a0a6c23c9c73cb625824339a1a748b5703",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "NC-taented9-02",
+      "source": "solana-security-patterns",
+      "tier": "NC",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "examples/02-signer-authorization/tests/secure.ts",
+          "sha256_norm": "ad7325ff0d630cbcc714e6d2bfa06fe60c5bef1c4846d3669661d6a2e2cf71f8"
+        }
+      ],
+      "pair": "X-taented9-02",
+      "dedupe_key": "ad7325ff0d630cbcc714e6d2bfa06fe60c5bef1c4846d3669661d6a2e2cf71f8",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "NC-taented9-03",
+      "source": "solana-security-patterns",
+      "tier": "NC",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "examples/03-arithmetic-overflow/tests/secure.ts",
+          "sha256_norm": "8b333f1e4acbe608c30aace29ae31b741d8184e22fc71c1f7d0fb569effa70a4"
+        }
+      ],
+      "pair": "X-taented9-03",
+      "dedupe_key": "8b333f1e4acbe608c30aace29ae31b741d8184e22fc71c1f7d0fb569effa70a4",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "NC-taented9-04",
+      "source": "solana-security-patterns",
+      "tier": "NC",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "examples/04-cpi-security/tests/secure.ts",
+          "sha256_norm": "dcbccb4f2e2a44b41bccc33ae46ee776234804b46739c29d78a6bbbe6414b7ff"
+        }
+      ],
+      "pair": "X-taented9-04",
+      "dedupe_key": "dcbccb4f2e2a44b41bccc33ae46ee776234804b46739c29d78a6bbbe6414b7ff",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "NC-taented9-05",
+      "source": "solana-security-patterns",
+      "tier": "NC",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "examples/05-account-closure/tests/secure.ts",
+          "sha256_norm": "1cc017160b5ff1abf2fced46d464aea7e4d2248ba2582c8f9c3be7f5ec771235"
+        }
+      ],
+      "pair": "X-taented9-05",
+      "dedupe_key": "1cc017160b5ff1abf2fced46d464aea7e4d2248ba2582c8f9c3be7f5ec771235",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    }
+  ],
+  "excluded": [
+    {
+      "source": "orderly-judging",
+      "path": "001/093.md",
+      "reason": "code blocks quote program source or the fix; no coded PoC"
+    },
+    {
+      "source": "orderly-judging",
+      "path": "001/095.md",
+      "reason": "code blocks quote program source or the fix; no coded PoC"
+    },
+    {
+      "source": "orderly-judging",
+      "path": "002/005.md",
+      "reason": "code blocks quote program source or the fix; no coded PoC"
+    },
+    {
+      "source": "orderly-judging",
+      "path": "004/129.md",
+      "reason": "code blocks quote program source or the fix; no coded PoC"
+    },
+    {
+      "source": "orderly-judging",
+      "path": "005/096.md",
+      "reason": "code blocks quote program source or the fix; no coded PoC"
+    },
+    {
+      "source": "orderly-judging",
+      "path": "011/041.md",
+      "reason": "code blocks quote program source or the fix; no coded PoC"
+    },
+    {
+      "source": "orderly-judging",
+      "path": "018/114.md",
+      "reason": "code blocks quote program source or the fix; no coded PoC"
+    },
+    {
+      "source": "orderly-judging",
+      "path": "113.md",
+      "reason": "code blocks quote program source or the fix; no coded PoC"
+    },
+    {
+      "source": "orderly-judging",
+      "path": "151.md",
+      "reason": "code blocks quote program source or the fix; no coded PoC"
+    },
+    {
+      "source": "orderly-judging",
+      "path": "170.md",
+      "reason": "code blocks quote program source or the fix; no coded PoC"
+    },
+    {
+      "source": "orderly-judging",
+      "path": "(other 160 issue files)",
+      "count": 160,
+      "reason": "no fenced code block with a test, harness call or PoC marker (screened by grep for program.methods|anchor.workspace|it(|#[test]|describe(|LiteSVM|ProgramTest|bankrun)"
+    },
+    {
+      "source": "woofi-judging",
+      "path": "002/058.md",
+      "reason": "code blocks quote program source; no coded PoC"
+    },
+    {
+      "source": "woofi-judging",
+      "path": "(other 88 issue files)",
+      "count": 88,
+      "reason": "no fenced code block with a test or PoC marker"
+    },
+    {
+      "source": "pump-science",
+      "path": "tests/bankrun.ts, tests/pump-science.ts, clients/js/tests/amm.test.ts",
+      "count": 3,
+      "reason": "the sponsor's own test suite, not a PoC"
+    },
+    {
+      "source": "pump-science",
+      "path": "report: H-01, M-01, M-02 and QA 01-12",
+      "reason": "report code blocks quote source or describe a scenario; no coded PoC (H-01's code is a source quote, not a test)"
+    },
+    {
+      "source": "web3-master-audit-reports",
+      "path": "defillama/2026-05-project0/report.md",
+      "reason": "Solana finding with source quotes only; no coded PoC"
+    },
+    {
+      "source": "web3-master-audit-reports",
+      "path": "immunefi/{2026-04-mux,2026-05-compound,2026-05-mux,2026-05-ostium,2026-05-nexusmutual}",
+      "count": 5,
+      "reason": "EVM PoCs (ethers/hardhat/viem), not Solana"
+    },
+    {
+      "source": "ackee-bootcamp",
+      "path": "Capture-the-Flag/level-1/tests/exploit.ts",
+      "reason": "unsolved CTF template: the 'ADD YOUR CODE' slot is empty"
+    },
+    {
+      "source": "ackee-bootcamp",
+      "path": "Capture-the-Flag/level-2/tests/exploit.ts",
+      "reason": "unsolved CTF template: the 'ADD YOUR CODE' slot is empty"
+    },
+    {
+      "source": "ackee-bootcamp",
+      "path": "Capture-the-Flag/level-3/tests/exploit.ts",
+      "reason": "unsolved CTF template: the 'ADD YOUR CODE' slot is empty"
+    },
+    {
+      "source": "ackee-bootcamp",
+      "path": "Capture-the-Flag/level-4/tests/exploit.ts",
+      "reason": "unsolved CTF template: the 'ADD YOUR CODE' slot is empty"
+    },
+    {
+      "source": "ackee-bootcamp",
+      "path": "Capture-the-Flag/level-5/tests/exploit.ts",
+      "reason": "unsolved CTF template: the 'ADD YOUR CODE' slot is empty"
+    },
+    {
+      "source": "ackee-bootcamp",
+      "path": "Lesson-6/ownership-check/tests/ownership-check.ts",
+      "reason": "template: it('TODO') with an empty slot"
+    },
+    {
+      "source": "ackee-bootcamp",
+      "path": "Lesson-6/type-cosplay/tests/type-cosplay.ts",
+      "reason": "template: it('TODO') with an empty slot"
+    },
+    {
+      "source": "ackee-bootcamp",
+      "path": "Lesson-6/initialization-frontrunning/tests/initialization-frontrunning.ts",
+      "reason": "only secure-path tests (wrong/correct authority on the secure instruction); no exploit test"
+    },
+    {
+      "source": "ackee-breakpoint-2023",
+      "path": "exploit-pocs/exploit-0/exploit-0.ts",
+      "reason": "exercise harness: the exploit slot is empty (0, 1) or the exploit is the participant's parameter choice (2, 3); not a solved PoC"
+    },
+    {
+      "source": "ackee-breakpoint-2023",
+      "path": "exploit-pocs/exploit-1/exploit-1.ts",
+      "reason": "exercise harness: the exploit slot is empty (0, 1) or the exploit is the participant's parameter choice (2, 3); not a solved PoC"
+    },
+    {
+      "source": "ackee-breakpoint-2023",
+      "path": "exploit-pocs/exploit-2/exploit-2.ts",
+      "reason": "exercise harness: the exploit slot is empty (0, 1) or the exploit is the participant's parameter choice (2, 3); not a solved PoC"
+    },
+    {
+      "source": "ackee-breakpoint-2023",
+      "path": "exploit-pocs/exploit-3/exploit-3.ts",
+      "reason": "exercise harness: the exploit slot is empty (0, 1) or the exploit is the participant's parameter choice (2, 3); not a solved PoC"
+    },
+    {
+      "source": "ottersec-devcave-2025",
+      "path": "pwn/cut-and-run/{,attachments/}program/programs/cut-and-run/tests/solve_base_program_test.rs",
+      "count": 2,
+      "reason": "unsolved template: 'you can test your exploit idea here' with no attack between the asserts"
+    },
+    {
+      "source": "ottersec-devcave-2025",
+      "path": "pwn/cut-and-run/{,attachments/}program/tests/cut-and-run.ts",
+      "count": 2,
+      "reason": "Anchor's default it('Is initialized!') template"
+    },
+    {
+      "source": "ottersec-devcave-2025",
+      "path": "pwn/{wallet-king,e2e-nft-trading}/attachments/solve/src/lib.rs",
+      "count": 2,
+      "reason": "the handout copies: the solve program is a stripped template (the solved versions are units)"
+    },
+    {
+      "source": "sealevel-attacks",
+      "path": "tests/raw.ts",
+      "reason": "Anchor's default it('Is initialized!') template; the repository has no exploit tests"
+    },
+    {
+      "source": "neodyme-workshop",
+      "path": "pocs/src/bin/level0.rs",
+      "reason": "unsolved PoC-framework template: hack() is empty"
+    },
+    {
+      "source": "neodyme-workshop",
+      "path": "pocs/src/bin/level1.rs",
+      "reason": "unsolved PoC-framework template: hack() is empty"
+    },
+    {
+      "source": "neodyme-workshop",
+      "path": "pocs/src/bin/level2.rs",
+      "reason": "unsolved PoC-framework template: hack() is empty"
+    },
+    {
+      "source": "neodyme-workshop",
+      "path": "pocs/src/bin/level3.rs",
+      "reason": "unsolved PoC-framework template: hack() is empty"
+    },
+    {
+      "source": "neodyme-workshop",
+      "path": "pocs/src/bin/level4.rs",
+      "reason": "unsolved PoC-framework template: hack() is empty"
+    },
+    {
+      "source": "neodyme-solana-ctf",
+      "path": "neodyme-breakpoint-workshop/pocs/src/bin/level0-4.rs",
+      "count": 5,
+      "reason": "byte-identical copies of the neodyme-workshop templates"
+    },
+    {
+      "source": "neodyme-solana-ctf",
+      "path": "solhana-ctf/client/challenge1-3.js",
+      "count": 3,
+      "reason": "template copies: attack() is empty (the solved versions are in dachen0/solhana-ctf)"
+    },
+    {
+      "source": "neodyme-solana-ctf",
+      "path": "pool/client/framework-solve/solve/tests/solve.ts",
+      "reason": "Anchor's default it('Is initialized!') template"
+    },
+    {
+      "source": "neodyme-solana-ctf",
+      "path": "league-of-lamports/solution_template/{solve.py,solution/src/solution/solution.c}",
+      "count": 2,
+      "reason": "solution template, and not Rust/TypeScript"
+    },
+    {
+      "source": "neodyme-solana-ctf",
+      "path": "darksols, moar-horse-5, solfire, HalbornCTF_Rust_Solana, allesctf21/secret-store",
+      "count": 5,
+      "reason": "challenge sources with no solve in the repository"
+    }
+  ],
+  "code_search_screen": {
+    "queries": {
+      "LiteSVM attacker exploit language:Rust": 77,
+      "ProgramTest attacker exploit language:Rust": 20,
+      "bankrun attacker exploit language:TypeScript": 26,
+      "anchor.workspace attacker exploit language:TypeScript": 58
+    },
+    "hits": 181,
+    "repositories": 92,
+    "rule": "Include a hit file when its tests demonstrate an exploit succeeding against a Solana program (titles or names say exploit/attack/PoC/bug and the test asserts the attack's effect). Exclude: realism-gate itself; tool, agent, prompt, template or fuzzer source; regression or security suites where the attack is expected to fail; feature suites; course data; non-Solana code. Only hit files are taken; sibling files of an included repository are not searched.",
+    "excluded_repositories": {
+      "KhomDev/realism-gate": "the tool under study",
+      "0xdefence-labs/0xDefend": "AI PoC-generator source and its prompts",
+      "0xwi11iam/Suijin": "red-team framework source, not a test",
+      "rade-nugroho/4R3S": "AI auditor source",
+      "solanabr/auditor-skill": "agent skill template",
+      "dumbbutt0/audit-watch": "PoC template",
+      "Replikanti/agentis-colonies": "agent-colony demo output (repository describes itself as an agent platform)",
+      "iamomm-hack/faultline": "replay-tool source",
+      "asymmetric-research/crucible": "fuzzer source",
+      "sinaabgarmy/AI_Agent_Office": "agent UI source",
+      "alrimarleskovar/RoundFinancial": "indexer source",
+      "vivekpal1/superteam-academy-lobster-green": "course data file",
+      "MetalLegBob/fantastical-finance-factory": "unit tests of constants",
+      "aeyakovenko/percolator-meta": "program unit tests",
+      "dcccrypto/percolator-stake": "program unit tests and a regression test",
+      "Solizardking/clawd-percolator (other hits)": "regression/adversarial suites where the attack fails; processor unit tests",
+      "tradewife/percolator-heist": "regression suite",
+      "x402agent/openclawd-main": "regression suite (percolator copy)",
+      "ChartGains/percolator-app": "regression suite",
+      "Ah-Riz/velthoryn": "security suite: every exploit attempt is expected to be blocked",
+      "JatinSharma222/Epoch": "security suite: attacks rejected",
+      "Lovexan369/drfraudsworth": "security suite: attacks mitigated",
+      "OOBE-PROTOCOL/synapse-sap": "security suite: invalid inputs rejected",
+      "Oliverknowledge/FairX": "feature/security suite",
+      "PlayHyperia/hyperbet": "security suite: attacks rejected",
+      "QuantuLabs/8004-atom": "attack-vector coverage suite; outcomes are mitigations",
+      "SolCardDev/staking-program": "security suites: attacks rejected",
+      "Parad0x-Labs/dna-x402": "regression: drain rejected",
+      "Parad0x-Labs/Dark-Null-Protocol": "red-team regression tests; the attack outcome is not stated as succeeding",
+      "lfdt-ibc/ibc-contracts": "program unit tests: exploits rejected",
+      "dbrowne/example_solana_vault": "security suite: attacks rejected",
+      "Axis-pizza/Axis_AMM": "regression suite",
+      "tobySolutions/SolanaAMM": "regression suite (Axis copy)",
+      "Sufon/TICK": "account-matrix fuzz suite",
+      "aizen299/aegis-protocol": "feature/security suite",
+      "arabafenice599rae/Token-sperimental": "security suite: attacks rejected",
+      "pina-rs/pina": "integration and regression suites",
+      "Shawnchee/Whistle": "feature suite",
+      "Dodecahedr0x/nebulous-world": "feature suite",
+      "Bench-games/opportunity-markets": "feature suite",
+      "0xLeathery/the-daily-rug": "feature suite",
+      "mihailShumilov/covantic": "feature and regression suites",
+      "levy-street/world-of-claudecraft": "game tests, not a Solana harness",
+      "mgocbr3/world-of-aphasya": "game tests, not a Solana harness",
+      "malbeclabs/doublezero": "feature suite",
+      "solana-foundation/subscriptions": "feature suite",
+      "solana-program/stake-pool": "feature suite",
+      "pointgroup-labs/fogo-stake-pool": "feature suite (stake-pool fork)",
+      "OpenAudio/solana-programs": "feature suite; the secp '_exploit' tests assert rejection",
+      "chinmaisiddhartha/audius-main": "copy of OpenAudio's suite",
+      "dawidosX/ANL-Protocol": "integration suite; attack tests assert rejection",
+      "otter-sec/anchor-community": "marginfi suite: attacker attempts should fail",
+      "retrovaliks/magnifi-v2": "marginfi suite copy",
+      "dikipidorot/AggreMax-marginfi_yield_cpi_integration": "marginfi suite copy",
+      "cyranoaladin/formation_web3": "post-patch validation: exploit should be rejected",
+      "b3njaminfuentes/Djinn-pmarket": "end-to-end suite; attack phase asserts rejection",
+      "oakenknight/solana-school": "Anchor default template",
+      "RaYYeR220/deliverable": "audit reproductions converted to regression guards (the file header says the assertions were inverted)",
+      "corelia-academy/solana-bootcamp (exercise/ files)": "unsolved exercise templates (the solution/ files are included)",
+      "AlphaR2/Soteria (multisig utils.rs)": "helper module, not a test",
+      "ParthRathix0/Verified-Anchor (verified-anchor-exploits/src/lib.rs)": "library source, not a test",
+      "web3-master/audit-reports": "already a §3 source (chainlink PoC is unit J-w3m-chainlink)",
+      "TAENTED9/solana-security-patterns": "already a §3 source",
+      "otter-sec/bp-devcave-ctf-2025": "already a §3 source"
+    }
+  },
+  "dead_ends": [
+    {
+      "source": "code-423n4/2025-08-solana-foundation",
+      "count": 0,
+      "reason": "the public report has no High or Medium finding and 7 QA reports without coded PoCs; the findings repository is private (404)"
+    },
+    {
+      "source": "code-423n4/2025-01-pump-science-findings",
+      "count": 0,
+      "reason": "findings repository is private (404); PoCs taken from the public report only, so invalid submissions are not visible"
+    },
+    {
+      "source": "Cantina competitions (pump.fun PumpSwap, Olas lockbox-solana)",
+      "count": 0,
+      "reason": "findings pages are not readable without login (anonymous fetch returned 404/login on 2026-11-25)"
+    },
+    {
+      "source": "dachen0/solhana-ctf server/",
+      "count": 0,
+      "reason": "challenge server, no PoC"
+    },
+    {
+      "source": "web3-master/audit-reports outcome labels",
+      "count": 0,
+      "reason": "no per-item status; the repository description says all items were approved, so its two Solana PoCs are 'self-reported' outcomes"
+    }
+  ],
+  "counts": {
+    "units": 103,
+    "duplicates": 4,
+    "counted_by_tier": {
+      "J": 12,
+      "NC": 5,
+      "X": 82
+    },
+    "excluded_candidates": 309
+  },
+  "tier_p_note": "Tier P (the operator's private PoCs) is measured in a private note and never appears in this file."
+}

@@ -56,6 +56,57 @@ fn rule_pages_are_current() {
     );
 }
 
+/// The claim-binding scorecard in docs/precision.md is the one stored in
+/// eval/claims/results.json. Keeping the block in the results file makes the
+/// check one string comparison, and `run.py --check` performs the same check.
+#[test]
+fn claims_scorecard_is_current() {
+    let results = std::fs::read_to_string(root().join("eval/claims/results.json"))
+        .expect("eval/claims/results.json");
+    let doc: serde_json::Value = serde_json::from_str(&results).expect("results.json is json");
+    let want = doc["scorecard"].as_str().expect("scorecard string");
+    let docs =
+        std::fs::read_to_string(root().join("docs/precision.md")).expect("docs/precision.md");
+    let begin = "<!-- BEGIN CLAIMS SCORECARD -->";
+    let end = "<!-- END CLAIMS SCORECARD -->";
+    let have = docs
+        .split(begin)
+        .nth(1)
+        .and_then(|s| s.split(end).next())
+        .expect("scorecard markers in docs/precision.md");
+    assert_eq!(
+        norm(have).trim(),
+        norm(want).trim(),
+        "docs/precision.md scorecard is stale; run python eval/claims/run.py --check"
+    );
+}
+
+/// The Solana PoC summary in docs/precision.md is the one stored in
+/// eval/solana-poc/results.json (`docs_block`), which `measure.py` derives
+/// from the committed flags and labels. `measure.py --check` performs the same
+/// comparison.
+#[test]
+fn solana_poc_table_is_current() {
+    let results = std::fs::read_to_string(root().join("eval/solana-poc/results.json"))
+        .expect("eval/solana-poc/results.json");
+    let doc: serde_json::Value = serde_json::from_str(&results).expect("results.json is json");
+    let want = doc["docs_block"].as_str().expect("docs_block string");
+    let docs =
+        std::fs::read_to_string(root().join("docs/precision.md")).expect("docs/precision.md");
+    let begin = "<!-- BEGIN SOLANA POC TABLE -->";
+    let end = "<!-- END SOLANA POC TABLE -->";
+    let have = docs
+        .split(begin)
+        .nth(1)
+        .and_then(|s| s.split(end).next())
+        .expect("Solana PoC markers in docs/precision.md");
+    assert_eq!(
+        norm(have).trim(),
+        norm(want).trim(),
+        "docs/precision.md Solana PoC table is stale; run python eval/solana-poc/measure.py --check"
+    );
+}
+
 /// Replaces the block between `<!-- BEGIN:{name} -->` and `<!-- END:{name} -->`
 /// in README.md with the output of `realism-gate check` run in `dir`, or
 /// checks that it already holds that output.

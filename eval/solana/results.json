@@ -1,0 +1,393 @@
+{
+  "schema": "realism-gate.solana-precision/v1",
+  "date": "2026-11-24",
+  "frozen_rule_commit": "6019773976706e42e11ceefc2ee1b03496f2df54",
+  "frozen_rule_version": "1.0.4",
+  "seed": "rg-solana-2026-11-24",
+  "population": "public Rust and Anchor TypeScript test suites. This is not a corpus of judged PoCs or incident reproductions; the report must say so and must not present the result as PoC precision.",
+  "split": {
+    "method": "dev if int(sha256(seed + '|' + corpus + '|' + flag_id)[:8], 16) % 2 == 0, else heldout",
+    "note": "The split is computed from the committed flag id, so a reader can recompute it without the labels."
+  },
+  "corpora": {
+    "anchor": {
+      "repo": "coral-xyz/anchor",
+      "commit": "53cd88fa179bad874904a37b65150a9a3840bc13",
+      "dir": ".corpus/solana/anchor",
+      "paths": [
+        "."
+      ],
+      "include": [
+        "tests/**",
+        "**/tests/**"
+      ],
+      "languages": [
+        "typescript",
+        "javascript"
+      ],
+      "listing_sha256": "2776158d742ed835b43dc5287d8bff681d38695d9b4f6df204a8288c6ed1d8cf",
+      "license": "Apache-2.0",
+      "terms": "public repository, Apache-2.0; pointers, flag ids and labels only; evidence text is not committed"
+    },
+    "program-examples": {
+      "repo": "solana-developers/program-examples",
+      "commit": "f766367013b1906cb897cdfa90d0b8332db39ae8",
+      "dir": ".corpus/solana/program-examples",
+      "paths": [
+        "."
+      ],
+      "include": [
+        "**/tests/**"
+      ],
+      "languages": [
+        "rust",
+        "typescript"
+      ],
+      "listing_sha256": "516145cb5ac4e5f60663347f2e063f38e049b772d180b7088b57cbcaf7be9c17",
+      "license": "MIT",
+      "terms": "public repository, MIT; pointers, flag ids and labels only; evidence text is not committed"
+    },
+    "litesvm": {
+      "repo": "LiteSVM/litesvm",
+      "commit": "c848c5617d1ae4d3f832fb0ca03e30c611a7ba52",
+      "dir": ".corpus/solana/litesvm",
+      "paths": [
+        "."
+      ],
+      "include": [
+        "crates/**/tests/**",
+        "tests/**"
+      ],
+      "languages": [
+        "rust",
+        "typescript"
+      ],
+      "listing_sha256": "3ade55e346ca5cae3ee402ed9026c585a6b0ba82f43297f9c4f74336f7d965fd",
+      "license": "Apache-2.0",
+      "terms": "public repository, Apache-2.0; pointers, flag ids and labels only; evidence text is not committed"
+    },
+    "solana-program-library": {
+      "repo": "solana-labs/solana-program-library",
+      "commit": "264ca72de06b0c2b45c0b15d298000fe3f82db2e",
+      "dir": ".corpus/solana/solana-program-library",
+      "paths": [
+        "token-lending/program/tests/",
+        "governance/program/tests/"
+      ],
+      "include": [
+        "**/program/tests/**"
+      ],
+      "languages": [
+        "rust"
+      ],
+      "listing_sha256": "08531a414f76edcf11e76b2cdda5d3a73a5587083a2fb3864ed1cb379fffe18f",
+      "license": "Apache-2.0",
+      "terms": "public repository, Apache-2.0; pointers, flag ids and labels only; evidence text is not committed"
+    }
+  },
+  "labels": {
+    "files": [
+      "eval/solana/labels/v1.0.4-heldout.jsonl"
+    ],
+    "sha256": {
+      "v1.0.4-heldout.jsonl": "18be0bf911cbf848147c02622746e3b712f6084d45534e7a8f69c4965c3025cc"
+    }
+  },
+  "counts": {
+    "flags": 174,
+    "sampled": 133,
+    "heldout_sampled": 63,
+    "heldout_labelled": 63,
+    "dev_sampled": 70,
+    "dev_labelled": 0
+  },
+  "heldout": {
+    "RG02": {
+      "javascript": {
+        "labelled": 5,
+        "tp": 0,
+        "fp": 5,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.4345
+        ],
+        "status": "measured"
+      },
+      "rust": {
+        "labelled": 21,
+        "tp": 0,
+        "fp": 21,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.1546
+        ],
+        "status": "measured"
+      },
+      "typescript": {
+        "labelled": 8,
+        "tp": 0,
+        "fp": 8,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.3244
+        ],
+        "status": "measured"
+      }
+    },
+    "RG03": {
+      "javascript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      },
+      "rust": {
+        "labelled": 6,
+        "tp": 0,
+        "fp": 6,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.3903
+        ],
+        "status": "measured"
+      },
+      "typescript": {
+        "labelled": 2,
+        "tp": 0,
+        "fp": 2,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.6576
+        ],
+        "status": "measured"
+      }
+    },
+    "RG04": {
+      "javascript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      },
+      "rust": {
+        "labelled": 6,
+        "tp": 0,
+        "fp": 6,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.3903
+        ],
+        "status": "measured"
+      },
+      "typescript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      }
+    },
+    "RG08": {
+      "javascript": {
+        "labelled": 1,
+        "tp": 1,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.2065,
+          1.0
+        ],
+        "status": "measured"
+      },
+      "rust": {
+        "labelled": 5,
+        "tp": 5,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.5655,
+          1.0
+        ],
+        "status": "measured"
+      },
+      "typescript": {
+        "labelled": 5,
+        "tp": 5,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.5655,
+          1.0
+        ],
+        "status": "measured"
+      }
+    },
+    "RG09": {
+      "javascript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      },
+      "rust": {
+        "labelled": 1,
+        "tp": 1,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.2065,
+          1.0
+        ],
+        "status": "measured"
+      },
+      "typescript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      }
+    },
+    "RG10": {
+      "javascript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      },
+      "rust": {
+        "labelled": 2,
+        "tp": 0,
+        "fp": 2,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.6576
+        ],
+        "status": "measured"
+      },
+      "typescript": {
+        "labelled": 1,
+        "tp": 0,
+        "fp": 1,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ],
+        "status": "measured"
+      }
+    },
+    "RG11": {
+      "javascript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      },
+      "rust": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      },
+      "typescript": {
+        "labelled": 0,
+        "tp": 0,
+        "fp": 0,
+        "unclear": 0,
+        "precision": null,
+        "wilson95": null,
+        "status": "unmeasured",
+        "reason": "no sampled flag on the held-out split"
+      }
+    }
+  },
+  "agreement": {
+    "schema": "realism-gate.solana-agreement/v1",
+    "date": "2026-11-24",
+    "seed": "rg-solana-agreement-2026-11-24",
+    "sample": 20,
+    "labels_file": "eval/solana/agreement/second-pass.jsonl",
+    "reader": "a blinded second AI reader with the same rubric; this is not independent human validation",
+    "raw": {
+      "agree": 19,
+      "n": 20,
+      "rate": 0.95,
+      "wilson95": [
+        0.7639,
+        0.9911
+      ]
+    },
+    "final": {
+      "agree": 20,
+      "n": 20,
+      "rate": 1.0,
+      "wilson95": [
+        0.8389,
+        1.0
+      ]
+    },
+    "disagreement": {
+      "id": "786841c4775e1098",
+      "primary_original": "true-positive",
+      "second": "false-positive",
+      "resolution": "The primary label was corrected to false-positive. The helper comment says it fabricates a settled pull because the real cc-vrf settle needs the Light stack, and the rubric's setup clause applies: the claim/refund tests act on that setup through the program. The paired pull write (2c673195bb4b4e58) was corrected on the same ground."
+    },
+    "note": "The raw rate is the unadjusted agreement before the one adjudication; the final rate reflects the corrected label. Both are published. The correction changed the RG04 held-out cell from 2/6 to 0/6."
+  },
+  "not_claimed": [
+    "This is not PoC precision: the corpus is public test suites, not judged PoCs or incident reproductions.",
+    "It is not recall: a rule that raised nothing is unmeasured, not 100%.",
+    "It is not a property of future versions; it is one tree at one commit.",
+    "It does not establish that a rule is safe to ship at error severity."
+  ]
+}

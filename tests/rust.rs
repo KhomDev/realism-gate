@@ -411,7 +411,7 @@ fn explain_and_rules_describe_the_rust_checks() {
     };
     assert_eq!(
         langs("RG04"),
-        serde_json::json!(["solidity", "rust", "typescript"])
+        serde_json::json!(["solidity", "rust", "typescript", "javascript"])
     );
     assert_eq!(langs("RG07"), serde_json::json!(["solidity"]));
 }

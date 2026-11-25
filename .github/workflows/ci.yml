@@ -116,6 +116,25 @@ jobs:
       - name: Check on 1.95.0
         run: cargo +1.95.0 check --locked
 
+  # --------------------------------------------------------------- shell tests
+  shell-tests:
+    name: shell tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The Action's provenance gate, with a fake gh: default-on, a failed
+      # verification, a missing gh, and the opt-out, plus the action.yml wiring.
+      - name: Action attestation gate
+        shell: bash
+        run: bash scripts/test-verify-attestation.sh
+
+      # The release packager must be deterministic, because the reproducibility
+      # workflow compares its archive hash with the published SHA256SUMS entry.
+      - name: Release packaging determinism
+        shell: bash
+        run: bash scripts/test-package-release.sh
+
   # ------------------------------------------------------------- supply chain
   deny:
     name: cargo-deny

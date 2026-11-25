@@ -1,0 +1,20 @@
+{"id":"3a861d2db2412ad8","label":"false-positive","reason":"Signer and authority are the test's own payer key; a negative constraint test asserting AnchorError 2029, not an exploit path."}
+{"id":"ff9903662c433d47","label":"false-positive","reason":"Admin is a test-generated funded keypair and the test asserts the AccountNotWritable enforcement error; feature/constraint test."}
+{"id":"81d4cbb17f2e4ef3","label":"false-positive","reason":"Finalize is signed by the test's own generated admin keypair in feature/negative finalize tests, with no exploit claim."}
+{"id":"2e3c4c0d63f0d253","label":"false-positive","reason":"env.authority is the test's own user authority keypair in a feature test of set_ethereum_address."}
+{"id":"035090f0272ef9cc","label":"false-positive","reason":"Payer is the token holder signing its own transfer in a feature test that asserts token balances."}
+{"id":"d206f8b01e4aa819","label":"false-positive","reason":"The test's own payer calls the hook outside a transfer; negative test asserting the expected rejection."}
+{"id":"e7fdc7bee3d237c8","label":"false-positive","reason":"Deliberately wrong owner (other market) signs in a negative test that asserts InvalidMarketOwner and unchanged config."}
+{"id":"8cabd9079b6dad79","label":"false-positive","reason":"Correct owner plus wrong lending market is signed in a negative test that asserts the expected failure."}
+{"id":"7d18029ffa5a5715","label":"false-positive","reason":"Ordinary local feature test; payer is a test-generated keypair and no access-controlled function is attacked."}
+{"id":"9a6b77747253004b","label":"false-positive","reason":"Ordinary local feature test of increment; payer is a test-generated keypair, no access control involved."}
+{"id":"fa62074134c8678d","label":"false-positive","reason":"Payer is the test's own key minting via the PDA authority in a feature test that asserts the minted amount."}
+{"id":"5ab317242b108d26","label":"false-positive","reason":"Payer transfers its own tokens in a feature test with balance and log assertions; ordinary local call."}
+{"id":"786841c4775e1098","label":"false-positive","reason":"Explicit setup fabricating a valid settled pull because the real cc-vrf settle needs the Light stack; claim/refund/withdraw later reach that state through the program."}
+{"id":"1b44e923945ff74a","label":"false-positive","reason":"ProgramTest add_account loads a test-owned fixture account built from packed data; ordinary local setup."}
+{"id":"b51758e75358ce69","label":"true-positive","reason":"Test body has no assertion: only an awaited .rpc() sell call and console.log, which the rule says do not count."}
+{"id":"a09d56b8cc7baa89","label":"true-positive","reason":"Test body has no assertion: only two awaited program.rpc calls, which the rule says do not count."}
+{"id":"0567ebe036cbe19a","label":"true-positive","reason":"No assertion of the update result; only process_transaction().unwrap(), which the rule says does not count."}
+{"id":"f2d04cadeafa8188","label":"true-positive","reason":"No assertion of aggregate validity; only send(...).unwrap() and the ignored return data, which the rule says do not count."}
+{"id":"23dfbeb813d5ae22","label":"true-positive","reason":"ENTRY_FEE is a compile-time const of 100_000_000, so comparing it to the same literal cannot fail; values are not dynamic."}
+{"id":"bacc6f34615e325e","label":"false-positive","reason":"Test sets the starting balances via mint and env.deposit and asserts bounds relative to DEFAULT_SUPPLY, so a baseline exists."}
