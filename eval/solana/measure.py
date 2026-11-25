@@ -242,10 +242,11 @@ def markdown(doc: dict) -> str:
         "# Rust and Anchor TypeScript rule precision",
         "",
         "**Population: public test suites, not judged PoCs.** The four corpora are pinned public",
-        "Rust and Anchor TypeScript test suites. The intended PoC corpus does not exist publicly in",
-        "a form this tool reads: the public CTF/workshop repositories ship exploit binaries, not",
-        "test functions. Every number below is precision on public test suites. It is not PoC",
-        "precision, and it must not be quoted as such.",
+        "Rust and Anchor TypeScript test suites. This page originally said the intended PoC corpus",
+        "does not exist publicly in a form this tool reads; that was wrong (the search stopped after",
+        "three repositories). The PoC measurement is `eval/solana-poc/RESULTS.md` (2026-11-25).",
+        "Every number below is precision on public test suites. It is not PoC precision, and it",
+        "must not be quoted as such.",
         "",
         f"Frozen rule logic: realism-gate {doc['frozen_rule_version']} at "
         f"`{doc['frozen_rule_commit']}`. Seed: `{doc['seed']}`. "

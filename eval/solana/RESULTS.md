@@ -1,10 +1,11 @@
 # Rust and Anchor TypeScript rule precision
 
 **Population: public test suites, not judged PoCs.** The four corpora are pinned public
-Rust and Anchor TypeScript test suites. The intended PoC corpus does not exist publicly in
-a form this tool reads: the public CTF/workshop repositories ship exploit binaries, not
-test functions. Every number below is precision on public test suites. It is not PoC
-precision, and it must not be quoted as such.
+Rust and Anchor TypeScript test suites. This page originally said the intended PoC corpus
+does not exist publicly in a form this tool reads; that was wrong (the search stopped after
+three repositories). The PoC measurement is `eval/solana-poc/RESULTS.md` (2026-11-25).
+Every number below is precision on public test suites. It is not PoC precision, and it
+must not be quoted as such.
 
 Frozen rule logic: realism-gate 1.0.4 at `6019773976706e42e11ceefc2ee1b03496f2df54`. Seed: `rg-solana-2026-11-24`. The headline is the held-out split; each flag was assigned by `sha256(seed|corpus|flag_id)` before any label was written.
 

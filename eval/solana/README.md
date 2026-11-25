@@ -4,13 +4,13 @@
 public Rust/Anchor TypeScript test suites, runs realism-gate over them, labels
 a sample of the flags, and measures per-rule precision on a held-out split.
 
-The intended corpus for P1 was public PoCs and incident reproductions. It does
-not exist publicly in a form this tool reads: the Neodyme CTF and workshop
-repositories ship exploit **binaries** (`pocs/src/bin/*.rs`), not test
-functions, and `coral-xyz/sealevel-attacks` has no test suite the tool
-recognizes. Those repositories are recorded as excluded in `corpus.json`. The
-numbers here are therefore precision on public test suites; they are not PoC
-precision and must not be quoted as such.
+The intended corpus for P1 was public PoCs and incident reproductions. This
+file originally said such a corpus does not exist publicly in a form this tool
+reads. **That was wrong**: the search checked three repositories and stopped,
+and the Neodyme workshop `pocs/src/bin/*.rs` it cited are unsolved templates.
+The PoC measurement is in [`../solana-poc/`](../solana-poc/RESULTS.md)
+(2026-11-25). The numbers here remain precision on public test suites; they
+are not PoC precision and must not be quoted as such.
 
 ## Files
 

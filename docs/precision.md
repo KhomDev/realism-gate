@@ -282,16 +282,59 @@ has the 0.6.0 rows.
 
 ## Rust (Solana) and Anchor TypeScript tests
 
+### On real PoCs (2026-11-25)
+
+The P1 measurement below ran on test suites because it said a public PoC corpus
+did not exist. That was wrong: the search checked three repositories. This
+study pins 45 public sources (judged Sherlock and Code4rena PoCs, two
+self-reported bounty PoCs, CTF solves, teaching exploit/secure pairs and a
+GitHub code-search screen) and measures the same frozen 1.0.4 rules on them:
+99 counted units (12 judged, 82 exploit-by-construction, 5 patched negative
+controls), 197 flags on PoCs, every one labelled, the held-out split first.
+Method: [`eval/solana-poc/PREREGISTRATION.md`](../eval/solana-poc/PREREGISTRATION.md);
+full tables, RQ3 and RQ4: [`eval/solana-poc/RESULTS.md`](../eval/solana-poc/RESULTS.md).
+
+<!-- BEGIN SOLANA POC TABLE -->
+| Measure | Value |
+|---|---|
+| Judged PoCs the tool reads (RQ1) | 1/12 = 8.3% [1.5-35.4] |
+| Exploit-by-construction PoCs the tool reads | 72/82 = 87.8% [79.0-93.2] |
+| All PoC flags, held-out precision | 46/106 = 43.4% [34.4-52.9] |
+| RG01 held-out precision | 2/12 = 16.7% [4.7-44.8] |
+| RG02 held-out precision | 8/30 = 26.7% [14.2-44.5] |
+| RG03 held-out precision | 0/2 (n<5, count only) |
+| RG04 held-out precision | 0/16 = 0.0% [0.0-19.4] |
+| RG06 held-out precision | 0/6 = 0.0% [0.0-39.0] |
+| RG08 held-out precision | 29/30 = 96.7% [83.3-99.4] |
+| RG09 held-out precision | 7/7 = 100.0% [64.6-100.0] |
+| RG10 held-out precision | 0/3 (n<5, count only) |
+| Never raised on a PoC (unmeasured) | RG05, RG11 |
+| Second-pass agreement, raw | 29/30 = 96.7% [83.3-99.4], kappa 0.9268 |
+<!-- END SOLANA POC TABLE -->
+
+What it says. The tool cannot read 11 of the 12 judged PoCs: they are Rust unit
+tests that call program functions directly, scripts, or fragments pasted into
+an issue, so on the population that matters most it is mostly silent. On the
+PoCs it does read, RG08 and RG09 are right almost every time, and RG01, RG02,
+RG04 and RG06 are mostly wrong: they fire on the attacker's own accounts, on
+secure-path control tests and on setup fixtures. The flags cluster within
+units and sources, so the intervals are narrower than they should be. One
+reader labelled (AI-assisted, disclosed) and a blinded AI second pass agreed on
+29 of 30; this is not independent human validation. The `rules`/`explain`
+measured field still embeds the P1 test-suite numbers; it is not switched to
+these in this branch.
+
 ### The P1 held-out measurement (2026-11-24)
 
 **Population: public test suites, not judged PoCs.** The four licensed corpora
 are pinned public Rust and Anchor TypeScript test suites: `coral-xyz/anchor`,
 `solana-developers/program-examples`, `LiteSVM/litesvm`, and the
 `token-lending` and `governance` `program/tests` directories of
-`solana-labs/solana-program-library`. The intended PoC corpus does not exist
-publicly in a form this tool reads: the Neodyme CTF and workshop repositories
-ship exploit **binaries** (`pocs/src/bin/*.rs`), not test functions, and
-`coral-xyz/sealevel-attacks` has no test suite the tool recognizes. Every
+`solana-labs/solana-program-library`. This paragraph originally said the
+intended PoC corpus does not exist publicly in a form this tool reads. That
+was wrong (the search stopped after three repositories, and the Neodyme
+workshop `pocs/src/bin/*.rs` are unsolved templates, not exploits); the PoC
+measurement above corrects it. Every
 number below is precision on public test suites. It is not PoC precision, and
 it must not be quoted as such.
 
@@ -334,8 +377,8 @@ test that asserts nothing is a real defect whether or not it is a PoC;
 three flags are rent-funding and bounded-balance assertions, not gain claims.
 The measurement answers "what happens when these rules run over public test
 suites"; it does not answer "how often is a Rust or Anchor PoC flag right".
-The PoC corpus remains missing, and the P1 handoff records that gap rather
-than widening the claim.
+The PoC measurement above answers the second question for the PoCs the tool
+can read.
 
 One reader wrote the labels (AI-assisted, disclosed); a blinded second pass on
 a seeded 20-flag sample is recorded in

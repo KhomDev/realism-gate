@@ -28,6 +28,8 @@ HERE = ROOT / "eval" / "solana-poc"
 P1 = ROOT / "eval" / "solana" / "results.json"
 Z = 1.959964
 MIN_N = 5
+BEGIN = "<!-- BEGIN SOLANA POC TABLE -->"
+END = "<!-- END SOLANA POC TABLE -->"
 SOLANA_RULES = ["RG01", "RG02", "RG03", "RG04", "RG05", "RG06", "RG08", "RG09", "RG10", "RG11"]
 LANGS = ["rust", "typescript", "javascript"]
 TP, FP, UNCLEAR = "true-positive", "false-positive", "unclear"
@@ -227,6 +229,13 @@ def build() -> dict:
         "pooled_by_rule_heldout": {r: pooled([f for f in heldout if f["rule"] == r]) for r in SOLANA_RULES},
         "pooled_by_rule_all": {r: pooled([f for f in sampled if f["rule"] == r]) for r in SOLANA_RULES},
         "flags_per_source_heldout": dict(sorted(Counter(f["source"] for f in heldout).items())),
+    }
+    top2 = [s for s, _ in Counter(f["source"] for f in sampled).most_common(2)]
+    rq2["sensitivity_without_top2_sources"] = {
+        "note": "not preregistered; shows how much the two largest sources drive the pooled number",
+        "sources_removed": top2,
+        "all": pooled([f for f in sampled if f["source"] not in top2]),
+        "heldout": pooled([f for f in heldout if f["source"] not in top2]),
     }
 
     # ---- RQ3 judged outcome (exploratory)
@@ -487,17 +496,43 @@ def markdown(doc: dict) -> str:
     return "\n".join(L)
 
 
+def docs_block(doc: dict) -> str:
+    """The table docs/precision.md carries between the SOLANA POC markers;
+    tests/docs.rs checks it against results.json."""
+    rq1, rq2 = doc["rq1_coverage"], doc["rq2_precision"]
+    L = [
+        "| Measure | Value |",
+        "|---|---|",
+        f"| Judged PoCs the tool reads (RQ1) | {pct(rq1['by_tier']['J'])} |",
+        f"| Exploit-by-construction PoCs the tool reads | {pct(rq1['by_tier']['X'])} |",
+        f"| All PoC flags, held-out precision | {prec(rq2['pooled']['heldout'])} |",
+    ]
+    for rule, c in rq2["pooled_by_rule_heldout"].items():
+        if c["status"] == "measured":
+            L.append(f"| {rule} held-out precision | {prec(c)} |")
+    L.append(f"| Never raised on a PoC (unmeasured) | {', '.join(doc['unmeasured_rules'])} |")
+    ag = doc.get("agreement")
+    if ag:
+        L.append(f"| Second-pass agreement, raw | {pct(ag['raw'])}, kappa {ag['raw']['kappa']} |")
+    return "\n".join(L) + "\n"
+
+
 def main(argv: list[str]) -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--check", action="store_true")
     args = p.parse_args(argv[1:])
     doc = build()
+    doc["docs_block"] = docs_block(doc)
     js = json.dumps(doc, indent=2, ensure_ascii=False) + "\n"
     md = markdown(doc)
     out_js, out_md = HERE / "results.json", HERE / "RESULTS.md"
     if args.check:
         bad = [str(f.relative_to(ROOT)) for f, text in ((out_js, js), (out_md, md))
                if not f.is_file() or f.read_text(encoding="utf-8") != text]
+        docs = (ROOT / "docs" / "precision.md").read_text(encoding="utf-8")
+        block = docs.split(BEGIN, 1)[-1].split(END, 1)[0] if BEGIN in docs else None
+        if block is None or block.strip() != doc["docs_block"].strip():
+            bad.append("docs/precision.md (Solana PoC block)")
         if bad:
             print(f"out of date: {', '.join(bad)}", file=sys.stderr)
             return 1

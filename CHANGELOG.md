@@ -22,6 +22,21 @@ may change in any minor release.
 
 ### Documentation
 
+- **Solana PoC measurement (P1-A redo, 2026-11-25).** `eval/solana-poc/`
+  measures the frozen 1.0.4 rules on 99 public Solana PoC units (12 judged,
+  82 exploit-by-construction, 5 patched negative controls) from 45 pinned
+  sources, preregistered before any run or label. The tool reads 1 of 12
+  judged PoCs (8.3% [1.5-35.4]) and 72 of 82 exploit-by-construction ones;
+  held-out precision over all rules is 46/106 = 43.4% [34.4-52.9], with RG08
+  29/30 and RG09 7/7 against RG01 2/12, RG02 8/30, RG04 0/16 and RG06 0/6.
+  `docs/precision.md` carries the summary (checked by `tests/docs.rs`).
+  No rule logic changed. The `rules`/`explain` measured field still embeds
+  the P1 test-suite numbers (`eval/solana/measured.json` is unchanged).
+- **Correction.** `eval/solana/{README,RESULTS}.md` and `docs/precision.md`
+  said a public Solana PoC corpus does not exist in a form the tool reads.
+  That was wrong: the search checked three repositories and stopped, and the
+  Neodyme workshop PoCs it cited are unsolved templates. The text now says so
+  and links the PoC measurement.
 - **P1 Rust/Anchor TypeScript measurement.** Four pinned public test suites,
   174 flags, 133 sampled, 63 held-out labels, Wilson 95% intervals per rule and
   language. The report says plainly that the corpus is test suites, not PoCs,
