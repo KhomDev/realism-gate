@@ -6,7 +6,9 @@ pub mod card;
 pub mod json;
 pub mod markdown;
 pub mod sarif;
-mod sha256;
+// Public so the golden test can hash captured stdout with the same SHA-256 the
+// evidence card already uses, without adding a hashing dependency.
+pub mod sha256;
 pub mod text;
 
 pub const TOOL: &str = "realism-gate";
