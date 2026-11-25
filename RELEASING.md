@@ -31,10 +31,14 @@ list, in substance:
 1. **The JSON schema is v1 and stable.** `realism-gate.report/v1` keeps
    `schema: 1`; fields are only added, never removed or redefined. SARIF for
    rule findings is unchanged.
-2. **Rule ids are stable.** RG01-RG20 keep their ids, slugs, severities and
-   meanings across the release. A 1.x release may add a rule, but never
-   renumber or re-grade an existing one without a major version and a
-   changelog entry that says which ids moved.
+2. **Rule ids are stable.** RG01-RG20 keep their ids, slugs and meanings
+   across the release. A 1.x release may add a rule but never renumber one.
+   Severity is calibrated data, not identity: a rule's severity may change in
+   a minor only with a measured reason in the changelog (the fresh cell, its
+   n and its Wilson interval), and never in a patch. This is the single
+   resolution of the old contradiction between this criterion and the
+   compatibility policy below; a measured re-grade is not a "re-grade
+   without a major".
 3. **Claim-binding precision is published.** `docs/precision.md` carries the
    measured number with its n and Wilson interval, generated from
    `eval/claims/results.json`. An unmeasured field is named as unmeasured, not
@@ -63,7 +67,9 @@ Stable within 1.x, and only changed in a minor with a changelog entry:
   `realism-gate-mcp`.
 
 May change in a minor, and is called out in the changelog: the text output, the
-library API, rule severities and defaults, and the MSRV.
+library API, rule severities and defaults, and the MSRV. A severity change
+carries its measured reason (the fresh cell, n and Wilson interval) in the
+changelog entry; see criterion 2.
 
 Never in a patch: a new rule, a changed rule severity, a changed default
 `--fail-on`, a removed flag, or a changed archive layout.
