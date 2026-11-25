@@ -9,11 +9,14 @@ gitignored `.corpus/solana-poc-v3/`.
 
 ## Result in one paragraph, with the uncomfortable part first
 
-The fresh public judged-Solana universe is **59 coded J submissions, not 60,
-across 20 distinct judged findings**, and it is **80% one beginner contest**:
-47 submissions (8 findings) from CodeHawks First Flight #36 (RustFund), 11
+The fresh public judged-Solana universe is **58 coded J submissions, not 60,
+across 20 distinct judged findings**, and it is **79% one beginner contest**:
+46 submissions (8 findings) from CodeHawks First Flight #36 (RustFund), 11
 findings from the Solana Audit Arena's remaining labelled issues, 1 from
-Code4rena Jupiter Lend. X is 60 (all Arena unlabelled submissions) and N is 16. Because
+Code4rena Jupiter Lend. X is 60 (all Arena unlabelled submissions) and N is 16.
+Blocks are selected by content (TOML, shell, diff and test-log rejected;
+language inferred; the fence label is only recorded), and two previously
+selected units lost their block and were dropped. Because
 the four candidate classes named in the prompt (Code4rena, Sherlock, Cantina,
 CodeHawks, Hats, Immunefi, audit firms, Solana-specific, incident repos) were
 each searched and the fresh coded supply is this thin, **the 40% source cap
@@ -97,16 +100,16 @@ FINAL minimum are reported here rather than engineered around.
 | Solana Audit Arena (`Frankcastleauditor/Solana-Audit-Arena`) | J | 11 | issues 141, 144, 147, 163, 187, 201, 203, 210, 270, 280, 281 |
 | Solana Audit Arena | X | 60 | unlabelled issues, harness block present, not in v2, first 60 unique by content |
 | Solana Audit Arena (target test suites) | N | 10 | secure-path tests of the five Arena programs |
-| CodeHawks RustFund (`CodeHawks-Contests/2025-03-rustfund`) | J | 47 | judged submissions with a harness block; 54 before content dedupe |
+| CodeHawks RustFund (`CodeHawks-Contests/2025-03-rustfund`) | J | 46 | judged submissions with a qualifying content-classified block; 54 before content dedupe, 1 dropped by the block rule |
 | CodeHawks RustFund (own suite) | N | 1 | `tests/rustfund.ts` |
 | Code4rena Jupiter Lend | J | 1 | L-07 (Low), the only executable test in the report |
 | Zolldyk `anchor-pinochio-security-template` | N | 5 | secure-path comparison/edge tests; `exploit-demo.ts` files are v2 X and not reused |
-| **Total counted** | | **135** | J 59, X 60, N 16 |
+| **Total counted** | | **134** | J 58, X 60, N 16 |
 
-Split (all counted units): DEV 51, V1 28, V2 29, FINAL 27.
-J by split: DEV 18, V1 14, V2 16, FINAL 11.
-J share by source: RustFund 79.66%, Arena 18.64%, Code4rena 1.69%.
-J share by platform: CodeHawks 79.66%, Arena 18.64%, Code4rena 1.69%.
+Split (all counted units): DEV 50, V1 27, V2 29, FINAL 28.
+J by split: DEV 18, V1 13, V2 16, FINAL 11.
+J share by source: RustFund 79.31%, Arena 18.97%, Code4rena 1.72%.
+J share by platform: CodeHawks 79.31%, Arena 18.97%, Code4rena 1.72%.
 
 **Severity source:** the published outcome is the maintainer label, not the
 submitter's title. Six Arena units carry a conflicting title bracket (144
@@ -116,8 +119,22 @@ High/Critical, 147 Low/Medium, 201 Low/High, 203 Medium/High, 210 info/Medium,
 both. Issues 270 and 281 have no severity label and use the title bracket as a
 documented fallback.
 
-**Distinct judged findings:** the 47 RustFund submissions span only 8 report
-groups (16+8+8+5+4+3+2+1 submissions), so the corpus has **20 distinct J
+**Block selection (content, not fence label).** A block is a unit only when
+its content carries a test-driver marker; TOML, shell, diff and test-log blocks
+are rejected first, and the language is inferred from the content. Against the
+previous build this dropped 2 previously selected units
+(`X-arena-196`, `J-ch-rustfund-cm8lqhv5l0003i803mincq3lm`), added one X
+replacement (`X-arena-129`) to keep the X target at 60, and changed the block
+index or inferred language on 63 units. Examples: `J-arena-147` moved from a
+TOML block (`litesvm = "0.11.0"`) to the Rust block; `X-arena-4`/`X-arena-13`
+moved from shell blocks to TypeScript; RustFund blocks fenced `Solidity`,
+`solidity`, `soldity`, `diff` or `javascript` were kept only where their
+content is test code, with `lang` inferred (mostly TypeScript) and the fence
+label recorded. 398 candidate issues carried no qualifying block and are listed
+as screened out in `inventory.json`; none is kept as a unit.
+
+**Distinct judged findings:** the 46 RustFund submissions span only 8 report
+groups (16+8+7+5+4+3+2+1 submissions), so the corpus has **20 distinct J
 findings**: Arena 11 + RustFund 8 + Code4rena 1. Each RustFund group has one
 representative unit (first by sorted unit id); the other 39 units carry
 `duplicate_of` pointing at it. At the distinct-finding level the shares are
@@ -126,13 +143,13 @@ Arena 55%, RustFund 40%, Code4rena 5%.
 ## Cap and FINAL arithmetic (the blocker)
 
 - §10 needs the FINAL slice to hold >= 30 J units from >= 3 sources with no
-  source > 40%. This corpus has 59 J, 11 of them in FINAL. The committed
+  source > 40%. This corpus has 58 J, 11 of them in FINAL. The committed
   enlargement rule may move DEV units only, and DEV holds 18 J: 11 + 18 = **29
   FINAL J at most**, one below the minimum.
 - Even after moving all 18, FINAL would be RustFund 23, Arena 6 (no Code4rena
   unit lands in FINAL): **79% one source**, against the 40% rule.
 - A strict 40%-per-origin cap over the whole J universe (origins: Arena 11,
-  RustFund 47, Code4rena 1) admits at most 2 + 2 + 1 = **5 J units**, because
+  RustFund 46, Code4rena 1) admits at most 2 + 2 + 1 = **5 J units**, because
   three sources at 40% each cannot absorb a third source of size 1 (T <= 5).
 - Therefore the target "J >= 60, >= 4 sources, no source > 40%" is **not
   reachable** from the public fresh data found. The corpus keeps every unit and

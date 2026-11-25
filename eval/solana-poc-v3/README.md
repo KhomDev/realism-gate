@@ -6,17 +6,26 @@ search log and the inventory are committed before any `p2/*` code reads a unit.
 
 ## Status
 
-**Collection closed 2026-11-25, not sealed, not run.** Counted units: **J 59
+**Collection closed 2026-11-25, not sealed, not run.** Counted units: **J 58
 submissions = 20 distinct judged findings** (Arena 11, CodeHawks RustFund 8
-groups, Code4rena 1), X 60, N 16. Split: DEV 51, V1 28, V2 29, FINAL 27. The 47
-RustFund submissions are 8 groups and 80% of J by submission, so the 40% source
+groups, Code4rena 1), X 60, N 16. Split: DEV 50, V1 27, V2 29, FINAL 28. The 46
+RustFund submissions are 8 groups and 79% of J by submission, so the 40% source
 rule and §10's FINAL minimum of 30 J cannot both hold; under the corrected unit
 discipline the whole corpus holds only 20 distinct J findings, so a 30-unit
 FINAL minimum is unreachable outright. The arithmetic is in `SEARCH_LOG.md`.
 
+Blocks are selected by content, not by fence label: TOML, shell, diff and
+test-log blocks are rejected, the first block with a test-driver marker is
+taken (preferring one that names the program under test), `lang` is inferred
+from the content and the original fence label is kept as `fence_label`. Two
+previously selected units lost their block under this rule and were dropped;
+63 units changed block index or inferred language. Three hundred
+ninety-eight candidate issues carried no qualifying block and are listed as
+screened out, none kept as a unit.
+
 Every unit carries `group_id`, `group_size` and `duplicate_of` when it belongs
 to a multi-submission judging group (RustFund: one representative per group,
-first by sorted unit id; the other 39 point at it). Arena and Code4rena J units
+first by sorted unit id; the other 38 point at it). Arena and Code4rena J units
 are their own finding group (`group_size` 1). `severity_source` records where
 the J severity came from. The published judge/platform severity always wins over
 author text: Arena uses the maintainer severity label (`issue-label`; only when

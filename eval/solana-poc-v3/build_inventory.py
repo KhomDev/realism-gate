@@ -60,15 +60,36 @@ V2_ISSUES = V2_J | V2_X | {278}
 # Selected by scanning all 349 issue bodies on 2026-11-25; see SEARCH_LOG.md.
 ARENA_J = [141, 144, 147, 163, 187, 201, 203, 210, 270, 280, 281]
 ARENA_X_TARGET = 60
+DROPPED: list[dict] = []
 
 FENCE = re.compile(r"```([A-Za-z0-9_+-]*)[ \t]*\n(.*?)```", re.S)
-# A block counts as test code only when it carries a harness marker.
-HARNESS = re.compile(
-    r"#\[test\]|#\[tokio::test\]|#\[cfg\(test\)\]"
+
+# Block selection is by content, never by fence label. A block is a PoC only
+# when it carries a test-driver marker; obvious non-code blocks (TOML, shell,
+# diff, test logs) are rejected first. Language is inferred from the content;
+# the original fence label is kept only for the record.
+DRIVER = re.compile(
+    r"#\[test\]|#\[tokio::test\]|#\[cfg\(test\)\][\s\S]{0,200}#\[test\]"
     r"|\bit\(\s*[\"'`]|describe\(\s*[\"'`]"
     r"|program\.methods|anchor\.workspace"
-    r"|ProgramTest::|program_test|LiteSVM::|litesvm|bankrun"
+    r"|ProgramTest::|LiteSVM::|Mollusk"
+    r"|^\s*(?:pub\s+)?fn main\s*\(", re.M
 )
+RUST_MARK = re.compile(
+    r"#\[test\]|#\[tokio::test\]|#\[cfg\(test\)\]|use anchor_lang|solana_program"
+    r"|AccountInfo|ProgramTest::|LiteSVM::|Mollusk|\bfn\s+\w+\s*\("
+)
+TS_MARK = re.compile(r"\bprogram\.methods\b|\banchor\.workspace\b|^\s*(?:it|describe)\s*\(", re.M)
+SOL_MARK = re.compile(r"pragma solidity|\bcontract\s+[A-Za-z_]\w*")
+TOML_LINE = re.compile(
+    r"^\s*(?:\[[A-Za-z0-9_.-]+\]|[A-Za-z0-9_.\"-]+\s*=\s*(?:\"[^\"]*\"|'[^']*'|\d[\w.]*|true|false))\s*$"
+)
+SHELL_CMD = re.compile(
+    r"^\s*(?:\$\s+)?(?:cd|ls|cat|curl|wget|git|npm|yarn|pnpm|npx|cargo|solana|anchor"
+    r"|forge|node|chmod|mkdir|export|source|cp|mv|rm|echo|test)\b"
+)
+DIFF_LINE = re.compile(r"^(?:---|\+\+\+|@@)", re.M)
+LOG_LINE = re.compile(r"^\s*(?:running \d+ tests?|test .* \.\.\. ok|test result:|Finished |Compiling )", re.M)
 PRE = re.compile(r"<pre\b[^>]*>(.*?)</pre>", re.S)
 
 
@@ -101,8 +122,72 @@ def blocks_of(body: str) -> list[tuple[int, str, str]]:
     return [(n, m.group(1) or "", m.group(2)) for n, m in enumerate(FENCE.finditer(body or ""))]
 
 
-def harness_blocks(body: str) -> list[tuple[int, str, str]]:
-    return [b for b in blocks_of(body) if HARNESS.search(b[2])]
+def _lines(code: str) -> list[str]:
+    return [l for l in code.split("\n") if l.strip()]
+
+
+def reject_reason(code: str) -> str | None:
+    lines = _lines(code)
+    if not lines:
+        return "empty"
+    if DIFF_LINE.search(code):
+        return "diff"
+    if LOG_LINE.search(code):
+        return "test-log"
+    if all(TOML_LINE.match(l) for l in lines):
+        return "toml"
+    shell = sum(1 for l in lines if SHELL_CMD.match(l))
+    if shell >= 2 and shell >= len(lines) - 1:
+        return "shell"
+    return None
+
+
+def infer_lang(code: str) -> str | None:
+    if RUST_MARK.search(code):
+        return "rust"
+    if TS_MARK.search(code):
+        return "typescript"
+    if SOL_MARK.search(code):
+        return "solidity"
+    if re.search(r"\b(?:const|let|await)\b", code):
+        return "typescript"
+    return None
+
+
+def title_identifiers(title: str) -> list[str]:
+    stop = {"with", "from", "that", "this", "when", "will", "user", "users", "pool",
+            "program", "account", "accounts", "missing", "check", "checks", "does",
+            "into", "over", "than", "then", "their", "there", "which", "allow",
+            "allows", "attack", "attacker", "vault", "fund", "funds", "state"}
+    out = []
+    for w in re.findall(r"[A-Za-z_][A-Za-z0-9_]+", title or ""):
+        if len(w) >= 4 and w.lower() not in stop and w not in out:
+            out.append(w)
+    return out
+
+
+def select_block(body: str, title: str = "") -> dict | None:
+    """First qualifying block by content; prefer one that names the program."""
+    cands = []
+    for idx, fence_label, code in blocks_of(body):
+        if reject_reason(code) is not None:
+            continue
+        if not DRIVER.search(code):
+            continue
+        lang = infer_lang(code)
+        if lang is None or lang == "solidity":
+            # Solana corpus: a Solidity block does not exercise a Solana program.
+            continue
+        cands.append((idx, fence_label, code, lang))
+    if not cands:
+        return None
+    idents = [i.lower() for i in title_identifiers(title)]
+    for c in cands:
+        low = c[2].lower()
+        if any(i in low for i in idents):
+            return {"block": c[0], "fence_label": c[1], "lang": c[3], "code": c[2]}
+    c = cands[0]
+    return {"block": c[0], "fence_label": c[1], "lang": c[3], "code": c[2]}
 
 
 def load_json(path: Path):
@@ -115,10 +200,11 @@ def arena_units() -> list[dict]:
     units: list[dict] = []
     for num in ARENA_J:
         it = by_num[num]
-        hb = harness_blocks(it.get("body") or "")
-        if not hb:
-            raise SystemExit(f"arena issue {num}: no harness block")
-        idx, lang, code = hb[0]
+        sel = select_block(it.get("body") or "", it.get("title") or "")
+        if sel is None:
+            DROPPED.append({"id": f"J-arena-{num}", "reason": "no qualifying block"})
+            continue
+        idx, lang, code, fence_label = sel["block"], sel["lang"], sel["code"], sel["fence_label"]
         labels = [l["name"] for l in it["labels"]]
         if "Valid" in labels:
             outcome = "valid"
@@ -155,6 +241,7 @@ def arena_units() -> list[dict]:
                 "body_sha256": hashlib.sha256(body.encode("utf-8")).hexdigest(),
                 "block": idx,
                 "lang": lang,
+                "fence_label": fence_label,
                 "block_sha256": norm_hash(code),
             }],
             "outcome": outcome,
@@ -175,10 +262,11 @@ def arena_units() -> list[dict]:
         num = it["number"]
         if it["labels"] or num in V2_ISSUES:
             continue
-        hb = harness_blocks(it.get("body") or "")
-        if not hb:
+        sel = select_block(it.get("body") or "", it.get("title") or "")
+        if sel is None:
+            DROPPED.append({"id": f"X-arena-{num}", "reason": "no qualifying block"})
             continue
-        idx, lang, code = hb[0]
+        idx, lang, code, fence_label = sel["block"], sel["lang"], sel["code"], sel["fence_label"]
         h = norm_hash(code)
         if h in seen:
             continue
@@ -199,6 +287,7 @@ def arena_units() -> list[dict]:
                 "body_sha256": hashlib.sha256((it["body"] or "").encode("utf-8")).hexdigest(),
                 "block": idx,
                 "lang": lang,
+                "fence_label": fence_label,
                 "block_sha256": h,
             }],
             "license": "none",
@@ -226,11 +315,12 @@ def rustfund_units() -> list[dict]:
                 # Seven submissions are listed under two report groups; keep the
                 # first (highest-severity) occurrence only.
                 continue
-            hb = harness_blocks(it.get("description") or "")
-            if not hb:
+            sel = select_block(it.get("description") or "", it.get("title") or "")
+            if sel is None:
+                DROPPED.append({"id": f"J-ch-rustfund-{it['id']}", "reason": "no qualifying block"})
                 continue
             seen_issue.add(it["id"])
-            idx, lang, code = hb[0]
+            idx, lang, code, fence_label = sel["block"], sel["lang"], sel["code"], sel["fence_label"]
             dup = it["id"] != g["selectedIssueId"]
             tm = re.search(r"[\[(](Critical|High|Medium|Low|Info)[\])]", it.get("title") or "", re.I)
             sev_title = tm.group(1).capitalize() if tm else None
@@ -252,6 +342,7 @@ def rustfund_units() -> list[dict]:
                     "issue_id": it["id"],
                     "block": idx,
                     "lang": lang,
+                    "fence_label": fence_label,
                     "block_sha256": norm_hash(code),
                 }],
                 "outcome": "valid",
@@ -451,6 +542,15 @@ def main(argv: list[str]) -> int:
     p.add_argument("--check", action="store_true")
     args = p.parse_args(argv[1:])
     units = arena_units() + rustfund_units() + c4_units() + n_units()
+    excluded = list(EXCLUDED)
+    if DROPPED:
+        seen_drop = {}
+        for d in DROPPED:
+            seen_drop.setdefault(d["id"], d["reason"])
+        excluded.append({"source": "content-classification",
+                         "count": len(seen_drop),
+                         "reason": "candidate had no qualifying block after content-based classification (non-code block or no test-driver marker); none is kept as a unit",
+                         "ids": sorted(seen_drop)})
     ids = [u["id"] for u in units]
     if len(ids) != len(set(ids)):
         raise SystemExit("duplicate unit ids")
@@ -500,7 +600,7 @@ def main(argv: list[str]) -> int:
             "rustfund": "the contest program's own test suite (secure path).",
         },
         "units": units,
-        "excluded": EXCLUDED,
+        "excluded": excluded,
         "counts": {
             "units": len(units),
             "content_duplicates": len(units) - len(counted),
