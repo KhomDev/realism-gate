@@ -1,0 +1,97 @@
+{
+  "version": "1.2.0",
+  "tiers": {
+    "J": {
+      "readable": 25,
+      "n": 28,
+      "wilson95": [
+        0.728,
+        0.9629
+      ]
+    },
+    "X": {
+      "readable": 48,
+      "n": 53,
+      "wilson95": [
+        0.7975,
+        0.959
+      ]
+    }
+  },
+  "kinds": {
+    "binary-main": {
+      "readable": 17,
+      "n": 18,
+      "wilson95": [
+        0.7424,
+        0.9901
+      ]
+    },
+    "rust-unit-test": {
+      "readable": 1,
+      "n": 1,
+      "wilson95": [
+        0.2065,
+        1.0
+      ]
+    },
+    "test-file": {
+      "readable": 40,
+      "n": 43,
+      "wilson95": [
+        0.8139,
+        0.976
+      ]
+    },
+    "test-fragment": {
+      "readable": 15,
+      "n": 19,
+      "wilson95": [
+        0.5667,
+        0.9149
+      ]
+    }
+  },
+  "unreadable": [
+    [
+      "J-arena-167",
+      "test-fragment",
+      "fragment that did not parse as a test body"
+    ],
+    [
+      "J-arena-200",
+      "test-fragment",
+      "fragment that did not parse as a test body"
+    ],
+    [
+      "J-arena-255",
+      "test-fragment",
+      "fragment that did not parse as a test body"
+    ],
+    [
+      "X-arena-40",
+      "test-file",
+      "does not parse"
+    ],
+    [
+      "X-arena-186",
+      "test-file",
+      "test-file"
+    ],
+    [
+      "X-arena-277",
+      "test-fragment",
+      "does not parse"
+    ],
+    [
+      "X-loopscale",
+      "binary-main",
+      "Rust binary with fn main (no recognised PoC framework)"
+    ],
+    [
+      "X-1inch-escrow",
+      "test-file",
+      "test-file"
+    ]
+  ]
+}
