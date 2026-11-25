@@ -7,24 +7,34 @@ Solidity is measured on its own slices and never pooled with Solana.
 
 ## Status
 
-**Collection closed 2026-11-25.** Counted units: **J 477 distinct judged
-findings from 112 Code4rena contests** (one report section = one unit; contest
-submissions are recorded per unit as `contest_submissions`), **X 36**
-(18 real-incident reproductions, 18 CTF teaching exploits), **N 30**
-(secure-path tests). Split: DEV 218, V1 103, V2 86, FINAL 136.
+**Collection closed 2026-11-26 (platform-diversity pass).** Counted units:
+**J 520 distinct judged findings** — Code4rena 477 (91.73%), CodeHawks EVM 41
+(7.88%), Hats Finance 2 (0.38%) — **X 36** (18 real-incident reproductions, 18
+CTF teaching exploits), **N 30** (secure-path tests). Split: DEV 234, V1 111,
+V2 95, FINAL 146.
 
-J meets the target at source level (477 >= 120, 112 sources, max source 4.4%
-of J) but **100% of J is Code4rena**; the platform share is reported, not
-hidden. X misses 150: DeFiHackLabs and DeFiVulnLabs are opened data (only 9 new
+J meets the target at source level (520 >= 120, 117 sources, max source 4.04%
+of J). The platform share is no longer 100% Code4rena, but Code4rena still
+dominates at 91.73%; both the source-level and platform-level shares are in
+`inventory.json` and `SEARCH_LOG.md`. The CodeHawks EVM units are 41 judged
+report groups from four Wayback-pinned contest results (2025-07-orderbook 5,
+2025-12-multisig-timelock 13, 2026-02-stratax-contracts 12,
+2026-04-snarkeling 11; 9 High, 14 Medium, 18 Low). Hats Finance contributes 2
+findings from the Euro-Dollar competition (High, Low): the other valid findings
+carry no Foundry test, and Mento yields none.
+
+X misses 150: DeFiHackLabs and DeFiVulnLabs are opened data (only 9 new
 DeFiHackLabs incident files and 0 new DeFiVulnLabs files since their pinned
 commits), Immunefi publishes 9 Foundry PoCs, and the remaining reachable
 material is 18 distinct CTF teaching exploits. The arithmetic is in
 `SEARCH_LOG.md`.
 
-Every J unit carries a `codebase_id` into the top-level `codebases` map (the
-`code-423n4/<slug>` contest snapshot and its commit): 466 of 477 units pinned,
-11 null because six contests have no reachable sponsor repo. Units with
-`codebase_id: null` are collected but the program model cannot run on them.
+Every J unit carries a `codebase_id` into the top-level `codebases` map: 507 of
+520 pinned (97.5%). The 13 nulls are 11 Code4rena units from six contests with
+no reachable sponsor repo and the 2 Hats units (the Hats repository names no
+audited codebase repo). The four CodeHawks contests pin their contest repos and
+commits. Units with `codebase_id: null` are collected but the program model
+cannot run on them.
 
 ## Tiers and targets
 

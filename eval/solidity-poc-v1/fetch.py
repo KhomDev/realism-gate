@@ -34,6 +34,9 @@ REPO_DIRS = {
 SEC = re.compile(r'^## \[\[([HM])-(\d+)\]\s*(.*?)\]\((https://github\.com/[^)]+)\)(.*?)(?=^## \[\[|\n# |\Z)', re.S | re.M)
 POCTEST = re.compile(r'function\s+test\w*\s*\(|function\s+invariant_\w*\s*\(|contract\s+\w*Test\w*\s*(?:is|\{)|vm\.(?:prank|deal|store|warp|startPrank)|assertEq\(|assertTrue\(|assertLt\(|assertGt\(')
 FENCE = re.compile(r'```(?:solidity)?\n(.*?)```', re.S)
+ALLFENCE = re.compile(r'```([A-Za-z0-9_+-]*)[ \t]*\n(.*?)```', re.S)
+CODEHAWKS = CACHE / "codehawks"
+HATS = CACHE / "hats"
 UA = "independent-security-research (corpus pin verification)"
 
 
@@ -133,6 +136,44 @@ def verify(units: list[dict]) -> list[str]:
                 continue
             if norm_hash(p.read_text(encoding="utf-8", errors="replace")) != f["sha256_norm"]:
                 errs.append(f"{u['id']}: raw file hash mismatch")
+        elif kind == "ch-page-json-block":
+            slug = u["source"][len("codehawks-"):]
+            p = CODEHAWKS / f"{slug}.html"
+            if not p.is_file():
+                errs.append(f"{u['id']}: missing CodeHawks page")
+                continue
+            if sha_file(p) != f["page_sha256"]:
+                errs.append(f"{u['id']}: CodeHawks page hash drift")
+                continue
+            text = p.read_text(encoding="utf-8", errors="replace")
+            i = text.find("findings.getFindingOverviewsForCompetition")
+            k = text.find(">", i)
+            e = text.find("</script>", k)
+            res = json.loads(json.loads(text[k + 1:e])["body"])[0]["result"]["data"]
+            groups = (res.get("highs") or []) + (res.get("mediums") or []) + (res.get("lows") or [])
+            grp = next((g for g in groups if g["id"] == f["group"]), None)
+            issue = next((x for x in (grp or {}).get("issues", []) if x["id"] == f["issue_id"]), None)
+            if issue is None:
+                errs.append(f"{u['id']}: CodeHawks submission not found")
+                continue
+            blocks = ALLFENCE.findall(issue.get("description") or "")
+            if f["block"] >= len(blocks) or norm_hash(blocks[f["block"]][1]) != f["block_sha256"]:
+                errs.append(f"{u['id']}: CodeHawks block hash mismatch")
+        elif kind == "gh-issue-block":
+            found = None
+            for hp in sorted(HATS.glob("*.json")):
+                for it in json.loads(hp.read_text(encoding="utf-8")):
+                    if it["number"] == f["issue"]:
+                        found = it
+            if found is None:
+                errs.append(f"{u['id']}: Hats issue not found")
+                continue
+            if hashlib.sha256((found.get("body") or "").encode("utf-8")).hexdigest() != f["body_sha256"]:
+                errs.append(f"{u['id']}: Hats issue body drift")
+                continue
+            blocks = ALLFENCE.findall(found.get("body") or "")
+            if f["block"] >= len(blocks) or norm_hash(blocks[f["block"]][1]) != f["block_sha256"]:
+                errs.append(f"{u['id']}: Hats block hash mismatch")
         else:
             errs.append(f"{u['id']}: unknown pin kind {kind}")
     return errs
@@ -150,6 +191,36 @@ def fetch(units: list[dict]) -> None:
         print(f"repo: {repo}@{commit[:8]} ({n} units)")
     for u in units:
         f = u["files"][0]
+        if f["kind"] == "ch-page-json-block":
+            slug = u["source"][len("codehawks-"):]
+            p = CODEHAWKS / f"{slug}.html"
+            if not p.is_file() or sha_file(p) != f["page_sha256"]:
+                p.parent.mkdir(parents=True, exist_ok=True)
+                req = urllib.request.Request(f["url"], headers={"User-Agent": UA})
+                with urllib.request.urlopen(req, timeout=180) as r:
+                    data = r.read()
+                if hashlib.sha256(data).hexdigest() != f["page_sha256"]:
+                    raise SystemExit(f"{u['id']}: CodeHawks page sha mismatch")
+                p.write_bytes(data)
+                print(f"page: {slug}")
+            continue
+        if f["kind"] == "gh-issue-block":
+            if not list(HATS.glob("*.json")):
+                HATS.mkdir(parents=True, exist_ok=True)
+                page = 1
+                while True:
+                    r = subprocess.run(["gh", "api", f"repos/{f['repo']}/issues?state=all&per_page=100&page={page}"],
+                                       capture_output=True, text=True, encoding="utf-8", errors="replace")
+                    if r.returncode != 0:
+                        raise SystemExit(f"{f['repo']} issues page {page}: {r.stderr.strip()}")
+                    (HATS / f"hats-euro-{page}.json").write_text(r.stdout, encoding="utf-8")
+                    n = len(json.loads(r.stdout))
+                    print(f"hats: page {page} ({n})")
+                    if n < 100:
+                        break
+                    page += 1
+                    time.sleep(8)
+            continue
         if f["kind"] != "raw-file":
             continue
         p = CACHE / "raw" / "salty" / f["path"].replace("/", "_")
