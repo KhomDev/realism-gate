@@ -19,6 +19,7 @@ separately as an **in-sample** set.
 | `extract.py` | Writes the named PoC blocks from issues and report pages into a gitignored work tree. |
 | `SEARCH_LOG.md` | Every search query, its date, hits screened, units taken and dead ends. |
 | `PREREGISTRATION.md` | Written at the code freeze, before the first run. |
+| `RESULTS.md` | The frozen run: RQ1 coverage and the in-sample 1.0.4 vs 1.2.0 comparison. |
 
 Checkouts live under the gitignored `.corpus/solana-poc-v2/`, extracted blocks
 under `.corpus/solana-poc-v2-work/`. No third-party source or issue text is

@@ -478,7 +478,11 @@ fresh measured cell for a rule that ships at `error` has a lower bound below
 
 ### Status of the re-measurement
 
-The corpus is sealed and committed; the frozen 1.2.0 run, the labels and the
-fresh numbers are not in this section yet. When they exist they are written
-here with n, Wilson and a source-clustered bootstrap interval, and the P1
-numbers above are left as they stand.
+The corpus is sealed and committed. The frozen 1.2.0 run's RQ1 coverage and
+the in-sample 1.0.4 vs 1.2.0 comparison are in
+[`eval/solana-poc-v2/RESULTS.md`](../eval/solana-poc-v2/RESULTS.md): fresh v2
+judged readability 25/28 = 89.3% [72.8-96.3]; in-sample P1 judged readability
+6/12 (target 8/12, missed). The v2 flags are sampled but not labelled, so the
+fresh per-rule precision cells and their bootstrap intervals do not exist yet;
+when they do they are added here with n, Wilson and the source-clustered
+bootstrap, and the P1 numbers above are left as they stand.
