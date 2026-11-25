@@ -1,0 +1,13 @@
+{
+  "version": "0.30.0",
+  "name": "vault",
+  "instructions": [
+    {
+      "name": "open",
+      "accounts": [
+        { "name": "admin", "isMut": false, "isSigner": true }
+      ],
+      "args": []
+    }
+  ]
+}

@@ -331,7 +331,9 @@ fn accounts_struct(structure: &ItemStruct, file: &str, index: &SourceIndex) -> A
  * One comma-separated argument of `#[account(...)]`.
  *
  * `Meta` cannot represent the bare keyword `mut`, which Anchor uses for a
- * writable account (`#[account(mut)]`), so it is parsed here and carries no
+ * writable account (`#[account(mut)]`), nor the `@ Error` suffix Anchor
+ * allows on a constraint (`has_one = admin @ Error::Unauthorized`). Both are
+ * parsed here; `@` names the error a failed check returns and carries no
  * authority meaning.
  */
 enum AccountArg {
@@ -344,10 +346,14 @@ impl syn::parse::Parse for AccountArg {
     fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
         if input.peek(Token![mut]) {
             let _: Token![mut] = input.parse()?;
-            Ok(AccountArg::Mut)
-        } else {
-            Ok(AccountArg::Meta(Box::new(input.parse()?)))
+            return Ok(AccountArg::Mut);
         }
+        let meta: Meta = input.parse()?;
+        if input.peek(Token![@]) {
+            let _: Token![@] = input.parse()?;
+            let _: syn::Expr = input.parse()?;
+        }
+        Ok(AccountArg::Meta(Box::new(meta)))
     }
 }
 
@@ -638,8 +644,25 @@ fn resolve_instruction(
             Provenance::AnchorStruct,
         );
     };
-    match structs.get(accounts_ty).map(Vec::as_slice) {
-        Some([accounts]) => {
+    let candidates: Vec<&AccountsStruct> = structs
+        .get(accounts_ty)
+        .map(|list| list.iter().collect())
+        .unwrap_or_default();
+    // Anchor resolves an accounts struct inside its own crate. The same name
+    // in a sibling program (`secure/` beside `vulnerable/`, or another
+    // challenge directory) is a different struct, not an ambiguity.
+    let same_crate: Vec<&AccountsStruct> = candidates
+        .iter()
+        .copied()
+        .filter(|candidate| same_crate(&candidate.file, &program.file))
+        .collect();
+    let chosen: Vec<&AccountsStruct> = if same_crate.is_empty() {
+        candidates
+    } else {
+        same_crate
+    };
+    match chosen.as_slice() {
+        [accounts] => {
             if let Some(error) = &accounts.error {
                 return entry.unknown(
                     error.clone(),
@@ -678,8 +701,8 @@ fn resolve_instruction(
             }
             entry
         }
-        Some(_many) => {
-            let places: Vec<String> = structs[accounts_ty]
+        [_, _, ..] => {
+            let places: Vec<String> = chosen
                 .iter()
                 .map(|candidate| candidate.file.clone())
                 .collect();
@@ -692,7 +715,7 @@ fn resolve_instruction(
                 Provenance::AnchorStruct,
             )
         }
-        None => {
+        [] => {
             let idl_instruction = idl
                 .and_then(|idl| idl_instruction(idl, &instruction.name).map(|found| (idl, found)));
             match idl_instruction {
@@ -914,6 +937,28 @@ fn join(prefix: &str, name: &str) -> String {
     } else {
         format!("{prefix}.{name}")
     }
+}
+
+/// The crate a source path belongs to: the `programs/<name>` directory when
+/// the path has one, else the directory above `src`, else the file's own
+/// directory. Two files with the same root are in the same crate.
+fn crate_root(path: &str) -> String {
+    let parts: Vec<&str> = path.split('/').collect();
+    if let Some(position) = parts.iter().position(|part| *part == "programs")
+        && parts.get(position + 1).is_some()
+    {
+        return parts[..=position + 1].join("/");
+    }
+    if let Some(position) = parts.iter().position(|part| *part == "src")
+        && position > 0
+    {
+        return parts[..position].join("/");
+    }
+    parts[..parts.len().saturating_sub(1)].join("/")
+}
+
+fn same_crate(a: &str, b: &str) -> bool {
+    crate_root(a) == crate_root(b)
 }
 
 struct Idl {
@@ -1169,6 +1214,26 @@ fn declare_id_literal(mac: &syn::ItemMacro) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn an_accounts_struct_is_scoped_to_its_crate() {
+        assert_eq!(crate_root("programs/alpha/src/lib.rs"), "programs/alpha");
+        assert_eq!(
+            crate_root("patterns/03-unsafe-arithmetic/programs/secure/src/lib.rs"),
+            "patterns/03-unsafe-arithmetic/programs/secure"
+        );
+        assert_eq!(crate_root("MissionX/src/lib.rs"), "MissionX");
+        assert_eq!(crate_root("src/accounts.rs"), "src");
+        assert!(same_crate(
+            "programs/alpha/src/lib.rs",
+            "programs/alpha/src/instructions/open.rs"
+        ));
+        assert!(!same_crate(
+            "programs/alpha/src/lib.rs",
+            "programs/beta/src/lib.rs"
+        ));
+        assert!(same_crate("src/one.rs", "src/two.rs"));
+    }
 
     #[test]
     fn camel_case_and_snake_case_normalise_together() {

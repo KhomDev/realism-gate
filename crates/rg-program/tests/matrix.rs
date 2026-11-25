@@ -181,6 +181,47 @@ fn cases() -> Vec<Case> {
                 "has_one = authority",
                 "anchor-struct",
             ),
+        Case::new("anchor-error-suffix", "vault", "settle", Instruction)
+            .auth(
+                "signer",
+                Some("admin"),
+                "src/lib.rs",
+                "pub admin: Signer<'info>,",
+                "anchor-struct",
+            )
+            .auth(
+                "owner",
+                None,
+                "src/lib.rs",
+                "has_one = admin @",
+                "anchor-struct",
+            ),
+        Case::new(
+            "anchor-duplicate-across-crates",
+            "alpha",
+            "open",
+            Instruction,
+        )
+        .auth(
+            "signer",
+            Some("authority"),
+            "programs/alpha/src/lib.rs",
+            "pub authority: Signer<'info>,",
+            "anchor-struct",
+        ),
+        Case::new(
+            "anchor-duplicate-across-crates",
+            "beta",
+            "open",
+            Instruction,
+        )
+        .auth(
+            "signer",
+            Some("payer"),
+            "programs/beta/src/lib.rs",
+            "pub payer: Signer<'info>,",
+            "anchor-struct",
+        ),
         Case::new("anchor-has-one-chain", "vault", "settle", Instruction)
             .auth(
                 "signer",
