@@ -23,7 +23,14 @@ pub fn parse_source(path: &str, source: &str) -> Unit {
     // byte ranges line up.
     let text = source.strip_prefix('\u{feff}').unwrap_or(source);
     let (file, errors) = match syn::parse_file(text) {
-        Ok(ast) => (Lower { src: text }.file(&ast), Vec::new()),
+        Ok(ast) => (
+            Lower {
+                src: text,
+                poc_main: poc_main(path, text),
+            }
+            .file(&ast),
+            Vec::new(),
+        ),
         Err(e) => {
             let at = e.span().start();
             let message = format!("error: {e} (line {}, column {})", at.line, at.column + 1);
@@ -45,6 +52,36 @@ pub fn parse_source(path: &str, source: &str) -> Unit {
 
 struct Lower<'s> {
     src: &'s str,
+    /// A `fn main` in this file is a PoC binary rather than a program entry
+    /// point: the path says tests/examples/pocs, or the source builds a PoC
+    /// framework environment.
+    poc_main: bool,
+}
+
+/// Whether `fn main` in this file should be read as one PoC test.
+fn poc_main(path: &str, src: &str) -> bool {
+    let lower = path.to_ascii_lowercase().replace('\\', "/");
+    let path_hit = [
+        "/tests/",
+        "/test/",
+        "/pocs/",
+        "/poc/",
+        "/examples/",
+        "/src/bin/",
+    ]
+    .iter()
+    .any(|p| lower.contains(p));
+    let src_hit = [
+        "poc_framework",
+        "poc-framework",
+        "solana_poc_framework",
+        "LocalEnvironment",
+        "Environment",
+        "execute_as_transaction",
+    ]
+    .iter()
+    .any(|m| src.contains(m));
+    path_hit || src_hit
 }
 
 /// An expression that stands for nothing: the value of a loop, a `return`, or
@@ -219,13 +256,15 @@ impl Lower<'_> {
             self.stmt(s, &mut body);
         }
         let name = sig.ident.to_string();
+        let test = has_attr(attrs, |a| matches!(a, "test" | "rstest" | "test_case"))
+            || (name == "main" && self.poc_main);
         Function {
             header: format!("fn {name}()"),
             name,
             owner,
             method,
             module: module.to_string(),
-            test: has_attr(attrs, |a| matches!(a, "test" | "rstest" | "test_case")),
+            test,
             should_panic: has_attr(attrs, |a| a == "should_panic"),
             required: params.len(),
             params,

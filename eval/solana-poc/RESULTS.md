@@ -64,20 +64,20 @@ Held-out split, J and X pooled. Cells with fewer than 5 labels are counts, not p
 | RG10 | rust | 0/2 (n<5, count only) | 0/1 (n<5, count only) | 0/3 (n<5, count only) |
 | RG10 | typescript | 0/1 (n<5, count only) | 0/2 (n<5, count only) | 0/3 (n<5, count only) |
 
-Pooled over all rules: held-out 46/106 = 43.4% [34.4-52.9]; dev 35/91 = 38.5% [29.1-48.7]; all 81/197 = 41.1% [34.5-48.1].
+Pooled over all rules: held-out 46/106 = 43.4% [34.4-52.9]; sources bootstrap [25.0-60.4]; dev 35/91 = 38.5% [29.1-48.7]; sources bootstrap [20.2-58.0]; all 81/197 = 41.1% [34.5-48.1]; sources bootstrap [23.6-58.8].
 
 Pooled by rule (held-out | all labelled):
 
 | Rule | Held-out | All |
 |---|---|---|
-| RG01 | 2/12 = 16.7% [4.7-44.8] | 3/17 = 17.6% [6.2-41.0] |
-| RG02 | 8/30 = 26.7% [14.2-44.5] | 13/63 = 20.6% [12.5-32.2] |
-| RG03 | 0/2 (n<5, count only) | 0/7 = 0.0% [0.0-35.4] |
-| RG04 | 0/16 = 0.0% [0.0-19.4] | 0/29 = 0.0% [0.0-11.7] |
-| RG06 | 0/6 = 0.0% [0.0-39.0] | 0/8 = 0.0% [0.0-32.4] |
-| RG08 | 29/30 = 96.7% [83.3-99.4] | 54/56 = 96.4% [87.9-99.0] |
-| RG09 | 7/7 = 100.0% [64.6-100.0] | 11/11 = 100.0% [74.1-100.0] |
-| RG10 | 0/3 (n<5, count only) | 0/6 = 0.0% [0.0-39.0] |
+| RG01 | 2/12 = 16.7% [4.7-44.8]; sources bootstrap [0.0-28.6] | 3/17 = 17.6% [6.2-41.0]; sources bootstrap [0.0-34.6] |
+| RG02 | 8/30 = 26.7% [14.2-44.5]; sources bootstrap [4.3-61.5] | 13/63 = 20.6% [12.5-32.2]; sources bootstrap [3.7-50.0] |
+| RG03 | 0/2 (n<5, count only) | 0/7 = 0.0% [0.0-35.4]; sources bootstrap [0.0-0.0] |
+| RG04 | 0/16 = 0.0% [0.0-19.4]; sources bootstrap [0.0-0.0] | 0/29 = 0.0% [0.0-11.7]; sources bootstrap [0.0-0.0] |
+| RG06 | 0/6 = 0.0% [0.0-39.0]; sources bootstrap [0.0-0.0] | 0/8 = 0.0% [0.0-32.4]; sources bootstrap [0.0-0.0] |
+| RG08 | 29/30 = 96.7% [83.3-99.4]; sources bootstrap [88.5-100.0] | 54/56 = 96.4% [87.9-99.0]; sources bootstrap [86.1-100.0] |
+| RG09 | 7/7 = 100.0% [64.6-100.0]; sources bootstrap [100.0-100.0] | 11/11 = 100.0% [74.1-100.0]; sources bootstrap [100.0-100.0] |
+| RG10 | 0/3 (n<5, count only) | 0/6 = 0.0% [0.0-39.0]; sources bootstrap [0.0-0.0] |
 
 Unmeasured on PoCs (no flag raised in any language): RG05, RG11. Unmeasured is not 100%.
 

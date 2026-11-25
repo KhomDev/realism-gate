@@ -408,6 +408,7 @@ mod tests {
             summary: Default::default(),
             declaration: None,
             config: None,
+            fragment: false,
             changed_since: None,
             findings: Vec::new(),
             parse_errors: Vec::new(),

@@ -76,6 +76,16 @@ pub enum SolanaNotes {
 }
 
 impl RuleInfo {
+    /// The severity the rule ships at on Solana. RG01, RG04 and RG06 are
+    /// notes until a fresh held-out measurement supports more: their P1 PoC
+    /// precision was 16.7%, 0% and 0% (docs/precision.md).
+    pub fn solana_severity(&self) -> Severity {
+        match self.id {
+            "RG01" | "RG04" | "RG06" => Severity::Note,
+            _ => self.severity,
+        }
+    }
+
     /// The fix that applies to a finding raised in `lang`.
     pub fn fix_for(&self, lang: Lang) -> &'static str {
         match lang {
@@ -131,8 +141,8 @@ pub const RULES: &[RuleInfo] = &[
         },
         solana: SolanaNotes::Checked {
             summary: "The harness makes the attacker's keypair a role holder: it is set as `admin` or `authority` in an instruction that initializes or reconfigures the program (a struct field in Rust, a field of `.accounts({ .. })` in Anchor TypeScript), given a role with `set_authority` or a `set_admin`-style call, or it is a role holder's keypair under another name.",
-            fix: "Sign the attack with a keypair that holds no role. If the bug really needs a role, the finding is about role compromise or an unknowing admin action, and the report must argue that explicitly.",
-            rust_bad: "let init = instruction::Initialize { admin: attacker.pubkey() };\nsend(&mut svm, &init, &[&attacker]);\nsend(&mut svm, &instruction::SetFee { bps: 10_000 }, &[&attacker]);",
+            fix: "Sign the attack with a keypair that holds no role. If the bug really needs a role, the finding is about role compromise or an unknowing admin action, and the report must argue that explicitly. On Solana this rule ships at note until a fresh held-out measurement supports more (docs/precision.md).",
+            rust_bad: "let init = instruction::Initialize { admin: attacker.pubkey() };\nsend(&mut svm, &init, &[&admin]);\nsend(&mut svm, &instruction::SetFee { bps: 10_000 }, &[&attacker]);",
             rust_good: "let init = instruction::Initialize { admin: admin.pubkey() };\nsend(&mut svm, &init, &[&admin]);\nsend(&mut svm, &instruction::Deposit { amount: 1 }, &[&attacker]);",
             ts_bad: "await program.methods.initialize().accounts({ admin: attacker.publicKey }).rpc();\nawait program.methods.setFee(new BN(10_000)).accounts({ admin: attacker.publicKey }).signers([attacker]).rpc();",
             ts_good: "await program.methods.initialize().accounts({ admin: admin.publicKey }).signers([admin]).rpc();\nawait program.methods.deposit(new BN(1)).accounts({ user: attacker.publicKey }).signers([attacker]).rpc();",
@@ -226,7 +236,7 @@ pub const RULES: &[RuleInfo] = &[
         move_lang: MoveNotes::NotChecked(MOVE_NOT_THIS),
         solana: SolanaNotes::Checked {
             summary: "`set_account` or `add_account` (`setAccount` in TypeScript, or an account handed to bankrun's `startAnchor`) writes an account of the program: a PDA, an account at a fixed address or named for protocol state, or one the test creates with the program as its owner.",
-            fix: "Reach the state through the program's own instructions. If the state exists on a live cluster, dump the account at a known slot and load it from the file. To fund the attacker, write the attacker's own accounts instead.",
+            fix: "Reach the state through the program's own instructions. If the state exists on a live cluster, dump the account at a known slot and load it from the file. To fund the attacker, write the attacker's own accounts instead. On Solana this rule ships at note until a fresh held-out measurement supports more (docs/precision.md).",
             rust_bad: "let mut pool = svm.get_account(&pool_pda).unwrap();\npool.data[8..16].copy_from_slice(&0u64.to_le_bytes()); // zero the debt\nsvm.set_account(pool_pda, pool).unwrap();",
             rust_good: "// The bug: repaying 0 clears the debt.\nsend(&mut svm, &repay_ix(&attacker.pubkey(), 0), &[&attacker]);",
             ts_bad: "const pool = svm.getAccount(poolPda)!;\npool.data.fill(0, 8, 16); // zero the debt\nsvm.setAccount(poolPda, pool);",
@@ -290,7 +300,7 @@ pub const RULES: &[RuleInfo] = &[
         },
         solana: SolanaNotes::Checked {
             summary: "`set_account` or `add_account` (`setAccount` in TypeScript, or an account handed to bankrun's `startAnchor`) sets the lamports or the token balance of an account of the program, such as a vault's token account.",
-            fix: "Fund the attacker's own accounts, then transfer from the attacker to the program's account. To seed liquidity, go through the program's own deposit instruction.",
+            fix: "Fund the attacker's own accounts, then transfer from the attacker to the program's account. To seed liquidity, go through the program's own deposit instruction. On Solana this rule ships at note until a fresh held-out measurement supports more (docs/precision.md).",
             rust_bad: "svm.set_account(vault_tokens, token_account(&mint, &vault_pda, 1_000_000)).unwrap();",
             rust_good: "svm.set_account(attacker_tokens, token_account(&mint, &attacker.pubkey(), 1_000_000)).unwrap();\nsend(&mut svm, &transfer_ix(&attacker_tokens, &vault_tokens, 1_000_000), &[&attacker]);",
             ts_bad: "svm.setAccount(vaultTokens, { lamports: 2_039_280, data: tokenAccountData(USDC, vaultPda, 1_000_000n), owner: TOKEN_PROGRAM_ID, executable: false });",

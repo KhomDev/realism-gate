@@ -241,10 +241,11 @@ fn an_attacker_granting_itself_a_role_is_the_attack_not_the_harness() {
     // A role holder grants it: the harness made the attacker privileged.
     let granted = "send(&mut svm, &set_admin_ix(&attacker.pubkey()), &[&admin]);";
     assert!(example_rules(granted).contains(&"RG01"));
-    // The attacker initializes the program as its own admin.
+    // The attacker initializes the program as its own admin: it takes the
+    // role through the bug, which is the exploit, not a harness grant.
     let init =
         "send(&mut svm, &instruction::Initialize { admin: attacker.pubkey() }, &[&attacker]);";
-    assert!(example_rules(init).contains(&"RG01"));
+    assert!(!example_rules(init).contains(&"RG01"));
     // No transaction the tool can see: who grants it is unknown.
     let unseen = "let ix = set_admin_ix(&attacker.pubkey()); bench.run(&[ix], None);";
     assert!(!example_rules(unseen).contains(&"RG01"));

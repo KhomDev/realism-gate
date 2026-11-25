@@ -19,6 +19,7 @@ import argparse
 import hashlib
 import json
 import math
+import random
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -57,6 +58,43 @@ def wilson(k: int, n: int) -> list[float] | None:
 
 def prop(k: int, n: int) -> dict:
     return {"k": k, "n": n, "rate": round(k / n, 4) if n else None, "wilson95": wilson(k, n)}
+
+
+BOOTSTRAP_DRAWS = 10_000
+BOOTSTRAP_SEED = "rg-solana-poc-bootstrap-2026-11-25"
+
+
+def bootstrap_cluster(rows: list[dict], labels: dict) -> list[float] | None:
+    """A source-clustered bootstrap interval for a pooled precision: resample
+    the sources with replacement, 10,000 draws, fixed seed. Wilson assumes
+    independent flags; the flags cluster within a few sources, so it is too
+    narrow."""
+    by: dict[str, list[str]] = defaultdict(list)
+    for f in rows:
+        label = labels.get(f["id"], {}).get("label")
+        if label in (TP, FP):
+            by[f["source"]].append(label)
+    if not by:
+        return None
+    sources = sorted(by)
+    rng = random.Random(BOOTSTRAP_SEED)
+    rates: list[float] = []
+    for _ in range(BOOTSTRAP_DRAWS):
+        tp = n = 0
+        for _ in sources:
+            src = sources[rng.randrange(len(sources))]
+            for label in by[src]:
+                n += 1
+                if label == TP:
+                    tp += 1
+        if n:
+            rates.append(tp / n)
+    if not rates:
+        return None
+    rates.sort()
+    lo = rates[int(0.025 * (len(rates) - 1))]
+    hi = rates[int(0.975 * (len(rates) - 1))]
+    return [round(lo, 4), round(hi, 4)]
 
 
 def fisher_two_sided(a: int, b: int, c: int, d: int) -> float:
@@ -218,6 +256,7 @@ def build() -> dict:
 
     def pooled(rows: list[dict]) -> dict:
         c = cell([labels[f["id"]]["label"] for f in rows])
+        c["bootstrap95"] = bootstrap_cluster(rows, labels)
         return c
 
     rq2 = {
@@ -369,7 +408,11 @@ def prec(c: dict) -> str:
     if not c["headline"]:
         return f"{c['tp']}/{c['n']} (n<{MIN_N}, count only){unclear}"
     lo, hi = c["wilson95"]
-    return f"{c['tp']}/{c['n']} = {c['precision'] * 100:.1f}% [{lo * 100:.1f}-{hi * 100:.1f}]{unclear}"
+    out = f"{c['tp']}/{c['n']} = {c['precision'] * 100:.1f}% [{lo * 100:.1f}-{hi * 100:.1f}]{unclear}"
+    if c.get("bootstrap95"):
+        blo, bhi = c["bootstrap95"]
+        out += f"; sources bootstrap [{blo * 100:.1f}-{bhi * 100:.1f}]"
+    return out
 
 
 def markdown(doc: dict) -> str:

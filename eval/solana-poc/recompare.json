@@ -1,0 +1,64 @@
+{
+  "schema": "realism-gate.solana-poc-recompare/v1",
+  "populations": "in-sample: the P1 PoC corpus, held-out and dev together",
+  "old": "1.0.4",
+  "new": "1.2.0",
+  "readability": {
+    "old": {
+      "J": {
+        "readable": 1,
+        "n": 12
+      },
+      "NC": {
+        "readable": 5,
+        "n": 5
+      },
+      "X": {
+        "readable": 72,
+        "n": 82
+      }
+    },
+    "new": {
+      "J": {
+        "readable": 6,
+        "n": 12
+      },
+      "NC": {
+        "readable": 5,
+        "n": 5
+      },
+      "X": {
+        "readable": 82,
+        "n": 82
+      }
+    }
+  },
+  "flags": {
+    "old": 205,
+    "new": 144,
+    "disappeared": 86,
+    "added": 25
+  },
+  "disappeared_labels": {
+    "false-positive": 77,
+    "true-positive": 9
+  },
+  "disappeared_by_rule": {
+    "RG01": 15,
+    "RG02": 29,
+    "RG04": 29,
+    "RG06": 7,
+    "RG08": 6
+  },
+  "added_by_rule": {
+    "RG02": 2,
+    "RG03": 2,
+    "RG08": 19,
+    "RG11": 2
+  },
+  "severity_new": {
+    "error": 29,
+    "note": 12,
+    "warn": 103
+  }
+}

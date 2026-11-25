@@ -1,0 +1,1908 @@
+{
+  "schema": "realism-gate.solana-poc-inventory/v2",
+  "date": "2026-11-25",
+  "kinds": {
+    "test-file": "a test file (Rust #[test]/#[tokio::test] or TS it/test) meant to drive a harness",
+    "test-fragment": "statements or an it()/#[test] block meant to be added to an existing test",
+    "rust-unit-test": "a Rust #[test] that calls program functions directly, driving no Solana harness",
+    "script": "a TS/JS script run with node (no it/test), e.g. a CTF client or a replaced deploy script",
+    "binary-main": "a Rust binary with fn main (PoC framework or CTF client)",
+    "ctf-solve-program": "an on-chain attacker program (entrypoint), not a test"
+  },
+  "units": [
+    {
+      "id": "J-arena-140",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "140.md",
+          "block": 2,
+          "host_dir": "FrankSol/programs/yield_generator/tests",
+          "name": "arena-140.rs",
+          "host_source": "arena",
+          "sha256_norm": "b47ba7a33636abc49c5be9f3b58de706227f2059bd1582f7362ff0add03b340b"
+        }
+      ],
+      "week": 4,
+      "issue": 140,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Medium/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "b47ba7a33636abc49c5be9f3b58de706227f2059bd1582f7362ff0add03b340b",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-142",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "142.md",
+          "block": 3,
+          "host_dir": "FrankSol/programs/yield_generator/tests",
+          "name": "arena-142.rs",
+          "host_source": "arena",
+          "sha256_norm": "84e4ec69e69baa304e3583fdd55f907b29812734a89146be79586dda40acde3c"
+        }
+      ],
+      "week": 4,
+      "issue": 142,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Medium/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "84e4ec69e69baa304e3583fdd55f907b29812734a89146be79586dda40acde3c",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-143",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "143.md",
+          "block": 5,
+          "host_dir": "FrankSol/programs/yield_generator/tests",
+          "name": "arena-143.rs",
+          "host_source": "arena",
+          "sha256_norm": "407805791d3e1ed8e2cbdb86073759aae2e014aeb3c252b24d656bcbb2903c7a"
+        }
+      ],
+      "week": 4,
+      "issue": 143,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Critical/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "407805791d3e1ed8e2cbdb86073759aae2e014aeb3c252b24d656bcbb2903c7a",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-148",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "148.md",
+          "block": 2,
+          "host_dir": "FrankSol/programs/yield_generator/tests",
+          "name": "arena-148.rs",
+          "host_source": "arena",
+          "sha256_norm": "dd827be1bc501e1575a09f2ce4960f671dcb079508b6312c4961c42be0fdfa50"
+        }
+      ],
+      "week": 4,
+      "issue": 148,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Medium/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "dd827be1bc501e1575a09f2ce4960f671dcb079508b6312c4961c42be0fdfa50",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-149",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "149.md",
+          "block": 3,
+          "host_dir": "FrankSol/programs/yield_generator/tests",
+          "name": "arena-149.rs",
+          "host_source": "arena",
+          "sha256_norm": "56a05f0a296e7c6e7ec1f912c3adf37d6a597f8f8402e61c2ce27e892ca59b28"
+        }
+      ],
+      "week": 4,
+      "issue": 149,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Medium/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "56a05f0a296e7c6e7ec1f912c3adf37d6a597f8f8402e61c2ce27e892ca59b28",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-150",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "150.md",
+          "block": 2,
+          "host_dir": "FrankSol/programs/yield_generator/tests",
+          "name": "arena-150.rs",
+          "host_source": "arena",
+          "sha256_norm": "b1d60b53ce39626b84eaea03b606f9421ff6cfca4f0c240e0bb2bb8765c420c5"
+        }
+      ],
+      "week": 4,
+      "issue": 150,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Medium/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "b1d60b53ce39626b84eaea03b606f9421ff6cfca4f0c240e0bb2bb8765c420c5",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-155",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "155.md",
+          "block": 4,
+          "host_dir": "FrankSol/programs/yield_generator/tests",
+          "name": "arena-155.rs",
+          "host_source": "arena",
+          "sha256_norm": "81ba3f6afa93f7a88f3ebed2ebe9d237661df681ddf18be35449690d27e1ce20"
+        }
+      ],
+      "week": 4,
+      "issue": 155,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Low/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "81ba3f6afa93f7a88f3ebed2ebe9d237661df681ddf18be35449690d27e1ce20",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-156",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "156.md",
+          "block": 2,
+          "host_dir": "FrankSol/programs/yield_generator/tests",
+          "name": "arena-156.rs",
+          "host_source": "arena",
+          "sha256_norm": "181b2ecfa9dcd0ff0039bff8ff01f96b691c1ea1bd7d601f6dc58d808f4ee1a3"
+        }
+      ],
+      "week": 4,
+      "issue": 156,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Medium/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "181b2ecfa9dcd0ff0039bff8ff01f96b691c1ea1bd7d601f6dc58d808f4ee1a3",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-160",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "160.md",
+          "block": 5,
+          "host_dir": "FrankSol/programs/yield_generator/tests",
+          "name": "arena-160.rs",
+          "host_source": "arena",
+          "sha256_norm": "f412071573a50afcd5a0754d226905e82237907dbf0f4606c1ecf973cc2204f4"
+        }
+      ],
+      "week": 4,
+      "issue": 160,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Low/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "f412071573a50afcd5a0754d226905e82237907dbf0f4606c1ecf973cc2204f4",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-165",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "165.md",
+          "block": 4,
+          "host_dir": "FrankSol/programs/yield_generator/tests",
+          "name": "arena-165.rs",
+          "host_source": "arena",
+          "sha256_norm": "bf0183ff6379f7eede6f1a6e2cf5c112f092f93d1f212e5995cb46ab8e28994a"
+        }
+      ],
+      "week": 4,
+      "issue": 165,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Medium/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "bf0183ff6379f7eede6f1a6e2cf5c112f092f93d1f212e5995cb46ab8e28994a",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-166",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "166.md",
+          "block": 3,
+          "host_dir": "FrankSol/programs/yield_generator/tests",
+          "name": "arena-166.rs",
+          "host_source": "arena",
+          "sha256_norm": "0fe1fde9118dc2d9f25c7a137d01e73118342fa361592301e5dc9f437558b60c"
+        }
+      ],
+      "week": 4,
+      "issue": 166,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Medium/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "0fe1fde9118dc2d9f25c7a137d01e73118342fa361592301e5dc9f437558b60c",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-167",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "167.md",
+          "block": 2,
+          "host_dir": "FrankSol/programs/yield_generator/tests",
+          "name": "arena-167.ts",
+          "host_source": "arena",
+          "sha256_norm": "d4d0714f67dde67fe328e8ea45cb6e57fd0a692fbcec66c68cba952345a267dd"
+        }
+      ],
+      "week": 4,
+      "issue": 167,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Low/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "d4d0714f67dde67fe328e8ea45cb6e57fd0a692fbcec66c68cba952345a267dd",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-200",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "200.md",
+          "block": 1,
+          "host_dir": "FrankSol/programs/yield_generator/tests",
+          "name": "arena-200.rs",
+          "host_source": "arena",
+          "sha256_norm": "eedaf6ed30ee20c746379bfdd118da664d48fe5f120263e2cdbe78e72a3e600b"
+        }
+      ],
+      "week": 4,
+      "issue": 200,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Low/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "eedaf6ed30ee20c746379bfdd118da664d48fe5f120263e2cdbe78e72a3e600b",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-233",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "233.md",
+          "block": 1,
+          "host_dir": "x402-Meridian/tests",
+          "name": "arena-233.ts",
+          "host_source": "arena",
+          "sha256_norm": "befc6e6330d7cc40c439a39f9cd0e3b074650db61eb425f2855e38404b9974ca"
+        }
+      ],
+      "week": 5,
+      "issue": 233,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Critical/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "befc6e6330d7cc40c439a39f9cd0e3b074650db61eb425f2855e38404b9974ca",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-234",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "234.md",
+          "block": 3,
+          "host_dir": "x402-Meridian/tests",
+          "name": "arena-234.ts",
+          "host_source": "arena",
+          "sha256_norm": "8a3083ba5a0dfdfb3250867ff4a7fb4fa86bf492dc8bb28524f6a715993e43a3"
+        }
+      ],
+      "week": 5,
+      "issue": 234,
+      "outcome": "valid",
+      "duplicate": true,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Valid/duplicate); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "8a3083ba5a0dfdfb3250867ff4a7fb4fa86bf492dc8bb28524f6a715993e43a3",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-235",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "235.md",
+          "block": 3,
+          "host_dir": "x402-Meridian/tests",
+          "name": "arena-235.ts",
+          "host_source": "arena",
+          "sha256_norm": "baa9009511c74ea8d3adce6d2b92c4d27d6aa6d3364f82972f3613772fdc0c31"
+        }
+      ],
+      "week": 5,
+      "issue": 235,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Medium/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "baa9009511c74ea8d3adce6d2b92c4d27d6aa6d3364f82972f3613772fdc0c31",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-236",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "236.md",
+          "block": 3,
+          "host_dir": "x402-Meridian/tests",
+          "name": "arena-236.ts",
+          "host_source": "arena",
+          "sha256_norm": "ec221720d681df5c507ecad61f235d063d572ee5c1a5403fc61894161f611d29"
+        }
+      ],
+      "week": 5,
+      "issue": 236,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (High/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "ec221720d681df5c507ecad61f235d063d572ee5c1a5403fc61894161f611d29",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-239",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "239.md",
+          "block": 1,
+          "host_dir": "x402-Meridian/tests",
+          "name": "arena-239.ts",
+          "host_source": "arena",
+          "sha256_norm": "73a70d4a273f32dcc0c725631e7203df059ff48d7c5a70bff40eeb938dd9f15d"
+        }
+      ],
+      "week": 5,
+      "issue": 239,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Low/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "73a70d4a273f32dcc0c725631e7203df059ff48d7c5a70bff40eeb938dd9f15d",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-243",
+      "source": "arena",
+      "tier": "J",
+      "kind": "rust-unit-test",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "243.md",
+          "block": 2,
+          "host_dir": "x402-Meridian/tests",
+          "name": "arena-243.rs",
+          "host_source": "arena",
+          "sha256_norm": "e5b3b0f56dac8e166dbdbc058340f1f2fb88dabac2f17e4e0c6bc7eb7749d6ff"
+        }
+      ],
+      "week": 5,
+      "issue": 243,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Medium/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "e5b3b0f56dac8e166dbdbc058340f1f2fb88dabac2f17e4e0c6bc7eb7749d6ff",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-244",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "244.md",
+          "block": 1,
+          "host_dir": "x402-Meridian/tests",
+          "name": "arena-244.ts",
+          "host_source": "arena",
+          "sha256_norm": "662111b18e800363d5131bf459e714a5349223cd01e1f124329e790d24d8b8d8"
+        }
+      ],
+      "week": 5,
+      "issue": 244,
+      "outcome": "valid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Low/Valid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "662111b18e800363d5131bf459e714a5349223cd01e1f124329e790d24d8b8d8",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-246",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "246.md",
+          "block": 1,
+          "host_dir": "x402-Meridian/tests",
+          "name": "arena-246.rs",
+          "host_source": "arena",
+          "sha256_norm": "31470b731321fe7f638080c4bb860dee260224f8a56919d5a9f10e403a4548a7"
+        }
+      ],
+      "week": 5,
+      "issue": 246,
+      "outcome": "valid",
+      "duplicate": true,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Valid/duplicate); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "31470b731321fe7f638080c4bb860dee260224f8a56919d5a9f10e403a4548a7",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-249",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "249.md",
+          "block": 6,
+          "host_dir": "x402-Meridian/tests",
+          "name": "arena-249.ts",
+          "host_source": "arena",
+          "sha256_norm": "c3ffdcf9d8fa9b48363c455f4826cbf72616e445e3865be33539e241376a10ed"
+        }
+      ],
+      "week": 5,
+      "issue": 249,
+      "outcome": "invalid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (invalid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "c3ffdcf9d8fa9b48363c455f4826cbf72616e445e3865be33539e241376a10ed",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-255",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "255.md",
+          "block": 12,
+          "host_dir": "x402-Meridian/tests",
+          "name": "arena-255.ts",
+          "host_source": "arena",
+          "sha256_norm": "a4b95cce3ccb5fdd946aba68c326427cff091393771635806df458c53d80820d"
+        }
+      ],
+      "week": 5,
+      "issue": 255,
+      "outcome": "valid",
+      "duplicate": true,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Valid/duplicate); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "a4b95cce3ccb5fdd946aba68c326427cff091393771635806df458c53d80820d",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-265",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "265.md",
+          "block": 1,
+          "host_dir": "stake-flow/tests",
+          "name": "arena-265.ts",
+          "host_source": "arena",
+          "sha256_norm": "55a0d9244d0e26b7d088014b8b98540017f8e3d5d72a3ad9695b390f56a5ffed"
+        }
+      ],
+      "week": 1,
+      "issue": 265,
+      "outcome": "invalid",
+      "duplicate": false,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (invalid); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "55a0d9244d0e26b7d088014b8b98540017f8e3d5d72a3ad9695b390f56a5ffed",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-arena-275",
+      "source": "arena",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "275.md",
+          "block": 3,
+          "host_dir": "x402-Meridian/tests",
+          "name": "arena-275.ts",
+          "host_source": "arena",
+          "sha256_norm": "4cb9add94a616c41ff6ce2589c6067633af83ee1deb42487ceb475dd1c80f2d9"
+        }
+      ],
+      "week": 5,
+      "issue": 275,
+      "outcome": "valid",
+      "duplicate": true,
+      "outcome_source": "arena-report",
+      "outcome_evidence": "maintainer labels on the issue (Valid/duplicate); the week's final report is committed in the arena checkout under reports/",
+      "dedupe_key": "4cb9add94a616c41ff6ce2589c6067633af83ee1deb42487ceb475dd1c80f2d9",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-9",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "9.md",
+          "block": 1,
+          "host_dir": "stake-flow/tests",
+          "name": "arena-9.ts",
+          "host_source": "arena",
+          "sha256_norm": "e9838e0991d52d4020357fadf04d87611b22323143e5cf461156e38d6e245c6f"
+        }
+      ],
+      "week": 1,
+      "issue": 9,
+      "dedupe_key": "e9838e0991d52d4020357fadf04d87611b22323143e5cf461156e38d6e245c6f",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-12",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "12.md",
+          "block": 1,
+          "host_dir": "stake-flow/tests",
+          "name": "arena-12.ts",
+          "host_source": "arena",
+          "sha256_norm": "7c825ca200b7bb4ad1f1bb71ec7ff9d1dbcf913a38ed6458daf65ad83e0229d5"
+        }
+      ],
+      "week": 1,
+      "issue": 12,
+      "dedupe_key": "7c825ca200b7bb4ad1f1bb71ec7ff9d1dbcf913a38ed6458daf65ad83e0229d5",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-20",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "20.md",
+          "block": 1,
+          "host_dir": "stake-flow/tests",
+          "name": "arena-20.ts",
+          "host_source": "arena",
+          "sha256_norm": "007b861db68f7937d0d5f89150876a9cda9883309e95fa9a88023760ff2fc83d"
+        }
+      ],
+      "week": 1,
+      "issue": 20,
+      "dedupe_key": "007b861db68f7937d0d5f89150876a9cda9883309e95fa9a88023760ff2fc83d",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-25",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "25.md",
+          "block": 1,
+          "host_dir": "stake-flow/tests",
+          "name": "arena-25.ts",
+          "host_source": "arena",
+          "sha256_norm": "e8dbf10a34f831663d7e2c9eb77e940a2cd758eb28ee5bb5c888bab57eff672e"
+        }
+      ],
+      "week": 1,
+      "issue": 25,
+      "dedupe_key": "e8dbf10a34f831663d7e2c9eb77e940a2cd758eb28ee5bb5c888bab57eff672e",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-26",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "26.md",
+          "block": 0,
+          "host_dir": "stake-flow/tests",
+          "name": "arena-26.ts",
+          "host_source": "arena",
+          "sha256_norm": "f18a96a28f280354d12b6edd9c7ef119bed2b6358f5e70fd77778b7cab133ab1"
+        }
+      ],
+      "week": 1,
+      "issue": 26,
+      "dedupe_key": "f18a96a28f280354d12b6edd9c7ef119bed2b6358f5e70fd77778b7cab133ab1",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-40",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "40.md",
+          "block": 0,
+          "host_dir": "stake-flow/tests",
+          "name": "arena-40.rs",
+          "host_source": "arena",
+          "sha256_norm": "be7a77898e685a3e074ecdb423580a03df2e53c057eea045bdaf0a0891d66d4e"
+        }
+      ],
+      "week": 1,
+      "issue": 40,
+      "dedupe_key": "be7a77898e685a3e074ecdb423580a03df2e53c057eea045bdaf0a0891d66d4e",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-49",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "49.md",
+          "block": 5,
+          "host_dir": "",
+          "name": "arena-49.ts",
+          "sha256_norm": "c4812823558638273793a85ad4e4349ac5a2341ecbb9b589c6083f641ff2c02e"
+        }
+      ],
+      "week": 2,
+      "issue": 49,
+      "dedupe_key": "c4812823558638273793a85ad4e4349ac5a2341ecbb9b589c6083f641ff2c02e",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-56",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "56.md",
+          "block": 1,
+          "host_dir": "",
+          "name": "arena-56.rs",
+          "sha256_norm": "cfca0ba7dc75de9fdb747bfbfa82284667b5e3cf0718ee46718ea069ddf98c84"
+        }
+      ],
+      "week": 2,
+      "issue": 56,
+      "dedupe_key": "cfca0ba7dc75de9fdb747bfbfa82284667b5e3cf0718ee46718ea069ddf98c84",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-66",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "66.md",
+          "block": 0,
+          "host_dir": "",
+          "name": "arena-66.rs",
+          "sha256_norm": "74ec0c016a85f00e1c9131cdb99f8315a1e2ea3ee6513a7946bed9e92f44925a"
+        }
+      ],
+      "week": 2,
+      "issue": 66,
+      "dedupe_key": "74ec0c016a85f00e1c9131cdb99f8315a1e2ea3ee6513a7946bed9e92f44925a",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-99",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "99.md",
+          "block": 5,
+          "host_dir": "Zenon/tests",
+          "name": "arena-99.ts",
+          "host_source": "arena",
+          "sha256_norm": "624ebe05cc9376085c0056da54b98b7b9a8d7c1039101b4e2b24cd0a5058637c"
+        }
+      ],
+      "week": 3,
+      "issue": 99,
+      "dedupe_key": "624ebe05cc9376085c0056da54b98b7b9a8d7c1039101b4e2b24cd0a5058637c",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-170",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "170.md",
+          "block": 5,
+          "host_dir": "FrankSol/programs/yield_generator/tests",
+          "name": "arena-170.rs",
+          "host_source": "arena",
+          "sha256_norm": "bf68b693ce63191dab605973e9796646a14ba60d5837a67ed15651e113e31803"
+        }
+      ],
+      "week": 4,
+      "issue": 170,
+      "dedupe_key": "bf68b693ce63191dab605973e9796646a14ba60d5837a67ed15651e113e31803",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-186",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "186.md",
+          "block": 3,
+          "host_dir": "FrankSol/programs/yield_generator/tests",
+          "name": "arena-186.rs",
+          "host_source": "arena",
+          "sha256_norm": "05a294f280859bb6cc4666f75be1160084acf9565ce72bd02567b9297f8aa712"
+        }
+      ],
+      "week": 4,
+      "issue": 186,
+      "dedupe_key": "05a294f280859bb6cc4666f75be1160084acf9565ce72bd02567b9297f8aa712",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-228",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "228.md",
+          "block": 1,
+          "host_dir": "x402-Meridian/tests",
+          "name": "arena-228.rs",
+          "host_source": "arena",
+          "sha256_norm": "53db12f2152ec233ee14e5824a31dad4c46c04ea77b021fb3da0bbe2ed1e957e"
+        }
+      ],
+      "week": 5,
+      "issue": 228,
+      "dedupe_key": "53db12f2152ec233ee14e5824a31dad4c46c04ea77b021fb3da0bbe2ed1e957e",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-277",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "277.md",
+          "block": 3,
+          "host_dir": "x402-Meridian/tests",
+          "name": "arena-277.ts",
+          "host_source": "arena",
+          "sha256_norm": "161842574a7e3a78f047f81266a9fcd03ae40a7ef69ab6faf527c6311585511f"
+        }
+      ],
+      "week": 5,
+      "issue": 277,
+      "dedupe_key": "161842574a7e3a78f047f81266a9fcd03ae40a7ef69ab6faf527c6311585511f",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-279",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "279.md",
+          "block": 2,
+          "host_dir": "x402-Meridian/tests",
+          "name": "arena-279.ts",
+          "host_source": "arena",
+          "sha256_norm": "d59d0d4f653a70f6c7ab4ae02d85130a8509389311afb8177463ff69aa8532b8"
+        }
+      ],
+      "week": 5,
+      "issue": 279,
+      "dedupe_key": "d59d0d4f653a70f6c7ab4ae02d85130a8509389311afb8177463ff69aa8532b8",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-289",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "289.md",
+          "block": 2,
+          "host_dir": "Solana_Autonomix/relay402/tests",
+          "name": "arena-289.rs",
+          "host_source": "arena",
+          "sha256_norm": "97df5a243831c4dd0c307e08750665c4c7f30407172a72b33673199a790a4d79"
+        }
+      ],
+      "week": 6,
+      "issue": 289,
+      "dedupe_key": "97df5a243831c4dd0c307e08750665c4c7f30407172a72b33673199a790a4d79",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-303",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "303.md",
+          "block": 4,
+          "host_dir": "Solana_Autonomix/relay402/tests",
+          "name": "arena-303.ts",
+          "host_source": "arena",
+          "sha256_norm": "e4870e76bfc02f7c21f6713191531b0b025d09d301b431469bd5b694e4b649d8"
+        }
+      ],
+      "week": 6,
+      "issue": 303,
+      "dedupe_key": "e4870e76bfc02f7c21f6713191531b0b025d09d301b431469bd5b694e4b649d8",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-305",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "305.md",
+          "block": 4,
+          "host_dir": "Solana_Autonomix/relay402/tests",
+          "name": "arena-305.ts",
+          "host_source": "arena",
+          "sha256_norm": "106755eaa6379d01cb738b277437400602b48cdd2b0b45a9bfecf0ece400b124"
+        }
+      ],
+      "week": 6,
+      "issue": 305,
+      "dedupe_key": "106755eaa6379d01cb738b277437400602b48cdd2b0b45a9bfecf0ece400b124",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-arena-319",
+      "source": "arena",
+      "tier": "X",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "arena-issues",
+          "md": "319.md",
+          "block": 1,
+          "host_dir": "",
+          "name": "arena-319.rs",
+          "sha256_norm": "ab098775fd6b9c439a3c27f8e31bc9dd95de8005e6afef7376941b760f176655"
+        }
+      ],
+      "week": 2,
+      "issue": 319,
+      "dedupe_key": "ab098775fd6b9c439a3c27f8e31bc9dd95de8005e6afef7376941b760f176655",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "J-jito-36903",
+      "source": "jito-restaking",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "report:jito-36903",
+          "block": 1,
+          "name": "jito-36903.rs",
+          "sha256_norm": "6adf859cb26c4b4c093faaec50ab281cb428ec62eb65c2c0e49f6c5df88cd7a5"
+        }
+      ],
+      "outcome": "valid",
+      "outcome_source": "platform-report",
+      "outcome_evidence": "Immunefi Audit Competition | Jito Restaking report #36903, published severity High",
+      "dedupe_key": "6adf859cb26c4b4c093faaec50ab281cb428ec62eb65c2c0e49f6c5df88cd7a5",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "J-jito-37079",
+      "source": "jito-restaking",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "report:jito-37079",
+          "block": 5,
+          "name": "jito-37079.rs",
+          "sha256_norm": "32efbe48e7b557cd5277c02406d73c6cbdae93d0016c8e8cc41653e379ba9a0e"
+        }
+      ],
+      "outcome": "valid",
+      "outcome_source": "platform-report",
+      "outcome_evidence": "Immunefi Audit Competition | Jito Restaking report #37079, published severity Insight",
+      "dedupe_key": "32efbe48e7b557cd5277c02406d73c6cbdae93d0016c8e8cc41653e379ba9a0e",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "J-jito-37295",
+      "source": "jito-restaking",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "extract": "report:jito-37295",
+          "block": 0,
+          "name": "jito-37295.rs",
+          "sha256_norm": "ec8a8efec3218a8ccf6b886afd07c470b53e7664bd3a1c906fde4d3ed2f486d6"
+        }
+      ],
+      "outcome": "valid",
+      "outcome_source": "platform-report",
+      "outcome_evidence": "Immunefi Audit Competition | Jito Restaking report #37295, published severity High",
+      "dedupe_key": "ec8a8efec3218a8ccf6b886afd07c470b53e7664bd3a1c906fde4d3ed2f486d6",
+      "license": "none",
+      "unlicensed": true
+    },
+    {
+      "id": "X-merov-account-data-match",
+      "source": "merovingio-solana-hacks",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "account-data-match/poc/src/main.rs",
+          "sha256_norm": "48c0ae1da8af5a50dfbfaf81898231849a365da05aed8b5d3b682b15b220c3dc"
+        }
+      ],
+      "dedupe_key": "48c0ae1da8af5a50dfbfaf81898231849a365da05aed8b5d3b682b15b220c3dc",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-merov-bump-seed-canonicalization",
+      "source": "merovingio-solana-hacks",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "bump-seed-canonicalization/poc/src/main.rs",
+          "sha256_norm": "d199070d1f1eaff7f328a4b86c07f70bde581fba2e0a826c4beebcbf668879c9"
+        }
+      ],
+      "dedupe_key": "d199070d1f1eaff7f328a4b86c07f70bde581fba2e0a826c4beebcbf668879c9",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-merov-cast_truncation",
+      "source": "merovingio-solana-hacks",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "cast_truncation/poc/src/bin/poc.rs",
+          "sha256_norm": "5a79f1440d8fc0d1fcc548f7e77559856fffa5477263b45f78f73a493656ccda"
+        }
+      ],
+      "dedupe_key": "5a79f1440d8fc0d1fcc548f7e77559856fffa5477263b45f78f73a493656ccda",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-merov-close-account",
+      "source": "merovingio-solana-hacks",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "close-account/poc/src/main.rs",
+          "sha256_norm": "a37d7288d10f77b10793892ad3f61a4e71f1e51e1be81be944ea18c0141f8fee"
+        }
+      ],
+      "dedupe_key": "a37d7288d10f77b10793892ad3f61a4e71f1e51e1be81be944ea18c0141f8fee",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-merov-cosplay",
+      "source": "merovingio-solana-hacks",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "cosplay/poc/src/main.rs",
+          "sha256_norm": "5911b16e234e526f78428499eabf3ef8fcc2dd0987ad32f16b65582b7407ec6a"
+        }
+      ],
+      "dedupe_key": "5911b16e234e526f78428499eabf3ef8fcc2dd0987ad32f16b65582b7407ec6a",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-merov-duplicated",
+      "source": "merovingio-solana-hacks",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "duplicated/poc/src/bin/poc.rs",
+          "sha256_norm": "4c842ffcd24c1c167a4d1a0db51878bea63731f917838d5d07b5284c15556d5a"
+        }
+      ],
+      "dedupe_key": "4c842ffcd24c1c167a4d1a0db51878bea63731f917838d5d07b5284c15556d5a",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-merov-error-not-handled",
+      "source": "merovingio-solana-hacks",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "error-not-handled/poc/src/main.rs",
+          "sha256_norm": "591a51ccd98c2f702af903e0a22d2502ca073ab67e3d1c26363b695e650237ff"
+        }
+      ],
+      "dedupe_key": "591a51ccd98c2f702af903e0a22d2502ca073ab67e3d1c26363b695e650237ff",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-merov-malicious-simulation",
+      "source": "merovingio-solana-hacks",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "malicious-simulation/poc/src/main.rs",
+          "sha256_norm": "09c4e4c3d41cb6e566c5d78f37a83da53f8ec058c2679c4a2aa0a0f30da5f832"
+        }
+      ],
+      "dedupe_key": "09c4e4c3d41cb6e566c5d78f37a83da53f8ec058c2679c4a2aa0a0f30da5f832",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-merov-other-bugs",
+      "source": "merovingio-solana-hacks",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "other-bugs/poc/src/main.rs",
+          "sha256_norm": "ac7381592c8f0cf07b2da0f8f489ad5ba8385ed2bab776c01a6790dd40bff121"
+        }
+      ],
+      "dedupe_key": "ac7381592c8f0cf07b2da0f8f489ad5ba8385ed2bab776c01a6790dd40bff121",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-merov-reinitialization",
+      "source": "merovingio-solana-hacks",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "reinitialization/poc/src/main.rs",
+          "sha256_norm": "bbba49cbcf147381a7306e69b29c28c01158317c75498f59d0fffc16d7e655aa"
+        }
+      ],
+      "dedupe_key": "bbba49cbcf147381a7306e69b29c28c01158317c75498f59d0fffc16d7e655aa",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-jet-adv-00",
+      "source": "jet-governance-pocs",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "os-jet-adv-00/src/main.rs",
+          "sha256_norm": "7ec2fd9be0007da18d94932e6f1f5cc090325edf4f1eb4ec0c63dcdcc22b7884"
+        }
+      ],
+      "dedupe_key": "7ec2fd9be0007da18d94932e6f1f5cc090325edf4f1eb4ec0c63dcdcc22b7884",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-jet-adv-01",
+      "source": "jet-governance-pocs",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "os-jet-adv-01/src/main.rs",
+          "sha256_norm": "afc0b3da46ba7740b5bcf2352a63d624cabb1c0abd3daa78d46849c4769c6a4c"
+        }
+      ],
+      "dedupe_key": "afc0b3da46ba7740b5bcf2352a63d624cabb1c0abd3daa78d46849c4769c6a4c",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-jet-adv-02",
+      "source": "jet-governance-pocs",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "os-jet-adv-02/src/main.rs",
+          "sha256_norm": "be63d94d998f04542b5acef7db447bd504b9e8fee0a5a6bd96c7ee6b03abe225"
+        }
+      ],
+      "dedupe_key": "be63d94d998f04542b5acef7db447bd504b9e8fee0a5a6bd96c7ee6b03abe225",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-jet-adv-03",
+      "source": "jet-governance-pocs",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "os-jet-adv-03/src/main.rs",
+          "sha256_norm": "60a24791515e05dd65d2d86360b08b5f0df05fd3a759942ebaacd1e600d705ee"
+        }
+      ],
+      "dedupe_key": "60a24791515e05dd65d2d86360b08b5f0df05fd3a759942ebaacd1e600d705ee",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-jet-adv-04",
+      "source": "jet-governance-pocs",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "os-jet-adv-04/src/main.rs",
+          "sha256_norm": "6c7b95a1a81b1bd152cdc972d8e5bba66457f01233dc09bb9bac2b7452c60853"
+        }
+      ],
+      "dedupe_key": "6c7b95a1a81b1bd152cdc972d8e5bba66457f01233dc09bb9bac2b7452c60853",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-halborn-poc1",
+      "source": "halborn-ctf-solutions",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "pocs/src/bin/poc1.rs",
+          "sha256_norm": "736b127b73d6e73c980a1cf4249440d027739229f1319b73db43440672c1887e"
+        }
+      ],
+      "dedupe_key": "736b127b73d6e73c980a1cf4249440d027739229f1319b73db43440672c1887e",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-halborn-poc2",
+      "source": "halborn-ctf-solutions",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "pocs/src/bin/poc2.rs",
+          "sha256_norm": "778158a866dbf33564cb33916ac7e1610b6da8bbea2a7e1ad2d95d77d9a068e6"
+        }
+      ],
+      "dedupe_key": "778158a866dbf33564cb33916ac7e1610b6da8bbea2a7e1ad2d95d77d9a068e6",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-francis-p01",
+      "source": "francis-codex-patterns",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "patterns/01-missing-signer-check/tests/tests/exploit.rs",
+          "sha256_norm": "f39f9314d6eb32875d71030e58044ee029905e24984148fd46edc22814bd6018"
+        }
+      ],
+      "dedupe_key": "f39f9314d6eb32875d71030e58044ee029905e24984148fd46edc22814bd6018",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-francis-p02",
+      "source": "francis-codex-patterns",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "patterns/02-missing-owner-check/tests/tests/exploit.rs",
+          "sha256_norm": "f54772321918f78d8e10722b41fdef5bf0397288ff63da6d97e8f7927fdbbc34"
+        }
+      ],
+      "dedupe_key": "f54772321918f78d8e10722b41fdef5bf0397288ff63da6d97e8f7927fdbbc34",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-francis-p03",
+      "source": "francis-codex-patterns",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "patterns/03-integer-overflow/tests/tests/exploit.rs",
+          "sha256_norm": "3dda13da172e4a9acc49f46854721f910665137b58237278559b27d21f5868c1"
+        }
+      ],
+      "dedupe_key": "3dda13da172e4a9acc49f46854721f910665137b58237278559b27d21f5868c1",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-francis-p04",
+      "source": "francis-codex-patterns",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "patterns/04-reinitialization-attack/tests/tests/exploit.rs",
+          "sha256_norm": "f1006c5af00db14637640989c3196b1631a3a988b8988a2dfb3f16a596f6c1ed"
+        }
+      ],
+      "dedupe_key": "f1006c5af00db14637640989c3196b1631a3a988b8988a2dfb3f16a596f6c1ed",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-francis-p05",
+      "source": "francis-codex-patterns",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "patterns/05-pda-bump-canonicalization/tests/tests/exploit.rs",
+          "sha256_norm": "50dbc4b5889f5571034437d9d338c86167205fc51df0a248498cb319a5a6781c"
+        }
+      ],
+      "dedupe_key": "50dbc4b5889f5571034437d9d338c86167205fc51df0a248498cb319a5a6781c",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-francis-p06",
+      "source": "francis-codex-patterns",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "patterns/06-type-cosplay/tests/tests/exploit.rs",
+          "sha256_norm": "d170a2fe2ae36cea3d933d07785b63629ee1d6d11f4662aeb7ef1dcc696ed816"
+        }
+      ],
+      "dedupe_key": "d170a2fe2ae36cea3d933d07785b63629ee1d6d11f4662aeb7ef1dcc696ed816",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-zolldyk-p01",
+      "source": "zolldyk-anchor-pinocchio",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "patterns/01-missing-validation/tests/exploit-demo.ts",
+          "sha256_norm": "50d9007b4153655951e23a2177b9d3503573b9bd6d4ecb8b14c9aa172c222b42"
+        }
+      ],
+      "dedupe_key": "50d9007b4153655951e23a2177b9d3503573b9bd6d4ecb8b14c9aa172c222b42",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-zolldyk-p02",
+      "source": "zolldyk-anchor-pinocchio",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "patterns/02-authority-checks/tests/exploit-demo.ts",
+          "sha256_norm": "1ef8f667b84dc489f09fcb82acf3e60ec4a2ac62b1131b6bc37842da229e5d55"
+        }
+      ],
+      "dedupe_key": "1ef8f667b84dc489f09fcb82acf3e60ec4a2ac62b1131b6bc37842da229e5d55",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-zolldyk-p03",
+      "source": "zolldyk-anchor-pinocchio",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "patterns/03-unsafe-arithmetic/tests/exploit-demo.ts",
+          "sha256_norm": "81f5587cb4703d203078fab7927365a1d2e7a805ce409c7f46458c7fdb5b455c"
+        }
+      ],
+      "dedupe_key": "81f5587cb4703d203078fab7927365a1d2e7a805ce409c7f46458c7fdb5b455c",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-zolldyk-p04",
+      "source": "zolldyk-anchor-pinocchio",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "patterns/04-cpi-reentrancy/tests/exploit-demo.ts",
+          "sha256_norm": "b7039bad50ac250ec60664164f63f5d6a90146dbada5ac3f4653657a1e393cc7"
+        }
+      ],
+      "dedupe_key": "b7039bad50ac250ec60664164f63f5d6a90146dbada5ac3f4653657a1e393cc7",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-zolldyk-p05",
+      "source": "zolldyk-anchor-pinocchio",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "patterns/05-pda-derivation/tests/exploit-demo.ts",
+          "sha256_norm": "703fce12b4078885e48cfb5cb0483d8f8e00ca3fbfc6fe1ae4341fd4dcf04c1e"
+        }
+      ],
+      "dedupe_key": "703fce12b4078885e48cfb5cb0483d8f8e00ca3fbfc6fe1ae4341fd4dcf04c1e",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-zolldyk-p06",
+      "source": "zolldyk-anchor-pinocchio",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "patterns/06-token-validation/tests/exploit-demo.ts",
+          "sha256_norm": "d0fc3842c64c5971fff6913c9d6538955caf92716bc2c1eacf02d2816f15e41f"
+        }
+      ],
+      "dedupe_key": "d0fc3842c64c5971fff6913c9d6538955caf92716bc2c1eacf02d2816f15e41f",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-loopscale",
+      "source": "loopscale-hack",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "path": "src/main.rs",
+          "sha256_norm": "263b02ddd660403793f4c4f76bb52c83317c1285e7ee9e11c36af9234364a4f2"
+        }
+      ],
+      "dedupe_key": "263b02ddd660403793f4c4f76bb52c83317c1285e7ee9e11c36af9234364a4f2",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-1inch-escrow",
+      "source": "1inch-solana-rescue",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "poc_theft.rs",
+          "sha256_norm": "ef8e5613412e898da0c81d7d332e6719a63ae113673fc3f53a32a2b2911e2b61"
+        }
+      ],
+      "dedupe_key": "ef8e5613412e898da0c81d7d332e6719a63ae113673fc3f53a32a2b2911e2b61",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-demo-escrow",
+      "source": "demo-solve-escrow",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "native-tests/tests/flow.rs",
+          "sha256_norm": "95fcf0ae3cea97c153342b9977d06e7ffc7ca9d739ef01d042ae2a7587c7cf21"
+        }
+      ],
+      "dedupe_key": "95fcf0ae3cea97c153342b9977d06e7ffc7ca9d739ef01d042ae2a7587c7cf21",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-amm-sandwich",
+      "source": "solana-amm-attacks",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "fork/tests/sandwich_e2e.rs",
+          "sha256_norm": "40630b58f8aebf34c956282bf0cceb2e37967405c1d6893fb6abf553f42f3fc4"
+        }
+      ],
+      "dedupe_key": "40630b58f8aebf34c956282bf0cceb2e37967405c1d6893fb6abf553f42f3fc4",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    },
+    {
+      "id": "X-amm-sandwich-program",
+      "source": "solana-amm-attacks",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "path": "programs/amm/tests/sandwich_e2e.rs",
+          "sha256_norm": "6b384ad5fc4a3356e905921e183710121dc016b4d781e0c8ad404a29ed5c8620"
+        }
+      ],
+      "dedupe_key": "6b384ad5fc4a3356e905921e183710121dc016b4d781e0c8ad404a29ed5c8620",
+      "license": "NOASSERTION",
+      "unlicensed": true
+    }
+  ],
+  "excluded": [
+    {
+      "source": "arena",
+      "path": "stake-flow/tests, MissionX/tests, Zenon/tests, FrankSol/**, x402-Meridian/tests, Solana_Autonomix/relay402/tests",
+      "count": 9,
+      "reason": "the targets' own feature suites, not PoCs; the Arena units are the issues' PoC blocks"
+    },
+    {
+      "source": "arena",
+      "path": "unlabelled issues without a test block",
+      "count": 95,
+      "reason": "no fenced block containing a test marker (it()/describe()/#[test]/program.methods)"
+    },
+    {
+      "source": "arena",
+      "path": "labelled issues without a test block",
+      "count": 13,
+      "reason": "labelled finding but no coded PoC (prose or source quotes only)"
+    },
+    {
+      "source": "arena",
+      "path": "issue 278",
+      "count": 1,
+      "reason": "the extracted block is a compute-unit benchmark of the shipped vs patched build, not an exploit PoC; excluded after reading the extracted block at collection time"
+    },
+    {
+      "source": "lkmidas-web3ctf",
+      "path": "dicectf2023, idekctf2022, sekaictf2023 solve tests",
+      "count": 6,
+      "reason": "Anchor default template ('Add your test here' / 'Is initialized!'); the challenge is unsolved"
+    },
+    {
+      "source": "paradigm-ctf-2022",
+      "path": "otter-world, otterswap, pool solve tests",
+      "count": 6,
+      "reason": "Anchor default template; unsolved"
+    },
+    {
+      "source": "de1ik-warrior",
+      "path": "warrior-path-3/ctf-breakpoint-2023/exploit-pocs/exploit-0..3",
+      "count": 4,
+      "reason": "unsolved exercise template: the file says 'TASK: Add your code'"
+    },
+    {
+      "source": "de1ik-warrior",
+      "path": "warrior-path-3/neodyme-breakpoint-workshop, warrior-path-1/2",
+      "count": 19,
+      "reason": "byte-identical copies of P1's neodyme-workshop units, or feature tests, not exploits"
+    },
+    {
+      "source": "neodyme-breakpoint-copy",
+      "path": "pocs/src/bin/level0-4.rs",
+      "count": 5,
+      "reason": "byte-identical copies of P1's neodyme-workshop units (dedupe against P1)"
+    },
+    {
+      "source": "vaultvult-research",
+      "path": "solana-rust-security/*.rs",
+      "count": 2,
+      "reason": "print-only simulations with a hardcoded verdict; no program call, no state, no assertion"
+    },
+    {
+      "source": "svm-exploit-gym",
+      "path": "tests/rust/tests/smoke.rs",
+      "count": 1,
+      "reason": "toolchain smoke test (hello_world), not an exploit"
+    },
+    {
+      "source": "princedotrs-audit",
+      "path": "skills/solana-program-audit/templates/**",
+      "count": 5,
+      "reason": "agent-skill template and tool source, not a PoC of a specific bug"
+    },
+    {
+      "source": "psyto-solinv, lgalabru/masoch",
+      "path": "crates/**",
+      "count": 2,
+      "reason": "invariant/fuzzing tool source, not a PoC"
+    },
+    {
+      "source": "jito-restaking",
+      "path": "/jito-restaking/36675",
+      "count": 1,
+      "reason": "no code block in the published report"
+    },
+    {
+      "source": "jito-restaking",
+      "path": "/jito-restaking/36787",
+      "count": 1,
+      "reason": "program source with @audit comments plus a Token-2022 demonstration test that does not exercise the vault"
+    },
+    {
+      "source": "anchor advisories",
+      "path": "GHSA-c6rc-8jpp-2fgc, GHSA-429q-fhh4-r6hj",
+      "count": 2,
+      "reason": "the PoC is program source to build and deploy, not a test; no reader covers it and it is not an on-chain attacker program"
+    },
+    {
+      "source": "reports.immunefi.com Firedancer v0.1",
+      "path": "firedancer-v0.1 findings",
+      "count": 18,
+      "reason": "validator-client (C) memory-safety PoCs, not Solana program tests; realism-gate has no C frontend"
+    },
+    {
+      "source": "code-423n4/2022-02-anchor-findings",
+      "path": "data/*.json",
+      "count": 76,
+      "reason": "Anchor framework audit; no issue contains a test or a runnable PoC (prose and source quotes only)"
+    },
+    {
+      "source": "code-423n4/2025-08-solana-foundation",
+      "path": "report",
+      "count": 0,
+      "reason": "public report has no High/Medium finding and no coded PoC; findings repository private"
+    },
+    {
+      "source": "Cantina competitions (Tensor, and others)",
+      "path": "findings",
+      "count": 0,
+      "reason": "competition pages do not publish individual findings or PoCs; /findings returned 404 without login"
+    },
+    {
+      "source": "code4rena.com/audits 2026-02-jupiter-lend",
+      "path": "repo",
+      "count": 0,
+      "reason": "sponsor repository contains only README/scope; no findings or PoCs published yet"
+    }
+  ],
+  "code_search_screen": {
+    "queries": {
+      "LiteSVM attacker exploit language:Rust": {
+        "total": 77,
+        "repos": 34
+      },
+      "ProgramTest attacker exploit language:Rust": {
+        "total": 20,
+        "repos": 14
+      },
+      "bankrun attacker exploit language:TypeScript": {
+        "total": 26,
+        "repos": 13
+      },
+      "anchor.workspace attacker exploit language:TypeScript": {
+        "total": 58,
+        "repos": 37
+      },
+      "\"proof of concept\" anchor test": {
+        "total": 44565,
+        "repos": 96,
+        "note": "unscoped phrase query is noise; only the Solana hits were read"
+      },
+      "Mollusk exploit language:Rust": {
+        "total": 89,
+        "repos": 63
+      },
+      "litesvm attacker language:Rust": {
+        "total": 788,
+        "repos": 55
+      },
+      "program_test steal language:Rust": {
+        "total": 41,
+        "repos": 32
+      },
+      "poc_framework language:Rust": {
+        "total": 109,
+        "repos": 35
+      }
+    },
+    "rule": "Include a hit file when its tests demonstrate an exploit succeeding against a Solana program (titles or names say exploit/attack/PoC/bug and the test asserts the attack's effect). Exclude: the tool under study; tool, agent, prompt, template or fuzzer source; regression or security suites where the attack is expected to fail; default Anchor templates; feature suites; print-only simulations; non-Solana code.",
+    "included_repositories": {
+      "Frankcastleauditor/Solana-Audit-Arena": "judged weekly competition; the units are its labelled and unlabelled issue PoCs",
+      "MerovingioOps/solana-hacks": "ten code-level PoC binaries",
+      "Zolldyk/anchor-pinochio-security-template": "six Anchor/Pinocchio exploit demos",
+      "TheGrandPew/jet-governance-pocs": "five poc-framework attack binaries",
+      "0xmoostorm/Halborn-Solana-CTF-Solutions": "two CTF solve binaries",
+      "francis-codex/solana-security-patterns": "six Mollusk exploit tests",
+      "publicqi/loopscale-hack": "post-mortem reproduction binary",
+      "corey888773/solana-amm-attacks-analysis": "two LiteSVM sandwich tests",
+      "Tejanadh/1inch-solana-rescue-theft-research": "one program-test PoC",
+      "supernewbiecoder/DEMO_solve_escrow": "one program-test demo"
+    },
+    "excluded_repositories": {
+      "VAD37/security-research-archive": "358 MB archive; the Solana entries found are challenge sources and tool output, not solves",
+      "scriptCTF/scriptCTF2026-OfficialWriteups": "290 MB; no Solana program PoC in the indexed paths",
+      "sajjadium/ctf-archives": "40 GB archive; not sparse-indexable by the search results available here",
+      "psyto/solinv": "invariant tool source",
+      "lgalabru/masoch": "coverage tool source",
+      "princedotrs/solana-audit": "agent skill, templates and tools",
+      "svm-exploit-gym": "harness and a toolchain smoke test; no exploit",
+      "vaultvult/web3-security-research": "print-only simulations with hardcoded verdicts",
+      "Don-Uwe/solana-security-pattern": "repository not found at the recorded path (404) on 2026-11-25",
+      "subgroupx": "a web application, not the XCTF Lilac solve repository the write-up appeared to link"
+    }
+  },
+  "dead_ends": [
+    {
+      "source": "Code4rena Solana contests",
+      "count": 0,
+      "reason": "the public reports index lists one Solana contest (2025-08-solana-foundation) besides Pump Science; its report has no H/M and no coded PoC, and the 2026-02-jupiter-lend repository holds scope only"
+    },
+    {
+      "source": "Sherlock Solana contests",
+      "count": 0,
+      "reason": "the org has 462 repositories; only Orderly and WOOFi are Solana, both already fully screened in P1"
+    },
+    {
+      "source": "Cantina competitions",
+      "count": 0,
+      "reason": "Tensor and the other Solana competitions do not publish individual findings or PoCs to anonymous readers (404 on /findings)"
+    },
+    {
+      "source": "Immunefi bug-fix-review PoC repository",
+      "count": 0,
+      "reason": "immunefi-team/bugfix-reviews-pocs is Foundry/EVM only; no Solana entry"
+    },
+    {
+      "source": "Immunefi Audit Competition reports",
+      "count": 5,
+      "reason": "Jito Restaking is the only Solana program competition in the index; its five findings yielded three test blocks (the other two excluded above); Firedancer is a C validator client"
+    },
+    {
+      "source": "Hats Finance",
+      "count": 0,
+      "reason": "competition findings are delivered to the sponsor, not published per-submission; the Dappslap Solana competition has no public findings report found"
+    },
+    {
+      "source": "CodeHawks",
+      "count": 0,
+      "reason": "no Solana contest found in the public contest archive on 2026-11-25"
+    },
+    {
+      "source": "Security-firm blogs (OtterSec, Neodyme, Zellic, Sec3, Ackee, Halborn, Accretion)",
+      "count": 0,
+      "reason": "Zellic/Sec3/Accretion publish report PDFs and post-mortems, not runnable PoC repositories; OtterSec and Neodyme's runnable PoCs are already P1 sources or the poc-framework"
+    },
+    {
+      "source": "CTF solve repositories 2023-2026",
+      "count": 0,
+      "reason": "the public solves found (lkmidas, paradigm-ctf-2022, De1ik, subgroupx) are unsolved Anchor templates or a mislabelled web app; the solved ones already in P1 (Neodyme, Ackee, OtterSec, solhana) are not reusable without overlap"
+    },
+    {
+      "source": "Auditor portfolios",
+      "count": 0,
+      "reason": "web3-master and the 1inch/Chainlink-style portfolios used in P1 are exhausted for Solana; vaultvult's PoCs are print-only; Jet Governance PoCs are included as X because no per-finding outcome is published"
+    }
+  ],
+  "counts": {
+    "units": 81,
+    "duplicates": 0,
+    "counted_by_tier": {
+      "J": 28,
+      "X": 53
+    },
+    "excluded_candidates": 266
+  },
+  "tier_notes": {
+    "J": "outcome published by a platform: Sherlock and Code4rena reports (P1), the Solana Audit Arena's maintainer labels and weekly final reports, and Immunefi Audit Competition published reports (Jito Restaking).",
+    "X": "exploit-by-construction: CTF solves, teaching PoC binaries, audit reproductions, and Arena submissions whose week is not judged yet. No published outcome.",
+    "NC": "none in v2: no new exploit/secure pair was found among the fresh sources."
+  }
+}

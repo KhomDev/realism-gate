@@ -187,6 +187,9 @@ pub fn render(report: &Report, opts: TextOptions) -> String {
             sanitize(&c.git_ref)
         ));
     }
+    if report.fragment {
+        out.push_str("fragment     read as one test body (the file has no top-level test)\n");
+    }
     out.push('\n');
 
     let mut current_file: Option<&str> = None;
@@ -362,6 +365,7 @@ mod tests {
             summary: crate::engine::Summary::default(),
             declaration: None,
             config: None,
+            fragment: false,
             changed_since: None,
             findings: vec![Finding {
                 rule: "RG01",

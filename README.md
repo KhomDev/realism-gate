@@ -25,7 +25,7 @@ makes. Each row is bound to evidence in the PoC and gets one of four statuses:
 <!-- BEGIN:example-claims -->
 
 ```text
-realism-gate 1.1.0  ·  1 file  ·  1 suite  ·  4 tests
+realism-gate 1.2.0  ·  1 file  ·  1 suite  ·  4 tests
 
 test/ShadowVault.t.sol
   note   RG03 deployer-is-attacker  test/ShadowVault.t.sol:57:26  ShadowVaultTest::test_healthyDistribution_shipsSurplus
@@ -162,7 +162,7 @@ The test deploys a vault and then drains it as admin, with `deal` writing the va
 <!-- BEGIN:example -->
 
 ```text
-realism-gate 1.1.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.2.0  ·  1 file  ·  1 suite  ·  1 test
 
 test/VaultDrain.t.sol
   warn   RG11 unpinned-fork  test/VaultDrain.t.sol:17:9  VaultDrainTest::test_attackerDrainsVault
@@ -195,7 +195,7 @@ test/VaultDrain.t.sol
          → Read the same quantity before and after, and assert on the difference.
 
 SUMMARY  1 error  ·  3 warnings  ·  0 notes  ·  0 suppressed
-RESULT   FAIL  (fails on error and above)
+RESULT   FAIL  (fails on note and above)
 
 realism-gate reads the test; it does not run it. A clean result means no known
 defect pattern was found, not that the PoC is valid. `realism-gate explain <RULE>`
@@ -232,7 +232,7 @@ Same rule ids, same output. Rust harnesses (solana-program-test, LiteSVM, Mollus
 <!-- BEGIN:example-rust -->
 
 ```text
-realism-gate 1.1.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.2.0  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault_drain.rs
   warn   RG11 unpinned-fork  tests/vault_drain.rs:21:15  vault_drain::test_attacker_drains_vault
@@ -252,7 +252,7 @@ tests/vault_drain.rs
          ↳ send(&mut svm, set_withdraw_fee_ix(&admin.pubkey(), 0), &[&admin])
          → Do not treat a privileged signature as configuration by moving it earlier.
 
-  error  RG06 balance-injection  tests/vault_drain.rs:32:5  vault_drain::test_attacker_drains_vault
+  note   RG06 balance-injection  tests/vault_drain.rs:32:5  vault_drain::test_attacker_drains_vault
          set_account sets the lamports of `vault_state` (a program-derived address) in the
          exploit. It transfers nothing and overwrites what the account held, so the program's
          own accounting never sees it. Fund the attacker and transfer instead.
@@ -267,8 +267,8 @@ tests/vault_drain.rs
          ↳ assert!(svm.get_balance(&attacker.pubkey()).unwrap() > 0);
          → Read the same quantity before and after, and assert on the difference.
 
-SUMMARY  1 error  ·  3 warnings  ·  0 notes  ·  0 suppressed
-RESULT   FAIL  (fails on error and above)
+SUMMARY  0 errors  ·  3 warnings  ·  1 note  ·  0 suppressed
+RESULT   FAIL  (fails on note and above)
 
 realism-gate reads the test; it does not run it. A clean result means no known
 defect pattern was found, not that the PoC is valid. `realism-gate explain <RULE>`
@@ -280,7 +280,7 @@ shows why a rule exists and how it can be wrong.
 <!-- BEGIN:example-anchor -->
 
 ```text
-realism-gate 1.1.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.2.0  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault-drain.ts
   warn   RG11 unpinned-fork  tests/vault-drain.ts:13:21  vault::lets the attacker drain the vault
@@ -300,7 +300,7 @@ tests/vault-drain.ts
          ↳ program.methods.setWithdrawFee(new BN(0)).accounts({ admin: admin.publicKey, vaultState }).signers([admin]).rpc()
          → Do not treat a privileged signature as configuration by moving it earlier.
 
-  error  RG06 balance-injection  tests/vault-drain.ts:29:5  vault::lets the attacker drain the vault
+  note   RG06 balance-injection  tests/vault-drain.ts:29:5  vault::lets the attacker drain the vault
          setAccount sets the lamports of `vaultState` (a program-derived address) in the
          exploit. It transfers nothing and overwrites what the account held, so the program's
          own accounting never sees it. Fund the attacker and transfer instead.
@@ -315,8 +315,8 @@ tests/vault-drain.ts
          ↳ expect(Number(await context.banksClient.getBalance(attacker.publicKey))).to.be.greaterThan(0)
          → Read the same quantity before and after, and assert on the difference.
 
-SUMMARY  1 error  ·  3 warnings  ·  0 notes  ·  0 suppressed
-RESULT   FAIL  (fails on error and above)
+SUMMARY  0 errors  ·  3 warnings  ·  1 note  ·  0 suppressed
+RESULT   FAIL  (fails on note and above)
 
 realism-gate reads the test; it does not run it. A clean result means no known
 defect pattern was found, not that the PoC is valid. `realism-gate explain <RULE>`

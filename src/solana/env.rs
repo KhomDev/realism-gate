@@ -156,6 +156,58 @@ fn peel_unwrap(e: &Expr) -> &Expr {
     e
 }
 
+/// The names of the instruction builders an expression uses, following helper
+/// parameters to the caller's argument and locals a few levels deep:
+/// `new Transaction().add(ix)` reaches `set_oracle_ix`; an Anchor
+/// `program.methods.setFee(..)` yields `setFee`. Account arguments are not
+/// read, so an `overflow_ix(&owner.pubkey())` is not mistaken for a gated
+/// instruction because its argument is called `owner`.
+fn instruction_names(
+    env: &Env<'_>,
+    op: &super::trace::Op<'_>,
+    e: &Expr,
+    depth: usize,
+    out: &mut String,
+) {
+    if depth > 32 {
+        return;
+    }
+    let e = op.resolved(e);
+    if let ExprKind::Call { callee, .. } = &e.kind {
+        let (name, path) = match &callee.kind {
+            ExprKind::Member(_, m) => (m.clone(), String::new()),
+            ExprKind::Ident(p) | ExprKind::Type(p) => {
+                (p.rsplit("::").next().unwrap_or(p).to_string(), p.clone())
+            }
+            _ => (String::new(), String::new()),
+        };
+        let builder = !name.is_empty()
+            && (name.ends_with("_ix")
+                || name.ends_with("_ixs")
+                || path.contains("instruction")
+                || e.text.contains(".methods"));
+        if builder {
+            out.push_str(&name);
+            out.push(' ');
+        }
+    }
+    if depth < 3 {
+        let name = match &e.kind {
+            ExprKind::Ident(n) => Some(n),
+            ExprKind::Member(_, m) => Some(m),
+            _ => None,
+        };
+        if let Some(name) = name {
+            for v in env.assigns.get(name).into_iter().flatten() {
+                instruction_names(env, op, v, depth + 1, out);
+            }
+        }
+    }
+    for c in e.children() {
+        instruction_names(env, op, c, depth + 1, out);
+    }
+}
+
 /// A word in `name` that marks a role, unless the name also says whose it
 /// is: `user_authority` and `attacker_owner` are not roles.
 pub fn role_of(name: &str) -> Option<String> {
@@ -255,6 +307,59 @@ impl<'p> Env<'p> {
                         text: format!("{field}: {}", compact(&value.text)),
                         op: i,
                     });
+                }
+            }
+            // A plain instruction-builder call that initialises or reconfigures
+            // the program hands roles to the keys it names, even when the
+            // helper's body is not in the test tree:
+            // `init_vault_ix(&admin.pubkey(), &keeper.pubkey())`. Only a key
+            // whose name reads as a role is taken, so an init that names the
+            // user's own account does not make that user privileged.
+            if c.fields.is_empty() && is_configuring(&c.name) {
+                for arg in c.args {
+                    if !is_identity_shaped(arg) {
+                        continue;
+                    }
+                    let k = op.key(arg);
+                    if matches!(env.class_of(&k), Class::Protocol(_) | Class::Program) {
+                        continue;
+                    }
+                    if role_of(&k).is_some() || env.declared_privileged.contains(&k) {
+                        env.grants.push(Grant {
+                            grantee: k,
+                            text: c.expr.text.clone(),
+                            op: i,
+                        });
+                    }
+                }
+            }
+            // A role-named key that signs a transaction whose instruction reads
+            // as access-controlled (`set_oracle_ix`, `pause_ix`, `admin_*`) is
+            // shown holding that role by the program call itself.
+            if let Some(harness::Event::Transaction {
+                signers,
+                instructions,
+                ..
+            }) = harness::event(c)
+            {
+                let mut text = String::new();
+                for ix in instructions {
+                    instruction_names(&env, op, ix, 0, &mut text);
+                }
+                if super::rules::instruction_looks_gated(&text) {
+                    for s in signers {
+                        for k in op.keys(s) {
+                            if (role_of(&k).is_some() || env.declared_privileged.contains(&k))
+                                && !env.grants.iter().any(|g| g.grantee == k && g.op == i)
+                            {
+                                env.grants.push(Grant {
+                                    grantee: k,
+                                    text: c.expr.text.clone(),
+                                    op: i,
+                                });
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -389,6 +494,15 @@ impl<'p> Env<'p> {
             return Some(format!("`{k}` is declared privileged in realism.yaml"));
         }
         if self.is_attacker(k) {
+            return None;
+        }
+        // A keypair the test itself generates holds no protocol role until
+        // the test gives it one: a name is not a grant. The attacker's own
+        // account (`let owner = Keypair::new()`), or a vault it initialises
+        // as its own authority, is the attacker, not a privileged insider.
+        // A grant from a program call, a role field, or a declaration still
+        // makes it privileged.
+        if self.is_fresh(k) && !self.grants.iter().any(|g| g.grantee == k) {
             return None;
         }
         if let Some(w) = role_of(k) {

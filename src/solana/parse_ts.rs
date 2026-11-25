@@ -83,8 +83,18 @@ pub fn is_script_path(path: &str) -> bool {
 /// Solana package. Never panics on malformed input: a file that does not
 /// parse yields what oxc recovered and its errors in [`Unit::errors`].
 pub fn parse_source(path: &str, source: &str) -> Option<Unit> {
+    parse_inner(path, source, true)
+}
+
+/// Parses a fragment pasted into an issue: the marker and import gates are
+/// skipped because the fragment is checked as given, not as a project file.
+pub fn parse_fragment(path: &str, source: &str) -> Option<Unit> {
+    parse_inner(path, source, false)
+}
+
+fn parse_inner(path: &str, source: &str, require_solana: bool) -> Option<Unit> {
     let text = source.strip_prefix('\u{feff}').unwrap_or(source);
-    if !MARKERS.iter().any(|m| text.contains(m)) {
+    if require_solana && !MARKERS.iter().any(|m| text.contains(m)) {
         return None;
     }
     let source_type = SourceType::from_path(path).unwrap_or_else(|_| SourceType::ts());
@@ -101,7 +111,7 @@ pub fn parse_source(path: &str, source: &str) -> Option<Unit> {
         })
         .collect();
     let imports_solana = lower.imports(&parsed.program.body);
-    if !imports_solana && errors.is_empty() {
+    if require_solana && !imports_solana && errors.is_empty() {
         return None;
     }
     let file = lower.program(&parsed.program.body);
@@ -280,6 +290,63 @@ pub fn is_setup_title(title: &str) -> bool {
         || (verb.starts_with("set") && rest.next().is_some_and(|w| w == "up"))
 }
 
+/// A test whose only transactions configure the world (an oracle or admin
+/// update) and whose body does not name an attacker is setup for the tests
+/// after it, even when its title does not lead with a setup verb.
+fn body_only_configures(body: &[Stmt]) -> bool {
+    let mut text = String::new();
+    let mut names = Vec::new();
+    for s in body {
+        match &s.kind {
+            StmtKind::Expr(e) | StmtKind::Return(Some(e)) => walk_body(e, &mut text, &mut names),
+            StmtKind::Decl { init: Some(e), .. } => walk_body(e, &mut text, &mut names),
+            _ => {}
+        }
+    }
+    let low = text.to_ascii_lowercase();
+    if ["attacker", "exploit", "drain", "steal", "victim"]
+        .iter()
+        .any(|w| low.contains(w))
+    {
+        return false;
+    }
+    names.iter().any(|n| {
+        let low = n.to_ascii_lowercase();
+        [
+            "set",
+            "update",
+            "config",
+            "init",
+            "initialize",
+            "create",
+            "deploy",
+            "fund",
+        ]
+        .iter()
+        .any(|w| low.contains(w))
+    })
+}
+
+fn walk_body(e: &Expr, text: &mut String, names: &mut Vec<String>) {
+    text.push_str(&e.text);
+    text.push(' ');
+    if let ExprKind::Call { callee, .. } = &e.kind {
+        let name = match &callee.kind {
+            ExprKind::Member(_, m) => m.clone(),
+            ExprKind::Ident(p) | ExprKind::Type(p) => {
+                p.rsplit("::").next().unwrap_or(p).to_string()
+            }
+            _ => String::new(),
+        };
+        if !name.is_empty() {
+            names.push(name);
+        }
+    }
+    for c in e.children() {
+        walk_body(c, text, names);
+    }
+}
+
 /// Assertion methods that compare two values, and the operator they assert.
 fn comparison(name: &str) -> Option<&'static str> {
     Some(match name {
@@ -445,6 +512,37 @@ impl<'s> Lower<'s> {
             self.structural(s, 0, &mut top);
         }
         self.finish_block(0, top, "");
+        if self.tests.is_empty() {
+            // A script, not a mocha suite: read it as one test. The body is
+            // the top-level statements, which include the call to main();
+            // main's body is inlined there like any helper. When the file has
+            // no top-level code, main itself is the test.
+            let function = match self.blocks[0].body {
+                Some(f) => Some(f),
+                None => self
+                    .functions
+                    .iter()
+                    .position(|f| f.name == "main" && !f.method),
+            };
+            if let Some(function) = function {
+                let f = &mut self.functions[function];
+                f.test = true;
+                f.hook = false;
+                if f.name.is_empty() {
+                    f.name = "script".to_string();
+                }
+                f.header = if f.name == "main" {
+                    "async function main()".to_string()
+                } else {
+                    "script (top level)".to_string()
+                };
+                self.tests.push(TestRef {
+                    function,
+                    block: 0,
+                    setup: false,
+                });
+            }
+        }
         let before_lists: Vec<(usize, Vec<Prior>)> = self
             .tests
             .iter()
@@ -473,12 +571,20 @@ impl<'s> Lower<'s> {
 
     fn before(&self, test: usize) -> Vec<Prior> {
         let chain = self.ancestors(self.tests[test].block);
+        let own = self.tests[test].function;
         let setup = |function: usize| Prior {
             function,
             setup: true,
         };
         let mut out: Vec<Prior> = Vec::new();
-        out.extend(chain.iter().filter_map(|&b| self.blocks[b].body).map(setup));
+        // A script's own top-level body is the test, not its setup.
+        out.extend(
+            chain
+                .iter()
+                .filter_map(|&b| self.blocks[b].body)
+                .filter(|&f| f != own)
+                .map(setup),
+        );
         for &b in &chain {
             out.extend(self.blocks[b].before.iter().copied().map(setup));
         }
@@ -589,6 +695,7 @@ impl<'s> Lower<'s> {
             }
             Mocha::Test | Mocha::Before | Mocha::BeforeEach => {
                 let body = self.isolated(cb);
+                let body_setup = body_only_configures(&body);
                 let test = kind == Mocha::Test;
                 let header = if test {
                     format!("{callee}({title:?})")
@@ -609,7 +716,7 @@ impl<'s> Lower<'s> {
                     Mocha::Test => self.tests.push(TestRef {
                         function: f,
                         block,
-                        setup: is_setup_title(&title),
+                        setup: is_setup_title(&title) || body_setup,
                     }),
                     Mocha::Before => self.blocks[block].before.push(f),
                     _ => self.blocks[block].before_each.push(f),

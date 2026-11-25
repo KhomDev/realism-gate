@@ -106,7 +106,8 @@ pub fn check_test(
     env.declared_attackers = declared.attackers.clone();
     env.declared_privileged = declared.privileged.clone();
     env.declared_victims = declared.victims.clone();
-    let ctx = rules::Ctx::new(&tr, &env);
+    let mut ctx = rules::Ctx::new(&tr, &env);
+    ctx.control = rules::is_control(&tr);
     if !rules::uses_harness(&ctx) {
         return None;
     }

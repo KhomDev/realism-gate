@@ -234,7 +234,18 @@ fn without_paths_an_anchor_tests_directory_is_checked() {
             ("Anchor.toml", "[programs.localnet]\n"),
         ],
     );
-    let o = run(&dir, &["check", "--no-config", "--no-declaration"]);
+    // RG01 ships at note on Solana until the fresh measurement supports more
+    // (docs/precision.md), so the run has to ask for note-level failures.
+    let o = run(
+        &dir,
+        &[
+            "check",
+            "--no-config",
+            "--no-declaration",
+            "--fail-on",
+            "note",
+        ],
+    );
     let out = String::from_utf8_lossy(&o.stdout);
     assert_eq!(o.status.code(), Some(1), "{out}");
     assert!(out.contains("tests/vault.ts:15:11"), "{out}");

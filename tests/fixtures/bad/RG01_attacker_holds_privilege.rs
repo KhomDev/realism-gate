@@ -15,9 +15,10 @@ fn test_attacker_raises_the_fee() {
     let mut svm = LiteSVM::new();
     svm.add_program(fee_vault::ID, include_bytes!("fee_vault.so"));
     let attacker = Keypair::new();
-    svm.airdrop(&attacker.pubkey(), 10_000_000_000).unwrap();
+    let admin = Keypair::new();
     let init = fee_vault::instruction::Initialize { admin: attacker.pubkey(), fee_bps: 30 };
-    send(&mut svm, init_ix(init), &[&attacker]);
+    send(&mut svm, init_ix(init), &[&admin]);
+    svm.airdrop(&attacker.pubkey(), 10_000_000_000).unwrap();
 
     let before = svm.get_balance(&attacker.pubkey()).unwrap();
     send(&mut svm, set_fee_ix(10_000), &[&attacker]);

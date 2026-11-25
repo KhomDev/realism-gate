@@ -118,10 +118,16 @@ pub struct VerifyArgs {
 
 #[derive(clap::Args, Debug)]
 pub struct CheckArgs {
-    /// Files or directories to check. Directories are searched for .sol and
-    /// .rs files; lib/, node_modules/, out/, cache/, target/ and hidden
+    /// The files or directories to check. Directories are searched for .sol
+    /// and .rs files; lib/, node_modules/, out/, cache/, target/ and hidden
     /// directories are skipped.
     pub paths: Vec<PathBuf>,
+    /// Read each path as a fragment pasted into an issue: a `.rs` file with no
+    /// top-level test is wrapped as one `#[test]` body, a `.ts`/`.js` file as
+    /// one `it()` body. `check --fragment poc.rs` checks the fragment. A file
+    /// given explicitly with no top-level test is auto-detected.
+    #[arg(long)]
+    pub fragment: bool,
     /// The attacker-model declaration. Defaults to ./realism.yaml if present.
     #[arg(long, value_name = "FILE")]
     pub declaration: Option<PathBuf>,
@@ -413,6 +419,9 @@ fn rerun_command(args: &CheckArgs, paths: &[PathBuf]) -> String {
     if args.no_fail_on_claims {
         parts.push("--no-fail-on-claims".to_string());
     }
+    if args.fragment {
+        parts.push("--fragment".to_string());
+    }
     parts.join(" ")
 }
 
@@ -440,6 +449,70 @@ fn compile(re: &Option<String>, flag: &str) -> Result<Option<Regex>, String> {
         .transpose()
 }
 
+/// Loads the project. A `.rs`/`.ts`/`.js` file with no top-level test is read
+/// as a fragment (a test body pasted into an issue) when the user passed the
+/// file explicitly or `--fragment` is set: bare statements are wrapped as one
+/// `#[test]` body (Rust) or one `it()` body (TypeScript).
+fn load_project(
+    files: &[PathBuf],
+    cwd: &Path,
+    force: bool,
+    paths: &[PathBuf],
+) -> Result<(Project, bool), String> {
+    let explicit: Vec<PathBuf> = paths
+        .iter()
+        .filter(|p| p.is_file())
+        .filter_map(|p| p.canonicalize().ok())
+        .collect();
+    let mut units = Vec::new();
+    let mut fragment = false;
+    for f in files {
+        let src = project::read_input(f).map_err(|e| e.to_string())?;
+        let path = project::display_path(f, cwd);
+        let ext = f
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("")
+            .to_ascii_lowercase();
+        let is_explicit = f.canonicalize().ok().is_some_and(|p| explicit.contains(&p));
+        let scripty = matches!(
+            ext.as_str(),
+            "rs" | "ts" | "mts" | "cts" | "tsx" | "js" | "mjs" | "cjs"
+        );
+        let wrap = scripty && !has_top_level_test(&src, &ext) && (force || is_explicit);
+        if wrap {
+            fragment = true;
+            let wrapped = wrap_fragment(&src, &ext);
+            if ext == "rs" {
+                units.push(crate::solana::parse_rust::parse_source(&path, &wrapped));
+            } else if let Some(u) = crate::solana::parse_ts::parse_fragment(&path, &wrapped) {
+                units.push(u);
+            }
+        } else if let Some(u) = project::parse_any(&path, &src) {
+            units.push(u);
+        }
+    }
+    Ok((Project { units }, fragment))
+}
+
+fn has_top_level_test(src: &str, ext: &str) -> bool {
+    if ext == "rs" {
+        src.contains("#[test]") || src.contains("#[tokio::test]") || src.contains("fn main")
+    } else {
+        ["it(", "it (", "test(", "describe("]
+            .iter()
+            .any(|m| src.contains(m))
+    }
+}
+
+fn wrap_fragment(src: &str, ext: &str) -> String {
+    if ext == "rs" {
+        format!("#[test]\nfn fragment() {{\n{src}\n}}\n")
+    } else {
+        format!("it(\"fragment\", async () => {{\n{src}\n}});\n")
+    }
+}
+
 fn check(args: CheckArgs) -> Result<ExitCode, String> {
     let cwd = std::env::current_dir().map_err(|e| format!("current directory: {e}"))?;
     let paths = if args.paths.is_empty() {
@@ -463,7 +536,7 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
                 .join(", ")
         ));
     }
-    let project = Project::load(&files, &cwd).map_err(|e| e.to_string())?;
+    let (project, fragment_input) = load_project(&files, &cwd, args.fragment, &paths)?;
 
     let policy_root = policy_root(&cwd);
     let mut ignored_policy = Vec::new();
@@ -593,6 +666,7 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
         citations: citations.clone(),
     };
     let mut report = engine::analyze(&project, loaded.as_ref(), &opts);
+    report.fragment = fragment_input;
     report.ignored_policy = ignored_policy;
     report.config = config_path.map(|p| project::display_path(&p, &cwd));
     report.changed_since = match (&args.changed_since, &changed) {

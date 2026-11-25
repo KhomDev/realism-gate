@@ -15,6 +15,7 @@ describe("vault", () => {
     await program.methods
       .initialize()
       .accounts({ vault, admin: attacker.publicKey })
+      .signers([provider.wallet.payer])
       .rpc();
     await program.methods
       .setFee(new BN(10_000))

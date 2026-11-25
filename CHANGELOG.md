@@ -8,6 +8,59 @@ may change in any minor release.
 
 ## [Unreleased]
 
+### Added (P1-C, proposed 1.2.0)
+
+- **Four readers for the PoCs judges receive.** A Rust `#[test]` that calls
+  program functions directly is checked (the direct call is modelled as the
+  exploit transaction); a Rust `fn main` that drives a PoC framework
+  (`poc-framework`, `LocalEnvironment`, `Environment::…_client`) is read as one
+  test; a TypeScript script that drives an Anchor/web3.js/LiteSVM client is read
+  as one test, with `main()` inlined; and `check --fragment <file>` wraps a
+  pasted fragment as one test body. A `.rs`/`.ts`/`.js` file given explicitly
+  that has no top-level test is auto-detected. The report gains
+  `fragment: true` when the boundary is the tool's.
+- **`tests/precision_floor.rs`** enforces the severity floor in
+  `docs/precision.md`: a rule ships at `error` on Solana only when its fresh
+  held-out Wilson lower bound is at least 0.80.
+- **`eval/solana-poc-v2/`** is the sealed fresh corpus: 81 counted units (28
+  judged, 53 exploit-by-construction), pinned before the first `src/` change.
+
+### Changed (P1-C, proposed 1.2.0)
+
+- **RG01, RG04 and RG06 ship at `note` on Solana.** Their P1 PoC held-out
+  precision was 16.7%, 0% and 0%; a rule at `error` now needs a fresh held-out
+  lower bound of at least 0.80. The Solidity severities are unchanged. The
+  catalog gains `solana_severity()`; the generated rule pages say which ids
+  moved.
+- **RG01 no longer counts an attacker-signed grant as a harness grant.** An
+  attacker that initialises the program as its own admin, or re-initialises
+  itself, took the role through the bug; that is the exploit, not the harness.
+- **RG04/RG06 fixtures and preconditions.** A write of an account a later
+  initialise/create instruction sets up is not reported. A precondition
+  written while setting up is reported at `note` with `Precondition
+  fabricated:` and says the drained balance never passed through the program.
+- **RG10** accepts a read of the same account before the attack as a baseline,
+  whatever the local is called, not only a name like `before`.
+- **Control tests** (expects failure, or a title saying `secure` / `control` /
+  `prevents` / `rejects` / `fails when`) no longer fire RG01, RG02, RG03, RG04
+  or RG06; RG08 still applies.
+- **A fresh keypair** the test never gives a role (by a grant, a role field, an
+  initialise/configure call, or a declaration) is not privileged. A role
+  granted by another signer, or shown by a role-named signer of a gated
+  instruction, still is.
+
+### Fixed (P1-C, proposed 1.2.0)
+
+- **Fragments**: bare statements and `it()` blocks pasted into an issue parse.
+- **Scripts**: an Anchor script with `main()` is no longer silent.
+- **PoC-framework binaries**: `execute_as_transaction` is a transaction with
+  its signers and instructions; `LocalEnvironment` is a harness and
+  `Environment::devnet_client` is a live cluster.
+- **RG08**: the rule's scope is the exploit part of the trace, matching its own
+  definition; the study rubric is updated to agree.
+- **Docs**: the rule pages and README example blocks are regenerated for the
+  1.2.0 severities and the four readers.
+
 ## [1.1.0] - 2026-11-25
 
 ### Added
