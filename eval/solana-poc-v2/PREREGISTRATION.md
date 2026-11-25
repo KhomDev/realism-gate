@@ -3,7 +3,7 @@
 Frozen 2026-11-25, after the corpus was collected, pinned and committed
 (commit `006f5e4`, before the first `src/` change) and **before the tool was
 run on any v2 unit or any v2 label was written**. The code freeze is commit
-`7779ce2`; this file is committed before the first v2 run.
+`f51ed17`; this file is committed before the first v2 run.
 
 Working title: *Does the 1.2.0 PoC reader and the corrected rules hold up on a
 fresh Solana PoC corpus?*
@@ -21,9 +21,9 @@ sealed corpus.
 ## What is frozen
 
 - **Rule logic and version**: realism-gate **1.2.0**, commit
-  `7779ce2` (`p1c/fixes-2026-11-25`). Binary: `target/release/realism-gate.exe`
+  `f51ed17` (`p1c/fixes-2026-11-25`). Binary: `target/release/realism-gate.exe`
   built with `cargo +1.95.0-x86_64-pc-windows-gnu build --release --locked`
-  from that commit; sha256 `3c145dc3aec5c7ba85058e3bb8e73d2179b9aa04334349a3e029e7c8b02e3baf`.
+  from that commit; sha256 `de19d1f5e6adc6cd723b2b51de3b105a30134a3a2c1f8ebf8d556286b40ccc70`.
   No rule, severity or reader change after this file is committed.
 - **Corpus**: `eval/solana-poc-v2/`, committed at `006f5e4`. 81 counted units
   (28 judged, 53 exploit-by-construction), 0 duplicates. Every git source is
@@ -118,3 +118,14 @@ that drives no client stays unreadable). The identity/state rules should fall
 to note-level and stop firing on the attacker's own keys and control tests.
 The fresh judged tier is 28 units, larger than P1's 12, so the RQ3 table can
 say a little more than P1's, but it is still not a population estimate.
+
+## Deviations (recorded before the first complete run)
+
+1. **A stack overflow on the first run attempt.** At freeze `7779ce2` the
+   binary exited with `0xC00000FD` on `J-arena-143` (a deeply nested Arena
+   test) before writing any `runs/` or `flags/` file and before any label.
+   Cause: the Windows main thread's 1 MiB stack. Fix: both binaries run
+   `cli::main` on a 64 MiB thread, and the new instruction-name walk is
+   depth-bounded. The code freeze is re-recorded at `f51ed17` with the binary
+   sha in "What is frozen". No v2 unit was labelled, and no v2 flag was
+   inspected by the author, before the re-freeze.
