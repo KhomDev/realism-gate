@@ -9,10 +9,11 @@ text lives in the gitignored `.corpus/solidity-poc-v1/`.
 
 ## Result, uncomfortable part first
 
-J meets the target at **source** level and fails it at **platform** level.
-477 distinct judged findings come from 112 Code4rena contests (target 120 from
-6+ sources, max source 4.4%). Every one of them is Code4rena, so platform share
-is 100%: if "independent source" means platform, the corpus has one, not six.
+J meets the target at **source** level; at platform level it is no longer
+single-platform but remains concentrated. **520 distinct judged findings**:
+Code4rena 477 (91.73%), CodeHawks EVM 41 (7.88%), Hats Finance 2 (0.38%); 117
+sources, max source 4.04% of J. The platform concentration is reported, not
+hidden: one platform still supplies 91.73% of J.
 **X misses badly: 36 of 150.** DeFiHackLabs and DeFiVulnLabs are opened data in
 this workspace; only 9 new DeFiHackLabs incident files exist after the pinned
 `later` commit (`d4bd931`), DeFiVulnLabs has 0 new files, Immunefi publishes 9
@@ -27,8 +28,8 @@ teaching exploits. N is 30 of 30.
 | Code4rena codebases | `git ls-remote` for all 209 contributing contests; 203 resolve to a commit. The `code-423n4/<slug>` snapshot is the codebase pin. | 209 codebases recorded; 466/477 J units pinned, 11 null. |
 | Sherlock judging repos | Cloned `2024-11-hats-protocol-judging` (58 submissions, final report in `README.md`, metadata in `comments.csv`). Only 2 of 58 submission bodies carry test code. | Screened out of J this run (yield too low); no Invalid-with-test N found in the sample. |
 | Cantina | Findings remain private to anonymous readers (Phase-1 check); competitions index has no Solidity finding pages. | 0. |
-| CodeHawks (EVM) | Results payloads exist only via Wayback (live site Vercel-checkpointed); the Phase-1 parser applies, but the run budget went to the larger C4 supply. | Not mined this run. |
-| Hats Finance | Competition repos carry issue bodies and judge labels; not reached this run. | Not reached. |
+| CodeHawks (EVM) | Wayback results payloads for four EVM contests parsed with the RustFund parser: 2025-07-orderbook, 2025-12-multisig-timelock, 2026-02-stratax-contracts, 2026-04-snarkeling. | **41 judged finding groups with Foundry tests** (9 High, 14 Medium, 18 Low), one unit per report group; 4 codebase pins. |
+| Hats Finance | `org:hats-finance language:Solidity` repos: Mento and Euro-Dollar are the audit competitions. Mento: 49 issues, 42 invalid, 3 low, none with Foundry test code. Euro-Dollar: 134 issues, 6 valid findings, 2 with Foundry test code. | **2 units** (High, Low); the repository names no codebase repo, so `codebase_id: null`. |
 | Immunefi audit competitions / bug-fix PoCs | `immunefi-team/bugfix-reviews-pocs` cloned: 9 real Foundry PoCs (Alchemix, Astar, Balancer, BeanStalk, DFX, MEV, Silo, Wormhole, Yield). | **9 X units.** |
 | DeFiHackLabs (X) | Compared `d4bd931` (the opened `later` corpus) with HEAD `8a2b37f`: 9 added `.sol` files (2026-10/11), 4 modified files (opened; not reused). | **9 X units.** |
 | DeFiVulnLabs (X) | HEAD equals the opened `fresh` commit `f61f6ee`; 0 new files. | 0 fresh. |
@@ -45,27 +46,32 @@ teaching exploits. N is 30 of 30.
 - `gh api repos/SunWeb3Sec/DeFiVulnLabs/compare/f61f6ee...HEAD` (0 files).
 - `search/repositories?q=damn-vulnerable-defi+solutions+foundry` and `...smart+contract+ctf+solutions+foundry` (leads above).
 - `gh api repos/theredguild/damn-vulnerable-defi/contents` (challenge repo, no official solutions; solve repos used instead).
+- Wayback CDX `codehawks.cyfrin.io/c/<slug>/results*` for ten EVM contest slugs; four had a 200 snapshot and were fetched (orderbook, multisig-timelock, stratax-contracts, snarkeling).
+- `gh api search/repositories?q=org:hats-finance+language:Solidity` (4 repos); `gh api repos/hats-finance/<repo>/issues` pages for Mento and Euro-Dollar.
 
 ## Units taken
 
 | Tier | Source | Units | Notes |
 |---|---|---|---|
-| J | Code4rena, 112 contests | 477 | one report section = one finding group; max contest 21 (2024-07-loopfi, 4.4%); 466 codebase-pinned |
+| J | Code4rena, 112 contests | 477 | one report section = one finding group; max contest 21 (2024-07-loopfi, 4.04%); 466 codebase-pinned |
+| J | CodeHawks EVM, 4 contests | 41 | one judged report group per unit; 4 codebase pins |
+| J | Hats Finance, Euro-Dollar | 2 | valid, non-duplicate, Foundry-test findings; no codebase pin |
 | X | DeFiHackLabs (new files) | 9 | real incidents, 2026-10/11 |
 | X | Immunefi bug-fix PoC repo | 9 | real incidents |
 | X | DVDefi / MixBytes CTF solutions | 18 | teaching exploits, `real_incident: false` |
 | N | `code-423n4/2024-08-wildcat` tests | 25 | secure-path tests of the audited code |
 | N | `code-423n4/2024-01-salty` tests | 5 | raw-fetched at the pinned commit |
-| **Total** | | **543** | J 477, X 36, N 30 |
+| **Total** | | **586** | J 520, X 36, N 30 |
 
-Split: DEV 218, V1 103, V2 86, FINAL 136.
-J source share: max 4.4%; 112 sources. J platform share: Code4rena 100%.
-Codebase pin coverage: 466/477 J units (97.7%); 11 null.
+Split: DEV 234, V1 111, V2 95, FINAL 146.
+J source share: max 4.04%; 117 sources.
+J platform share: Code4rena 91.73%, CodeHawks EVM 7.88%, Hats Finance 0.38%.
+Codebase pin coverage: 507/520 J units (97.5%); 13 null (11 Code4rena, 2 Hats).
 
 ## Cap and target arithmetic
 
-- J target at source level: met (477, 112 sources, max 4.4% <= 30%).
-- J at platform level: **not met** — one platform holds 100% of J. The unit
+- J target at source level: met (520, 117 sources, max 4.04% <= 30%).
+- J at platform level: **not met** — Code4rena holds 91.73% of J. The unit
   rule and the target language do not define "source" beyond the per-contest
   unit; both readings are reported so the orchestrator can decide.
 - X target 150: **missed at 36**. Fresh incident material is the binding
@@ -81,8 +87,9 @@ Codebase pin coverage: 466/477 J units (97.7%); 11 null.
 |---|---|
 | 1,980 C4 H/M findings with no Foundry test in the report | source/fix snippets only; a report section without test code is not a coded PoC |
 | Sherlock `2024-11-hats-protocol` (58 submissions) | only 2 submission bodies carry test code; too thin to represent the class |
-| CodeHawks EVM results | not mined this run (Wayback parser available; budget went to C4) |
-| Hats Finance competition repos | not reached this run |
+| CodeHawks EVM contests with no Wayback results snapshot (2025-03-curve, and the snapshot attempts for 2025-05-hawk-high / 2025-07-last-man-standing hit an archive outage) | no public results payload, so no published outcome and no unit |
+| Hats Mento | 49 issues, 42 invalid; the valid low findings carry no Foundry test code |
+| Hats duplicate-labelled issues (33 in Euro-Dollar) | Hats marks them `duplicate` without a primary link, so a judged finding group cannot be reconstructed; they are not units |
 | Cantina competitions | findings not public |
 | DeFiHackLabs modified files (Opyn, README, scripts) | opened data; modification is drift, not a fresh unit |
 | DeFiVulnLabs HEAD | equals the opened `fresh` commit |

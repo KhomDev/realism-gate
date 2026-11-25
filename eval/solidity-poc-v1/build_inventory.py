@@ -248,12 +248,205 @@ def n_units(cb: dict) -> list[dict]:
     return units
 
 
+# ---------------------------------------------------------------------------
+# CodeHawks EVM and Hats Finance: fresh judged Solidity findings with Foundry
+# test code. Both use the content-based block selector below (never the fence
+# label): non-code blocks are rejected, the language is inferred, and a block
+# is eligible only when it carries a Foundry test marker.
+# ---------------------------------------------------------------------------
+CODEHAWKS = CACHE / "codehawks"
+HATS = CACHE / "hats"
+ALLFENCE = re.compile(r'```([A-Za-z0-9_+-]*)[ \t]*\n(.*?)```', re.S)
+SOLTEST = re.compile(
+    r"function\s+test\w*\s*\(|function\s+invariant_\w*\s*\("
+    r"|vm\.(?:prank|deal|store|warp|startPrank)"
+    r"|assertEq\(|assertTrue\(|assertLt\(|assertGt\("
+)
+SOLMARK = re.compile(r"pragma solidity|\bcontract\s+[A-Za-z_]\w*|\buint\d*\b|\baddress\b|msg\.sender")
+TSMARK = re.compile(r"\b(?:const|let|await)\b|\bit\s*\(|\bdescribe\s*\(")
+DIFFLINE2 = re.compile(r"^(?:---|\+\+\+|@@)", re.M)
+LOGLINE2 = re.compile(r"^\s*(?:running \d+ tests?|test .* \.\.\. ok|test result:|Compiling )", re.M)
+TOML_LINE3 = re.compile(
+    r"^\s*(?:\[[A-Za-z0-9_.-]+\]|[A-Za-z0-9_.\"-]+\s*=\s*(?:\"[^\"]*\"|'[^']*'|\d[\w.]*|true|false))\s*$"
+)
+SHELLCMD3 = re.compile(
+    r"^\s*(?:\$\s+)?(?:cd|ls|cat|curl|wget|git|npm|yarn|pnpm|npx|cargo|forge|node"
+    r"|chmod|mkdir|export|source|cp|mv|rm|echo|test)\b"
+)
+
+
+def all_blocks(desc: str) -> list[tuple[int, str, str]]:
+    return [(n, m.group(1) or "", m.group(2)) for n, m in enumerate(ALLFENCE.finditer(desc or ""))]
+
+
+def reject_sol(code: str) -> str | None:
+    lines = [l for l in code.split("\n") if l.strip()]
+    if not lines:
+        return "empty"
+    if DIFFLINE2.search(code):
+        return "diff"
+    if LOGLINE2.search(code):
+        return "test-log"
+    if all(TOML_LINE3.match(l) for l in lines):
+        return "toml"
+    shell = sum(1 for l in lines if SHELLCMD3.match(l))
+    if shell >= 2 and shell >= len(lines) - 1:
+        return "shell"
+    return None
+
+
+def select_sol_block(desc: str) -> dict | None:
+    cands = []
+    for idx, fence_label, code in all_blocks(desc):
+        if reject_sol(code) is not None:
+            continue
+        if not SOLTEST.search(code):
+            continue
+        if TSMARK.search(code.replace("msg.sender", "")):
+            continue
+        if not SOLMARK.search(code):
+            continue
+        cands.append((idx, fence_label, code))
+    if not cands:
+        return None
+    full = [c for c in cands if re.search(r"pragma solidity|\bcontract\s+[A-Za-z_]\w*", c[2])]
+    c = (full or cands)[0]
+    return {"block": c[0], "fence_label": c[1], "lang": "solidity", "code": c[2]}
+
+
+def codehawks_units(cb: dict) -> list[dict]:
+    meta = json.loads((CODEHAWKS / "meta.json").read_text(encoding="utf-8"))
+    units = []
+    for slug, m in sorted(meta.items()):
+        page = (CODEHAWKS / m["file"]).read_bytes()
+        text = page.decode("utf-8", "replace")
+        i = text.find("findings.getFindingOverviewsForCompetition")
+        k = text.find(">", i)
+        e = text.find("</script>", k)
+        res = json.loads(json.loads(text[k + 1:e])["body"])[0]["result"]["data"]
+        groups = (res.get("highs") or []) + (res.get("mediums") or []) + (res.get("lows") or [])
+        if m.get("commit"):
+            cb[slug] = {"repo": m["github_url"], "commit": m["commit"],
+                        "source": "codehawks-contest-repo"}
+        for gi, g in enumerate(groups):
+            issues = g.get("issues") or []
+            byid = {it["id"]: it for it in issues}
+            order = [g.get("selectedIssueId")] + [it["id"] for it in issues if it["id"] != g.get("selectedIssueId")]
+            chosen = None
+            for iid in order:
+                it = byid.get(iid)
+                if not it:
+                    continue
+                sel = select_sol_block(it.get("description") or "")
+                if sel:
+                    chosen = (iid, it, sel)
+                    break
+            if chosen is None:
+                continue
+            iid, it, sel = chosen
+            sev = g["severity"].capitalize()
+            units.append({
+                "id": f"J-ch-evm-{slug}-g{gi}",
+                "source": "codehawks-" + slug,
+                "platform": "codehawks-evm",
+                "tier": "J",
+                "kind": "test-fragment",
+                "files": [{
+                    "kind": "ch-page-json-block",
+                    "url": m["wayback"],
+                    "page_sha256": m["page_sha256"],
+                    "group": g["id"],
+                    "issue_id": iid,
+                    "block": sel["block"],
+                    "lang": sel["lang"],
+                    "fence_label": sel["fence_label"],
+                    "block_sha256": norm_hash(sel["code"]),
+                }],
+                "outcome": "valid",
+                "severity": sev,
+                "severity_title": None,
+                "severity_conflict": False,
+                "severity_source": "results-group-severity-field",
+                "outcome_source": "codehawks-results",
+                "outcome_evidence": f'Results page heading "{sev} Risk Findings"; group of {len(issues)} submissions',
+                "outcome_url": m["wayback"],
+                "group_id": g["id"],
+                "group_size": len(issues),
+                "duplicate_of": None,
+                "contest_submissions": len(issues),
+                "codebase_id": slug if m.get("commit") else None,
+                "license": "none",
+                "unlicensed": True,
+            })
+    return units
+
+
+def hats_units() -> list[dict]:
+    repo = "hats-finance/Euro-Dollar-0xa4ccd3b6daa763f729ad59eae75f9cbff7baf2cd"
+    issues = []
+    for p in sorted(HATS.glob("*.json")):
+        d = json.loads(p.read_text(encoding="utf-8"))
+        if isinstance(d, list):
+            issues += d
+    units = []
+    seen = set()
+    for it in issues:
+        n = it["number"]
+        if n in seen:
+            continue
+        seen.add(n)
+        labs = [l["name"] for l in it["labels"]]
+        low = [l.lower() for l in labs]
+        if "duplicate" in low or "invalid" in low:
+            continue
+        sev = next((l.capitalize() for l in labs if l.lower() in ("high", "medium", "low")), None)
+        if sev is None:
+            continue
+        sel = select_sol_block(it.get("body") or "")
+        if sel is None:
+            continue
+        units.append({
+            "id": f"J-hats-eurodollar-{n}",
+            "source": "hats-euro-dollar",
+            "platform": "hats-finance",
+            "tier": "J",
+            "kind": "test-fragment",
+            "files": [{
+                "kind": "gh-issue-block",
+                "repo": repo,
+                "issue": n,
+                "url": it["html_url"],
+                "body_sha256": hashlib.sha256((it.get("body") or "").encode("utf-8")).hexdigest(),
+                "block": sel["block"],
+                "lang": sel["lang"],
+                "fence_label": sel["fence_label"],
+                "block_sha256": norm_hash(sel["code"]),
+            }],
+            "outcome": "valid",
+            "severity": sev,
+            "severity_title": None,
+            "severity_conflict": False,
+            "severity_source": "hats-issue-labels",
+            "outcome_source": "hats-issue-labels",
+            "outcome_evidence": "Hats labels: " + ", ".join(labs),
+            "outcome_url": it["html_url"],
+            "group_id": None,
+            "group_size": 1,
+            "duplicate_of": None,
+            "codebase_id": None,
+            "codebase_note": "the Hats repository names no audited codebase repo",
+            "note": "Hats marks duplicates without a primary link; duplicate-labelled issues are not units",
+            "license": "none",
+            "unlicensed": True,
+        })
+    return units
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
     args = ap.parse_args(argv[1:])
     cb = codebases()
-    units = c4_units(cb) + x_units() + n_units(cb)
+    units = c4_units(cb) + codehawks_units(cb) + hats_units() + x_units() + n_units(cb)
     ids = [u["id"] for u in units]
     if len(ids) != len(set(ids)):
         dup = sorted({i for i in ids if ids.count(i) > 1})
@@ -275,7 +468,9 @@ def main(argv: list[str]) -> int:
     j_by_source = {}
     for u in j:
         j_by_source[u["source"]] = j_by_source.get(u["source"], 0) + 1
-    j_by_platform = {"code4rena": len(j)}
+    j_by_platform = {}
+    for u in j:
+        j_by_platform[u["platform"]] = j_by_platform.get(u["platform"], 0) + 1
     covered = sum(1 for u in j if u.get("codebase_id"))
     doc = {
         "schema": "realism-gate.solidity-poc-inventory/v1",
@@ -292,6 +487,7 @@ def main(argv: list[str]) -> int:
             "J_by_source": dict(sorted(j_by_source.items())),
             "J_by_platform": j_by_platform,
             "J_source_share_pct": {k: round(100.0 * v / len(j), 2) for k, v in sorted(j_by_source.items())} if j else {},
+            "J_platform_share_pct": {k: round(100.0 * v / len(j), 2) for k, v in sorted(j_by_platform.items())} if j else {},
             "J_codebase_pinned": covered,
             "J_codebase_null": len(j) - covered,
             "split": {s: len([u for u in counted if u["split"] == s]) for s in ("DEV", "V1", "V2", "FINAL")},
