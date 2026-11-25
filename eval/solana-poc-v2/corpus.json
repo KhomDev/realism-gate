@@ -1,0 +1,541 @@
+{
+  "schema": "realism-gate.solana-poc-corpus/v2",
+  "seed": "rg-solana-poc-v2-2026-11-25",
+  "frozen_rule_commit": null,
+  "frozen_rule_version": null,
+  "collected": "2026-11-25",
+  "corpora": {
+    "arena-issues": {
+      "dir": ".corpus/solana-poc-v2/issues",
+      "license": "none",
+      "note": "Issue bodies fetched from the Solana Audit Arena repository; pinned per issue by sha256 in arena_issues."
+    },
+    "arena": {
+      "repo": "Frankcastleauditor/Solana-Audit-Arena",
+      "commit": "81eaf902d971cc0a87c8107b23bf12c1d30525e0",
+      "dir": ".corpus/solana-poc-v2/arena",
+      "paths": [
+        "."
+      ],
+      "license": "NOASSERTION",
+      "listing_sha256": "70496b42c04b9b6f7c979c226644d4c97698bed9fed87963d631b07aa4cc90fe"
+    },
+    "merovingio-solana-hacks": {
+      "repo": "MerovingioOps/solana-hacks",
+      "commit": "7a0bebc9f40591eeb7e273ce57d166c759ec0d7f",
+      "dir": ".corpus/solana-poc-v2/merovingio-solana-hacks",
+      "paths": [
+        "."
+      ],
+      "license": "NOASSERTION",
+      "listing_sha256": "20dc979d8cf15aedd0d1bdac676d5ae961867bd0fe2ee8c057e3630b1ba88186"
+    },
+    "zolldyk-anchor-pinocchio": {
+      "repo": "Zolldyk/anchor-pinochio-security-template",
+      "commit": "3cf8950271e85b0291e943516f15f17c74510a08",
+      "dir": ".corpus/solana-poc-v2/zolldyk-anchor-pinocchio",
+      "paths": [
+        "."
+      ],
+      "license": "NOASSERTION",
+      "listing_sha256": "bfbce1e2d0c304541a0bdd3f3c35049c88618b784afc14c634c9784a686d10db"
+    },
+    "jet-governance-pocs": {
+      "repo": "TheGrandPew/jet-governance-pocs",
+      "commit": "9b96d36638246f423a75492cc5d45975c4391729",
+      "dir": ".corpus/solana-poc-v2/jet-governance-pocs",
+      "paths": [
+        "."
+      ],
+      "license": "NOASSERTION",
+      "listing_sha256": "11df6047f664d1798ed8b66d5a0ab66e2405fbfae701f227646308db63ee8c13"
+    },
+    "halborn-ctf-solutions": {
+      "repo": "0xmoostorm/Halborn-Solana-CTF-Solutions",
+      "commit": "87a5569d2e3d61995852e8ca96b0aad143b50621",
+      "dir": ".corpus/solana-poc-v2/halborn-ctf-solutions",
+      "paths": [
+        "."
+      ],
+      "license": "NOASSERTION",
+      "listing_sha256": "70d943cf8b9fd373063e35e25152589cf3d753cbde61ee6c9b6c29a19d29d415"
+    },
+    "loopscale-hack": {
+      "repo": "publicqi/loopscale-hack",
+      "commit": "b3b9aa85b92aeb874231d19b5b898b5a3c6b55ff",
+      "dir": ".corpus/solana-poc-v2/loopscale-hack",
+      "paths": [
+        "."
+      ],
+      "license": "NOASSERTION",
+      "listing_sha256": "5f493b8378da817dcfc98417522a7ad9e1726e2242efc9ebe496c12e46204593"
+    },
+    "solana-amm-attacks": {
+      "repo": "corey888773/solana-amm-attacks-analysis",
+      "commit": "0f4799d1409d4d2cc2f58b6960f1762aa61abd71",
+      "dir": ".corpus/solana-poc-v2/solana-amm-attacks",
+      "paths": [
+        "."
+      ],
+      "license": "NOASSERTION",
+      "listing_sha256": "c74fef1522a560098368fdecedd3c21cc6ddb9c33ec91a7c15f4f61375d8fba7"
+    },
+    "francis-codex-patterns": {
+      "repo": "francis-codex/solana-security-patterns",
+      "commit": "9f9cc034939a34510abe28f0749a40f100d95038",
+      "dir": ".corpus/solana-poc-v2/francis-codex-patterns",
+      "paths": [
+        "."
+      ],
+      "license": "NOASSERTION",
+      "listing_sha256": "da12d94f91ea432ad4606774cd43fb2f939644844e9e1ce608048d911911832c"
+    },
+    "1inch-solana-rescue": {
+      "repo": "Tejanadh/1inch-solana-rescue-theft-research",
+      "commit": "ef34ed8bf530ad26277f4013bebd3d7ef62f42ae",
+      "dir": ".corpus/solana-poc-v2/1inch-solana-rescue",
+      "paths": [
+        "."
+      ],
+      "license": "NOASSERTION",
+      "listing_sha256": "703cd94ad7dedda5d853f772cfe504e869d956e6666c09c607acfe867d0e7578"
+    },
+    "demo-solve-escrow": {
+      "repo": "supernewbiecoder/DEMO_solve_escrow",
+      "commit": "1c071c4b7804c7d312dec4528a3ab8ac0fa6f297",
+      "dir": ".corpus/solana-poc-v2/demo-solve-escrow",
+      "paths": [
+        "."
+      ],
+      "license": "NOASSERTION",
+      "listing_sha256": "37e13a3968aa7f14bbcdf4a70935af05a72672a6a5b1a004ee223ed02e90c2bd"
+    },
+    "jito-restaking": {
+      "dir": ".corpus/solana-poc-v2/reports",
+      "license": "none",
+      "note": "Immunefi Audit Competition report pages, pinned per finding by sha256 in reports."
+    }
+  },
+  "reports": {
+    "jito-index": {
+      "url": "https://reports.immunefi.com/jito-restaking",
+      "file": ".corpus/solana-poc-v2/reports/jito-index.html",
+      "sha256": "992aebdf893aee12e5ec47b6ca1e804a42df75026f05d465e2120cd052bcba25"
+    },
+    "jito-36675": {
+      "url": "https://reports.immunefi.com/jito-restaking/36675-sc-insight-missing-revoke-instruction-leads-to-old-delegate-accounts-have-unlimited-number-of",
+      "file": ".corpus/solana-poc-v2/reports/jito36675.html",
+      "sha256": "80a1223a66662a4dc5a419f252568798f2a7013ac357b87add04f555bdb7c540"
+    },
+    "jito-36787": {
+      "url": "https://reports.immunefi.com/jito-restaking/36787-sc-insight-the-vault-program-dont-support-token2022-transfer",
+      "file": ".corpus/solana-poc-v2/reports/jito36787.html",
+      "sha256": "b2f58b60ee253a1373d627f84ad3c7e00206c7d49aac7b712c10b0c658af4194"
+    },
+    "jito-36903": {
+      "url": "https://reports.immunefi.com/jito-restaking/36903-sc-high-the-vault-reward-mechanism-can-be-sandwiched-by-mev",
+      "file": ".corpus/solana-poc-v2/reports/jito36903.html",
+      "sha256": "49e37988486f083db9db9682c8344f3465fb2b25a966c3eeec5030a04e47ba87"
+    },
+    "jito-37079": {
+      "url": "https://reports.immunefi.com/jito-restaking/37079-sc-insight-withdrawals-can-be-dosed-by-reviving-tickets-in-the-same-burn-tx",
+      "file": ".corpus/solana-poc-v2/reports/jito37079.html",
+      "sha256": "b6c9973bbb32b083509ff508fa235e4ca7d4c7cf51858a45c850531c31ca0b70"
+    },
+    "jito-37295": {
+      "url": "https://reports.immunefi.com/jito-restaking/37295-sc-high-rewards-can-be-stolen-by-depositing-immediately-after-reward-tokens-get-sent-to-vault",
+      "file": ".corpus/solana-poc-v2/reports/jito37295.html",
+      "sha256": "5c7797563800cc086c4fb56a5d39a14ae7fb0641f0f609e388e931b5fefaad5e"
+    }
+  },
+  "arena_issues": {
+    "9": {
+      "sha256": "8030a0ca883ed87f8a399fea793cc012ea94af9e0ba83b5c3ffdca734e3fd81d",
+      "title": "[Week 1] [Medium] Token-2022 transfer fee causes vault isolvency",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-03-23T17:13:33Z"
+    },
+    "12": {
+      "sha256": "5ce6e23b0419ba0fa6636a0a7aec3acc47409195b250c5a0e387f815f53bba51",
+      "title": "[Week 1] [High] Repeatable reward inflation via rounding mismatch between `claim_rewards` and `partial_unstake` debt adjustment",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-03-23T17:37:28Z"
+    },
+    "20": {
+      "sha256": "624a722f04a16685dcc8b7430020146ad94255c50237c85313789c96d77fbd42",
+      "title": "[Week 1] [High] unstake_locked double-pays rewards already claimed via claim_rewards",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-03-23T17:45:36Z"
+    },
+    "25": {
+      "sha256": "4f61fca70a6429698358fadf95b7feb041ea3be2201dc955884edcc6f4a4be6d",
+      "title": "[Week 1][Medium] Pool rebalancing causes vault insolvency",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-03-23T17:53:44Z"
+    },
+    "26": {
+      "sha256": "5a714a5584160bf6e14e4d849c52b2f6d2a6123d54f48c918b15ceb9c84c72d4",
+      "title": "[Week 1][Critical] Double Reward Payout",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-03-23T17:54:02Z"
+    },
+    "40": {
+      "sha256": "74929c46f2ee7251818e76f323f08e829791e3f4d1ca08a49ca94f28541d400a",
+      "title": "[Week 1] [Medium] Missing stake caps",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-03-23T18:11:56Z"
+    },
+    "49": {
+      "sha256": "8792aa206d9452196b588e77cb154094ff25d0924ed93746826ec20fc3eabce1",
+      "title": "[Week 2] [High] `switch_ban_to_failed(immediate=true)` bypasses the failed-mission sell grace period",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-04-02T16:43:48Z"
+    },
+    "56": {
+      "sha256": "e68624d5619f9ab6e3317beab9aabe5eef5cf1fb23a280d9d697ce4c443641cc",
+      "title": "[Week2] [medium] Sell Slippage Guard Uses Gross Output Not Net After Fee",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-04-02T19:44:10Z"
+    },
+    "66": {
+      "sha256": "6541873f8023cee985e624c38b37f59345f676a65de8b6b4349dec3bab798af4",
+      "title": "[Week 2] [High] Mint extension space computed before MetadataPointer is added, causing create-time failure when metadata is enabled",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-04-02T19:18:40Z"
+    },
+    "99": {
+      "sha256": "69245de3de196a0ed64855f0f8fce76bd07b1b2df9203a5499036d0a664a35dd",
+      "title": "[Week 3] [Medium] Token creator can permanently lock protocol token fees by choosing the cooldown timestamp",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-04-13T20:26:01Z"
+    },
+    "140": {
+      "sha256": "1ec1f4e8e6065a9c4f58cbd66c583574b510b641e3d8ee31059eab7234bb1f5c",
+      "title": "[Week 4] [Medium] `sol_to_franksol` divides before multiplying — bricks `stake` after seed deposit",
+      "labels": [
+        "Medium",
+        "Valid"
+      ],
+      "state": "closed",
+      "updated_at": "2026-08-27T17:01:06Z"
+    },
+    "142": {
+      "sha256": "abb97451d0f3f72f9f588be3bc1b94820f76742cef9da8dc57c6156c0d4c6354",
+      "title": "[Week 4] [Medium] Third fee recipient is constrained to the second fee slot",
+      "labels": [
+        "Medium",
+        "Valid"
+      ],
+      "state": "closed",
+      "updated_at": "2026-08-27T17:01:07Z"
+    },
+    "143": {
+      "sha256": "b0e786df0e5ec1fdb978c302c7c392d6824b81fb8eff9782a7a0196125d8323f",
+      "title": "[Week 4] [Critical] Unauthenticated deploy_to_yield enables full pool drain via yield_generator withdraw",
+      "labels": [
+        "Critical",
+        "Valid"
+      ],
+      "state": "closed",
+      "updated_at": "2026-08-27T17:01:39Z"
+    },
+    "148": {
+      "sha256": "ee2ad80fe6c82c98a01c414eef4ec3199ba0dea5023829b8ab5f2436d639fe89",
+      "title": "[Week 4] [Medium] withdraw_from_yield rejects valid yield_generator accounts before CPI",
+      "labels": [
+        "Medium",
+        "Valid"
+      ],
+      "state": "closed",
+      "updated_at": "2026-08-27T17:01:08Z"
+    },
+    "149": {
+      "sha256": "7715db2af964d4970f31bbe75728a8ed9d782255de1bb6ba34859d576332bbc1",
+      "title": "# [Week 4] [Medium] Missing `token::authority` constraint on `user_franksol_ata` in `stake` — minted frankSOL can be redirected",
+      "labels": [
+        "Medium",
+        "Valid"
+      ],
+      "state": "closed",
+      "updated_at": "2026-08-27T17:01:09Z"
+    },
+    "150": {
+      "sha256": "aa63900d0e3a550185006bc6f134ebe68022ea86ce85db7b7be1e8e5e693e806",
+      "title": "[Week 4] [Medium] Prefunding the vault PDA bricks program initialization",
+      "labels": [
+        "Medium",
+        "Valid"
+      ],
+      "state": "closed",
+      "updated_at": "2026-08-27T17:01:10Z"
+    },
+    "155": {
+      "sha256": "89107d135e1a6b9cb3417595a9939e41f81e0977808aa2c43a6ae5f4cb3882e1",
+      "title": "[Week 4] [Low] set_yield_direction does not update last_config_update_ts",
+      "labels": [
+        "Low",
+        "Valid"
+      ],
+      "state": "closed",
+      "updated_at": "2026-08-27T17:01:11Z"
+    },
+    "156": {
+      "sha256": "a65e1190793de6d2bf2bf9f9212b85bfa66b116185cfe4460591c3f864ad9d91",
+      "title": "[Week 4] [Medium] Permissionless stake_v2 initialization lets attacker control Pool admin",
+      "labels": [
+        "Medium",
+        "Valid"
+      ],
+      "state": "closed",
+      "updated_at": "2026-08-27T17:01:11Z"
+    },
+    "160": {
+      "sha256": "02c81a94c49392c0a59cce71f66e1bcc3f335cd82c7737fadb8633e476312abc",
+      "title": "[Week 4] [Low] set_admin accepts the default address and can permanently lock admin controls",
+      "labels": [
+        "Low",
+        "Valid"
+      ],
+      "state": "closed",
+      "updated_at": "2026-08-27T17:01:12Z"
+    },
+    "165": {
+      "sha256": "027ba67aa9cc5b86fc071e977eadc2617c46029aa93f863687762166aea048e6",
+      "title": "[Week 4] [Medium] yield_generator pays fixed APY rewards from other active principals",
+      "labels": [
+        "Medium",
+        "Valid"
+      ],
+      "state": "closed",
+      "updated_at": "2026-08-27T17:01:13Z"
+    },
+    "166": {
+      "sha256": "1bb74bc31247a6f9c5831cfdbbdae46d7e9f9e9c4aace25d14d830ad85530a59",
+      "title": "[Week 4] [High] Default initialize state immediately bricks unstake via Anchor V2 ConstraintDuplicateMutableAccount",
+      "labels": [
+        "Medium",
+        "Valid"
+      ],
+      "state": "closed",
+      "updated_at": "2026-08-27T17:01:14Z"
+    },
+    "167": {
+      "sha256": "037c422258919dffa41bbd13ca8eba9d47f5a7525f23cefc18f7b30e60546877",
+      "title": "[WEEK 4] [HIGH]  Secondary frankSOL Holders Permanently Unable to Unstake Due to Missing UserPosition Initialization in unstake.rs",
+      "labels": [
+        "Low",
+        "Valid"
+      ],
+      "state": "closed",
+      "updated_at": "2026-08-27T17:01:15Z"
+    },
+    "170": {
+      "sha256": "e1cd51720849e4eb04e9533e1af00ec34479201e9c4b8aa3e172322c245eb045",
+      "title": "[WEEK 4] [HIGH] Missing Writable Flag Causes Permanent DoS on deposit via System Program Privilege Escalation",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-05-13T19:29:31Z"
+    },
+    "186": {
+      "sha256": "1e2e4712345f06cccecb0affd8a30ce9a9120b8feeeabf09fdd76444887c93d5",
+      "title": "[Week 4] [Critical] PnL sign inverted in withdraw_from_yield corrupts frankSOL exchange rate",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-05-23T15:21:21Z"
+    },
+    "200": {
+      "sha256": "5f3011ea3d0b8f9534d05021d6f2fd46e28bcad1e7db90026c639694ac293657",
+      "title": "[Week 4] [Low] set_user_blacklist requires an existing UserPosition; users get a one-tx stake window before blacklist applies",
+      "labels": [
+        "Low",
+        "Valid"
+      ],
+      "state": "closed",
+      "updated_at": "2026-08-27T17:01:40Z"
+    },
+    "228": {
+      "sha256": "2d4d046011aac8b8c38bc308ab32390401b17ff84c7d8fea2652e7f336455744",
+      "title": "[Week 5][Critical] Division-Before-Multiplication in sol_to_franksol Permanently Blocks All Sub-TVL Stakes",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-05-09T18:25:55Z"
+    },
+    "233": {
+      "sha256": "712ffe3a2b7a3aecd536a83f8194d52343e916f5c10b2b1762f58227610d9472",
+      "title": "[Week 1] [Critical] permit2 never binds the secp256k1-signed message to the permit hash, enabling full vault drain",
+      "labels": [
+        "Critical",
+        "Valid"
+      ],
+      "state": "open",
+      "updated_at": "2026-09-12T20:00:29Z"
+    },
+    "234": {
+      "sha256": "7eb46a91ddffb00a68357fee33226c7b7f13d657c8e52f59bdbb1797c2a5027d",
+      "title": "[Week 5] [Critical] Any 32-byte Ethereum signature can authorize arbitrary Permit2 transfers",
+      "labels": [
+        "Valid",
+        "duplicate"
+      ],
+      "state": "closed",
+      "updated_at": "2026-09-12T20:01:00Z"
+    },
+    "235": {
+      "sha256": "a7da5e6829d54499cae50f0874b1bdcf1f2bf71ba58fc70a561ace360999a488",
+      "title": "[Week 5] [High] Expired Permit2 signatures remain spendable forever",
+      "labels": [
+        "Medium",
+        "Valid"
+      ],
+      "state": "open",
+      "updated_at": "2026-09-12T20:07:21Z"
+    },
+    "236": {
+      "sha256": "1284907d71d7bb2af86efa0139a87fd9b6c7a559bf9893447ba293e59dfa9695",
+      "title": "[Week 5] [High] Closing consumed nonce bitmaps re-enables replay of old permits",
+      "labels": [
+        "High",
+        "Valid"
+      ],
+      "state": "open",
+      "updated_at": "2026-09-12T20:12:27Z"
+    },
+    "239": {
+      "sha256": "6801616aacfd290a41e90931f80c27f14a971aa219853c63083f2975a5f643b3",
+      "title": "[Week 5] [Medium] Transfer hook enabled after deposit permanently freezes vault funds with no recovery path",
+      "labels": [
+        "Low",
+        "Valid"
+      ],
+      "state": "open",
+      "updated_at": "2026-09-13T12:22:06Z"
+    },
+    "243": {
+      "sha256": "707653ed9e6df1af9e7880729433b81ece1ce1ff82237f29eaa404fb318966ba",
+      "title": "[Week 5] [Medium] Deployment-agnostic Permit2 hashes allow cross-deployment signature replay",
+      "labels": [
+        "Medium",
+        "Valid"
+      ],
+      "state": "open",
+      "updated_at": "2026-09-12T19:56:33Z"
+    },
+    "244": {
+      "sha256": "3ac08c28a1930b60faa5c7ba86fb5b2063d50e6b42ba535b16c80f63c92b2d5f",
+      "title": "[Week 5] [Medium] Buyer-chosen nonces strand facilitator rent permanently, with zero cost to the attacker",
+      "labels": [
+        "Low",
+        "Valid"
+      ],
+      "state": "open",
+      "updated_at": "2026-09-13T17:16:05Z"
+    },
+    "246": {
+      "sha256": "376a9c5e829243b009654f43710868bb288fe013afa581ab80331f1a7f9349b7",
+      "title": "[Week 5] [Critical] Signature message never bound to permit hash — any historical secp256k1 signature drains the vault",
+      "labels": [
+        "Valid",
+        "duplicate"
+      ],
+      "state": "closed",
+      "updated_at": "2026-09-21T01:22:23Z"
+    },
+    "249": {
+      "sha256": "7eb40ae7a66f33596e10fb397de53344307f4c023fb4034f5dbc839c38888fef",
+      "title": "[Week 5] [Medium] Valid plain Permit2 signatures do not bind transfer recipient",
+      "labels": [
+        "invalid"
+      ],
+      "state": "closed",
+      "updated_at": "2026-09-13T16:34:43Z"
+    },
+    "255": {
+      "sha256": "7aeb07ff37907b3f364df5ad350e00c6bd0f2a832dd306e31fb7831d477e49dd",
+      "title": "[week 5][high] Secp256k1 Signature Is Not Bound to the Permit Hash, Allowing Arbitrary Permit Parameters to Be Authorized",
+      "labels": [
+        "Valid",
+        "duplicate"
+      ],
+      "state": "closed",
+      "updated_at": "2026-09-12T20:02:14Z"
+    },
+    "265": {
+      "sha256": "44a1587602614a65a46df244601605f1f89c0e18b4055ddebce5a6161d581ced",
+      "title": "[Week 1] [Medium] The buyer cannot submit their own revocation, so cancellation depends on the counterparty",
+      "labels": [
+        "invalid"
+      ],
+      "state": "closed",
+      "updated_at": "2026-09-13T11:14:17Z"
+    },
+    "275": {
+      "sha256": "0a7ae6ef85cf7d7fab9c07b0744c634f055b5b0d59f60c5de79e9f0e725d7030",
+      "title": "[Week 5] [Critical] Signature-message binding bypass: ECDSA signature forgery enables full vault drain",
+      "labels": [
+        "Valid",
+        "duplicate"
+      ],
+      "state": "closed",
+      "updated_at": "2026-09-12T19:58:13Z"
+    },
+    "277": {
+      "sha256": "74e8f791fe218402b3ce7dca7a3ea0c447b7305f5ac02bfbfbc712cef33f82de",
+      "title": "[Week 5] [Low] init_vault accepts mints with a freeze authority, stranding vault deposits with no in-program recovery",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-09-13T11:50:01Z"
+    },
+    "278": {
+      "sha256": "e8c3550291a8947a7bae92b699747b4ffb7aead2dc313805dcca5edd87492433",
+      "title": "[Week 5] [Low] tiny_keccak software hashing instead of the keccak256 syscall doubles the compute cost of settle and permit paths",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-09-13T11:53:29Z"
+    },
+    "279": {
+      "sha256": "e3332ea854c439317f7a99a963e07bde451ec3ceb82d08b17cc8c94520ac216b",
+      "title": "[Week 5] [Medium] Pausable Token-2022 mint locks vault funds; freeze_authority=None slips past the freeze-authority fix",
+      "labels": [],
+      "state": "closed",
+      "updated_at": "2026-09-13T12:16:37Z"
+    },
+    "289": {
+      "sha256": "1e0bb5b216901084fe4ee6f44a26e46d464274cc5f8f20f86c28391ce2e961fc",
+      "title": "[Week 6] [Medium] A false facilitator success response releases paid output without any on-chain payment",
+      "labels": [],
+      "state": "open",
+      "updated_at": "2026-09-28T15:44:29Z"
+    },
+    "303": {
+      "sha256": "7ce469b0920e9aa3785311e9e27e4af4a98c45146dbf58c334947abdc797add5",
+      "title": "[Week 6] [Medium] Client escrows funds into a payment the facilitator will always refuse: the window clamp silently eats the padding it just added",
+      "labels": [],
+      "state": "open",
+      "updated_at": "2026-09-28T16:04:34Z"
+    },
+    "305": {
+      "sha256": "f936c7ade66cece7ba9481c4e7524086a38b2b8dc2a66827d3df921590f604f5",
+      "title": "[Week 6] [Medium] The facilitator's fee payer subsidises every settlement it cannot price: 10,000 lamports burned for 10 base units of protocol fee, drained by anyone who registers an agent",
+      "labels": [],
+      "state": "open",
+      "updated_at": "2026-09-28T17:09:06Z"
+    },
+    "319": {
+      "sha256": "4bc884803a73cb8fb1b8833d0efb9268f6bdfdaca2196bb7dde1b0943b386e4d",
+      "title": "# [Week 2] [Medium] Reputation forgery with 0 cost",
+      "labels": [],
+      "state": "open",
+      "updated_at": "2026-10-01T03:55:10Z"
+    }
+  }
+}
