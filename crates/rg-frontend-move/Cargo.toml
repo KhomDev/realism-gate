@@ -1,0 +1,14 @@
+[package]
+name = "rg-frontend-move"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Sui and Aptos Move frontend for realism-gate: finds #[test] functions and their calls."
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+# Published sub-crates are an approval-gated release step; see PACKAGING.md.
+publish = false
+
+[dependencies]
+rg-ir.workspace = true

@@ -2377,18 +2377,17 @@ name = "realism-gate"
 version = "1.4.0"
 dependencies = [
  "clap",
- "oxc_allocator",
- "oxc_ast",
- "oxc_parser",
- "oxc_span",
- "proc-macro2",
  "proptest",
  "regex",
+ "rg-exec",
+ "rg-frontend-sol",
+ "rg-ir",
+ "rg-model",
+ "rg-render",
+ "rg-rules",
  "serde",
  "serde-saphyr",
  "serde_json",
- "solar-parse",
- "syn 2.0.119",
  "tempfile",
  "toml",
 ]
@@ -2459,6 +2458,104 @@ checksum = "f8dd2a808d456c4a54e300a23e9f5a67e122c3024119acbfd73e3bf664491cb2"
 dependencies = [
  "hmac",
  "subtle",
+]
+
+[[package]]
+name = "rg-exec"
+version = "1.4.0"
+dependencies = [
+ "serde_json",
+ "tempfile",
+ "toml",
+]
+
+[[package]]
+name = "rg-frontend-move"
+version = "1.4.0"
+dependencies = [
+ "rg-ir",
+]
+
+[[package]]
+name = "rg-frontend-rust"
+version = "1.4.0"
+dependencies = [
+ "proc-macro2",
+ "rg-ir",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "rg-frontend-sol"
+version = "1.4.0"
+dependencies = [
+ "rg-ir",
+ "solar-parse",
+]
+
+[[package]]
+name = "rg-frontend-ts"
+version = "1.4.0"
+dependencies = [
+ "oxc_allocator",
+ "oxc_ast",
+ "oxc_parser",
+ "oxc_span",
+ "rg-ir",
+]
+
+[[package]]
+name = "rg-ir"
+version = "1.4.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "rg-model"
+version = "1.4.0"
+dependencies = [
+ "regex",
+ "rg-frontend-move",
+ "rg-frontend-rust",
+ "rg-frontend-sol",
+ "rg-frontend-ts",
+ "rg-ir",
+ "serde",
+ "serde-saphyr",
+ "tempfile",
+]
+
+[[package]]
+name = "rg-program"
+version = "1.4.0"
+dependencies = [
+ "rg-ir",
+]
+
+[[package]]
+name = "rg-render"
+version = "1.4.0"
+dependencies = [
+ "rg-ir",
+ "rg-model",
+ "rg-rules",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "rg-rules"
+version = "1.4.0"
+dependencies = [
+ "regex",
+ "rg-frontend-move",
+ "rg-frontend-rust",
+ "rg-frontend-ts",
+ "rg-ir",
+ "rg-model",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

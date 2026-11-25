@@ -8,6 +8,17 @@ may change in any minor release.
 
 ## [Unreleased]
 
+### Changed (build)
+
+- **The crate is a Cargo workspace.** `rg-ir`, `rg-frontend-sol`,
+  `rg-frontend-rust`, `rg-frontend-ts`, `rg-frontend-move`, `rg-program`,
+  `rg-model`, `rg-rules`, `rg-exec` and `rg-render` are separate library
+  crates; the `realism-gate` package keeps its name, its three binaries, its
+  CLI flags and exit codes, the `report/v1` and `card/v1` schemas and the
+  SARIF output. The library crates are `publish = false` until they are
+  published in dependency order (PACKAGING.md); a golden test pins the CLI
+  output over every committed fixture to prove the split changed no bytes.
+
 ## [1.4.0] - 2026-11-25
 
 ### Changed (severity)

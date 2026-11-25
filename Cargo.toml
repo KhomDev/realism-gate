@@ -1,34 +1,56 @@
-[package]
-name = "realism-gate"
+[workspace]
+resolver = "3"
+members = [
+    "crates/rg-ir",
+    "crates/rg-frontend-sol",
+    "crates/rg-frontend-rust",
+    "crates/rg-frontend-ts",
+    "crates/rg-frontend-move",
+    "crates/rg-program",
+    "crates/rg-model",
+    "crates/rg-rules",
+    "crates/rg-exec",
+    "crates/rg-render",
+]
+# Without this, `cargo build`, `test`, `clippy` and `fmt --all` at the root
+# would select only the root package and silently skip the library crates'
+# unit tests. Every member is a default member.
+default-members = [
+    ".",
+    "crates/rg-ir",
+    "crates/rg-frontend-sol",
+    "crates/rg-frontend-rust",
+    "crates/rg-frontend-ts",
+    "crates/rg-frontend-move",
+    "crates/rg-program",
+    "crates/rg-model",
+    "crates/rg-rules",
+    "crates/rg-exec",
+    "crates/rg-render",
+]
+
+[workspace.package]
 version = "1.4.0"
 edition = "2024"
-description = "Static checker for Foundry and Solana (Rust and Anchor TypeScript) PoC tests: does the proof of concept show what an unprivileged attacker can do, or only what the harness made true?"
+rust-version = "1.95"
 license = "MIT"
 repository = "https://github.com/KhomDev/realism-gate"
 homepage = "https://khomdev.org/tools"
-readme = "README.md"
-keywords = ["foundry", "solana", "anchor", "security", "poc"]
-categories = ["command-line-utilities", "development-tools::testing"]
-rust-version = "1.95"
-# The published crate is the program, its licence, and the one JSON table the
-# rule catalog embeds (`eval/solana/measured.json`). No fixtures, no corpus,
-# no workflows, no other evaluation data.
-include = ["/src/**/*.rs", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE", "/CHANGELOG.md", "/eval/solana/measured.json"]
 
-# Two binaries, same program: `realism-gate` and the short `rgate`.
-[[bin]]
-name = "realism-gate"
-path = "src/bin/realism-gate.rs"
+[workspace.dependencies]
+# The workspace's own crates. `version` is what Cargo rewrites a packaged
+# path dependency to; the path is what a checkout builds.
+rg-ir = { path = "crates/rg-ir", version = "1.4.0" }
+rg-frontend-sol = { path = "crates/rg-frontend-sol", version = "1.4.0" }
+rg-frontend-rust = { path = "crates/rg-frontend-rust", version = "1.4.0" }
+rg-frontend-ts = { path = "crates/rg-frontend-ts", version = "1.4.0" }
+rg-frontend-move = { path = "crates/rg-frontend-move", version = "1.4.0" }
+rg-program = { path = "crates/rg-program", version = "1.4.0" }
+rg-model = { path = "crates/rg-model", version = "1.4.0" }
+rg-rules = { path = "crates/rg-rules", version = "1.4.0" }
+rg-exec = { path = "crates/rg-exec", version = "1.4.0" }
+rg-render = { path = "crates/rg-render", version = "1.4.0" }
 
-[[bin]]
-name = "rgate"
-path = "src/bin/rgate.rs"
-
-[[bin]]
-name = "realism-gate-mcp"
-path = "src/bin/realism-gate-mcp.rs"
-
-[dependencies]
 clap = { version = "4.6.7", features = ["derive"] }
 # The TypeScript parser of the Oxc toolchain, for Anchor's tests. Pinned: oxc
 # releases break their API on every minor version, and 0.146 is the last that
@@ -48,6 +70,53 @@ solar-parse = "0.2.0"
 # The Rust parser used by the Rust compiler's own macro ecosystem.
 syn = { version = "2.0.119", default-features = false, features = ["full", "parsing", "printing"] }
 toml = { version = "1.2.0", default-features = false, features = ["parse", "serde"] }
+proptest = { version = "1.6.0", default-features = false, features = ["std"] }
+tempfile = "3.27.0"
+
+[package]
+name = "realism-gate"
+version.workspace = true
+edition.workspace = true
+description = "Static checker for Foundry and Solana (Rust and Anchor TypeScript) PoC tests: does the proof of concept show what an unprivileged attacker can do, or only what the harness made true?"
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords = ["foundry", "solana", "anchor", "security", "poc"]
+categories = ["command-line-utilities", "development-tools::testing"]
+rust-version.workspace = true
+# The published crate is the program: its CLI, engine, binders and the three
+# binaries. The analysis crates under crates/ are separate packages and are
+# publish = false until the sub-crates are published in dependency order; see
+# PACKAGING.md. No fixtures, no corpus, no workflows, no evaluation data.
+include = ["/src/**/*.rs", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE", "/CHANGELOG.md"]
+
+# Two binaries, same program: `realism-gate` and the short `rgate`.
+[[bin]]
+name = "realism-gate"
+path = "src/bin/realism-gate.rs"
+
+[[bin]]
+name = "rgate"
+path = "src/bin/rgate.rs"
+
+[[bin]]
+name = "realism-gate-mcp"
+path = "src/bin/realism-gate-mcp.rs"
+
+[dependencies]
+rg-ir.workspace = true
+rg-frontend-sol.workspace = true
+rg-model.workspace = true
+rg-rules.workspace = true
+rg-exec.workspace = true
+rg-render.workspace = true
+clap.workspace = true
+regex.workspace = true
+serde.workspace = true
+serde-saphyr.workspace = true
+serde_json.workspace = true
+toml.workspace = true
 
 [profile.release]
 opt-level = 3
@@ -56,8 +125,8 @@ codegen-units = 1
 strip = true
 
 [dev-dependencies]
-proptest = { version = "1.6.0", default-features = false, features = ["std"] }
-tempfile = "3.27.0"
+proptest.workspace = true
+tempfile.workspace = true
 
 # cargo-binstall: where the release workflow puts each archive and what is in
 # it. Spelled out rather than left to binstall's guessing, and checked by the

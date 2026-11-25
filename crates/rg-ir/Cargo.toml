@@ -1,0 +1,14 @@
+[package]
+name = "rg-ir"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Parser-independent IR shared by realism-gate's frontends, model and rules."
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+# Published sub-crates are an approval-gated release step; see PACKAGING.md.
+publish = false
+
+[dependencies]
+serde.workspace = true
