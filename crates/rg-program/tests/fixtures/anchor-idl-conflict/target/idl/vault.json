@@ -1,0 +1,15 @@
+{
+  "version": "0.30.0",
+  "name": "vault",
+  "instructions": [
+    {
+      "name": "withdraw",
+      "accounts": [
+        { "name": "authority", "isMut": false, "isSigner": false },
+        { "name": "vault", "isMut": true, "isSigner": false },
+        { "name": "extra", "isMut": false, "isSigner": true }
+      ],
+      "args": []
+    }
+  ]
+}

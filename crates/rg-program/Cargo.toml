@@ -3,7 +3,7 @@ name = "rg-program"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
-description = "Entry-point authority model for realism-gate (skeleton; filled by RG-A1)."
+description = "Entry-point authority model for realism-gate: which authority each Anchor, native Solana or Solidity entry point requires."
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
@@ -11,4 +11,16 @@ homepage.workspace = true
 publish = false
 
 [dependencies]
-rg-ir.workspace = true
+# The Rust parser: Anchor programs and native Solana handlers are Rust source.
+syn.workspace = true
+# `syn` spans report a line and column only when proc-macro2's `span-locations`
+# feature is on; the workspace dependency sets exactly that feature. Without
+# it every span of every Anchor and native fixture would be (0, 0).
+proc-macro2.workspace = true
+# The Solidity parser written for the Foundry toolchain.
+solar-parse.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
