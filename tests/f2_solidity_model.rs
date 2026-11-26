@@ -8,9 +8,9 @@
 //! (the golden manifest pins that byte for byte). The contracts are
 //! synthetic, written for this file.
 
+use realism_gate::Severity;
 use realism_gate::engine::{Options, Report, analyze};
 use realism_gate::project::Project;
-use realism_gate::Severity;
 
 fn scratch(name: &str) -> std::path::PathBuf {
     let dir = std::env::temp_dir().join(format!("rg-f2-{}-{name}", std::process::id()));
@@ -21,7 +21,11 @@ fn scratch(name: &str) -> std::path::PathBuf {
 
 /// A target checkout with one `Vault`. `harvest_modifier` and
 /// `deposit_modifier` are written after the function's parameter list.
-fn vault_model(name: &str, harvest_modifier: &str, deposit_modifier: &str) -> rg_program::ProgramModel {
+fn vault_model(
+    name: &str,
+    harvest_modifier: &str,
+    deposit_modifier: &str,
+) -> rg_program::ProgramModel {
     let dir = scratch(name);
     std::fs::write(
         dir.join("src/Vault.sol"),

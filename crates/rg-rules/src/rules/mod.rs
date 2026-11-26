@@ -130,7 +130,11 @@ impl<'p> Ctx<'p, '_> {
         }
         let mut answer: Option<ModelGate> = None;
         for entry in candidates {
-            if entry.authorities.iter().any(rg_program::Authority::is_unknown) {
+            if entry
+                .authorities
+                .iter()
+                .any(rg_program::Authority::is_unknown)
+            {
                 return None;
             }
             let gate = if entry.authorities.iter().any(|a| {
