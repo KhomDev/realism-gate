@@ -639,7 +639,7 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
                 .map(|d| d.victims().collect())
                 .unwrap_or_default(),
         };
-        let model = solana::dump_model(&project, &declared, program_model.as_ref());
+        let model = solana::dump_model(&project, &declared, program_model.as_ref(), &cwd);
         // `--dump-model json` is the item's spelling: write the JSON to
         // standard output. Any other value is a file path.
         if path.as_os_str() == "json" {

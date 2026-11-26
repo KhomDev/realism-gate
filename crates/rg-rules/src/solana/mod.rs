@@ -123,10 +123,13 @@ pub fn check_test(
 /// The same tests `check` would model are included: a test that drives no
 /// harness and calls no program function is not a PoC and has no model. The
 /// order is the suite order, which is source order; the JSON is deterministic.
+/// `base` is the invocation directory: every path the model carries is
+/// rewritten relative to it, so an absolute input path never reaches the dump.
 pub fn dump_model(
     project: &Project,
     declared: &Declared,
     program: Option<&rg_program::ProgramModel>,
+    base: &std::path::Path,
 ) -> rg_model::exploit::ExploitModel {
     let scopes = trace::Scopes::new(project);
     let mut tests = Vec::new();
@@ -158,9 +161,11 @@ pub fn dump_model(
             }
         }
     }
-    rg_model::exploit::ExploitModel {
+    let mut model = rg_model::exploit::ExploitModel {
         schema: rg_model::exploit::SCHEMA.to_string(),
         target: program.map(|p| p.target.clone()),
         tests,
-    }
+    };
+    rg_model::exploit::sanitize_paths(&mut model, base);
+    model
 }
