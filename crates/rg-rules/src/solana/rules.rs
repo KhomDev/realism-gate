@@ -471,10 +471,19 @@ fn privileged_signer(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
             // authority. Never fire on a guess.
             continue;
         }
+        // The binding rule (F1), when the program model resolved the entry
+        // point: the holder must be bound, by data flow in the test before
+        // this step, to an actor that is neither the attacker nor
+        // attacker-owned. An unbound holder is unknown, and the rule does not
+        // fire on it; the exploit model records why (`--dump-model`). Without
+        // a model the authority comes from the test's own grant data, which
+        // already is a binding, and that path is unchanged.
+        let modelled = step.authority_source == AuthoritySource::ProgramModel;
         let hit = step.authority_holders.iter().find(|signer| {
             !env.declared_privileged.contains(signer.as_str())
                 && !env.is_attacker(signer)
                 && !step.attacker_owned.contains(signer)
+                && (!modelled || step.binding(signer).is_some_and(exploit::Binding::is_bound))
         });
         let Some(signer) = hit else { continue };
         let why = match env.privileged(signer) {
@@ -528,6 +537,23 @@ fn deployer_is_attacker(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
                     && env.privileged(s).is_none()
             });
         if !only_builders {
+            continue;
+        }
+        // The binding rule (F1), when the program model resolved the entry
+        // point: a harness default signer that the test never gives a
+        // protocol role is the attacker, and a key whose origin the test does
+        // not show is unknown. Neither shows that setting up gave the signer
+        // an authority.
+        if step.authority_source == AuthoritySource::ProgramModel
+            && step.signers.iter().all(|s| {
+                step.binding(s).is_some_and(|b| {
+                    matches!(
+                        b.basis,
+                        exploit::BindingBasis::DefaultSigner | exploit::BindingBasis::NoOrigin
+                    )
+                })
+            })
+        {
             continue;
         }
         // The program model is the authority when one was supplied: a name
