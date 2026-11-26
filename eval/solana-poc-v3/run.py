@@ -8,7 +8,10 @@ the block hash against the inventory, then runs the binary exactly as
 
 - fragments are passed with `--fragment`;
 - a unit that names a protocol checkout (`target`) also passes
-  `--target`/`--target-commit`, so the program model (RG-A1) can read it.
+  `--target`/`--target-commit`, so the program model (RG-A1) can read it;
+- the exploit model (RG-A2) gets `--model-target` with the source's checkout
+  (SOURCE_TARGETS) when one exists in the pin cache. The binary must therefore
+  be the P2 build that has `--model-target`; a pre-P2 binary rejects the flag.
 
 Outputs (under `--out-dir`, default `<cache>/run-<version>`):
   runs.jsonl    one row per unit (readability, parse errors)
@@ -51,6 +54,17 @@ KNOWN_REPOS = {
     "Frankcastleauditor/Solana-Audit-Arena": "Frankcastleauditor-Solana-Audit-Arena",
     "Zolldyk/anchor-pinochio-security-template": "Zolldyk-anchor-pinochio-security-template",
     "CodeHawks-Contests/2025-03-rustfund": "CodeHawks-Contests-2025-03-rustfund",
+}
+
+# The protocol checkout each source's tests run against, used as the exploit
+# model's --model-target. RustFund and Zolldyk are single programs; the Arena
+# repo holds several, so the model returns Unknown on an ambiguous instruction
+# name rather than guessing.
+SOURCE_TARGETS = {
+    "arena": "Frankcastleauditor-Solana-Audit-Arena",
+    "codehawks-rustfund": "CodeHawks-Contests-2025-03-rustfund",
+    "rustfund": "CodeHawks-Contests-2025-03-rustfund",
+    "zolldyk": "Zolldyk-anchor-pinochio-security-template",
 }
 
 EXT = {"rust": "rs", "typescript": "ts", "javascript": "js"}
@@ -239,6 +253,15 @@ def run_unit(binary: str, unit: dict, cache: Path, extract_root: Path) -> tuple[
     target = unit.get("target")
     if target:
         args += ["--target", target["path"], "--target-commit", target["commit"]]
+    model_target = target
+    if model_target is None and unit.get("source") in SOURCE_TARGETS:
+        checkout = cache / "repos" / SOURCE_TARGETS[unit["source"]]
+        if checkout.is_dir():
+            model_target = {"path": str(checkout)}
+    if model_target:
+        # The protocol checkout feeds the exploit model (RG-A2). It is separate
+        # from --target/--target-commit, which drive RG20 citation checks.
+        args += ["--model-target", model_target["path"]]
     proc = subprocess.run(args, cwd=base, capture_output=True)
     no_suite = proc.returncode == 2 and b"no test suite found" in proc.stderr
     if proc.returncode != 0 and not no_suite:
