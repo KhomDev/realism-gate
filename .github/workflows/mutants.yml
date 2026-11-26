@@ -45,13 +45,13 @@ jobs:
         run: |
           args=()
           for f in $FILES; do args+=(--file "$f"); done
-          cargo mutants "${args[@]}" --timeout 300
+          cargo mutants --workspace "${args[@]}" --timeout 300
 
       - name: Mutate the rule, claim, bind and verify-fix code
         if: ${{ inputs.files == '' }}
         continue-on-error: true
         run: |
-          cargo mutants \
+          cargo mutants --workspace \
             --file 'crates/rg-rules/src/rules/*.rs' \
             --file 'crates/rg-model/src/claims/*.rs' \
             --file 'src/bind/*.rs' \
