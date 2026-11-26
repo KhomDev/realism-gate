@@ -325,7 +325,7 @@ def main(argv: list[str]) -> int:
                          "are opened only by a frozen round run.")
     ap.add_argument("--check", action="store_true")
     args = ap.parse_args(argv[1:])
-    cache = Path(args.cache)
+    cache = Path(args.cache).resolve()
     inv = load_json(HERE / "inventory.json")
     wanted = {s.strip().upper() for s in args.split.split(",") if s.strip()}
     units = [u for u in inv["units"] if (u.get("split") or "").upper() in wanted]
@@ -347,7 +347,7 @@ def main(argv: list[str]) -> int:
     if not args.binary:
         ap.error("BINARY is required unless --check")
     binary = str(Path(args.binary).resolve())
-    out_dir = Path(args.out_dir) if args.out_dir else cache / f"run-{args.version}"
+    out_dir = (Path(args.out_dir) if args.out_dir else cache / f"run-{args.version}").resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     rows, flags = [], []
     for unit in units:
