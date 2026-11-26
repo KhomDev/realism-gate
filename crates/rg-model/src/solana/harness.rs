@@ -80,6 +80,11 @@ pub enum Event<'p> {
         /// A signer the call adds without naming it: the Anchor provider's
         /// wallet or the anchor-client payer.
         implicit: Option<&'static str>,
+        /// The fee payer, when the call names one: the `Some(&payer)` of
+        /// `Transaction::new_signed_with_payer`, or the first signer of
+        /// web3.js's `sendAndConfirmTransaction`. This is recorded apart from
+        /// the signer list because paying a fee is not holding an authority.
+        payer: Option<&'p Expr>,
         /// What the transaction runs: instructions, instruction lists, or
         /// the Anchor builder call that names the instruction
         /// (`program.methods.withdraw(amount)`).
@@ -185,6 +190,7 @@ fn anchor_builder<'p>(c: &Call<'p>) -> Option<Event<'p>> {
         } else {
             CLIENT_PAYER
         }),
+        payer: None,
         instructions,
         accounts,
     })
@@ -208,6 +214,7 @@ fn anchor_rpc_namespace<'p>(c: &Call<'p>) -> Option<Event<'p>> {
     Some(Event::Transaction {
         signers: field("signers").into_iter().collect(),
         implicit: Some(PROVIDER_WALLET),
+        payer: None,
         instructions: vec![c.expr],
         accounts: field("accounts"),
     })
@@ -240,28 +247,35 @@ fn sign_signers(args: &[Expr]) -> Vec<&Expr> {
 pub fn event<'p>(c: &Call<'p>) -> Option<Event<'p>> {
     let args = c.args;
     let arg = |i: usize| args.get(i);
-    let tx = |signers: Option<&'p Expr>, instructions: Option<&'p Expr>| Event::Transaction {
-        signers: signers.into_iter().collect(),
-        implicit: None,
-        instructions: instructions.into_iter().collect(),
-        accounts: None,
+    let tx = |signers: Option<&'p Expr>,
+              payer: Option<&'p Expr>,
+              instructions: Option<&'p Expr>|
+     -> Event<'p> {
+        Event::Transaction {
+            signers: signers.into_iter().collect(),
+            implicit: None,
+            payer,
+            instructions: instructions.into_iter().collect(),
+            accounts: None,
+        }
     };
     if !c.path.is_empty() {
         let p = c.path.as_str();
         if path_ends(p, &["Transaction", "new_signed_with_payer"]) {
-            return Some(tx(arg(2), arg(0)));
+            return Some(tx(arg(2), arg(1), arg(0)));
         }
         if path_ends(p, &["Transaction", "new"]) && !args.is_empty()
             || path_ends(p, &["Transaction", "new_with_compiled_instructions"])
         {
-            return Some(tx(arg(0), arg(1)));
+            return Some(tx(arg(0), None, arg(1)));
         }
         if path_ends(p, &["VersionedTransaction", "try_new"]) {
-            return Some(tx(arg(1), arg(0)));
+            return Some(tx(arg(1), None, arg(0)));
         }
-        // web3.js: sendAndConfirmTransaction(connection, tx, signers)
+        // web3.js: sendAndConfirmTransaction(connection, tx, signers). The
+        // first signer pays the fee.
         if path_ends(p, &["send_and_confirm_transaction"]) && args.len() >= 3 {
-            return Some(tx(arg(2), arg(1)));
+            return Some(tx(arg(2), arg(2), arg(1)));
         }
         let segs: Vec<&str> = p.rsplit("::").collect();
         let (last, owner) = (segs[0], segs.get(1).copied().unwrap_or(""));
@@ -327,6 +341,7 @@ pub fn event<'p>(c: &Call<'p>) -> Option<Event<'p>> {
             Some(Event::Transaction {
                 signers: sign_signers(args),
                 implicit: None,
+                payer: None,
                 instructions: Vec::new(),
                 accounts: None,
             })
@@ -358,9 +373,9 @@ pub fn event<'p>(c: &Call<'p>) -> Option<Event<'p>> {
             id: &args[1],
             code: vec![&args[0]],
         }),
-        (m, n) if MOLLUSK_RUNS.contains(&m) && n >= 1 => Some(tx(None, arg(0))),
+        (m, n) if MOLLUSK_RUNS.contains(&m) && n >= 1 => Some(tx(None, None, arg(0))),
         // anchor-litesvm: ctx.execute_instruction(ix, &[&user])
-        ("execute_instruction" | "execute_instructions", 2) => Some(tx(arg(1), arg(0))),
+        ("execute_instruction" | "execute_instructions", 2) => Some(tx(arg(1), None, arg(0))),
         // Solana PoC frameworks: env.execute_as_transaction(&[ix], &[&signer])
         (
             "execute_as_transaction"
@@ -368,13 +383,15 @@ pub fn event<'p>(c: &Call<'p>) -> Option<Event<'p>> {
             | "execute_transactions"
             | "execute_transaction",
             2,
-        ) => Some(tx(arg(1), arg(0))),
-        // web3.js: connection.sendTransaction(tx, [signers])
-        ("send_transaction", 2) => Some(tx(arg(1), arg(0))),
+        ) => Some(tx(arg(1), None, arg(0))),
+        // web3.js: connection.sendTransaction(tx, [signers]). The first
+        // signer pays the fee.
+        ("send_transaction", 2) => Some(tx(arg(1), arg(1), arg(0))),
         // Anchor: provider.sendAndConfirm(tx, [signers]), signed by the wallet
         ("send_and_confirm", 1..=3) => Some(Event::Transaction {
             signers: arg(1).into_iter().collect(),
             implicit: Some(PROVIDER_WALLET),
+            payer: None,
             instructions: vec![&args[0]],
             accounts: None,
         }),

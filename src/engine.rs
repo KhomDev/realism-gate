@@ -41,6 +41,10 @@ pub struct Options {
     /// Protocol tree and commit for RG20. Absent means the citation check
     /// does not run.
     pub citations: Option<crate::cite::Index>,
+    /// The RG-A1 program model of `--model-target`, when one was supplied.
+    /// The Solana rules read entry-point authorities from it; without one they
+    /// read the test's own grant data and never guess.
+    pub program_model: Option<rg_program::ProgramModel>,
 }
 
 impl Options {
@@ -230,7 +234,14 @@ pub fn analyze(
                 continue;
             }
             // A test that drives no Solana harness is not a PoC.
-            let Some(raws) = solana::check_test(project, &scopes, &suite, test, &declared) else {
+            let Some(raws) = solana::check_test(
+                project,
+                &scopes,
+                &suite,
+                test,
+                &declared,
+                opts.program_model.as_ref(),
+            ) else {
                 continue;
             };
             if !counted {

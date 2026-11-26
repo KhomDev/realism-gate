@@ -16,7 +16,8 @@ use crate::finding::Severity;
 use crate::identity::{compact, is_mock_name, words};
 use crate::ir::{Expr, ExprKind, Lit};
 use crate::rules::{Raw, snippet};
-use rg_model::solana::env::instruction_looks_gated;
+use rg_model::exploit::{self, AuthoritySource, Phase, StepKind};
+use rg_program::ProgramModel;
 use std::collections::{BTreeMap, BTreeSet};
 
 /// Words in an instruction that say it builds the world.
@@ -45,6 +46,8 @@ struct Tx<'p> {
 pub struct Ctx<'p, 'a> {
     pub trace: &'a Trace<'p>,
     pub env: &'a Env<'p>,
+    /// The exploit model: actors, steps, mutations, assertions and phases.
+    pub model: exploit::TestModel,
     /// The test is a negative/control test: it shows the attack failing, or
     /// its title says so. The identity and state rules do not fire on it;
     /// RG08 still does.
@@ -95,7 +98,15 @@ fn instruction_words(env: &Env<'_>, e: &Expr, out: &mut BTreeSet<String>, follow
 }
 
 impl<'p, 'a> Ctx<'p, 'a> {
-    pub fn new(trace: &'a Trace<'p>, env: &'a Env<'p>) -> Ctx<'p, 'a> {
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        project: &'p crate::project::Project,
+        trace: &'a Trace<'p>,
+        env: &'a Env<'p>,
+        suite: &str,
+        program: Option<&'a ProgramModel>,
+        declared: &super::Declared,
+    ) -> Ctx<'p, 'a> {
         let events: Vec<Option<Event<'p>>> = trace
             .ops
             .iter()
@@ -110,6 +121,7 @@ impl<'p, 'a> Ctx<'p, 'a> {
                 Some(Event::Transaction {
                     signers,
                     implicit,
+                    payer: _,
                     instructions,
                     accounts,
                 }) => {
@@ -167,9 +179,22 @@ impl<'p, 'a> Ctx<'p, 'a> {
                 }
             }
         }
+        let declared_model = exploit::Declared {
+            attackers: declared.attackers.clone(),
+            privileged: declared.privileged.clone(),
+        };
+        let model = exploit::build(&exploit::Input {
+            project,
+            trace,
+            env,
+            suite,
+            program,
+            declared: &declared_model,
+        });
         let mut ctx = Ctx {
             trace,
             env,
+            model,
             control: false,
             events,
             txs,
@@ -425,26 +450,44 @@ fn attacker_holds_privilege(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
 }
 
 /// RG02: a transaction in the exploit is signed by a role holder.
+///
+/// The exploit model answers three questions the old name reading could not:
+/// whether the step is in the exploit at all (a token-account helper is setup,
+/// whatever its line), whether the entry point requires an authority (a name
+/// alone is not a gate; a grant or the program model must say so), and whether
+/// the authority is attacker-owned (an account the attacker created or funded
+/// in the test). A payer is never an authority: paying a fee proves only that
+/// the payer could pay.
 fn privileged_signer(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
     if ctx.control {
         return;
     }
     let env = ctx.env;
-    for tx in &ctx.txs {
-        if !ctx.is_exploit(tx.op) {
+    for step in ctx.model.steps.iter().filter(|step| {
+        step.kind == StepKind::Transaction && step.phase == Phase::Exploit && !step.library
+    }) {
+        if !step.required_authority.iter().any(|a| a.is_gate()) {
+            // No program model, grant or gate says this instruction needs an
+            // authority. Never fire on a guess.
             continue;
         }
-        let hit = tx.signers.iter().find_map(|s| {
-            if env.declared_privileged.contains(s) {
-                return None;
-            }
-            env.privileged(s).map(|why| (s, why))
+        let hit = step.authority_holders.iter().find(|signer| {
+            !env.declared_privileged.contains(signer.as_str())
+                && !env.is_attacker(signer)
+                && !step.attacker_owned.contains(signer)
         });
-        let Some((signer, why)) = hit else { continue };
+        let Some(signer) = hit else { continue };
+        let why = match env.privileged(signer) {
+            Some(why) => why,
+            None => format!(
+                "the entry point `{}` requires `{signer}`",
+                step.entry_point.clone().unwrap_or_default()
+            ),
+        };
         out.push(tx_raw(
             "RG02",
             Severity::Note,
-            ctx.op(tx.op),
+            ctx.op(step.op),
             format!(
                 "The exploit sends a transaction signed by `{signer}`: {why}. An attacker cannot produce that signature. Declare the role in an operator realism.yaml outside the repo under review if the claim relies on that role acting."
             ),
@@ -453,23 +496,33 @@ fn privileged_signer(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
 }
 
 /// RG03: the exploit is signed only by the keys that built the world.
+///
+/// The rule fires only on a gated instruction. A single-payer harness whose
+/// exploit calls an ordinary deposit is the ordinary local harness, not
+/// evidence of a privilege, and a payer is never a role signer.
 fn deployer_is_attacker(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
     if ctx.control {
         return;
     }
     let env = ctx.env;
     let builders: BTreeSet<&String> = ctx
-        .txs
+        .model
+        .steps
         .iter()
-        .filter(|t| !ctx.is_exploit(t.op))
-        .flat_map(|t| &t.signers)
+        .filter(|step| step.phase != Phase::Exploit && step.kind == StepKind::Transaction)
+        .flat_map(|step| &step.signers)
         .collect();
     if builders.is_empty() {
         return;
     }
-    for tx in ctx.txs.iter().filter(|t| ctx.is_exploit(t.op)) {
-        let only_builders = !tx.signers.is_empty()
-            && tx.signers.iter().all(|s| {
+    for step in ctx
+        .model
+        .steps
+        .iter()
+        .filter(|step| step.phase == Phase::Exploit && step.kind == StepKind::Transaction)
+    {
+        let only_builders = !step.signers.is_empty()
+            && step.signers.iter().all(|s| {
                 builders.contains(s)
                     && !matches!(env.class_of(s), Class::Attacker | Class::User)
                     && env.privileged(s).is_none()
@@ -477,33 +530,28 @@ fn deployer_is_attacker(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
         if !only_builders {
             continue;
         }
-        let op = ctx.op(tx.op);
-        let names: Vec<String> = tx.signers.iter().map(|s| format!("`{s}`")).collect();
-        let instruction_text: String = tx
-            .instructions
-            .iter()
-            .map(|e| e.text.as_str())
-            .collect::<Vec<_>>()
-            .join(" ");
-        let gated = instruction_looks_gated(&instruction_text);
-        let (severity, message) = if gated {
-            (
-                Severity::Note,
-                format!(
-                    "This exploit transaction is signed only by {}, which also signed the transactions that set the protocol up, and the instruction is named like an access-controlled call. If setting up gave that key any authority, the PoC proves what the deployer can do. Sign the exploit with a separate attacker keypair.",
-                    names.join(" and ")
-                ),
-            )
-        } else {
-            (
-                Severity::Note,
-                format!(
-                    "This exploit transaction is signed only by {}, which also signed setup. The instruction is not named like an access-controlled call, so this is the ordinary single-payer harness, not evidence the attacker used a privilege. It is a note. Sign the exploit with a separate attacker keypair if the instruction is in fact gated.",
-                    names.join(" and ")
-                ),
-            )
+        // The program model is the authority when one was supplied: a name
+        // that reads as gated does not override an entry point the model
+        // resolved as ungated. Without a model, the name is the evidence.
+        let gated = match step.authority_source {
+            AuthoritySource::ProgramModel => step.required_authority.iter().any(|a| a.is_gate()),
+            _ => step.gated || step.required_authority.iter().any(|a| a.is_gate()),
         };
-        out.push(tx_raw("RG03", severity, op, message));
+        if !gated {
+            // An ungated instruction: the world-builder signing it is the
+            // single-payer harness, not evidence of privilege.
+            continue;
+        }
+        let names: Vec<String> = step.signers.iter().map(|s| format!("`{s}`")).collect();
+        out.push(tx_raw(
+            "RG03",
+            Severity::Note,
+            ctx.op(step.op),
+            format!(
+                "This exploit transaction is signed only by {}, which also signed the transactions that set the protocol up, and the instruction is named like an access-controlled call. If setting up gave that key any authority, the PoC proves what the deployer can do. Sign the exploit with a separate attacker keypair.",
+                names.join(" and ")
+            ),
+        ));
         return;
     }
 }
@@ -1592,7 +1640,13 @@ fn is_program_call(c: &Call<'_>) -> bool {
 /// test that calls program functions directly is a PoC: the direct call is
 /// modelled as its exploit transaction.
 pub fn uses_harness(ctx: &Ctx<'_, '_>) -> bool {
-    ctx.events.iter().any(Option::is_some)
-        || (ctx.trace.dialect == Dialect::Rust
-            && ctx.trace.calls().any(|(_, _, c)| is_program_call(c)))
+    drives_harness(ctx.trace)
+}
+
+/// Whether a trace drives a Solana harness, or calls program code directly.
+pub fn drives_harness(trace: &Trace<'_>) -> bool {
+    trace.ops.iter().any(|op| {
+        op.call()
+            .is_some_and(|c| super::harness::event(c).is_some())
+    }) || (trace.dialect == Dialect::Rust && trace.calls().any(|(_, _, c)| is_program_call(c)))
 }

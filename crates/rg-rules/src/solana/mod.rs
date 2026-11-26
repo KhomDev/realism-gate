@@ -100,6 +100,7 @@ pub fn check_test(
     suite: &Suite<'_>,
     test: &ir::Function,
     declared: &Declared,
+    program: Option<&rg_program::ProgramModel>,
 ) -> Option<Vec<Raw>> {
     if is_setup_for_later_tests(project, suite, test) {
         return None;
@@ -109,10 +110,62 @@ pub fn check_test(
     env.declared_attackers = declared.attackers.clone();
     env.declared_privileged = declared.privileged.clone();
     env.declared_victims = declared.victims.clone();
-    let mut ctx = rules::Ctx::new(&tr, &env);
+    let mut ctx = rules::Ctx::new(project, &tr, &env, &suite.name, program, declared);
     ctx.control = rules::is_control(&tr);
     if !rules::uses_harness(&ctx) {
         return None;
     }
     Some(rules::check_test(&ctx))
+}
+
+/// Builds the exploit model of every checked test, for `--dump-model`.
+///
+/// The same tests `check` would model are included: a test that drives no
+/// harness and calls no program function is not a PoC and has no model. The
+/// order is the suite order, which is source order; the JSON is deterministic.
+/// `base` is the invocation directory: every path the model carries is
+/// rewritten relative to it, so an absolute input path never reaches the dump.
+pub fn dump_model(
+    project: &Project,
+    declared: &Declared,
+    program: Option<&rg_program::ProgramModel>,
+    base: &std::path::Path,
+) -> rg_model::exploit::ExploitModel {
+    let scopes = trace::Scopes::new(project);
+    let mut tests = Vec::new();
+    for suite in suites(project) {
+        for test in &suite.tests {
+            if is_setup_for_later_tests(project, &suite, test) {
+                continue;
+            }
+            let tr = trace::build(&scopes, suite.unit, test);
+            let mut env = env::Env::new(project, &tr);
+            env.declared_attackers = declared.attackers.clone();
+            env.declared_privileged = declared.privileged.clone();
+            env.declared_victims = declared.victims.clone();
+            let declared_model = rg_model::exploit::Declared {
+                attackers: declared.attackers.clone(),
+                privileged: declared.privileged.clone(),
+            };
+            let model = rg_model::exploit::build(&rg_model::exploit::Input {
+                project,
+                trace: &tr,
+                env: &env,
+                suite: &suite.name,
+                program,
+                declared: &declared_model,
+            });
+            let drives_harness = rules::drives_harness(&tr);
+            if drives_harness {
+                tests.push(model);
+            }
+        }
+    }
+    let mut model = rg_model::exploit::ExploitModel {
+        schema: rg_model::exploit::SCHEMA.to_string(),
+        target: program.map(|p| p.target.clone()),
+        tests,
+    };
+    rg_model::exploit::sanitize_paths(&mut model, base);
+    model
 }

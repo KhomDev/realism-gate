@@ -19,6 +19,7 @@
 //! [`crate::move_lang`] resolve the way they did when this was one crate.
 
 pub mod claims;
+pub mod exploit;
 pub mod identity;
 pub mod project;
 pub mod report;

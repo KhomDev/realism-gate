@@ -2522,8 +2522,10 @@ dependencies = [
  "rg-frontend-sol",
  "rg-frontend-ts",
  "rg-ir",
+ "rg-program",
  "serde",
  "serde-saphyr",
+ "serde_json",
  "tempfile",
 ]
 
@@ -2560,6 +2562,7 @@ dependencies = [
  "rg-frontend-ts",
  "rg-ir",
  "rg-model",
+ "rg-program",
  "serde",
  "serde_json",
 ]
