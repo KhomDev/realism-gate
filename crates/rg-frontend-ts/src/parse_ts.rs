@@ -5,9 +5,12 @@
 //! full, recovers from errors, and gives every node a byte range, so a
 //! finding points at the exact call and quotes it as written.
 //!
-//! Only files that import a Solana package are read (`@coral-xyz/anchor`,
-//! anything under `@solana/`, bankrun, LiteSVM). Other JavaScript in the tree
-//! (a Hardhat suite, a bundler config) is not a Solana test and is skipped.
+//! Only Solana test files are read: files that import a Solana package
+//! (`@coral-xyz/anchor`, anything under `@solana/`, bankrun, LiteSVM), and
+//! files with a top-level mocha test that import no other chain's test stack
+//! and use a name only a Solana test spells (an `it()` block pasted with no
+//! imports, a suite that takes `program` from its own `./utils`). Other
+//! JavaScript in the tree (a Hardhat suite, a bundler config) is skipped.
 //!
 //! The lowering spells TypeScript the way [`rg_frontend_rust::parse_rust`]
 //! spells Rust, so the trace, the identities and the rules read both alike:
@@ -48,7 +51,7 @@ use oxc_span::{GetSpan, SourceType, Span};
 use rg_ir::ir::{Expr, ExprKind, Lit, Pos, Stmt, StmtKind, Unit};
 use rg_ir::solana::ir::{Dialect, File, Function, Prior};
 use std::borrow::Cow;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 /// Text that a Solana test file must contain somewhere; a cheap filter before
 /// parsing every JavaScript file in a tree.
@@ -71,6 +74,227 @@ fn is_solana_package(source: &str) -> bool {
 
 fn is_bankrun(source: &str) -> bool {
     matches!(source, "solana-bankrun" | "anchor-bankrun")
+}
+
+/// Names only a Solana test spells. A test that imports no Solana package
+/// itself (a fragment pasted into an issue, or a suite that takes `program`
+/// and `provider` from its own `./utils`) is read when it uses one of them.
+const SOLANA_SHAPES: &[&str] = &[
+    "program.methods",
+    "program.account.",
+    "program.programId",
+    "LAMPORTS_PER_SOL",
+    "SystemProgram",
+    "Keypair.generate",
+    "PublicKey",
+    "findProgramAddress",
+    "sendAndConfirmTransaction",
+    "TransactionInstruction",
+    "banksClient",
+];
+
+/// Packages of other chains' test stacks. A file that imports one is not a
+/// Solana test, whatever names it uses.
+const FOREIGN_PACKAGES: &[&str] = &[
+    "hardhat",
+    "ethers",
+    "viem",
+    "web3",
+    "wagmi",
+    "@nomicfoundation",
+    "@nomiclabs",
+    "@openzeppelin",
+    "@ethersproject",
+    "@aptos-labs",
+    "@mysten",
+    "near-api-js",
+    "@near-js",
+    "near-workspaces",
+    "starknet",
+    "@polkadot",
+    "@cosmjs",
+    "@ton",
+];
+
+fn is_foreign_package(source: &str) -> bool {
+    FOREIGN_PACKAGES
+        .iter()
+        .any(|p| source == *p || source.strip_prefix(p).is_some_and(|r| r.starts_with('/')))
+}
+
+/// The modules a file imports or requires at its top level.
+fn module_sources<'b>(body: &'b [Statement<'_>]) -> Vec<&'b str> {
+    let mut out = Vec::new();
+    for s in body {
+        match s {
+            Statement::ImportDeclaration(d) => out.push(d.source.value.as_str()),
+            Statement::VariableDeclaration(d) => out.extend(
+                d.declarations
+                    .iter()
+                    .filter_map(|decl| decl.init.as_ref().and_then(required_module)),
+            ),
+            _ => {}
+        }
+    }
+    out
+}
+
+/// Whether a file that imports no Solana package is still a Solana test: it
+/// imports no other chain's test stack, it uses a name only a Solana test
+/// spells ([`SOLANA_SHAPES`]), and either it imports nothing at all (a
+/// fragment pasted into an issue: an `it()` block or bare statements) or its
+/// top level holds a mocha test or `describe` (a suite whose Anchor import is
+/// indirect, `import { program } from "./utils"`). A Hardhat suite and a
+/// plain mocha test are still skipped.
+fn reads_as_solana_test(lower: &Lower<'_>, body: &[Statement<'_>], text: &str) -> bool {
+    let sources = module_sources(body);
+    if sources.iter().any(|s| is_foreign_package(s)) {
+        return false;
+    }
+    if !SOLANA_SHAPES.iter().any(|m| text.contains(m)) {
+        return false;
+    }
+    // A file with no import at all cannot run as a module: it is a fragment.
+    // Its top-level statements are read as one test, as a script's are.
+    if sources.is_empty() {
+        return true;
+    }
+    body.iter().any(|s| match s {
+        Statement::ExpressionStatement(e) => match e.expression.without_parentheses() {
+            Expression::CallExpression(call) => {
+                matches!(lower.mocha_call(call), Some(Mocha::Test | Mocha::Describe))
+            }
+            _ => false,
+        },
+        _ => false,
+    })
+}
+
+/// Whether a file that failed to parse as TypeScript is Rust: a line opens
+/// with a Rust test attribute, `fn` or a `use` of a Solana crate.
+fn looks_like_rust(text: &str) -> bool {
+    const OPENERS: &[&str] = &[
+        "#[test]",
+        "#[tokio::test",
+        "#[cfg(test)]",
+        "fn ",
+        "pub fn ",
+        "async fn ",
+        "use solana_",
+        "use anchor_",
+        "use litesvm",
+        "use mollusk",
+    ];
+    text.lines()
+        .map(str::trim_start)
+        .any(|l| OPENERS.iter().any(|o| l.starts_with(o)))
+}
+
+/// A same-length rewrite of a fragment that does not parse, or `None`. It
+/// tries, in order: blanking elisions (`{ ... }`, `foo(...)`, a line that is
+/// only `...` or `…`); blanking unified-diff marks (the `+` that opens an
+/// added line; a removed `-` line, a hunk header and a file header become
+/// blank); and both. A candidate is kept only when oxc parses it with no
+/// error, so a file that is broken for another reason keeps its own errors.
+/// Every rewrite replaces bytes with spaces, so byte offsets, lines and
+/// columns are those of the original. The annotation guard runs again on the
+/// candidate, because blanking can bring a comment opener next to a marker.
+fn repair_fragment(text: &str, source_type: SourceType, guard: bool) -> Option<String> {
+    let elided = blank_elisions(text);
+    let undiffed = blank_diff_marks(text);
+    let both = elided.as_deref().and_then(blank_diff_marks);
+    for candidate in [elided, undiffed, both].into_iter().flatten() {
+        let candidate = if guard {
+            neutralize_annotations(&candidate).into_owned()
+        } else {
+            candidate
+        };
+        let allocator = Allocator::default();
+        let parsed = Parser::new(&allocator, &candidate, source_type).parse();
+        if parsed.diagnostics.errors().next().is_none() {
+            return Some(candidate);
+        }
+    }
+    None
+}
+
+/// Blanks every `...` (or `…`) that stands for elided code: it follows an
+/// opening bracket, a comma or the start of a line, and is followed by a
+/// closing bracket, a comma or the end of a line. A spread (`...rest`) is
+/// followed by an expression and is kept.
+fn blank_elisions(text: &str) -> Option<String> {
+    let bytes = text.as_bytes();
+    let mut out: Option<Vec<u8>> = None;
+    let mut i = 0;
+    while i < bytes.len() {
+        // Three dots, not four, or one `…` (three bytes in UTF-8).
+        let dots = bytes[i..].starts_with(b"...") && !bytes[i + 3..].starts_with(b".");
+        if !dots && !bytes[i..].starts_with("\u{2026}".as_bytes()) {
+            i += 1;
+            continue;
+        }
+        let width = 3;
+        let before = bytes[..i]
+            .iter()
+            .rev()
+            .find(|b| !matches!(b, b' ' | b'\t'))
+            .copied();
+        let after = bytes[i + width..]
+            .iter()
+            .find(|b| !matches!(b, b' ' | b'\t'))
+            .copied();
+        let opens = matches!(
+            before,
+            None | Some(b'{' | b'(' | b'[' | b',' | b'\n' | b'\r')
+        );
+        let closes = matches!(
+            after,
+            None | Some(b'}' | b')' | b']' | b',' | b'\n' | b'\r')
+        );
+        if opens && closes {
+            let v = out.get_or_insert_with(|| bytes.to_vec());
+            v[i..i + width].fill(b' ');
+        }
+        i += width;
+    }
+    out.and_then(|v| String::from_utf8(v).ok())
+}
+
+/// Blanks unified-diff marks when at least two lines open with `+`: the run
+/// of `+` that opens an added line, and the whole of a removed `-` line, a
+/// hunk header (`@@`) and a file header (`+++ `, `--- `, `diff --git`).
+fn blank_diff_marks(text: &str) -> Option<String> {
+    let added = text
+        .lines()
+        .filter(|l| l.starts_with('+') && !l.starts_with("+++ "))
+        .count();
+    if added < 2 {
+        return None;
+    }
+    let mut v = text.as_bytes().to_vec();
+    let mut start = 0;
+    while start < v.len() {
+        let end = v[start..]
+            .iter()
+            .position(|&b| b == b'\n')
+            .map_or(v.len(), |p| start + p);
+        let line = &v[start..end];
+        let header = line.starts_with(b"+++ ")
+            || line.starts_with(b"--- ")
+            || line.starts_with(b"@@")
+            || line.starts_with(b"diff --git");
+        if header || line.first() == Some(&b'-') {
+            v[start..end]
+                .iter_mut()
+                .filter(|b| **b != b'\r')
+                .for_each(|b| *b = b' ');
+        } else {
+            let run = line.iter().take_while(|&&b| b == b'+').count();
+            v[start..start + run].fill(b' ');
+        }
+        start = end + 1;
+    }
+    String::from_utf8(v).ok().filter(|s| s != text)
 }
 
 /// Whether a path names a JavaScript or TypeScript source this frontend reads.
@@ -97,11 +321,18 @@ pub fn parse_fragment(path: &str, source: &str) -> Option<Unit> {
 /// [`neutralize_annotations`].
 fn parse_inner(path: &str, source: &str, require_solana: bool, guard: bool) -> Option<Unit> {
     let text = source.strip_prefix('\u{feff}').unwrap_or(source);
-    if require_solana && !MARKERS.iter().any(|m| text.contains(m)) {
+    if require_solana
+        && !MARKERS.iter().any(|m| text.contains(m))
+        && !SOLANA_SHAPES.iter().any(|m| text.contains(m))
+        // A Rust test saved under a script name is reported, not skipped: it
+        // fails to parse, and the error names the language.
+        && !looks_like_rust(text)
+    {
         return None;
     }
     let source_type = SourceType::from_path(path).unwrap_or_else(|_| SourceType::ts());
     let allocator = Allocator::default();
+    let repair_allocator = Allocator::default();
     // oxc reads the guarded text; the lowering quotes and positions the
     // original. The guard changes no byte offset, so every span fits both.
     let guarded = if guard {
@@ -109,9 +340,22 @@ fn parse_inner(path: &str, source: &str, require_solana: bool, guard: bool) -> O
     } else {
         Cow::Borrowed(text)
     };
-    let parsed = Parser::new(&allocator, &guarded, source_type).parse();
+    let first = Parser::new(&allocator, &guarded, source_type).parse();
+    // A fragment pasted into an issue often elides code (`{ ... }`) or is a
+    // diff (`+` before each added line). When the text does not parse, the
+    // repair blanks those marks, and it is kept only when the result parses
+    // with no error. It changes no byte offset either.
+    let repaired = if first.diagnostics.errors().next().is_some() {
+        repair_fragment(&guarded, source_type, guard)
+    } else {
+        None
+    };
+    let parsed = match &repaired {
+        Some(r) => Parser::new(&repair_allocator, r, source_type).parse(),
+        None => first,
+    };
     let mut lower = Lower::new(text);
-    let errors: Vec<String> = parsed
+    let mut errors: Vec<String> = parsed
         .diagnostics
         .errors()
         .take(3)
@@ -120,8 +364,19 @@ fn parse_inner(path: &str, source: &str, require_solana: bool, guard: bool) -> O
             format!("error: {} (line {}, column {})", d.message, at.line, at.col)
         })
         .collect();
+    if let Some(first) = errors.first_mut()
+        && looks_like_rust(text)
+    {
+        first.push_str(
+            "; the file reads as Rust, not TypeScript or JavaScript: check it under a .rs name",
+        );
+    }
     let imports_solana = lower.imports(&parsed.program.body);
-    if require_solana && !imports_solana && errors.is_empty() {
+    if require_solana
+        && !imports_solana
+        && errors.is_empty()
+        && !reads_as_solana_test(&lower, &parsed.program.body, text)
+    {
         return None;
     }
     let file = lower.program(&parsed.program.body);
@@ -271,6 +526,9 @@ struct Lower<'s> {
     lines: Vec<usize>,
     /// Imported names: the local binding and the module it comes from.
     imported: BTreeMap<String, String>,
+    /// Lower-case names imported by name from the suite's own module
+    /// (`./utils`): values such as `program`, never a namespace path.
+    values: BTreeSet<String>,
     functions: Vec<Function>,
     blocks: Vec<Block>,
     tests: Vec<TestRef>,
@@ -474,6 +732,7 @@ impl<'s> Lower<'s> {
             src,
             lines,
             imported: BTreeMap::new(),
+            values: BTreeSet::new(),
             functions: Vec::new(),
             blocks: Vec::new(),
             tests: Vec::new(),
@@ -523,13 +782,26 @@ impl<'s> Lower<'s> {
                     let source = d.source.value.as_str();
                     solana |= is_solana_package(source);
                     for spec in d.specifiers.iter().flatten() {
-                        let local = match spec {
-                            ImportDeclarationSpecifier::ImportSpecifier(s) => &s.local,
-                            ImportDeclarationSpecifier::ImportDefaultSpecifier(s) => &s.local,
-                            ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) => &s.local,
+                        let (local, namespace) = match spec {
+                            ImportDeclarationSpecifier::ImportSpecifier(s) => (&s.local, false),
+                            ImportDeclarationSpecifier::ImportDefaultSpecifier(s) => {
+                                (&s.local, false)
+                            }
+                            ImportDeclarationSpecifier::ImportNamespaceSpecifier(s) => {
+                                (&s.local, true)
+                            }
                         };
-                        self.imported
-                            .insert(local.name.as_str().to_string(), source.to_string());
+                        let name = local.name.as_str();
+                        // `import { program, provider } from "./utils"`: the
+                        // suite's own module exports values, not namespaces,
+                        // so `program.methods.withdraw()` stays a method chain.
+                        if !namespace
+                            && source.starts_with('.')
+                            && name.starts_with(|c: char| c.is_ascii_lowercase())
+                        {
+                            self.values.insert(name.to_string());
+                        }
+                        self.imported.insert(name.to_string(), source.to_string());
                     }
                 }
                 Statement::VariableDeclaration(d) => {
@@ -549,12 +821,13 @@ impl<'s> Lower<'s> {
     }
 
     /// The path a member chain names when it starts at an imported binding or
-    /// a capitalised name (a class): `anchor.web3.Keypair`, `PublicKey`.
+    /// a capitalised name (a class): `anchor.web3.Keypair`, `PublicKey`. A
+    /// value imported from the suite's own module is not a path.
     fn path_of(&self, e: &Expression<'_>) -> Option<String> {
         match e.without_parentheses() {
             Expression::Identifier(id) => {
                 let name = id.name.as_str();
-                (self.imported.contains_key(name)
+                ((self.imported.contains_key(name) && !self.values.contains(name))
                     || name.starts_with(|c: char| c.is_ascii_uppercase()))
                 .then(|| name.to_string())
             }
@@ -2042,5 +2315,104 @@ mod tests {
         let without = parse_inner("t.ts", &src, true, false).expect("a Solana file");
         assert!(with.errors.is_empty(), "{:?}", with.errors);
         assert_eq!(format!("{with:?}"), format!("{without:?}"));
+    }
+
+    // ----- RG-A6: the import gate, fragment repair, mixed language -------
+
+    #[test]
+    fn an_import_less_fragment_with_solana_names_is_read() {
+        let it_block = "it(\"x\", async () => {\n  const a = Keypair.generate();\n  await program.methods.withdraw().signers([a]).rpc();\n});\n";
+        assert!(parse_source("t.ts", it_block).is_some());
+        let bare =
+            "const a = Keypair.generate();\nawait program.methods.deposit().signers([a]).rpc();\n";
+        let unit = parse_source("t.ts", bare).expect("bare statements are read");
+        let file = unit.solana.unwrap();
+        assert!(file.functions.iter().any(|f| f.test), "read as one test");
+    }
+
+    #[test]
+    fn the_relaxed_gate_still_skips_other_javascript() {
+        for src in [
+            // No Solana name.
+            "it(\"adds\", () => { expect(add(1, 2)).to.equal(3); });\n",
+            // Another chain's test stack, whatever names it uses.
+            "import { ethers } from \"hardhat\";\nit(\"x\", async () => { await program.methods.a().rpc(); });\n",
+            "const { ethers } = require(\"ethers\");\nit(\"x\", async () => { const k = Keypair.generate(); });\n",
+            // Imports something, but has no top-level test.
+            "import { program } from \"./utils\";\nexport const run = () => program.methods.a().rpc();\n",
+        ] {
+            assert!(parse_source("t.ts", src).is_none(), "{src}");
+        }
+    }
+
+    #[test]
+    fn a_value_imported_from_the_suites_module_is_a_method_chain() {
+        let src = "import { program } from \"./utils\";\nimport * as h from \"./helpers\";\nit(\"x\", async () => {\n  await program.methods.withdraw().rpc();\n  h.fund();\n});\n";
+        let file = parse_source("t.ts", src).unwrap().solana.unwrap();
+        let names = body_calls(test(&file, "x"));
+        assert!(names.iter().any(|n| n == ".rpc"), "{names:?}");
+        assert!(names.iter().any(|n| n == ".withdraw"), "{names:?}");
+        // A namespace import stays a path.
+        assert!(names.iter().any(|n| n == "h::fund"), "{names:?}");
+    }
+
+    #[test]
+    fn elisions_are_blanked_and_spreads_kept() {
+        let src =
+            "f({ a, ... }); g(...); h([...]);\n  ...\nk({ ...rest }); m(...args);\n  \u{2026}\n";
+        let out = blank_elisions(src).expect("elisions found");
+        assert_eq!(out.len(), src.len());
+        assert_eq!(
+            out,
+            "f({ a,     }); g(   ); h([   ]);\n     \nk({ ...rest }); m(...args);\n     \n"
+        );
+        assert!(blank_elisions("f(...xs);\n").is_none());
+    }
+
+    #[test]
+    fn diff_marks_are_blanked_keeping_offsets() {
+        let src = "@@ -1,2 +1,3 @@\n a();\n-b();\n+c();\n++d();\r\n+e();\n";
+        let out = blank_diff_marks(src).unwrap();
+        assert_eq!(out.len(), src.len());
+        assert_eq!(
+            out,
+            "               \n a();\n     \n c();\n  d();\r\n e();\n"
+        );
+        // One `+` line is not a diff.
+        assert!(blank_diff_marks("+x;\ny;\n").is_none());
+    }
+
+    #[test]
+    fn a_repair_is_kept_only_when_it_parses_cleanly() {
+        let elided = "it(\"x\", async () => {\n  await program.methods.a().accounts({ u, ... }).rpc();\n});\n";
+        let unit = parse_fragment("t.ts", elided).unwrap();
+        assert!(unit.errors.is_empty(), "{:?}", unit.errors);
+        // The original text and positions are kept.
+        assert_eq!(unit.source, elided);
+        let broken = "it(\"x\", async () => {\n  await f({ u, ... }).rpc(;\n});\n";
+        let unit = parse_fragment("t.ts", broken).unwrap();
+        assert!(!unit.errors.is_empty());
+        // A file that parses is never rewritten.
+        assert!(repair_fragment("const a = 1;\n", SourceType::ts(), true).is_none());
+    }
+
+    #[test]
+    fn a_repaired_annotation_is_guarded_again() {
+        // Blanking `...` brings `/*` next to `#__PURE__`; the guard reruns on
+        // the candidate, so a debug build does not panic.
+        let src = "it(\"x\", async () => { f({ a, ... }); /*\n+#__PURE__*/\n+:\n+ g(); });\n";
+        let _ = parse_fragment("t.ts", src);
+    }
+
+    #[test]
+    fn rust_saved_as_typescript_names_the_language() {
+        let unit = parse_source("t.ts", "#[test]\nfn t() { let k = Keypair::new(); }\n").unwrap();
+        assert!(
+            unit.errors[0].contains("reads as Rust, not TypeScript"),
+            "{:?}",
+            unit.errors
+        );
+        let unit = parse_fragment("t.ts", "it(\"x\", () => { f(; });\n").unwrap();
+        assert!(!unit.errors[0].contains("reads as"), "{:?}", unit.errors);
     }
 }
