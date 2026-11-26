@@ -157,14 +157,43 @@ def self_test() -> int:
     # Cell rules: n<5 is a count; a 28.6% unclear cell is inconclusive.
     count_ok = cell(["true-positive", "false-positive"])["status"] == "count"
     unclear_ok = cell(["true-positive"] * 5 + ["unclear"] * 2)["status"] == "inconclusive"
-    ok = kappa_ok and wilson_ok and count_ok and unclear_ok
+    # A hand-made tiny packet: three flags, AI readers agree, one human
+    # disagreement. The scorer path (resolve -> pairs -> kappa -> cells) must
+    # reproduce kappa 0.4 and count the 3-flag pooled cell.
+    packet = [
+        {"id": "f1", "unit": "u1", "tier": "J", "language": "solidity", "file": "a.t.sol", "line": 1},
+        {"id": "f2", "unit": "u1", "tier": "J", "language": "solidity", "file": "a.t.sol", "line": 2},
+        {"id": "f3", "unit": "u1", "tier": "J", "language": "solidity", "file": "a.t.sol", "line": 3},
+    ]
+    ai = [
+        {"id": "f1", "reader": "A", "label": "true-positive", "rule": "RG01"},
+        {"id": "f1", "reader": "B", "label": "true-positive", "rule": "RG01"},
+        {"id": "f2", "reader": "A", "label": "true-positive", "rule": "RG01"},
+        {"id": "f2", "reader": "B", "label": "true-positive", "rule": "RG01"},
+        {"id": "f3", "reader": "A", "label": "false-positive", "rule": "RG01"},
+        {"id": "f3", "reader": "B", "label": "false-positive", "rule": "RG01"},
+    ]
+    human_tiny = {"f1": "true-positive", "f2": "false-positive", "f3": "false-positive"}
+    resolved = resolve_ai(ai)
+    tiny_pairs = [(resolved[r["id"]]["label"], human_tiny[r["id"]]) for r in packet]
+    tiny = kappa(tiny_pairs)
+    tiny_cell = cell([human_tiny[r["id"]] for r in packet])
+    packet_ok = (
+        tiny["kappa"] == 0.4
+        and tiny["n"] == 3
+        and tiny_cell["status"] == "count"
+        and tiny_cell["tp"] == 1
+        and tiny_cell["fp"] == 2
+    )
+    ok = kappa_ok and wilson_ok and count_ok and unclear_ok and packet_ok
     print(
-        "self-test: kappa={:.4f} raw={:.4f} wilson7/10={} wilson5/5={} cells={} {}".format(
+        "self-test: kappa={:.4f} raw={:.4f} wilson7/10={} wilson5/5={} cells={} packet={} {}".format(
             got["kappa"] or 0.0,
             got["raw_agreement"] or 0.0,
             w1,
             w2,
             count_ok and unclear_ok,
+            packet_ok,
             "ok" if ok else "FAIL",
         )
     )
