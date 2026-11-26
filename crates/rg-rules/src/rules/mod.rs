@@ -55,6 +55,19 @@ pub struct Ctx<'p, 'a> {
     pub switches: Vec<(usize, &'p Expr)>,
     /// The file the test function is written in.
     pub test_unit: usize,
+    /// The RG-A1 program model of `--model-target`, when one was supplied.
+    /// RG02 and RG03 read the authority an entry point requires from it;
+    /// without one they read names and the test's own grant data.
+    pub program: Option<&'a rg_program::ProgramModel>,
+}
+
+/// What the program model says an external call requires of its caller.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ModelGate {
+    /// `onlyOwner`, `onlyRole(..)`, or a `msg.sender` check the model names.
+    Gated,
+    /// The model resolved the function and it requires no caller authority.
+    Ungated,
 }
 
 /// The whole-file fact a rule needs, computed once per suite.
@@ -65,6 +78,79 @@ pub fn fee_concession(source: &str) -> bool {
 impl<'p> Ctx<'p, '_> {
     pub fn op_unit(&self, i: usize) -> usize {
         self.trace.ops[i].unit
+    }
+
+    /// What the program model says the external call at op `i` requires,
+    /// when a model was supplied and it resolves the function without doubt.
+    /// The receiver's contract type picks the contract; when the test does
+    /// not say it, the function name must resolve the same way in every
+    /// contract that defines it. An `Unknown` authority, or a disagreement
+    /// between candidates, is no answer.
+    pub fn model_gate(&self, i: usize) -> Option<ModelGate> {
+        let model = self.program?;
+        let call = self.trace.ops.get(i)?.call()?;
+        if call.class != CallClass::External || call.method.is_empty() {
+            return None;
+        }
+        let contract = call.receiver.and_then(|r| {
+            let k = key(r);
+            self.env
+                .deployed_type(&k)
+                .or_else(|| self.env.type_of(&k).map(str::to_string))
+        });
+        let solidity = || {
+            model
+                .programs
+                .iter()
+                .filter(|p| p.language == rg_program::Language::Solidity)
+        };
+        let named = |name: &str| -> Vec<&rg_program::EntryPoint> {
+            solidity()
+                .filter(|p| p.name == name)
+                .flat_map(|p| p.entry_points.iter())
+                .filter(|e| e.name == call.method)
+                .collect()
+        };
+        let mut candidates: Vec<&rg_program::EntryPoint> = Vec::new();
+        if let Some(t) = &contract {
+            candidates = named(t);
+            // `IVault vault`: the interface's implementation, by convention.
+            if candidates.is_empty()
+                && let Some(rest) = t.strip_prefix('I')
+                && rest.starts_with(|c: char| c.is_ascii_uppercase())
+            {
+                candidates = named(rest);
+            }
+        }
+        if candidates.is_empty() {
+            candidates = solidity()
+                .flat_map(|p| p.entry_points.iter())
+                .filter(|e| e.name == call.method)
+                .collect();
+        }
+        let mut answer: Option<ModelGate> = None;
+        for entry in candidates {
+            if entry.authorities.iter().any(rg_program::Authority::is_unknown) {
+                return None;
+            }
+            let gate = if entry.authorities.iter().any(|a| {
+                matches!(
+                    a,
+                    rg_program::Authority::Owner { .. }
+                        | rg_program::Authority::Role { .. }
+                        | rg_program::Authority::Signer { .. }
+                )
+            }) {
+                ModelGate::Gated
+            } else {
+                ModelGate::Ungated
+            };
+            match answer {
+                Some(seen) if seen != gate => return None,
+                _ => answer = Some(gate),
+            }
+        }
+        answer
     }
 
     pub fn sender_key(&self, i: usize) -> Option<String> {
@@ -145,6 +231,18 @@ pub fn check_test<'p>(
     env: &Env<'p>,
     fee_concession: bool,
 ) -> Vec<Raw> {
+    check_test_with(project, suite, trace, env, fee_concession, None)
+}
+
+/// [`check_test`] with the RG-A1 program model of `--model-target`.
+pub fn check_test_with<'p>(
+    project: &'p Project,
+    suite: &Suite<'p>,
+    trace: &Trace<'p>,
+    env: &Env<'p>,
+    fee_concession: bool,
+    program: Option<&rg_program::ProgramModel>,
+) -> Vec<Raw> {
     let (senders, switches) = replay_senders(trace);
     let test_unit = suite.linear[trace.test_pos].unit;
     let ctx = Ctx {
@@ -156,6 +254,7 @@ pub fn check_test<'p>(
         senders,
         switches,
         test_unit,
+        program,
     };
     let mut out = Vec::new();
     privilege::attacker_holds_privilege(&ctx, &mut out);

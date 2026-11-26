@@ -42,8 +42,9 @@ pub struct Options {
     /// does not run.
     pub citations: Option<crate::cite::Index>,
     /// The RG-A1 program model of `--model-target`, when one was supplied.
-    /// The Solana rules read entry-point authorities from it; without one they
-    /// read the test's own grant data and never guess.
+    /// The Solana rules and the Solidity RG02/RG03 read entry-point
+    /// authorities from it; without one they read the test's own grant data
+    /// and names, and never guess.
     pub program_model: Option<rg_program::ProgramModel>,
 }
 
@@ -192,7 +193,14 @@ pub fn analyze(
                 env.declared_privileged = d.decl.privileged_identities().collect();
                 env.deployment_evidence = d.decl.deployment_names().collect();
             }
-            for raw in rules::check_test(project, &suite, &tr, &env, fee_concession) {
+            for raw in rules::check_test_with(
+                project,
+                &suite,
+                &tr,
+                &env,
+                fee_concession,
+                opts.program_model.as_ref(),
+            ) {
                 add(
                     raw,
                     &suite.contract.name,
