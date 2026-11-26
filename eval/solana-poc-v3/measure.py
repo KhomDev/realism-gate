@@ -13,7 +13,12 @@ Rules fixed by the preregistration:
 - n < 5 is a count, never a rate;
 - Wilson 95% (z = 1.959964) per cell; pooled cells also get a source-clustered
   bootstrap (10,000 draws, committed seed);
-- no pooling across languages or binaries: the caller passes one run.
+- no pooling across languages, corpora or binaries: the caller passes one
+  run, and `--corpus` fixes the language vocabulary that run may carry.
+
+`--corpus` defaults to `solana-v3`; `solidity-v1` uses the same statistics
+with the Solidity language vocabulary. A flags file carrying a language from
+the other corpus is refused (never pool Solana with Solidity).
 
 Usage:
   python eval/solana-poc-v3/measure.py --flags <run>/flags.jsonl --labels <labels.jsonl> \
@@ -32,10 +37,15 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent.parent
+
+sys.path.insert(0, str(ROOT / "eval"))
+import p2r_corpora  # noqa: E402
+
 Z = 1.959964
 SEED = "p2r-bootstrap-2026-11-25"
 DRAWS = 10_000
-LANGUAGES = ("rust", "typescript", "javascript", "solidity", "other")
 LABELS = ("true-positive", "false-positive", "unclear")
 
 
@@ -127,13 +137,17 @@ def bootstrap(rows: list[dict], draws: int, seed: str) -> dict | None:
 
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--corpus", default="solana-v3", choices=p2r_corpora.names())
     ap.add_argument("--flags", required=True)
     ap.add_argument("--labels", required=True)
     ap.add_argument("--measured", required=True)
     ap.add_argument("--results", required=True)
     ap.add_argument("--check", action="store_true")
     args = ap.parse_args(argv[1:])
+    corpus = p2r_corpora.get(args.corpus)
     flags = {f["id"]: f for f in load_jsonl(Path(args.flags))}
+    p2r_corpora.check_languages(corpus, list(flags.values()))
+    languages = corpus.cell_languages
     label_rows = load_jsonl(Path(args.labels))
 
     by_flag: dict[str, dict[str, dict]] = defaultdict(dict)
@@ -173,7 +187,7 @@ def main(argv: list[str]) -> int:
     measured_rules: dict[str, dict[str, dict]] = {}
     for rule in sorted(cells):
         measured_rules[rule] = {}
-        for language in LANGUAGES:
+        for language in languages:
             ids = cells[rule].get(language)
             if not ids:
                 measured_rules[rule][language] = {

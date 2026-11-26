@@ -6,9 +6,14 @@ snippet around the flag. Neither packet contains the rule's shipped severity or
 the other reader's labels; the only difference is the packet id. The readers
 write `labels.jsonl` rows: {id, reader, label, rule, reason}.
 
+`--corpus` selects the sealed corpus the run belongs to (default
+`solana-v3`). The packet content is language-neutral; the corpus only says
+where the inventory and the pin cache live and how a flag's file is found.
+A Solana run and a Solidity run are never mixed in one packet.
+
 Usage:
   python eval/solana-poc-v3/labels.py --run-dir <run> --out-dir labels/v1
-  python eval/solana-poc-v3/labels.py --run-dir <run> --check
+  python eval/solana-poc-v3/labels.py --corpus solidity-v1 --run-dir <run> --check
 """
 
 from __future__ import annotations
@@ -21,36 +26,22 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 CACHE = ROOT / ".corpus" / "solana-poc-v3"
-KNOWN_REPOS = {
-    "Frankcastleauditor/Solana-Audit-Arena": "Frankcastleauditor-Solana-Audit-Arena",
-    "Zolldyk/anchor-pinochio-security-template": "Zolldyk-anchor-pinochio-security-template",
-    "CodeHawks-Contests/2025-03-rustfund": "CodeHawks-Contests-2025-03-rustfund",
-}
 SNIPPET_BEFORE = 8
 SNIPPET_AFTER = 8
+
+sys.path.insert(0, str(ROOT / "eval"))
+import p2r_corpora  # noqa: E402
+
+# Kept for callers that imported the mapping; the registry is the source.
+KNOWN_REPOS = p2r_corpora.SOLANA_REPOS
 
 
 def load_jsonl(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
-def inventory() -> dict[str, dict]:
-    doc = json.loads((HERE / "inventory.json").read_text(encoding="utf-8"))
-    return {u["id"]: u for u in doc["units"]}
-
-
-def unit_file(unit: dict, flag: dict, run_dir: Path, cache: Path) -> Path | None:
-    extracted = run_dir / "extract" / unit["id"] / flag["file"]
-    if extracted.is_file():
-        return extracted
-    f = unit["files"][0]
-    if f.get("kind") == "repo-file":
-        dirname = KNOWN_REPOS.get(f["repo"])
-        if dirname:
-            p = cache / "repos" / dirname / flag["file"]
-            if p.is_file():
-                return p
-    return None
+def unit_file(unit: dict, flag: dict, run_dir: Path, cache: Path, corpus) -> Path | None:
+    return p2r_corpora.source_for_flag(corpus, run_dir, unit["id"], flag["file"], cache)
 
 
 def snippet(path: Path | None, line: int) -> tuple[str, str]:
@@ -71,23 +62,14 @@ def snippet(path: Path | None, line: int) -> tuple[str, str]:
 
 
 def rule_definition(rule: str) -> str:
-    p = ROOT / "docs" / "rules" / f"{rule}.md"
-    if not p.is_file():
-        return f"{rule}: definition not found"
-    lines = p.read_text(encoding="utf-8").splitlines()
-    out = []
-    for line in lines[:60]:
-        out.append(line)
-        if len(out) >= 40 and line.startswith("#"):
-            break
-    return "\n".join(out).strip()
+    return p2r_corpora.rule_definition(rule)
 
 
-def packet(flags: list[dict], inv: dict[str, dict], run_dir: Path, cache: Path, reader: str) -> list[dict]:
+def packet(flags: list[dict], inv: dict[str, dict], run_dir: Path, cache: Path, reader: str, corpus) -> list[dict]:
     rows = []
     for f in flags:
         unit = inv[f["unit"]]
-        path = unit_file(unit, f, run_dir, cache)
+        path = unit_file(unit, f, run_dir, cache, corpus)
         text, status = snippet(path, f["line"])
         rows.append({
             "packet": reader,
@@ -107,16 +89,20 @@ def packet(flags: list[dict], inv: dict[str, dict], run_dir: Path, cache: Path, 
 
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--corpus", default="solana-v3", choices=p2r_corpora.names())
     ap.add_argument("--run-dir", required=True)
     ap.add_argument("--out-dir", default=None)
-    ap.add_argument("--cache", default=str(CACHE))
+    ap.add_argument("--cache", default=None)
     ap.add_argument("--check", action="store_true")
     args = ap.parse_args(argv[1:])
+    corpus = p2r_corpora.get(args.corpus)
+    cache = Path(args.cache) if args.cache else corpus.cache
     run_dir = Path(args.run_dir)
     flags = load_jsonl(run_dir / "sample.jsonl")
-    inv = inventory()
-    a = packet(flags, inv, run_dir, Path(args.cache), "A")
-    b = packet(flags, inv, run_dir, Path(args.cache), "B")
+    p2r_corpora.check_languages(corpus, flags)
+    inv = corpus.units()
+    a = packet(flags, inv, run_dir, cache, "A", corpus)
+    b = packet(flags, inv, run_dir, cache, "B", corpus)
     if [r["id"] for r in a] != [r["id"] for r in b]:
         raise SystemExit("packets differ in flags")
     if args.check:
