@@ -88,6 +88,14 @@ def sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def sha_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def load_json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -323,6 +331,11 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--split", default="DEV",
                     help="comma-separated slices to touch (default DEV). V1/V2/FINAL "
                          "are opened only by a frozen round run.")
+    ap.add_argument("--round", default=None,
+                    help="round id; required with --version and --binary-sha256 "
+                         "before a sealed slice may be touched")
+    ap.add_argument("--binary-sha256", default=None,
+                    help="expected sha256 of BINARY; required for a sealed slice")
     ap.add_argument("--check", action="store_true")
     args = ap.parse_args(argv[1:])
     cache = Path(args.cache).resolve()
@@ -331,6 +344,17 @@ def main(argv: list[str]) -> int:
     units = [u for u in inv["units"] if (u.get("split") or "").upper() in wanted]
     if not units:
         raise SystemExit(f"no units in split {sorted(wanted)}")
+    if wanted & {"V1", "V2", "FINAL"}:
+        missing = [name for name, value in (
+            ("--round", args.round),
+            ("--version", args.version if args.version != "unfrozen" else None),
+            ("--binary-sha256", args.binary_sha256),
+        ) if not value]
+        if missing:
+            raise SystemExit(
+                f"refusing to touch sealed slice(s) {sorted(wanted & {'V1', 'V2', 'FINAL'})}: "
+                f"{', '.join(missing)} required (round protocol, section 8)"
+            )
     if args.check:
         bad = 0
         tmp = cache / "extract-check"
@@ -347,6 +371,11 @@ def main(argv: list[str]) -> int:
     if not args.binary:
         ap.error("BINARY is required unless --check")
     binary = str(Path(args.binary).resolve())
+    binary_sha = sha_file(Path(binary))
+    if args.binary_sha256 and binary_sha != args.binary_sha256:
+        raise SystemExit(
+            f"binary sha256 {binary_sha} != --binary-sha256 {args.binary_sha256}"
+        )
     out_dir = (Path(args.out_dir) if args.out_dir else cache / f"run-{args.version}").resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     rows, flags = [], []
@@ -362,8 +391,24 @@ def main(argv: list[str]) -> int:
     poc = [f for f in flags if f["tier"] in ("J", "X")]
     write_jsonl(out_dir / "sample.jsonl", sample(SEED, poc))
     readable = sum(r["readable"] for r in rows)
+    meta = {
+        "schema": "realism-gate.solana-poc-run/v3",
+        "version": args.version,
+        "round": args.round,
+        "binary": binary,
+        "binary_sha256": binary_sha,
+        "split": sorted(wanted),
+        "units": len(rows),
+        "readable": readable,
+        "flags": len(flags),
+        "sampled": len(sample(SEED, poc)),
+        "seed": SEED,
+    }
+    (out_dir / "meta.json").write_text(
+        json.dumps(meta, indent=1, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
+    )
     print(f"{len(rows)} units, {readable} readable, {len(flags)} flags, "
-          f"{len(sample(SEED, poc))} sampled -> {out_dir}")
+          f"{len(sample(SEED, poc))} sampled, binary {binary_sha[:8]} -> {out_dir}")
     return 0
 
 
