@@ -3,9 +3,10 @@
 
 The packet is produced only for a sample that exists: `sample.jsonl` in the
 run directory, written by `run.py`. Each flag appears with its unit, tier,
-file and a code snippet. The packet deliberately carries **no rule, no shipped
-severity and no other reader's label**: a human reader judges the code, not
-the rule's claim.
+rule, the rule's claim (the finding message), the rule definition and a code
+snippet. The packet deliberately carries **no shipped severity and no other
+reader's label**, so the human judges the same proposition the AI readers did
+without knowing how the rule ships or how the others voted.
 
 Outputs (under `--out-dir`, default `<run>/human`):
   HUMAN_PACKET.md      the human-facing packet, snippets in fenced blocks
@@ -33,7 +34,10 @@ import p2r_corpora  # noqa: E402
 
 SNIPPET_BEFORE = 8
 SNIPPET_AFTER = 8
-BLIND_FIELDS = {"rule", "severity", "label", "reader", "reason", "rule_definition"}
+# Severity and other readers' judgements are blind; the rule and its claim are
+# not. v2's human packet showed the rule and told the reader to open the rule
+# page, and the AI readers see both.
+BLIND_FIELDS = {"severity", "label", "reader", "reason"}
 FENCE = {"rust": "rust", "typescript": "ts", "javascript": "js", "solidity": "solidity", "other": ""}
 
 
@@ -75,6 +79,9 @@ def packet_rows(corpus, run_dir: Path, cache: Path) -> list[dict]:
             "id": flag["id"],
             "unit": flag["unit"],
             "tier": flag["tier"],
+            "rule": flag["rule"],
+            "message": flag.get("message", ""),
+            "rule_definition": p2r_corpora.rule_definition(flag["rule"]),
             "language": flag["language"],
             "file": flag["file"],
             "line": flag["line"],
@@ -93,9 +100,12 @@ def markdown(corpus_name: str, rows: list[dict]) -> str:
         f"# Human labelling packet — {corpus_name}",
         "",
         "This packet was produced from a frozen run's sampled flags, before any",
-        "FINAL labels were revealed. It is **blind**: it does not name the rule,",
-        "the rule's shipped severity, or another reader's label. The snippets are",
-        "the exact files the frozen binary read; the line numbers are theirs.",
+        "FINAL labels were revealed. It is **blind** to the rule's shipped",
+        "severity and to every reader's label. Each flag names its rule and the",
+        "rule's own claim, so the human judges the same proposition the AI",
+        "readers did. Read the rule's page in `docs/rules/` before deciding.",
+        "The snippets are the exact files the frozen binary read; the line",
+        "numbers are theirs.",
         "",
         "## How to label",
         "",
@@ -127,10 +137,13 @@ def markdown(corpus_name: str, rows: list[dict]) -> str:
     ]
     for row in rows:
         fence = FENCE.get(row["language"], "")
-        lines.append(f"### `{row['id']}` — unit `{row['unit']}` ({row['tier']})")
+        lines.append(f"### `{row['id']}` — {row['rule']} — unit `{row['unit']}` ({row['tier']})")
         lines.append("")
-        lines.append(f"`{row['file']}:{row['line']}`")
+        lines.append(f"`{row['file']}:{row['line']}` · rule page `docs/rules/{row['rule']}.md`")
         lines.append("")
+        if row.get("message"):
+            lines.append(f"> {row['message']}")
+            lines.append("")
         if row["snippet_status"] != "ok":
             lines.append(f"snippet: {row['snippet_status']}")
             lines.append("")
