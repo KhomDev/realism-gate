@@ -8,6 +8,27 @@ may change in any minor release.
 
 ## [Unreleased]
 
+### Added (P2)
+
+- **Program model (RG-A1).** `check --dump-program DIR` reads a protocol
+  working tree and reports, per entry point, the authority it requires
+  (`Signer(account)`, `Role(name)`, `Owner`, `None`, `Unknown(reason)`) with
+  source spans. Anchor `#[derive(Accounts)]` constructs, native `is_signer` /
+  owner / key checks and Solidity modifiers and body guards are resolved; an
+  IDL fills gaps but the source wins and records the conflict; a resolution
+  failure is `Unknown`, never a guess. The model reads only the target tree.
+- **Exploit model (RG-A2).** Actors carry provenance (generated, loaded,
+  derived PDA, funded, granted, deployer); steps carry program, entry point,
+  signers, a separate payer and the required authority; mutations, assertions
+  and data-dependency phases are recorded, with position only a tiebreaker.
+  An authority over an account the attacker created or funded is
+  attacker-owned, and a payer is never a role signer. `--dump-model FILE`
+  writes the model deterministically with no absolute paths;
+  `--model-target DIR` supplies the protocol checkout the rules read.
+  On the opened v2 corpus the model removes all 28 RG02 and 8 RG03 false
+  positives with no other rule moved and readability unchanged (in-sample;
+  not a fresh precision claim).
+
 ### Changed (build)
 
 - **The crate is a Cargo workspace.** `rg-ir`, `rg-frontend-sol`,
