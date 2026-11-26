@@ -216,3 +216,19 @@ Hats 2 (0.24%), Sherlock bounty 1 (0.12%), platform unstated 1 (0.12%); total 84
 
 `python -I eval/solidity-poc-v2/build_inventory.py --check` → `inventory.json ok`;
 `python -I eval/solidity-poc-v2/fetch.py --check` → `all 369 unit pins verified (offline)`.
+
+## Correction 2026-11-26 (orchestrator verification of `26b076e`)
+
+Defect: `report_sha256` hashed the Windows working-tree README, which `core.autocrlf=true`
+had converted to CRLF, so 309 of 322 Sherlock pins were host-dependent (the 13 CRLF-upstream
+reports matched by accident). Fix: the builder and `fetch.py` now read the git blob at the
+pinned commit (`git cat-file blob <commit>:README.md`, no eol filters); the hash is of the blob
+bytes, and the text is newline-normalised before parsing (as the former universal-newline
+read did). Effect: 309 `report_sha256` values changed; no unit id, membership, selected block
+index, `block_sha256` or split changed (`norm_hash` already strips `\r`). Proof: all 97
+distinct report pins equal the sha256 of the raw upstream bytes
+(`raw.githubusercontent.com/<repo>/<commit>/README.md`, 97/97), and fresh
+`git -c core.autocrlf=false` clones of smilee-finance and gmx reproduce their pins.
+learn-evm-attacks `sha256_norm` is now computed from the blob too (values unchanged).
+Dacian page: page bytes are dynamic and are no longer a pin; `block_sha256` is the pin, and a
+fresh fetch on 2026-11-26 reproduces it (block 3, `10ae36ec…`). Online `fetch.py` re-checks it.

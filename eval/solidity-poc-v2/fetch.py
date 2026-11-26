@@ -83,6 +83,15 @@ def fetch(doc: dict) -> None:
             f"{pin['repo'].replace('github.com', 'raw.githubusercontent.com')}/{pin['commit']}/{pin['path']}"
         p.write_bytes(get(url))
     del heads
+    # Dynamic pages: re-fetch and require the pinned block hash to reproduce.
+    for w in B.WRITEUPS:
+        if w["pin"]["kind"] != "page-pre-block":
+            continue
+        fresh = get(w["pin"]["url"]).decode("utf-8", errors="replace")
+        sel = B.select_sol_block(B.page_markdown(fresh))
+        want = next(u for u in doc["units"] if u["id"] == w["id"])["files"][0]["block_sha256"]
+        if sel is None or B.norm_hash(sel["code"]) != want:
+            raise SystemExit(f"{w['id']}: the live page no longer reproduces block_sha256")
 
 
 def verify(doc: dict) -> list[str]:
@@ -103,7 +112,7 @@ def verify(doc: dict) -> list[str]:
             h = git("-C", str(d), "rev-parse", "HEAD")
             if h.returncode != 0 or h.stdout.strip() != f["commit"]:
                 errors.append(f"{u['id']}: judging checkout not at pinned commit")
-            elif hashlib.sha256((d / "README.md").read_bytes()).hexdigest() != f["report_sha256"]:
+            elif hashlib.sha256(B.git_blob(d, f["commit"], "README.md") or b"").hexdigest() != f["report_sha256"]:
                 errors.append(f"{u['id']}: report hash drift")
         elif f["kind"] == "repo-file":
             d = CACHE / "x" / "learn-evm-attacks"

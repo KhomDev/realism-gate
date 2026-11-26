@@ -100,19 +100,33 @@ def tsv(path: Path) -> dict[str, str]:
     return out
 
 
+def git_blob(repo: Path, commit: str, path: str) -> bytes | None:
+    """Raw blob bytes at commit:path (no eol/smudge filters), or None."""
+    import subprocess
+    if not re.fullmatch(r"[0-9a-f]{40}", commit or ""):
+        return None
+    out = subprocess.run(["git", "-C", str(repo), "cat-file", "blob", f"{commit}:{path}"],
+                         capture_output=True)
+    return out.stdout if out.returncode == 0 else None
+
+
 def sherlock_units(cb: dict) -> tuple[list[dict], list[dict]]:
     heads = tsv(CACHE / "meta" / "sherlock-judging-heads.tsv")
     bases = tsv(CACHE / "meta" / "sherlock-codebases.tsv")
     units: list[dict] = []
     screened: list[dict] = []
     for repo in sorted((CACHE / "sherlock").iterdir()):
-        rp = repo / "README.md"
         name = repo.name
-        if not rp.is_file():
+        # Hash and parse the git blob at the pinned commit, never the working
+        # tree: core.autocrlf would make working-tree bytes host-dependent.
+        blob = git_blob(repo, heads.get(name, ""), "README.md")
+        if blob is None:
             screened.append({"repo": name, "sections": 0, "taken": 0, "reason": "no README.md final report"})
             continue
-        text = rp.read_text(encoding="utf-8", errors="replace")
-        report_sha = hashlib.sha256(rp.read_bytes()).hexdigest()
+        # Newlines are normalised before parsing (as Python universal-newline
+        # reading did), so CRLF-upstream reports parse the same on every host.
+        text = blob.decode("utf-8", errors="replace").replace("\r\n", "\n").replace("\r", "\n")
+        report_sha = hashlib.sha256(blob).hexdigest()
         slug = name[: -len("-judging")] if name.endswith("-judging") else name
         commit = bases.get(slug, "MISSING")
         if re.fullmatch(r"[0-9a-f]{40}", commit):
@@ -240,7 +254,9 @@ def writeup_units() -> list[dict]:
             sel = select_sol_block(page_markdown(raw))
             if sel is None:
                 raise SystemExit(f"{w['id']}: no qualifying block")
-            pin.update({"page_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            # The page is dynamic HTML, so its bytes are not a pin; the
+            # selected block's normalised hash is the verified pin.
+            pin.update({"pin": "block_sha256 of the selected block (page bytes are dynamic)",
                         "block": sel["block"], "lang": sel["lang"],
                         "block_sha256": norm_hash(sel["code"])})
             kind = "test-fragment"
@@ -292,7 +308,7 @@ def learn_x_units() -> list[dict]:
                 "repo": LEARN_REPO,
                 "commit": commit,
                 "path": rel,
-                "sha256_norm": norm_hash(p.read_text(encoding="utf-8", errors="replace")),
+                "sha256_norm": norm_hash(git_blob(base, commit, rel).decode("utf-8", errors="replace")),
             }],
             "real_incident": True,
             "incident": Path(rel).parent.name,
