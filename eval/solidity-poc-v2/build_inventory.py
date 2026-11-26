@@ -1,0 +1,268 @@
+#!/usr/bin/env python3
+"""Builds eval/solidity-poc-v2/inventory.json from the pinned cache.
+
+Additive to eval/solidity-poc-v1: v1 units and split assignments are never
+touched, and every v2 unit is deduped by content hash and by URL against every
+opened and sealed corpus under eval/.
+
+Units are pointers plus hashes; no third-party text is copied into the repo.
+The block selector is v1's `select_sol_block`, loaded from
+eval/solidity-poc-v1/build_inventory.py so the two corpora use one selector
+(content-based; the fence label is only recorded).
+
+J  Sherlock: one section of the judging repository's final report (README.md,
+   "# Issue H-n" / "# Issue M-n") is one judged finding group; duplicates are
+   never separate units. Only the issue body before "## Discussion" is read.
+   codebase_id points at the sherlock-audit/<contest> snapshot repo.
+J  Immunefi bounty write-ups (operator-supplied finder list, pointer only):
+   one write-up page with a complete Foundry/Hardhat test and a payout or
+   severity stated on the original page or the program's page.
+X  incident reproduction test files not in any opened corpus.
+
+Usage:
+  python -I eval/solidity-poc-v2/build_inventory.py
+  python -I eval/solidity-poc-v2/build_inventory.py --check
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import importlib.util
+import json
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent.parent
+HERE = ROOT / "eval" / "solidity-poc-v2"
+CACHE = ROOT / ".corpus" / "solidity-poc-v2"
+SALT = "rg-solidity-v2-salt-bb3d119768be2a49b8417195654a5d66"
+
+_spec = importlib.util.spec_from_file_location(
+    "solidity_v1_builder", ROOT / "eval" / "solidity-poc-v1" / "build_inventory.py")
+V1 = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(V1)
+select_sol_block = V1.select_sol_block
+norm_hash = V1.norm_hash
+
+SHER_SEC = re.compile(r"^# Issue ([HM])-(\d+): (.*?)$(.*?)(?=^# Issue [HM]-\d+:|\Z)", re.S | re.M)
+SOURCE = re.compile(r"^Source:\s*(https://github\.com/sherlock-audit/\S+/issues/\d+)", re.M)
+
+# Corpora whose units are opened or sealed; a v2 unit may not repeat any of
+# their content hashes or URLs.
+OPENED = [
+    "eval/corpus.json",
+    "eval/solana-poc/inventory.json", "eval/solana-poc/corpus.json",
+    "eval/solana-poc-v2/inventory.json", "eval/solana-poc-v2/corpus.json",
+    "eval/solana-poc-v3/inventory.json",
+    "eval/solidity-poc-v1/inventory.json",
+    "eval/near-poc-v1/inventory.json", "eval/near-poc-v1/corpus.json",
+]
+HEX64 = re.compile(r"^[0-9a-f]{64}$")
+
+
+def split_of(uid: str) -> str:
+    n = int(hashlib.sha256((SALT + "|" + uid).encode("utf-8")).hexdigest()[:8], 16) % 100
+    return "DEV" if n < 40 else "V1" if n < 60 else "V2" if n < 75 else "FINAL"
+
+
+def opened_index() -> tuple[set[str], set[str]]:
+    hashes: set[str] = set()
+    urls: set[str] = set()
+
+    def walk(x, key=""):
+        if isinstance(x, dict):
+            for k, v in x.items():
+                walk(v, k)
+        elif isinstance(x, list):
+            for v in x:
+                walk(v, key)
+        elif isinstance(x, str):
+            if HEX64.match(x) and key != "salt":
+                hashes.add(x)
+            elif x.startswith("http") and ("url" in key.lower() or key in ("repo", "repository")):
+                urls.add(x.rstrip("/"))
+
+    for rel in OPENED:
+        p = ROOT / rel
+        if p.is_file():
+            walk(json.loads(p.read_text(encoding="utf-8")))
+    return hashes, urls
+
+
+def tsv(path: Path) -> dict[str, str]:
+    out = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if "\t" in line:
+            k, v = line.split("\t", 1)
+            out[k.strip()] = v.strip()
+    return out
+
+
+def sherlock_units(cb: dict) -> tuple[list[dict], list[dict]]:
+    heads = tsv(CACHE / "meta" / "sherlock-judging-heads.tsv")
+    bases = tsv(CACHE / "meta" / "sherlock-codebases.tsv")
+    units: list[dict] = []
+    screened: list[dict] = []
+    for repo in sorted((CACHE / "sherlock").iterdir()):
+        rp = repo / "README.md"
+        name = repo.name
+        if not rp.is_file():
+            screened.append({"repo": name, "sections": 0, "taken": 0, "reason": "no README.md final report"})
+            continue
+        text = rp.read_text(encoding="utf-8", errors="replace")
+        report_sha = hashlib.sha256(rp.read_bytes()).hexdigest()
+        slug = name[: -len("-judging")] if name.endswith("-judging") else name
+        commit = bases.get(slug, "MISSING")
+        if re.fullmatch(r"[0-9a-f]{40}", commit):
+            cb[slug] = {"repo": f"https://github.com/sherlock-audit/{slug}", "commit": commit,
+                        "source": "sherlock-contest-snapshot"}
+        n_sec = n_take = 0
+        for m in SHER_SEC.finditer(text):
+            n_sec += 1
+            sev, num, title, rest = m.group(1), m.group(2), m.group(3).strip(), m.group(4)
+            body = rest.split("\n## Discussion", 1)[0]
+            sm = SOURCE.search(body)
+            sel = select_sol_block(body)
+            if sel is None:
+                continue
+            n_take += 1
+            sev_word = "High" if sev == "H" else "Medium"
+            uid = f"J-sherlock-{slug}-{sev}{num}"
+            units.append({
+                "id": uid,
+                "source": "sherlock-" + slug,
+                "platform": "sherlock",
+                "tier": "J",
+                "kind": "test-fragment",
+                "files": [{
+                    "kind": "sherlock-report-section-block",
+                    "repo": f"https://github.com/sherlock-audit/{name}",
+                    "commit": heads.get(name),
+                    "path": "README.md",
+                    "report_sha256": report_sha,
+                    "section": f"{sev}-{num}",
+                    "issue_url": sm.group(1) if sm else None,
+                    "block": sel["block"],
+                    "lang": sel["lang"],
+                    "fence_label": sel["fence_label"],
+                    "block_sha256": norm_hash(sel["code"]),
+                }],
+                "outcome": "valid",
+                "severity": sev_word,
+                "severity_title": None,
+                "severity_conflict": False,
+                "severity_source": "report-section-heading",
+                "outcome_source": "sherlock-final-report",
+                "outcome_evidence": f'Judging repo final report heading "Issue {sev}-{num}"',
+                "outcome_url": sm.group(1) if sm else f"https://github.com/sherlock-audit/{name}",
+                "group_id": None,
+                "group_size": 1,
+                "duplicate_of": None,
+                "codebase_id": slug if slug in cb else None,
+                "license": "none",
+                "unlicensed": True,
+            })
+        screened.append({"repo": name, "sections": n_sec, "taken": n_take})
+    return units, screened
+
+
+def extra_units(cb: dict) -> list[dict]:
+    """Units recorded by hand in units_extra.json (pointer + hash), verified by fetch.py."""
+    p = HERE / "units_extra.json"
+    if not p.is_file():
+        return []
+    doc = json.loads(p.read_text(encoding="utf-8"))
+    for k, v in (doc.get("codebases") or {}).items():
+        cb[k] = v
+    return doc.get("units", [])
+
+
+def main(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--check", action="store_true")
+    args = ap.parse_args(argv[1:])
+    cb: dict = {}
+    sher, screened = sherlock_units(cb)
+    units = sher + extra_units(cb)
+    ids = [u["id"] for u in units]
+    if len(ids) != len(set(ids)):
+        raise SystemExit("duplicate unit ids")
+    op_hash, op_url = opened_index()
+    seen: dict[str, str] = {}
+    for u in units:
+        f = u["files"][0]
+        key = f.get("block_sha256") or f.get("sha256_norm")
+        u["dedupe_key"] = key
+        url = (f.get("issue_url") or f.get("url") or "").rstrip("/")
+        if key in op_hash:
+            u["opened_duplicate"] = "content hash present in an opened/sealed corpus"
+        elif url and url in op_url:
+            u["opened_duplicate"] = "source URL present in an opened/sealed corpus"
+        if key in seen:
+            u["content_duplicate_of"] = seen[key]
+        else:
+            seen[key] = u["id"]
+        u["split"] = split_of(u["id"])
+    counted = [u for u in units if "content_duplicate_of" not in u and "opened_duplicate" not in u]
+    by_tier: dict[str, int] = {}
+    for u in counted:
+        by_tier[u["tier"]] = by_tier.get(u["tier"], 0) + 1
+    j = [u for u in counted if u["tier"] == "J" and u.get("duplicate_of") is None]
+    j_by_platform: dict[str, int] = {}
+    j_by_source: dict[str, int] = {}
+    for u in j:
+        j_by_platform[u["platform"]] = j_by_platform.get(u["platform"], 0) + 1
+        j_by_source[u["source"]] = j_by_source.get(u["source"], 0) + 1
+    v1 = json.loads((ROOT / "eval" / "solidity-poc-v1" / "inventory.json").read_text(encoding="utf-8"))
+    v1_plat = dict(v1["counts"]["J_by_platform"])
+    comb = dict(v1_plat)
+    for k, v in j_by_platform.items():
+        comb[k] = comb.get(k, 0) + v
+    comb_total = sum(comb.values())
+    split_counts = {}
+    for t in sorted(by_tier):
+        split_counts[t] = {s: len([u for u in counted if u["tier"] == t and u["split"] == s])
+                           for s in ("DEV", "V1", "V2", "FINAL")}
+    doc = {
+        "schema": "realism-gate.solidity-poc-inventory/v2",
+        "date": "2026-11-26",
+        "salt": SALT,
+        "split_rule": "int(sha256(salt + '|' + unit_id)[:8], 16) % 100: 0-39 DEV, 40-59 V1, 60-74 V2, 75-99 FINAL",
+        "tiers": ["J", "X", "N", "A", "AJ"],
+        "unit_rule": ("J: one Sherlock final-report section (one judged finding group) or one bounty write-up; "
+                      "duplicate submissions are never separate units. X: one incident test file. "
+                      "A/AJ: separate cells, never pooled (Amendment 2)."),
+        "selector": "eval/solidity-poc-v1/build_inventory.py select_sol_block (content-based)",
+        "codebases": dict(sorted(cb.items())),
+        "units": units,
+        "screened": {"sherlock": screened},
+        "counts": {
+            "units": len(units),
+            "excluded_duplicates": len(units) - len(counted),
+            "counted_by_tier": dict(sorted(by_tier.items())),
+            "split_by_tier": split_counts,
+            "J_by_platform": dict(sorted(j_by_platform.items())),
+            "J_sources": len(j_by_source),
+            "J_max_source_pct": round(100.0 * max(j_by_source.values()) / len(j), 2) if j else 0,
+            "J_platform_share_v1_plus_v2_pct": {k: round(100.0 * v / comb_total, 2) for k, v in sorted(comb.items())},
+            "J_v1_plus_v2_total": comb_total,
+            "J_codebase_pinned": sum(1 for u in j if u.get("codebase_id")),
+        },
+    }
+    text = json.dumps(doc, indent=2, ensure_ascii=False) + "\n"
+    out = HERE / "inventory.json"
+    if args.check:
+        if out.read_text(encoding="utf-8") != text:
+            print("inventory.json does not match the builder and the cache", file=sys.stderr)
+            return 1
+        print("inventory.json ok")
+        return 0
+    out.write_text(text, encoding="utf-8", newline="\n")
+    print(json.dumps(doc["counts"], indent=1))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

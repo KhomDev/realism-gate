@@ -2,8 +2,587 @@
   "schema": "realism-gate.solana-poc-inventory/v4",
   "date": "2026-11-26",
   "salt": "rg-solana-v4-salt-d43343efde75d096d1005d85de7aef82",
+  "collected": "2026-11-26",
   "split_rule": "int(sha256(salt + '|' + unit_id)[:8], 16) % 100: 0-39 DEV, 40-59 V1, 60-74 V2, 75-99 FINAL",
-  "tiers": ["J", "X", "N", "A", "AJ"],
-  "units": [],
-  "status": "scaffold: salt committed before any unit is collected"
+  "tiers": [
+    "J",
+    "X",
+    "N",
+    "A",
+    "AJ"
+  ],
+  "selector": "eval/solana-poc-v3/build_inventory.py select_block (content-based)",
+  "kinds": {
+    "test-fragment": "a block (issue, report or PDF PoC span) meant to be added to an existing test"
+  },
+  "units": [
+    {
+      "id": "J-c4-lavarage-2",
+      "source": "code4rena-lavarage",
+      "platform": "code4rena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "repo": "code-423n4/2024-04-lavarage-findings",
+          "issue": 2,
+          "url": "https://github.com/code-423n4/2024-04-lavarage-findings/issues/2",
+          "body_sha256": "1b0f3a1a1cb53dfeb231fc51b1af061bfd662f29f9e5e3bfe63c0c58ee5bf32e",
+          "block": 5,
+          "lang": "typescript",
+          "fence_label": "typescript",
+          "block_sha256": "966480af9f058844802910459690eae6ad943a60e6d65536cc986553c1605637"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "QA",
+      "severity_title": null,
+      "severity_conflict": false,
+      "severity_source": "issue-label",
+      "outcome_source": "code4rena-judge-labels",
+      "outcome_evidence": "Judge labels: bug, downgraded by judge, grade-a, primary issue, QA (Quality Assurance), satisfactory, sponsor confirmed, edited-by-warden, Q-05",
+      "outcome_url": "https://github.com/code-423n4/2024-04-lavarage-findings/issues/2",
+      "model_target": {
+        "repo": "https://github.com/code-423n4/2024-04-lavarage",
+        "commit": null,
+        "note": "sponsor snapshot repository returns 'Repository not found' on 2026-11-26"
+      },
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "966480af9f058844802910459690eae6ad943a60e6d65536cc986553c1605637",
+      "group_id": "lavarage-2",
+      "group_size": 1,
+      "duplicate_of": null,
+      "split": "DEV"
+    },
+    {
+      "id": "J-c4-lavarage-13",
+      "source": "code4rena-lavarage",
+      "platform": "code4rena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "repo": "code-423n4/2024-04-lavarage-findings",
+          "issue": 13,
+          "url": "https://github.com/code-423n4/2024-04-lavarage-findings/issues/13",
+          "body_sha256": "d44430b0214d437d2eac85094fa5f4fdbaf3eb096afbc74fb72678e07c34f4dd",
+          "block": 2,
+          "lang": "typescript",
+          "fence_label": "typescript",
+          "block_sha256": "22b77fd23f74907446b541763812e9a4dbb51f177ce80fa09c7d9fb0a4c76785"
+        }
+      ],
+      "outcome": "duplicate",
+      "severity": "High",
+      "severity_title": null,
+      "severity_conflict": false,
+      "severity_source": "issue-label",
+      "outcome_source": "code4rena-judge-labels",
+      "outcome_evidence": "Judge labels: bug, 3 (High Risk), satisfactory, duplicate-26",
+      "outcome_url": "https://github.com/code-423n4/2024-04-lavarage-findings/issues/13",
+      "model_target": {
+        "repo": "https://github.com/code-423n4/2024-04-lavarage",
+        "commit": null,
+        "note": "sponsor snapshot repository returns 'Repository not found' on 2026-11-26"
+      },
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "22b77fd23f74907446b541763812e9a4dbb51f177ce80fa09c7d9fb0a4c76785",
+      "group_id": "lavarage-26",
+      "group_size": 2,
+      "duplicate_of": "J-c4-lavarage-26",
+      "split": "V1"
+    },
+    {
+      "id": "J-c4-lavarage-16",
+      "source": "code4rena-lavarage",
+      "platform": "code4rena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "repo": "code-423n4/2024-04-lavarage-findings",
+          "issue": 16,
+          "url": "https://github.com/code-423n4/2024-04-lavarage-findings/issues/16",
+          "body_sha256": "0768398c0c6dcb71e7b798e91f4bc147661a5628f0248755f584eb9dfe2312cc",
+          "block": 2,
+          "lang": "typescript",
+          "fence_label": "typescript",
+          "block_sha256": "0b6fc0b44fc42cdcc0ecd57fbc3a592eadbb660c6eac3e5c20b5830f50a3e533"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "severity_title": null,
+      "severity_conflict": false,
+      "severity_source": "issue-label",
+      "outcome_source": "code4rena-judge-labels",
+      "outcome_evidence": "Judge labels: bug, 3 (High Risk), primary issue, satisfactory, selected for report, sponsor confirmed, edited-by-warden, H-02",
+      "outcome_url": "https://github.com/code-423n4/2024-04-lavarage-findings/issues/16",
+      "model_target": {
+        "repo": "https://github.com/code-423n4/2024-04-lavarage",
+        "commit": null,
+        "note": "sponsor snapshot repository returns 'Repository not found' on 2026-11-26"
+      },
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "0b6fc0b44fc42cdcc0ecd57fbc3a592eadbb660c6eac3e5c20b5830f50a3e533",
+      "group_id": "lavarage-16",
+      "group_size": 2,
+      "duplicate_of": null,
+      "split": "DEV"
+    },
+    {
+      "id": "J-c4-lavarage-25",
+      "source": "code4rena-lavarage",
+      "platform": "code4rena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "repo": "code-423n4/2024-04-lavarage-findings",
+          "issue": 25,
+          "url": "https://github.com/code-423n4/2024-04-lavarage-findings/issues/25",
+          "body_sha256": "5daa78f02616604f22242266c79da14276e0d0cd388d65f60dcfd89c45b39e6d",
+          "block": 1,
+          "lang": "typescript",
+          "fence_label": "ts",
+          "block_sha256": "cb7d843d89d7ffa0dcfddb1604f3e731c55d23860ed44c8e872b4330b168a3d9"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "QA",
+      "severity_title": null,
+      "severity_conflict": false,
+      "severity_source": "issue-label",
+      "outcome_source": "code4rena-judge-labels",
+      "outcome_evidence": "Judge labels: bug, downgraded by judge, grade-a, QA (Quality Assurance), satisfactory, sponsor confirmed, edited-by-warden",
+      "outcome_url": "https://github.com/code-423n4/2024-04-lavarage-findings/issues/25",
+      "model_target": {
+        "repo": "https://github.com/code-423n4/2024-04-lavarage",
+        "commit": null,
+        "note": "sponsor snapshot repository returns 'Repository not found' on 2026-11-26"
+      },
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "cb7d843d89d7ffa0dcfddb1604f3e731c55d23860ed44c8e872b4330b168a3d9",
+      "group_id": "lavarage-25",
+      "group_size": 1,
+      "duplicate_of": null,
+      "split": "V1"
+    },
+    {
+      "id": "J-c4-lavarage-26",
+      "source": "code4rena-lavarage",
+      "platform": "code4rena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "repo": "code-423n4/2024-04-lavarage-findings",
+          "issue": 26,
+          "url": "https://github.com/code-423n4/2024-04-lavarage-findings/issues/26",
+          "body_sha256": "12f214518d9e9342197fce436400d821b3a60b1334108fdca8564b3f1f2c8dc7",
+          "block": 0,
+          "lang": "typescript",
+          "fence_label": "ts",
+          "block_sha256": "bbf0ae3f40bf1140511a2f20d60622491f11bb4d42bfeea3c33bfbd49611152e"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "severity_title": null,
+      "severity_conflict": false,
+      "severity_source": "issue-label",
+      "outcome_source": "code4rena-judge-labels",
+      "outcome_evidence": "Judge labels: bug, 3 (High Risk), primary issue, satisfactory, selected for report, sponsor confirmed, H-01",
+      "outcome_url": "https://github.com/code-423n4/2024-04-lavarage-findings/issues/26",
+      "model_target": {
+        "repo": "https://github.com/code-423n4/2024-04-lavarage",
+        "commit": null,
+        "note": "sponsor snapshot repository returns 'Repository not found' on 2026-11-26"
+      },
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "bbf0ae3f40bf1140511a2f20d60622491f11bb4d42bfeea3c33bfbd49611152e",
+      "group_id": "lavarage-26",
+      "group_size": 2,
+      "duplicate_of": null,
+      "split": "V1"
+    },
+    {
+      "id": "J-c4-lavarage-28",
+      "source": "code4rena-lavarage",
+      "platform": "code4rena",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "issue-block",
+          "repo": "code-423n4/2024-04-lavarage-findings",
+          "issue": 28,
+          "url": "https://github.com/code-423n4/2024-04-lavarage-findings/issues/28",
+          "body_sha256": "3adfcb96a4bf4a07e66e11ab47e6010a125c1f56b36af9badc7942f44ef7860e",
+          "block": 1,
+          "lang": "typescript",
+          "fence_label": "ts",
+          "block_sha256": "44169306db6bb39a4e64e4513f228a8ebb1871583e538cccfa2b0bc2bb96b73d"
+        }
+      ],
+      "outcome": "duplicate",
+      "severity": "High",
+      "severity_title": null,
+      "severity_conflict": false,
+      "severity_source": "issue-label",
+      "outcome_source": "code4rena-judge-labels",
+      "outcome_evidence": "Judge labels: bug, 3 (High Risk), satisfactory, sponsor confirmed, duplicate-16",
+      "outcome_url": "https://github.com/code-423n4/2024-04-lavarage-findings/issues/28",
+      "model_target": {
+        "repo": "https://github.com/code-423n4/2024-04-lavarage",
+        "commit": null,
+        "note": "sponsor snapshot repository returns 'Repository not found' on 2026-11-26"
+      },
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "44169306db6bb39a4e64e4513f228a8ebb1871583e538cccfa2b0bc2bb96b73d",
+      "group_id": "lavarage-16",
+      "group_size": 2,
+      "duplicate_of": "J-c4-lavarage-16",
+      "split": "V1"
+    },
+    {
+      "id": "A-cantina-sf-multidelegator-3.1.2",
+      "source": "cantina-solana-foundation-multidelegator",
+      "platform": "cantina-private-review",
+      "tier": "A",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "pdf-poc-span",
+          "url": "https://cdn.cantina.xyz/reports/cantina_solana_foundation_mar2026.pdf",
+          "pdf_sha256": "a324c0dc2395da3e5ab67d7e90ce9e998bc0b629c3bb14d51262a5ba3aa8aea0",
+          "extractor": "pdftotext -layout (xpdf 4.06)",
+          "section": "3.1.2",
+          "lang": "rust",
+          "block_sha256": "fb1fe88e25d75e07eb66f1f3efeac02eb17c92e6a82fefccca9b665a603f00cb"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "severity_source": "report-section-heading",
+      "sponsor_status": "Fixed in PR 4.",
+      "outcome_source": "cantina-report",
+      "outcome_evidence": "Report section 3.1.2 under \"High\"; sponsor: Fixed in PR 4.; Cantina: Verified fix. This finding sha",
+      "outcome_url": "https://cdn.cantina.xyz/reports/cantina_solana_foundation_mar2026.pdf",
+      "model_target": {
+        "note": "report names commit 18a50bc2 of multi-delegator; repository not located"
+      },
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "fb1fe88e25d75e07eb66f1f3efeac02eb17c92e6a82fefccca9b665a603f00cb",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
+      "split": "DEV"
+    },
+    {
+      "id": "A-cantina-sf-multidelegator-3.1.3",
+      "source": "cantina-solana-foundation-multidelegator",
+      "platform": "cantina-private-review",
+      "tier": "A",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "pdf-poc-span",
+          "url": "https://cdn.cantina.xyz/reports/cantina_solana_foundation_mar2026.pdf",
+          "pdf_sha256": "a324c0dc2395da3e5ab67d7e90ce9e998bc0b629c3bb14d51262a5ba3aa8aea0",
+          "extractor": "pdftotext -layout (xpdf 4.06)",
+          "section": "3.1.3",
+          "lang": "rust",
+          "block_sha256": "235a50b7dd24b4e1f79659f03fce10ddd743fbed5f18d2147782a7c04a5586da"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "severity_source": "report-section-heading",
+      "sponsor_status": "Fixed in PR 5.",
+      "outcome_source": "cantina-report",
+      "outcome_evidence": "Report section 3.1.3 under \"High\"; sponsor: Fixed in PR 5.; Cantina: Verified fix.",
+      "outcome_url": "https://cdn.cantina.xyz/reports/cantina_solana_foundation_mar2026.pdf",
+      "model_target": {
+        "note": "report names commit 18a50bc2 of multi-delegator; repository not located"
+      },
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "235a50b7dd24b4e1f79659f03fce10ddd743fbed5f18d2147782a7c04a5586da",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
+      "split": "DEV"
+    },
+    {
+      "id": "A-cantina-sf-multidelegator-3.1.4",
+      "source": "cantina-solana-foundation-multidelegator",
+      "platform": "cantina-private-review",
+      "tier": "A",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "pdf-poc-span",
+          "url": "https://cdn.cantina.xyz/reports/cantina_solana_foundation_mar2026.pdf",
+          "pdf_sha256": "a324c0dc2395da3e5ab67d7e90ce9e998bc0b629c3bb14d51262a5ba3aa8aea0",
+          "extractor": "pdftotext -layout (xpdf 4.06)",
+          "section": "3.1.4",
+          "lang": "rust",
+          "block_sha256": "7cf7c8d0f717fc3d040596f3668bbdfb130d628065fd456c4d3d5959473d0884"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "High",
+      "severity_source": "report-section-heading",
+      "sponsor_status": "Fixed in PR 4.",
+      "outcome_source": "cantina-report",
+      "outcome_evidence": "Report section 3.1.4 under \"High\"; sponsor: Fixed in PR 4.; Cantina: The fix correctly mitigates th",
+      "outcome_url": "https://cdn.cantina.xyz/reports/cantina_solana_foundation_mar2026.pdf",
+      "model_target": {
+        "note": "report names commit 18a50bc2 of multi-delegator; repository not located"
+      },
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "7cf7c8d0f717fc3d040596f3668bbdfb130d628065fd456c4d3d5959473d0884",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
+      "split": "FINAL"
+    },
+    {
+      "id": "A-cantina-sf-multidelegator-3.2.1",
+      "source": "cantina-solana-foundation-multidelegator",
+      "platform": "cantina-private-review",
+      "tier": "A",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "pdf-poc-span",
+          "url": "https://cdn.cantina.xyz/reports/cantina_solana_foundation_mar2026.pdf",
+          "pdf_sha256": "a324c0dc2395da3e5ab67d7e90ce9e998bc0b629c3bb14d51262a5ba3aa8aea0",
+          "extractor": "pdftotext -layout (xpdf 4.06)",
+          "section": "3.2.1",
+          "lang": "rust",
+          "block_sha256": "7670edf4c5a5465119dcc9c24e469c28ffbfda912c5514f66e4ec3aa2ff351c4"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "severity_source": "report-section-heading",
+      "sponsor_status": "Fixed in PR 8.",
+      "outcome_source": "cantina-report",
+      "outcome_evidence": "Report section 3.2.1 under \"Medium\"; sponsor: Fixed in PR 8.; Cantina: Verified fix.",
+      "outcome_url": "https://cdn.cantina.xyz/reports/cantina_solana_foundation_mar2026.pdf",
+      "model_target": {
+        "note": "report names commit 18a50bc2 of multi-delegator; repository not located"
+      },
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "7670edf4c5a5465119dcc9c24e469c28ffbfda912c5514f66e4ec3aa2ff351c4",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
+      "split": "DEV"
+    },
+    {
+      "id": "A-cantina-sf-multidelegator-3.2.2",
+      "source": "cantina-solana-foundation-multidelegator",
+      "platform": "cantina-private-review",
+      "tier": "A",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "pdf-poc-span",
+          "url": "https://cdn.cantina.xyz/reports/cantina_solana_foundation_mar2026.pdf",
+          "pdf_sha256": "a324c0dc2395da3e5ab67d7e90ce9e998bc0b629c3bb14d51262a5ba3aa8aea0",
+          "extractor": "pdftotext -layout (xpdf 4.06)",
+          "section": "3.2.2",
+          "lang": "rust",
+          "block_sha256": "66be567e537bfc3d393238e0b08b2b169100851f9e9ec5d75cbead90ebbe3982"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "severity_source": "report-section-heading",
+      "sponsor_status": "Fixed in PR 7.",
+      "outcome_source": "cantina-report",
+      "outcome_evidence": "Report section 3.2.2 under \"Medium\"; sponsor: Fixed in PR 7.; Cantina: Verified fix.",
+      "outcome_url": "https://cdn.cantina.xyz/reports/cantina_solana_foundation_mar2026.pdf",
+      "model_target": {
+        "note": "report names commit 18a50bc2 of multi-delegator; repository not located"
+      },
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "66be567e537bfc3d393238e0b08b2b169100851f9e9ec5d75cbead90ebbe3982",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
+      "split": "FINAL"
+    },
+    {
+      "id": "A-cantina-sf-multidelegator-3.3.2",
+      "source": "cantina-solana-foundation-multidelegator",
+      "platform": "cantina-private-review",
+      "tier": "A",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "pdf-poc-span",
+          "url": "https://cdn.cantina.xyz/reports/cantina_solana_foundation_mar2026.pdf",
+          "pdf_sha256": "a324c0dc2395da3e5ab67d7e90ce9e998bc0b629c3bb14d51262a5ba3aa8aea0",
+          "extractor": "pdftotext -layout (xpdf 4.06)",
+          "section": "3.3.2",
+          "lang": "rust",
+          "block_sha256": "130d99f3af081bb19441717f93908df95a5f95681eee4fb839a1ed4f3e754e53"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Low",
+      "severity_source": "report-section-heading",
+      "sponsor_status": "Fixed in PR 9.",
+      "outcome_source": "cantina-report",
+      "outcome_evidence": "Report section 3.3.2 under \"Low\"; sponsor: Fixed in PR 9.; Cantina: Verified fix. The fix extracts",
+      "outcome_url": "https://cdn.cantina.xyz/reports/cantina_solana_foundation_mar2026.pdf",
+      "model_target": {
+        "note": "report names commit 18a50bc2 of multi-delegator; repository not located"
+      },
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "130d99f3af081bb19441717f93908df95a5f95681eee4fb839a1ed4f3e754e53",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
+      "split": "V1"
+    },
+    {
+      "id": "A-cantina-sf-multidelegator-3.4.1",
+      "source": "cantina-solana-foundation-multidelegator",
+      "platform": "cantina-private-review",
+      "tier": "A",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "pdf-poc-span",
+          "url": "https://cdn.cantina.xyz/reports/cantina_solana_foundation_mar2026.pdf",
+          "pdf_sha256": "a324c0dc2395da3e5ab67d7e90ce9e998bc0b629c3bb14d51262a5ba3aa8aea0",
+          "extractor": "pdftotext -layout (xpdf 4.06)",
+          "section": "3.4.1",
+          "lang": "rust",
+          "block_sha256": "fce9bd24d818ae69103889b3f688a727fde33beff4651213b80aee79e3142a4a"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Informational",
+      "severity_source": "report-section-heading",
+      "sponsor_status": "Fixed in PR 12.",
+      "outcome_source": "cantina-report",
+      "outcome_evidence": "Report section 3.4.1 under \"Informational\"; sponsor: Fixed in PR 12.; Cantina: Verified fix.",
+      "outcome_url": "https://cdn.cantina.xyz/reports/cantina_solana_foundation_mar2026.pdf",
+      "model_target": {
+        "note": "report names commit 18a50bc2 of multi-delegator; repository not located"
+      },
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "fce9bd24d818ae69103889b3f688a727fde33beff4651213b80aee79e3142a4a",
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
+      "split": "V2"
+    }
+  ],
+  "excluded": [
+    {
+      "source": "code4rena-lavarage",
+      "count": 28,
+      "reason": "findings-repo issues with no qualifying test block (34 issues, 6 with a block); issue 1 is the disclosures stub"
+    },
+    {
+      "source": "sherlock-zetachain-cross-chain-2025",
+      "count": 0,
+      "reason": "judging repo private (404); the final report (mirror copy, finder only) has 12 Solana findings and none carries Solana test code; the one test block (M-1) is Sui Move"
+    },
+    {
+      "source": "warden-portfolio-anticsdecoded-jupiter-lend",
+      "count": 0,
+      "reason": "the public Code4rena Jupiter Lend report does not credit the warden or list the flashloan residual-debt item"
+    },
+    {
+      "source": "cantina-solana-private-reviews",
+      "count": 23,
+      "reason": "23 of 24 Solana-touching Cantina reports (436 findings) carry no test-driver code in the original PDF"
+    },
+    {
+      "source": "content-classification",
+      "count": 28,
+      "reason": "candidate had no qualifying block after content-based classification",
+      "ids": [
+        "A-cantina-sf-multidelegator-3.1.1",
+        "J-c4-lavarage-10",
+        "J-c4-lavarage-11",
+        "J-c4-lavarage-12",
+        "J-c4-lavarage-14",
+        "J-c4-lavarage-15",
+        "J-c4-lavarage-17",
+        "J-c4-lavarage-18",
+        "J-c4-lavarage-19",
+        "J-c4-lavarage-20",
+        "J-c4-lavarage-21",
+        "J-c4-lavarage-22",
+        "J-c4-lavarage-23",
+        "J-c4-lavarage-24",
+        "J-c4-lavarage-27",
+        "J-c4-lavarage-29",
+        "J-c4-lavarage-3",
+        "J-c4-lavarage-30",
+        "J-c4-lavarage-31",
+        "J-c4-lavarage-32",
+        "J-c4-lavarage-33",
+        "J-c4-lavarage-34",
+        "J-c4-lavarage-4",
+        "J-c4-lavarage-5",
+        "J-c4-lavarage-6",
+        "J-c4-lavarage-7",
+        "J-c4-lavarage-8",
+        "J-c4-lavarage-9"
+      ]
+    }
+  ],
+  "counts": {
+    "units": 13,
+    "submissions_counted": 13,
+    "distinct_findings_by_tier": {
+      "A": 7,
+      "J": 4
+    },
+    "distinct_by_source": {
+      "cantina-solana-foundation-multidelegator": 7,
+      "code4rena-lavarage": 4
+    },
+    "split_by_tier_distinct": {
+      "A": {
+        "DEV": 3,
+        "V1": 1,
+        "V2": 1,
+        "FINAL": 2
+      },
+      "J": {
+        "DEV": 2,
+        "V1": 2,
+        "V2": 0,
+        "FINAL": 0
+      }
+    }
+  }
 }
