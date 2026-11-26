@@ -288,6 +288,11 @@ def run_unit(binary: str, unit: dict, cache: Path, extract_root: Path) -> tuple[
             "column": f["column"],
             "suite": f.get("suite"),
             "tests": f.get("tests", []),
+            # The message names what the rule claims at this span. A label
+            # reader needs it; without it the reader sees the pattern but not
+            # which actor or step the finding is about. Evidence text stays
+            # out (third-party source; pointer-plus-hash only).
+            "message": f.get("message", ""),
             "evidence_sha256": sha256(f["evidence"]),
         })
     flags.sort(key=lambda x: (x["rule"], x["file"], x["line"], x["column"], x["id"]))

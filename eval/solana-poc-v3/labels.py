@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Build two blind labelling packets for a frozen run's sampled flags.
 
-Reader A and reader B receive the same flags, the rule's definition and a code
-snippet around the flag. Neither packet contains the rule's shipped severity or
-the other reader's labels; the only difference is the packet id. The readers
-write `labels.jsonl` rows: {id, reader, label, rule, reason}.
+Reader A and reader B receive the same flags, the finding's message (what the
+rule claims at the span), the rule's definition and a code snippet around the
+flag. Neither packet contains the rule's shipped severity or the other
+reader's labels; the only difference is the packet id. The readers write
+`labels.jsonl` rows: {id, reader, label, rule, reason}.
 
 Usage:
   python eval/solana-poc-v3/labels.py --run-dir <run> --out-dir labels/v1
@@ -98,6 +99,10 @@ def packet(flags: list[dict], inv: dict[str, dict], run_dir: Path, cache: Path, 
             "language": f["language"],
             "file": f["file"],
             "line": f["line"],
+            # The rule's own claim at this span. Without it a reader cannot
+            # know which actor or step the finding is about, and RG02/RG03
+            # labels would be guesses. Never the shipped severity.
+            "message": f.get("message", ""),
             "rule_definition": rule_definition(f["rule"]),
             "snippet_status": status,
             "snippet": text,
