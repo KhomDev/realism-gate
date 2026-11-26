@@ -636,6 +636,9 @@ class Runner:
                     "column": finding["column"],
                     "suite": finding.get("suite"),
                     "tests": finding.get("tests", []),
+                    # The rule's claim at this span; a label reader needs it.
+                    # Evidence text stays out (pointer-plus-hash).
+                    "message": finding.get("message", ""),
                     "evidence_sha256": sha256_text(finding["evidence"]),
                 }
             )
