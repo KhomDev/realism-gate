@@ -223,16 +223,6 @@ pub fn privileged_step_in_exploit(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
                 _ => None,
             },
         };
-        // With a program model, a role read from the address is evidence of
-        // a privileged step only if a call it makes needs one: when the model
-        // resolves every call made as `k` after this switch to a function
-        // that requires no caller authority, the step is not privileged.
-        // Impersonating a protocol contract or a fixed address is a
-        // different claim and is kept.
-        let role_reason = env.privileged_expr(arg).is_some();
-        if reason.is_some() && role_reason && calls_need_no_authority(ctx, i, &k) {
-            continue;
-        }
         if let Some(reason) = reason {
             let entry = hits.entry(k).or_insert((i, 0, reason));
             entry.1 += 1;
@@ -259,42 +249,6 @@ pub fn privileged_step_in_exploit(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
                 .unwrap_or_default(),
         });
     }
-}
-
-/// Whether the program model resolves every external call made as `k`, from
-/// the switch at op `switch` until the sender changes again, to a function
-/// that requires no caller authority. `false` when there is no model, no
-/// such call, or any call the model cannot answer or finds gated.
-fn calls_need_no_authority(ctx: &Ctx<'_, '_>, switch: usize, k: &str) -> bool {
-    if ctx.program.is_none() {
-        return false;
-    }
-    let next_switch = ctx
-        .switches
-        .iter()
-        .map(|&(j, _)| j)
-        .find(|&j| j > switch)
-        .unwrap_or(ctx.trace.ops.len());
-    let mut any = false;
-    for j in switch + 1..next_switch {
-        let Some(Sender::Switched(e)) = ctx.senders.get(j).copied().flatten() else {
-            continue;
-        };
-        if key(e) != k {
-            continue;
-        }
-        let Some(c) = ctx.trace.ops[j].call() else {
-            continue;
-        };
-        if c.class != CallClass::External {
-            continue;
-        }
-        match ctx.model_gate(j) {
-            Some(super::ModelGate::Ungated) => any = true,
-            _ => return false,
-        }
-    }
-    any
 }
 
 /// A contract the test deploys (`new T()`) from a type `T` the PoC's own file
@@ -480,15 +434,15 @@ pub fn deployer_is_attacker(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
             continue;
         }
         targets.insert(rk);
-        // The program model, when supplied, says whether the function is
-        // gated (`onlyOwner`, `onlyRole`); the name is the evidence only
-        // when the model has no answer. The holder is bound: the test
-        // contract deployed the contract and its constructor handed control
-        // to nobody else (`owned` above).
-        let gated = match ctx.model_gate(i) {
-            Some(gate) => gate == super::ModelGate::Gated,
-            None => is_access_controlled_method(&c.method),
-        };
+        // The program model, when supplied, is positive evidence that the
+        // function is gated (`onlyOwner`, `onlyRole`, a `msg.sender` check).
+        // Its "no caller authority" answer is not used to clear a name: the
+        // Solidity resolver does not see a guard delegated to a library or
+        // an external contract, so that answer can be a miss. The holder is
+        // bound: the test contract deployed the contract and its constructor
+        // handed control to nobody else (`owned` above).
+        let gated = ctx.model_gate(i) == Some(super::ModelGate::Gated)
+            || is_access_controlled_method(&c.method);
         if gated {
             privileged_count += 1;
             privileged_methods.insert(c.method.clone());

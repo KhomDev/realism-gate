@@ -1,11 +1,11 @@
 //! F2: the Solidity rule path reads the RG-A1 program model of
 //! `--model-target`.
 //!
-//! RG03 takes "is this call access-controlled" from the model when it has an
-//! answer (`onlyOwner` on a function whose name says nothing), and RG02 drops
-//! a role-read prank whose every call the model resolves to a function that
-//! requires no caller authority. Without a model both rules are unchanged
-//! (the golden manifest pins that byte for byte). The contracts are
+//! RG03 takes "is this call access-controlled" from the model when the model
+//! finds a gate (`onlyOwner` on a function whose name says nothing). A model
+//! answer of "no caller authority" clears nothing, for RG02 or RG03: the
+//! resolver misses guards delegated to libraries. Without a model both rules
+//! are unchanged (the golden manifest pins that byte for byte). The contracts are
 //! synthetic, written for this file.
 
 use realism_gate::Severity;
@@ -149,15 +149,16 @@ fn f2_rg03_model_without_a_modifier_keeps_the_note() {
 }
 
 #[test]
-fn f2_rg02_drops_a_role_prank_whose_calls_need_no_authority() {
-    // Without a model the prank as `admin` is reported by its name.
+fn f2_rg02_is_not_cleared_by_a_model_that_finds_no_authority() {
+    // The Solidity resolver answers "no caller authority" for a function
+    // whose guard lives in a library or an external contract (DEV: Lens
+    // `setState`, DittoETH `diamondCut`). That answer is not evidence that a
+    // prank is harmless, so RG02 stays as it is without a model.
     let plain = report(ADMIN_DEPOSITS, None);
     assert_eq!(rule(&plain, "RG02").len(), 1, "{:?}", plain.findings);
-    // The model resolves `deposit` to a function anyone may call: signing as
-    // `admin` proves nothing an attacker could not do from its own address.
     let open = vault_model("deposit-open", "", "");
     let with = report(ADMIN_DEPOSITS, Some(&open));
-    assert!(rule(&with, "RG02").is_empty(), "{:?}", with.findings);
+    assert_eq!(rule(&with, "RG02").len(), 1, "{:?}", with.findings);
 }
 
 #[test]
