@@ -237,9 +237,17 @@ def fetch(units: list[dict]) -> None:
 
 
 def main(argv: list[str]) -> int:
+    global CACHE, CODEHAWKS, HATS
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--cache", default=None,
+                    help="pin cache root (default %(default)s); e.g. "
+                         "worktrees/research-rg/.corpus/solidity-poc-v1")
     args = ap.parse_args(argv[1:])
+    if args.cache:
+        CACHE = Path(args.cache)
+        CODEHAWKS = CACHE / "codehawks"
+        HATS = CACHE / "hats"
     doc = json.loads(INV.read_text(encoding="utf-8"))
     units = doc["units"]
     if not args.check:
