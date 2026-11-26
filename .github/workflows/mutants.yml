@@ -12,6 +12,10 @@ on:
         description: "Space-separated --file globs to mutate instead of the weekly set (changed files on a work branch)"
         required: false
         default: ""
+      base:
+        description: "Mutate only lines changed since this commit (cargo mutants --in-diff); used with files"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -23,8 +27,11 @@ jobs:
   mutants:
     name: cargo-mutants
     runs-on: ubuntu-latest
+    timeout-minutes: 340
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       - name: Install toolchain
         run: rustup toolchain install stable --profile minimal
@@ -42,10 +49,15 @@ jobs:
         continue-on-error: true
         env:
           FILES: ${{ inputs.files }}
+          BASE: ${{ inputs.base }}
         run: |
           args=()
           for f in $FILES; do args+=(--file "$f"); done
-          cargo mutants --workspace "${args[@]}" --timeout 300
+          if [ -n "$BASE" ]; then
+            git diff "$BASE" HEAD -- $FILES > "$RUNNER_TEMP/changes.diff"
+            args+=(--in-diff "$RUNNER_TEMP/changes.diff")
+          fi
+          cargo mutants --workspace "${args[@]}" -j 4 --timeout 300
 
       - name: Mutate the rule, claim, bind and verify-fix code
         if: ${{ inputs.files == '' }}
