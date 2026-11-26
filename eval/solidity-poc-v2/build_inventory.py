@@ -168,15 +168,144 @@ def sherlock_units(cb: dict) -> tuple[list[dict], list[dict]]:
     return units, screened
 
 
+PRE = re.compile(r"<pre\b[^>]*>(.*?)</pre>", re.S)
+JSON_BODY = re.compile(r'"body":"((?:[^"\x5c]|\x5c.)*)"')
+
+
+def page_markdown(raw: str) -> str:
+    """Rebuilds fenced blocks from an HTML page: every <pre> block, then any
+    markdown body embedded as JSON (mirror.xyz / hashnode). Deterministic."""
+    import html as html_mod
+    out = []
+    for m in PRE.finditer(raw):
+        inner = re.sub(r"<br\s*/?>", "\n", m.group(1))
+        inner = html_mod.unescape(re.sub(r"<[^>]+>", "", html_mod.unescape(inner)))
+        out.append("```\n" + inner + "\n```")
+    for m in JSON_BODY.finditer(raw):
+        try:
+            out.append(json.loads('"' + m.group(1) + '"'))
+        except ValueError:
+            pass
+    return "\n\n".join(out)
+
+
+# Bounty write-ups from the operator-supplied finder list
+# (sayan011/Immunefi-bug-bounty-writeups-list @ b8277a4, pointer only). The
+# outcome quote is from the ORIGINAL page named in outcome_url, never the list.
+WRITEUPS = [
+    {"id": "J-bounty-alchemist-dacian", "row": 32, "whitehat": "dacian", "platform": "bounty-platform-unstated",
+     "pin": {"kind": "page-pre-block", "url": "https://dacian.me/28k-bounty-admin-brick-forced-revert",
+             "cache": "immunefi-list/pages/row032.html"},
+     "outcome": "paid", "severity": "unstated",
+     "evidence": 'Page headline "$28K Bounty - Admin Brick & Forced Revert"',
+     "outcome_url": "https://dacian.me/28k-bounty-admin-brick-forced-revert"},
+    {"id": "J-bounty-sherlock-yield-gothicshanon", "row": 7, "whitehat": "GothicShanon89238", "platform": "sherlock-bounty",
+     "pin": {"kind": "raw-file", "repo": "https://github.com/sherlock-protocol/bug-poc",
+             "commit": "f5fee9404ca8ddbb2eb7e5cb9f565ae40b718673", "path": "test/Attack.sol",
+             "cache": "immunefi-list/linked/sherlock-bug-poc-Attack.sol"},
+     "outcome": "paid", "severity": "Critical",
+     "evidence": '"Sherlock ... has paid out a $250k bounty as a reward"',
+     "outcome_url": "https://mirror.xyz/0xE400820f3D60d77a3EC8018d44366ed0d334f93C/LOZF1YBcH1eBdxlC6HP223cAMeTpNgQ-Kc4EjQuxmGA"},
+    {"id": "J-bounty-tranchess-floranguyen0", "row": 97, "whitehat": "floranguyen0", "platform": "immunefi",
+     "pin": {"kind": "raw-file", "repo": "https://github.com/floranguyen0/tranchess-vulnerability-disclosure",
+             "commit": "a270357fd8ec89f16951c1ce12657bd5465e829c", "path": "tranchessPoc.t.sol",
+             "cache": "immunefi-list/linked/tranchessPoc.t.sol"},
+     "outcome": "paid", "severity": "unstated",
+     "evidence": '"rewarded me with the maximum bounty of $200,000"',
+     "outcome_url": "https://github.com/floranguyen0/tranchess-vulnerability-disclosure"},
+    {"id": "J-bounty-angle-deliriusz-vault", "row": 36, "whitehat": "deliriusz", "platform": "immunefi",
+     "pin": {"kind": "raw-file", "repo": "https://github.com/deliriusz/Angle-bb-poc",
+             "commit": "14f522aef28ab787ae5ea8b97a688739aec3934e", "path": "test/POC-vault.t.sol",
+             "cache": "immunefi-list/linked/angle-POC-vault.t.sol"},
+     "outcome": "rejected", "severity": "rejected",
+     "evidence": '"Again, submitted, got rejected, asked Immunefi for help, got rejected."',
+     "outcome_url": "https://medium.com/@deliriusz/stealing-in-motion-immunefi-bounty-hunting-from-different-angle-5eb03602f5c1"},
+    {"id": "J-bounty-angle-deliriusz-erc777", "row": 36, "whitehat": "deliriusz", "platform": "immunefi",
+     "pin": {"kind": "raw-file", "repo": "https://github.com/deliriusz/Angle-bb-poc",
+             "commit": "14f522aef28ab787ae5ea8b97a688739aec3934e", "path": "test/POC-reentrancy-erc777.t.sol",
+             "cache": "immunefi-list/linked/angle-POC-reentrancy-erc777.t.sol"},
+     "outcome": "rejected", "severity": "rejected",
+     "evidence": '"So I wrote a PoC, submitted it, and... got rejected."',
+     "outcome_url": "https://medium.com/@deliriusz/stealing-in-motion-immunefi-bounty-hunting-from-different-angle-5eb03602f5c1"},
+]
+
+
+def writeup_units() -> list[dict]:
+    units = []
+    for w in WRITEUPS:
+        pin = dict(w["pin"])
+        path = CACHE / pin.pop("cache")
+        raw = path.read_text(encoding="utf-8", errors="replace")
+        if pin["kind"] == "page-pre-block":
+            sel = select_sol_block(page_markdown(raw))
+            if sel is None:
+                raise SystemExit(f"{w['id']}: no qualifying block")
+            pin.update({"page_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                        "block": sel["block"], "lang": sel["lang"],
+                        "block_sha256": norm_hash(sel["code"])})
+            kind = "test-fragment"
+        else:
+            if not V1.SOLTEST.search(raw):
+                raise SystemExit(f"{w['id']}: file carries no Foundry test marker")
+            pin["sha256_norm"] = norm_hash(raw)
+            pin["url"] = f"{pin['repo'].replace('github.com', 'raw.githubusercontent.com')}/{pin['commit']}/{pin['path']}"
+            kind = "test-file"
+        units.append({
+            "id": w["id"],
+            "source": "bounty-" + w["whitehat"].lower(),
+            "platform": w["platform"],
+            "tier": "J",
+            "kind": kind,
+            "files": [pin],
+            "outcome": w["outcome"],
+            "severity": w["severity"],
+            "severity_source": "original-writeup",
+            "outcome_source": "original-writeup",
+            "outcome_evidence": w["evidence"],
+            "outcome_url": w["outcome_url"],
+            "finder": {"list": "sayan011/Immunefi-bug-bounty-writeups-list", "commit": "b8277a4", "row": w["row"]},
+            "group_id": None, "group_size": 1, "duplicate_of": None,
+            "codebase_id": None,
+            "license": "none", "unlicensed": True,
+        })
+    return units
+
+
+LEARN_REPO = "https://github.com/coinspect/learn-evm-attacks"
+
+
+def learn_x_units() -> list[dict]:
+    base = CACHE / "x" / "learn-evm-attacks"
+    commit = V1.git_head(base)
+    units = []
+    for p in sorted(base.glob("test/**/*.attack.sol")):
+        rel = p.relative_to(base).as_posix()
+        units.append({
+            "id": "X-learnevm-" + re.sub(r"[^a-z0-9]+", "-", Path(rel).parent.name.lower()).strip("-")
+                  + "-" + re.sub(r"[^a-z0-9]+", "-", p.name[:-len(".attack.sol")].lower()).strip("-"),
+            "source": "coinspect-learn-evm-attacks",
+            "platform": "incident-repro",
+            "tier": "X",
+            "kind": "test-file",
+            "files": [{
+                "kind": "repo-file",
+                "repo": LEARN_REPO,
+                "commit": commit,
+                "path": rel,
+                "sha256_norm": norm_hash(p.read_text(encoding="utf-8", errors="replace")),
+            }],
+            "real_incident": True,
+            "incident": Path(rel).parent.name,
+            "group_id": None, "group_size": None, "duplicate_of": None,
+            "license": "MIT",
+            "unlicensed": False,
+            "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+        })
+    return units
+
+
 def extra_units(cb: dict) -> list[dict]:
-    """Units recorded by hand in units_extra.json (pointer + hash), verified by fetch.py."""
-    p = HERE / "units_extra.json"
-    if not p.is_file():
-        return []
-    doc = json.loads(p.read_text(encoding="utf-8"))
-    for k, v in (doc.get("codebases") or {}).items():
-        cb[k] = v
-    return doc.get("units", [])
+    return writeup_units() + learn_x_units()
 
 
 def main(argv: list[str]) -> int:

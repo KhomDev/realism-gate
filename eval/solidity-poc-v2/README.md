@@ -10,9 +10,7 @@ Solidity is measured on its own slices and never pooled with Solana.
 
 ## Status
 
-**Scaffold committed before any unit was collected.** The salt below is fixed by
-this commit. Collection results, counts and the seal are recorded in
-`SEARCH_LOG.md` and `inventory.json` by later commits.
+**Collection closed 2026-11-26, sealed, not run.** Counted units: J 327 (Sherlock 322, bounty write-ups 5), X 42. Code4rena is 56.32% of J across v1+v2 (cap 60%: met). X across v1+v2 is 78 of 150 (missed). The salt below was fixed by the scaffold commit before any unit was collected.
 
 ## Tiers
 

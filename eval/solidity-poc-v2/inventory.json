@@ -13375,6 +13375,1278 @@
       "unlicensed": true,
       "dedupe_key": "5e7e6a742feb0affa1febd9c8df5fe8ed6ba3d5f465144f5d1b8f4b6ab7a3c29",
       "split": "V1"
+    },
+    {
+      "id": "J-bounty-alchemist-dacian",
+      "source": "bounty-dacian",
+      "platform": "bounty-platform-unstated",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "page-pre-block",
+          "url": "https://dacian.me/28k-bounty-admin-brick-forced-revert",
+          "page_sha256": "62413b304f39eecf8f4f7e5d98c30545dd4f0b739c883c03a74d5c14952d80df",
+          "block": 3,
+          "lang": "solidity",
+          "block_sha256": "10ae36eccfcfaf7932c8ce8f5738e66c37214b879df3466071c79be0d51bdada"
+        }
+      ],
+      "outcome": "paid",
+      "severity": "unstated",
+      "severity_source": "original-writeup",
+      "outcome_source": "original-writeup",
+      "outcome_evidence": "Page headline \"$28K Bounty - Admin Brick & Forced Revert\"",
+      "outcome_url": "https://dacian.me/28k-bounty-admin-brick-forced-revert",
+      "finder": {
+        "list": "sayan011/Immunefi-bug-bounty-writeups-list",
+        "commit": "b8277a4",
+        "row": 32
+      },
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
+      "codebase_id": null,
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "10ae36eccfcfaf7932c8ce8f5738e66c37214b879df3466071c79be0d51bdada",
+      "split": "V1"
+    },
+    {
+      "id": "J-bounty-sherlock-yield-gothicshanon",
+      "source": "bounty-gothicshanon89238",
+      "platform": "sherlock-bounty",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "raw-file",
+          "repo": "https://github.com/sherlock-protocol/bug-poc",
+          "commit": "f5fee9404ca8ddbb2eb7e5cb9f565ae40b718673",
+          "path": "test/Attack.sol",
+          "sha256_norm": "96cdadfe8de8ba9b91394f1689ae794c0654cdb94d92f6a4e4169f2364907c79",
+          "url": "https://raw.githubusercontent.com/sherlock-protocol/bug-poc/f5fee9404ca8ddbb2eb7e5cb9f565ae40b718673/test/Attack.sol"
+        }
+      ],
+      "outcome": "paid",
+      "severity": "Critical",
+      "severity_source": "original-writeup",
+      "outcome_source": "original-writeup",
+      "outcome_evidence": "\"Sherlock ... has paid out a $250k bounty as a reward\"",
+      "outcome_url": "https://mirror.xyz/0xE400820f3D60d77a3EC8018d44366ed0d334f93C/LOZF1YBcH1eBdxlC6HP223cAMeTpNgQ-Kc4EjQuxmGA",
+      "finder": {
+        "list": "sayan011/Immunefi-bug-bounty-writeups-list",
+        "commit": "b8277a4",
+        "row": 7
+      },
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
+      "codebase_id": null,
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "96cdadfe8de8ba9b91394f1689ae794c0654cdb94d92f6a4e4169f2364907c79",
+      "split": "V2"
+    },
+    {
+      "id": "J-bounty-tranchess-floranguyen0",
+      "source": "bounty-floranguyen0",
+      "platform": "immunefi",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "raw-file",
+          "repo": "https://github.com/floranguyen0/tranchess-vulnerability-disclosure",
+          "commit": "a270357fd8ec89f16951c1ce12657bd5465e829c",
+          "path": "tranchessPoc.t.sol",
+          "sha256_norm": "6b16f5d2f46237947a7c3706b96dbca0475394c01448a2154392d6565ea9436b",
+          "url": "https://raw.githubusercontent.com/floranguyen0/tranchess-vulnerability-disclosure/a270357fd8ec89f16951c1ce12657bd5465e829c/tranchessPoc.t.sol"
+        }
+      ],
+      "outcome": "paid",
+      "severity": "unstated",
+      "severity_source": "original-writeup",
+      "outcome_source": "original-writeup",
+      "outcome_evidence": "\"rewarded me with the maximum bounty of $200,000\"",
+      "outcome_url": "https://github.com/floranguyen0/tranchess-vulnerability-disclosure",
+      "finder": {
+        "list": "sayan011/Immunefi-bug-bounty-writeups-list",
+        "commit": "b8277a4",
+        "row": 97
+      },
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
+      "codebase_id": null,
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "6b16f5d2f46237947a7c3706b96dbca0475394c01448a2154392d6565ea9436b",
+      "split": "V2"
+    },
+    {
+      "id": "J-bounty-angle-deliriusz-vault",
+      "source": "bounty-deliriusz",
+      "platform": "immunefi",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "raw-file",
+          "repo": "https://github.com/deliriusz/Angle-bb-poc",
+          "commit": "14f522aef28ab787ae5ea8b97a688739aec3934e",
+          "path": "test/POC-vault.t.sol",
+          "sha256_norm": "b67a864fc473740e4a3a9302868f614f20b6870319ac34dcaf39091ee11ace7e",
+          "url": "https://raw.githubusercontent.com/deliriusz/Angle-bb-poc/14f522aef28ab787ae5ea8b97a688739aec3934e/test/POC-vault.t.sol"
+        }
+      ],
+      "outcome": "rejected",
+      "severity": "rejected",
+      "severity_source": "original-writeup",
+      "outcome_source": "original-writeup",
+      "outcome_evidence": "\"Again, submitted, got rejected, asked Immunefi for help, got rejected.\"",
+      "outcome_url": "https://medium.com/@deliriusz/stealing-in-motion-immunefi-bounty-hunting-from-different-angle-5eb03602f5c1",
+      "finder": {
+        "list": "sayan011/Immunefi-bug-bounty-writeups-list",
+        "commit": "b8277a4",
+        "row": 36
+      },
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
+      "codebase_id": null,
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "b67a864fc473740e4a3a9302868f614f20b6870319ac34dcaf39091ee11ace7e",
+      "split": "DEV"
+    },
+    {
+      "id": "J-bounty-angle-deliriusz-erc777",
+      "source": "bounty-deliriusz",
+      "platform": "immunefi",
+      "tier": "J",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "raw-file",
+          "repo": "https://github.com/deliriusz/Angle-bb-poc",
+          "commit": "14f522aef28ab787ae5ea8b97a688739aec3934e",
+          "path": "test/POC-reentrancy-erc777.t.sol",
+          "sha256_norm": "0d5b55bffe8881e0fb7dbc9c25dc20500677e3940c6517b3133c10858fdda197",
+          "url": "https://raw.githubusercontent.com/deliriusz/Angle-bb-poc/14f522aef28ab787ae5ea8b97a688739aec3934e/test/POC-reentrancy-erc777.t.sol"
+        }
+      ],
+      "outcome": "rejected",
+      "severity": "rejected",
+      "severity_source": "original-writeup",
+      "outcome_source": "original-writeup",
+      "outcome_evidence": "\"So I wrote a PoC, submitted it, and... got rejected.\"",
+      "outcome_url": "https://medium.com/@deliriusz/stealing-in-motion-immunefi-bounty-hunting-from-different-angle-5eb03602f5c1",
+      "finder": {
+        "list": "sayan011/Immunefi-bug-bounty-writeups-list",
+        "commit": "b8277a4",
+        "row": 36
+      },
+      "group_id": null,
+      "group_size": 1,
+      "duplicate_of": null,
+      "codebase_id": null,
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "0d5b55bffe8881e0fb7dbc9c25dc20500677e3940c6517b3133c10858fdda197",
+      "split": "V2"
+    },
+    {
+      "id": "X-learnevm-daomaker-daomaker",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Access_Control/DAOMaker/DAOMaker.attack.sol",
+          "sha256_norm": "b7e4134bcdcfad48342090a73c5875407a406c87e592d03b0151e98ca04ab985"
+        }
+      ],
+      "real_incident": true,
+      "incident": "DAOMaker",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "b7e4134bcdcfad48342090a73c5875407a406c87e592d03b0151e98ca04ab985",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-mbctoken-mbctoken",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Access_Control/MBCToken/MBCToken.attack.sol",
+          "sha256_norm": "4737de74afb4741055a38fa992a576847c236ad8ec2743389526ef480ad6a657"
+        }
+      ],
+      "real_incident": true,
+      "incident": "MBCToken",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "4737de74afb4741055a38fa992a576847c236ad8ec2743389526ef480ad6a657",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-punkprotocol-punkprotocol",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Access_Control/PunkProtocol/PunkProtocol.attack.sol",
+          "sha256_norm": "ed77e8ceedde6f633c2258d4fd9657e78ec87cd55061b35e4cfbe7b588a8f367"
+        }
+      ],
+      "real_incident": true,
+      "incident": "PunkProtocol",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "ed77e8ceedde6f633c2258d4fd9657e78ec87cd55061b35e4cfbe7b588a8f367",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-learnevm-rikkei-rikkei",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Access_Control/Rikkei/Rikkei.attack.sol",
+          "sha256_norm": "ac899c95cec53327d3eb7ecf17ce145298df2dc649ca535945e17c9b27e9ebc8"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Rikkei",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "ac899c95cec53327d3eb7ecf17ce145298df2dc649ca535945e17c9b27e9ebc8",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-sandbox-sandbox",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Access_Control/Sandbox/Sandbox.attack.sol",
+          "sha256_norm": "d352bf479fe27cbfdb6e7b5ec85c5b5d177ecf6e23338cf09cdc26b53a430d65"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Sandbox",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "d352bf479fe27cbfdb6e7b5ec85c5b5d177ecf6e23338cf09cdc26b53a430d65",
+      "split": "V1"
+    },
+    {
+      "id": "X-learnevm-templedao-templedao",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Access_Control/TempleDao/TempleDao.attack.sol",
+          "sha256_norm": "5276a2d2ac6a4392382f25970776d86c357a6eaac69538cc7257cd882f6ce424"
+        }
+      ],
+      "real_incident": true,
+      "incident": "TempleDao",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "5276a2d2ac6a4392382f25970776d86c357a6eaac69538cc7257cd882f6ce424",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-learnevm-1inch-oneinch",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Bad_Data_Validation/1inch/OneInch.attack.sol",
+          "sha256_norm": "4a627f9f4189eff2616c18143dba0cac7e56cba726d8b28663c2f673ec25e4fd"
+        }
+      ],
+      "real_incident": true,
+      "incident": "1inch",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "4a627f9f4189eff2616c18143dba0cac7e56cba726d8b28663c2f673ec25e4fd",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-bad-guys-nft-bad-guys-nft",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Bad_Data_Validation/Bad_Guys_NFT/Bad_Guys_NFT.attack.sol",
+          "sha256_norm": "d90521495a5daff5ad1a0fa0b09f22e2efda217a4670d1737d9bcc0a5df360f5"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Bad_Guys_NFT",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "d90521495a5daff5ad1a0fa0b09f22e2efda217a4670d1737d9bcc0a5df360f5",
+      "split": "V2"
+    },
+    {
+      "id": "X-learnevm-bond-olympusdao-bond-olympusdao",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Bad_Data_Validation/Bond_OlympusDAO/Bond_OlympusDAO.attack.sol",
+          "sha256_norm": "1e18010a004b2c67fa8df64cd8c92dafe0c1064e2d637c90146d7a1ea168006b"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Bond_OlympusDAO",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "1e18010a004b2c67fa8df64cd8c92dafe0c1064e2d637c90146d7a1ea168006b",
+      "split": "V2"
+    },
+    {
+      "id": "X-learnevm-lyradepositwrapper-lyradepositwrapper",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Bad_Data_Validation/LyraDepositWrapper/LyraDepositWrapper.attack.sol",
+          "sha256_norm": "64459633dcf5a2b0c572bb184476704ec7b8981b36f29ce3a3d4ce1e535f9502"
+        }
+      ],
+      "real_incident": true,
+      "incident": "LyraDepositWrapper",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "64459633dcf5a2b0c572bb184476704ec7b8981b36f29ce3a3d4ce1e535f9502",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-multichain-permit-multichain-permit",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Bad_Data_Validation/Multichain_Permit/Multichain_Permit.attack.sol",
+          "sha256_norm": "1475ed0df56a089fe69f83ca6fb6f9714a263deb6f3e51eff5c11057fe121694"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Multichain_Permit",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "1475ed0df56a089fe69f83ca6fb6f9714a263deb6f3e51eff5c11057fe121694",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-superfluid-superfluid",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Bad_Data_Validation/Superfluid/Superfluid.attack.sol",
+          "sha256_norm": "39f52593b2dc89517d5f4d4edaaed606ceea46acb4eab57714a4b44ebbefa6b2"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Superfluid",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "39f52593b2dc89517d5f4d4edaaed606ceea46acb4eab57714a4b44ebbefa6b2",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-learnevm-nomadbridge-nomadbridge",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Bridges/NomadBridge/NomadBridge.attack.sol",
+          "sha256_norm": "2436efcff07452361ec371af215bf2d8263b2bbb01ae4f1113b5538241518e49"
+        }
+      ],
+      "real_incident": true,
+      "incident": "NomadBridge",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "2436efcff07452361ec371af215bf2d8263b2bbb01ae4f1113b5538241518e49",
+      "split": "V1"
+    },
+    {
+      "id": "X-learnevm-polynetworkbridge-polynetworkbridge",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Bridges/PolyNetworkBridge/PolyNetworkBridge.attack.sol",
+          "sha256_norm": "944281b118e3f286b04d64cd197ade0f16776299bb71990f2309b182c7a0d266"
+        }
+      ],
+      "real_incident": true,
+      "incident": "PolyNetworkBridge",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "944281b118e3f286b04d64cd197ade0f16776299bb71990f2309b182c7a0d266",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-roninbridge-roninbridge",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Bridges/RoninBridge/RoninBridge.attack.sol",
+          "sha256_norm": "9d833261abdb462ce8d1889f28b8ac79470864af5917c6e7ac30e94e8e395e18"
+        }
+      ],
+      "real_incident": true,
+      "incident": "RoninBridge",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "9d833261abdb462ce8d1889f28b8ac79470864af5917c6e7ac30e94e8e395e18",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-learnevm-balancer-v2-pools-balancer-v2-pools",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/Balancer_V2_Pools/Balancer_V2_Pools.attack.sol",
+          "sha256_norm": "38a472745a1a033aaf90ace56a0e5908176f5d4da6445d8bb76943f9b977ce98"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Balancer_V2_Pools",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "38a472745a1a033aaf90ace56a0e5908176f5d4da6445d8bb76943f9b977ce98",
+      "split": "V1"
+    },
+    {
+      "id": "X-learnevm-bunni-bunni",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/Bunni/Bunni.attack.sol",
+          "sha256_norm": "1d6c92ef94d30e9ed1cc6cae32226b40994c720717db1f2855462726424b3545"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Bunni",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "1d6c92ef94d30e9ed1cc6cae32226b40994c720717db1f2855462726424b3545",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-bvaults-bvaults",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/Bvaults/Bvaults.attack.sol",
+          "sha256_norm": "9b41593f70f2e4082d96977e94021fdfa1851c1f1bc7623754c0688bb4cb1777"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Bvaults",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "9b41593f70f2e4082d96977e94021fdfa1851c1f1bc7623754c0688bb4cb1777",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-cork-finance-corkfinance",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/Cork_Finance/CorkFinance.attack.sol",
+          "sha256_norm": "5c8fe2992b94dec2b90d3cc0918caf16df35fa09f8feeceeea6266f6f69ce35a"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Cork_Finance",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "5c8fe2992b94dec2b90d3cc0918caf16df35fa09f8feeceeea6266f6f69ce35a",
+      "split": "V1"
+    },
+    {
+      "id": "X-learnevm-earningfarm-earningfarm",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/EarningFarm/EarningFarm.attack.sol",
+          "sha256_norm": "cdd60133abb1d3a33e47c2845687204017e257a6f16315cc0e7eae2353ff7aa6"
+        }
+      ],
+      "real_incident": true,
+      "incident": "EarningFarm",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "cdd60133abb1d3a33e47c2845687204017e257a6f16315cc0e7eae2353ff7aa6",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-learnevm-fantasm-finance-fantasm-finance",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/Fantasm_Finance/Fantasm_Finance.attack.sol",
+          "sha256_norm": "8e0c8e9a2cb6dc6ca9132c213a94143f0950d29579ad04d2c4a27764d750b4f6"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Fantasm_Finance",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "8e0c8e9a2cb6dc6ca9132c213a94143f0950d29579ad04d2c4a27764d750b4f6",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-fourmeme-fourmeme",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/FourMeme/FourMeme.attack.sol",
+          "sha256_norm": "4fd9eef164ea37f0d67a5cb7519e37dd8fe838928cb0564640fc33fd5e202dd4"
+        }
+      ],
+      "real_incident": true,
+      "incident": "FourMeme",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "4fd9eef164ea37f0d67a5cb7519e37dd8fe838928cb0564640fc33fd5e202dd4",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-furucombo-furucombo",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/Furucombo/Furucombo.attack.sol",
+          "sha256_norm": "b94906a5049d6d4641d8971e5c4f8eab46a3c7663bd7afa8babe7f8f2910bbf1"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Furucombo",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "b94906a5049d6d4641d8971e5c4f8eab46a3c7663bd7afa8babe7f8f2910bbf1",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-futureswap-futureswap",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/Futureswap/futureswap.attack.sol",
+          "sha256_norm": "dac40ea9e592dedd81db00bd0dfa05040e2c98d858b83b6c7b2060d5554c01c9"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Futureswap",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "dac40ea9e592dedd81db00bd0dfa05040e2c98d858b83b6c7b2060d5554c01c9",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-mobiusdao-mobiusdao",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/MobiusDAO/MobiusDAO.attack.sol",
+          "sha256_norm": "4266c4d664a377d4a3977c1c5e35d5e8297dd111856c6ff011f544c98e0791f1"
+        }
+      ],
+      "real_incident": true,
+      "incident": "MobiusDAO",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "4266c4d664a377d4a3977c1c5e35d5e8297dd111856c6ff011f544c98e0791f1",
+      "split": "V2"
+    },
+    {
+      "id": "X-learnevm-oneringfinance-oneringfinance",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/OneRingFinance/OneRingFinance.attack.sol",
+          "sha256_norm": "04affd6504f136d148be9baaf652dffb788661189d09670c4d2db7bdab7ec1b1"
+        }
+      ],
+      "real_incident": true,
+      "incident": "OneRingFinance",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "04affd6504f136d148be9baaf652dffb788661189d09670c4d2db7bdab7ec1b1",
+      "split": "V2"
+    },
+    {
+      "id": "X-learnevm-onyxprotocol-onyxprotocol",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/OnyxProtocol/OnyxProtocol.attack.sol",
+          "sha256_norm": "30bb70e7ba0c0a294a431bb40e6477df1c0782dd94d1aef29f9746a27222b7f2"
+        }
+      ],
+      "real_incident": true,
+      "incident": "OnyxProtocol",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "30bb70e7ba0c0a294a431bb40e6477df1c0782dd94d1aef29f9746a27222b7f2",
+      "split": "V2"
+    },
+    {
+      "id": "X-learnevm-polter-finance-polter-finance",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/Polter_Finance/Polter_Finance.attack.sol",
+          "sha256_norm": "1c179f6c3888c4e01c0415f96d323b565426b0db2dab0a8af445219a323205e8"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Polter_Finance",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "1c179f6c3888c4e01c0415f96d323b565426b0db2dab0a8af445219a323205e8",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-seaman-seaman",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/Seaman/Seaman.attack.sol",
+          "sha256_norm": "228c2a3ae8089c19291adfd153aad10ce7dabdcd776f0b0edfbc8d0c7dca9440"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Seaman",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "228c2a3ae8089c19291adfd153aad10ce7dabdcd776f0b0edfbc8d0c7dca9440",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-sirtrading-sirtrading",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/SIRTrading/SIRTrading.attack.sol",
+          "sha256_norm": "67b8a55c2231d03565a917e09479e9858131a834ff581e19b70a7af65fb89037"
+        }
+      ],
+      "real_incident": true,
+      "incident": "SIRTrading",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "67b8a55c2231d03565a917e09479e9858131a834ff581e19b70a7af65fb89037",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-learnevm-team-finance-teamfinance",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/Team_Finance/TeamFinance.attack.sol",
+          "sha256_norm": "1c023ccc7dc1b93303a154e7f329790de8c4897739e954d27f845a34691dbbf1"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Team_Finance",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "1c023ccc7dc1b93303a154e7f329790de8c4897739e954d27f845a34691dbbf1",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-tornadocash-governance-tornadocash-governance",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/TornadoCash_Governance/TornadoCash_Governance.attack.sol",
+          "sha256_norm": "87ebb56c1390e551fb219210064da006519a7f0dab5d608a829d95242ed25872"
+        }
+      ],
+      "real_incident": true,
+      "incident": "TornadoCash_Governance",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "87ebb56c1390e551fb219210064da006519a7f0dab5d608a829d95242ed25872",
+      "split": "V1"
+    },
+    {
+      "id": "X-learnevm-uranium-uranium",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/Uranium/Uranium.attack.sol",
+          "sha256_norm": "50d89efc7e646315235168604a0030b4b06757dff80bfc954684098715887cd4"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Uranium",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "50d89efc7e646315235168604a0030b4b06757dff80bfc954684098715887cd4",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-learnevm-usds-usds",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/Usds/usds.attack.sol",
+          "sha256_norm": "081ca6432230cddee6315eaed3e3e0840ca0b6456242b436e10bb5093845dc2e"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Usds",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "081ca6432230cddee6315eaed3e3e0840ca0b6456242b436e10bb5093845dc2e",
+      "split": "V1"
+    },
+    {
+      "id": "X-learnevm-vesperrarifuse-vesperrarifuse",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Business_Logic/VesperRariFuse/VesperRariFuse.attack.sol",
+          "sha256_norm": "25d6f7bc643e05e80ddf55d82a62f1af86df7a266fc237a9d2387af08c08b86a"
+        }
+      ],
+      "real_incident": true,
+      "incident": "VesperRariFuse",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "25d6f7bc643e05e80ddf55d82a62f1af86df7a266fc237a9d2387af08c08b86a",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-creamfinance-creamfinance",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Reentrancy/CreamFinance/CreamFinance.attack.sol",
+          "sha256_norm": "03ee215de9fba82e62dad14d5f35230e8a080865e56c93af423037380eb547ff"
+        }
+      ],
+      "real_incident": true,
+      "incident": "CreamFinance",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "03ee215de9fba82e62dad14d5f35230e8a080865e56c93af423037380eb547ff",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-learnevm-curvepooloracle-qireadonlyreentrancy",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Reentrancy/CurvePoolOracle/QiReadOnlyReentrancy.attack.sol",
+          "sha256_norm": "53c19652f32971437d9eda52b6af4134d5001d08013e53f8762fbdca4930a53b"
+        }
+      ],
+      "real_incident": true,
+      "incident": "CurvePoolOracle",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "53c19652f32971437d9eda52b6af4134d5001d08013e53f8762fbdca4930a53b",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-learnevm-dfxfinance-dfxfinance",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Reentrancy/DFXFinance/DFXFinance.attack.sol",
+          "sha256_norm": "9f6076574358cc263db0948ea478b7f13298f59e270ae1b69eb8d825469b0ce6"
+        }
+      ],
+      "real_incident": true,
+      "incident": "DFXFinance",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "9f6076574358cc263db0948ea478b7f13298f59e270ae1b69eb8d825469b0ce6",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-feiprotocol-feiprotocol",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Reentrancy/FeiProtocol/FeiProtocol.attack.sol",
+          "sha256_norm": "49fbbf98b94044e8c3fe83fec3f396565a99ae9eb0c828dff31b919007dec32f"
+        }
+      ],
+      "real_incident": true,
+      "incident": "FeiProtocol",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "49fbbf98b94044e8c3fe83fec3f396565a99ae9eb0c828dff31b919007dec32f",
+      "split": "V1"
+    },
+    {
+      "id": "X-learnevm-hundredfinance-hundredfinance",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Reentrancy/HundredFinance/HundredFinance.attack.sol",
+          "sha256_norm": "7102fb389df55aad3448b996daba74a59a98fd9a9fb0b1b93d8f00873441a2f7"
+        }
+      ],
+      "real_incident": true,
+      "incident": "HundredFinance",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "7102fb389df55aad3448b996daba74a59a98fd9a9fb0b1b93d8f00873441a2f7",
+      "split": "FINAL"
+    },
+    {
+      "id": "X-learnevm-paraluni-paraluni",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Reentrancy/Paraluni/Paraluni.attack.sol",
+          "sha256_norm": "ea937fc6d74e53bc4adcf056b84c83a82d958733037e682f1c21a4ecb0214fdd"
+        }
+      ],
+      "real_incident": true,
+      "incident": "Paraluni",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "ea937fc6d74e53bc4adcf056b84c83a82d958733037e682f1c21a4ecb0214fdd",
+      "split": "DEV"
+    },
+    {
+      "id": "X-learnevm-revestfinance-revestfinance",
+      "source": "coinspect-learn-evm-attacks",
+      "platform": "incident-repro",
+      "tier": "X",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/coinspect/learn-evm-attacks",
+          "commit": "77342c4e947218e93ba5d86972e3116f0d39bbfb",
+          "path": "test/Reentrancy/RevestFinance/RevestFinance.attack.sol",
+          "sha256_norm": "f25c5dde6aab6c2ae26b0c352d05cf815b1c0d4c4e918e710ac27e9e1caa84c0"
+        }
+      ],
+      "real_incident": true,
+      "incident": "RevestFinance",
+      "group_id": null,
+      "group_size": null,
+      "duplicate_of": null,
+      "license": "MIT",
+      "unlicensed": false,
+      "note": "pointer + hash kept although MIT permits copying; same-incident overlap with the opened DeFiHackLabs corpus is possible (different code)",
+      "dedupe_key": "f25c5dde6aab6c2ae26b0c352d05cf815b1c0d4c4e918e710ac27e9e1caa84c0",
+      "split": "DEV"
     }
   ],
   "screened": {
@@ -14534,31 +15806,44 @@
     ]
   },
   "counts": {
-    "units": 322,
+    "units": 369,
     "excluded_duplicates": 0,
     "counted_by_tier": {
-      "J": 322
+      "J": 327,
+      "X": 42
     },
     "split_by_tier": {
       "J": {
-        "DEV": 138,
-        "V1": 54,
-        "V2": 48,
+        "DEV": 139,
+        "V1": 55,
+        "V2": 51,
         "FINAL": 82
+      },
+      "X": {
+        "DEV": 20,
+        "V1": 7,
+        "V2": 5,
+        "FINAL": 10
       }
     },
     "J_by_platform": {
-      "sherlock": 322
+      "bounty-platform-unstated": 1,
+      "immunefi": 3,
+      "sherlock": 322,
+      "sherlock-bounty": 1
     },
-    "J_sources": 97,
-    "J_max_source_pct": 4.97,
+    "J_sources": 101,
+    "J_max_source_pct": 4.89,
     "J_platform_share_v1_plus_v2_pct": {
-      "code4rena": 56.65,
-      "codehawks-evm": 4.87,
+      "bounty-platform-unstated": 0.12,
+      "code4rena": 56.32,
+      "codehawks-evm": 4.84,
       "hats-finance": 0.24,
-      "sherlock": 38.24
+      "immunefi": 0.35,
+      "sherlock": 38.02,
+      "sherlock-bounty": 0.12
     },
-    "J_v1_plus_v2_total": 842,
+    "J_v1_plus_v2_total": 847,
     "J_codebase_pinned": 314
   }
 }

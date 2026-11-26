@@ -8,9 +8,7 @@ and split assignments are never edited, and no v3/v2/v1 unit is reused.
 
 ## Status
 
-**Scaffold committed before any unit was collected.** The salt below is fixed by
-this commit. Collection results, counts and the seal are recorded in
-`SEARCH_LOG.md` and `inventory.json` by later commits.
+**Collection closed 2026-11-26, sealed, not run.** Distinct findings: J 4 (6 submissions, Code4rena Lavarage), A 7 (Cantina, separate cell). FINAL J+X gains 0 units; the amended Solana FINAL minimum is unreachable (see SEARCH_LOG.md). The salt below was fixed by the scaffold commit before any unit was collected.
 
 ## Tiers
 
