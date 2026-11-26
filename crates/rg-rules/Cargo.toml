@@ -13,6 +13,7 @@ publish = false
 [dependencies]
 rg-ir.workspace = true
 rg-model.workspace = true
+rg-program.workspace = true
 rg-frontend-rust.workspace = true
 rg-frontend-ts.workspace = true
 rg-frontend-move.workspace = true

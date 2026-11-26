@@ -16,8 +16,10 @@ rg-frontend-sol.workspace = true
 rg-frontend-rust.workspace = true
 rg-frontend-ts.workspace = true
 rg-frontend-move.workspace = true
+rg-program.workspace = true
 regex.workspace = true
 serde.workspace = true
+serde_json.workspace = true
 serde-saphyr.workspace = true
 
 [dev-dependencies]
