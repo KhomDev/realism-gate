@@ -47,6 +47,7 @@ use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType, Span};
 use rg_ir::ir::{Expr, ExprKind, Lit, Pos, Stmt, StmtKind, Unit};
 use rg_ir::solana::ir::{Dialect, File, Function, Prior};
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 
 /// Text that a Solana test file must contain somewhere; a cheap filter before
@@ -83,23 +84,32 @@ pub fn is_script_path(path: &str) -> bool {
 /// Solana package. Never panics on malformed input: a file that does not
 /// parse yields what oxc recovered and its errors in [`Unit::errors`].
 pub fn parse_source(path: &str, source: &str) -> Option<Unit> {
-    parse_inner(path, source, true)
+    parse_inner(path, source, true, true)
 }
 
 /// Parses a fragment pasted into an issue: the marker and import gates are
 /// skipped because the fragment is checked as given, not as a project file.
 pub fn parse_fragment(path: &str, source: &str) -> Option<Unit> {
-    parse_inner(path, source, false)
+    parse_inner(path, source, false, true)
 }
 
-fn parse_inner(path: &str, source: &str, require_solana: bool) -> Option<Unit> {
+/// `guard` is false only in the tests that compare a parse with and without
+/// [`neutralize_annotations`].
+fn parse_inner(path: &str, source: &str, require_solana: bool, guard: bool) -> Option<Unit> {
     let text = source.strip_prefix('\u{feff}').unwrap_or(source);
     if require_solana && !MARKERS.iter().any(|m| text.contains(m)) {
         return None;
     }
     let source_type = SourceType::from_path(path).unwrap_or_else(|_| SourceType::ts());
     let allocator = Allocator::default();
-    let parsed = Parser::new(&allocator, text, source_type).parse();
+    // oxc reads the guarded text; the lowering quotes and positions the
+    // original. The guard changes no byte offset, so every span fits both.
+    let guarded = if guard {
+        neutralize_annotations(text)
+    } else {
+        Cow::Borrowed(text)
+    };
+    let parsed = Parser::new(&allocator, &guarded, source_type).parse();
     let mut lower = Lower::new(text);
     let errors: Vec<String> = parsed
         .diagnostics
@@ -123,6 +133,62 @@ fn parse_inner(path: &str, source: &str, require_solana: bool) -> Option<Unit> {
         move_file: None,
         errors,
     })
+}
+
+/// Blanks the sigil of every bundler annotation comment (`#__PURE__`,
+/// `@__PURE__`, `#__NO_SIDE_EFFECTS__`, `@__NO_SIDE_EFFECTS__`) so oxc reads
+/// it as a plain comment.
+///
+/// Why: `oxc_parser` 0.146.0 fails `debug_assert!(comment.is_pure())` at
+/// `lexer/trivia_builder.rs:62` when a pure annotation precedes a statement
+/// label or a stray colon (`/*#__PURE__*/a:0`, `//#__PURE__\n:`): the comment
+/// is retagged "not applied" once by the expression parser and again by the
+/// statement parser. A debug build (the fuzz targets, `cargo test`) panics.
+/// realism-gate never reads these annotations, so it hides them from oxc.
+///
+/// The match follows oxc's `parse_annotation`: the comment opens with `//` or
+/// `/*`, then ASCII whitespace (no line break after `//`), then `@` or `#`,
+/// then `__PURE__` or `__NO_SIDE_EFFECTS__`. The sigil becomes one space, so
+/// the length, every byte offset, every line and every column are unchanged.
+/// A string or regex literal that contains such a sequence loses the same one
+/// character in oxc's copy; findings quote the original text.
+///
+/// Input without a match comes back borrowed and byte-identical.
+pub fn neutralize_annotations(text: &str) -> Cow<'_, str> {
+    const ANNOTATIONS: &[&[u8]] = &[b"__PURE__", b"__NO_SIDE_EFFECTS__"];
+    let bytes = text.as_bytes();
+    let mut out: Option<Vec<u8>> = None;
+    let mut i = 0;
+    while i + 1 < bytes.len() {
+        let line = match (bytes[i], bytes[i + 1]) {
+            (b'/', b'/') => true,
+            (b'/', b'*') => false,
+            _ => {
+                i += 1;
+                continue;
+            }
+        };
+        let mut j = i + 2;
+        while j < bytes.len()
+            && bytes[j].is_ascii_whitespace()
+            && !(line && matches!(bytes[j], b'\n' | b'\r'))
+        {
+            j += 1;
+        }
+        if j < bytes.len()
+            && matches!(bytes[j], b'@' | b'#')
+            && ANNOTATIONS.iter().any(|a| bytes[j + 1..].starts_with(a))
+        {
+            out.get_or_insert_with(|| bytes.to_vec())[j] = b' ';
+        }
+        i += 1;
+    }
+    match out {
+        // One ASCII byte replaced by another keeps the text UTF-8, so the
+        // fallback never runs; it is there so this function cannot panic.
+        Some(v) => String::from_utf8(v).map_or(Cow::Borrowed(text), Cow::Owned),
+        None => Cow::Borrowed(text),
+    }
 }
 
 /// A called name in snake case: `setAccount` is `set_account`,
@@ -1927,5 +1993,54 @@ mod tests {
         ] {
             assert!(!is_setup_title(t), "{t}");
         }
+    }
+
+    #[test]
+    fn the_guard_blanks_only_the_annotation_sigil() {
+        for (src, want) in [
+            ("/* #__PURE__ */ f()", "/*  __PURE__ */ f()"),
+            ("/*@__PURE__*/f()", "/* __PURE__*/f()"),
+            (
+                "// #__NO_SIDE_EFFECTS__\nfunction f() {}",
+                "//  __NO_SIDE_EFFECTS__\nfunction f() {}",
+            ),
+            (
+                "/*\n\t @__NO_SIDE_EFFECTS__ */",
+                "/*\n\t  __NO_SIDE_EFFECTS__ */",
+            ),
+            ("// #__PURE__KEY_x\na: 0", "//  __PURE__KEY_x\na: 0"),
+        ] {
+            let got = neutralize_annotations(src);
+            assert!(matches!(got, Cow::Owned(_)), "{src:?}");
+            assert_eq!(got, want, "{src:?}");
+        }
+        // Not annotations to oxc either: a line break after `//`, a JSDoc
+        // block, a missing sigil, a missing trailing `__`.
+        for src in [
+            "//\n#__PURE__",
+            "/** @__PURE__ */ f()",
+            "/* __PURE__ */ f()",
+            "/* #__PURE_ */ f()",
+            "/* #__KEY__ */ 'a'",
+            "const s = '#__PURE__';",
+        ] {
+            assert!(
+                matches!(neutralize_annotations(src), Cow::Borrowed(s) if s == src),
+                "{src:?}"
+            );
+        }
+    }
+
+    /// The parse oxc's annotations do not crash gives the same unit, with
+    /// every position and quote, whether or not the guard runs.
+    #[test]
+    fn the_guard_changes_no_position_or_quote() {
+        let body = "describe(\"v\", () => {\n  const admin = Keypair.generate();\n  it(\"drains\", async () => {\n    /* #__PURE__ */ await program.methods.setOracle(x).signers([admin]).rpc();\n    // @__NO_SIDE_EFFECTS__\n    const f = /* @__PURE__ */ anchor.web3.Keypair.generate();\n    assert.equal(f.publicKey.toBase58(), \"x\");\n  });\n});\n";
+        let src = format!("{IMPORTS}{body}");
+        assert_ne!(neutralize_annotations(&src), src.as_str());
+        let with = parse_inner("t.ts", &src, true, true).expect("a Solana file");
+        let without = parse_inner("t.ts", &src, true, false).expect("a Solana file");
+        assert!(with.errors.is_empty(), "{:?}", with.errors);
+        assert_eq!(format!("{with:?}"), format!("{without:?}"));
     }
 }
