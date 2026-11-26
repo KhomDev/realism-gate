@@ -841,7 +841,12 @@ describe("retroactive rate", () => {{
 
   it("applies the new rate to the whole period", async () => {{
     const [farm] = PublicKey.findProgramAddressSync([Buffer.from("farm")], program.programId);
-    await program.methods.initialize(new BN(10)).accounts({{ farm, admin: admin.publicKey }}).rpc();
+    // The accounts name the system program: the call is still the farm's
+    // own `initialize`, and it still makes the wallet the farm's admin.
+    await program.methods
+      .initialize(new BN(10))
+      .accounts({{ farm, admin: admin.publicKey, systemProgram: anchor.web3.SystemProgram.programId }})
+      .rpc();
     const staker = Keypair.generate();
     const sig = await provider.connection.requestAirdrop(staker.publicKey, 3 * LAMPORTS_PER_SOL);
     await provider.connection.confirmTransaction(sig);
