@@ -57,13 +57,13 @@ jobs:
             git diff "$BASE" HEAD -- $FILES > "$RUNNER_TEMP/changes.diff"
             args+=(--in-diff "$RUNNER_TEMP/changes.diff")
           fi
-          cargo mutants --workspace "${args[@]}" -j 4 --timeout 300
+          cargo mutants --workspace --test-workspace=true "${args[@]}" -j 4 --timeout 300
 
       - name: Mutate the rule, claim, bind and verify-fix code
         if: ${{ inputs.files == '' }}
         continue-on-error: true
         run: |
-          cargo mutants --workspace \
+          cargo mutants --workspace --test-workspace=true \
             --file 'crates/rg-rules/src/rules/*.rs' \
             --file 'crates/rg-model/src/claims/*.rs' \
             --file 'src/bind/*.rs' \
