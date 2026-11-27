@@ -347,7 +347,12 @@ pub fn line(r: &RuleInfo, with_reason: bool) -> String {
 pub fn shipped_line(r: &RuleInfo) -> String {
     languages(r)
         .into_iter()
-        .map(|lang| format!("{lang} {}", capped(r.severity, derived(r.id, lang)).as_str()))
+        .map(|lang| {
+            format!(
+                "{lang} {}",
+                capped(r.severity, derived(r.id, lang)).as_str()
+            )
+        })
         .collect::<Vec<_>>()
         .join(" · ")
 }
@@ -386,7 +391,10 @@ mod tests {
             let id = format!("RG{i:02}");
             let cells = DOC.rules.get(&id).unwrap_or_else(|| panic!("{id} missing"));
             for (lang, cell) in cells {
-                assert!(LANGUAGES.contains(&lang.as_str()), "{id}: bad language {lang}");
+                assert!(
+                    LANGUAGES.contains(&lang.as_str()),
+                    "{id}: bad language {lang}"
+                );
                 assert!(
                     ["measured", "unmeasured"].contains(&cell.status.as_str()),
                     "{id} {lang}: bad status {}",
@@ -499,7 +507,10 @@ mod tests {
         assert_eq!(text, "0/2 (n<5, count only, heldout, in-sample)");
         assert!(!text.contains('%'));
         let r = record_of("rust", Some(&sample(3, 1, true)), Severity::Note);
-        assert_eq!(r.text(), "rust fresh 3/4 (n<5, count only); floor allows note");
+        assert_eq!(
+            r.text(),
+            "rust fresh 3/4 (n<5, count only); floor allows note"
+        );
         assert!(r.wilson95.is_none());
     }
 

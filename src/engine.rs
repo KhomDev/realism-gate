@@ -136,8 +136,11 @@ pub fn analyze(
         // and the level the severity floor allows this rule in this
         // language, derived at build time from `data/measured.json`
         // (`rules::measured`). `--severity` still wins over both.
-        let shipped =
-            rules::measured::shipped(info.id, rules::measured::lang_key(lang, &file), raw.severity);
+        let shipped = rules::measured::shipped(
+            info.id,
+            rules::measured::lang_key(lang, &file),
+            raw.severity,
+        );
         merged.insert(
             k,
             Finding {

@@ -95,7 +95,9 @@ pub fn render(report: &Report, fail_on: Option<Severity>) -> String {
 
     let active: Vec<&Finding> = report.active().collect();
     if !active.is_empty() {
-        out.push_str("| Level | Rule | Where | Test | Finding | Measured |\n|---|---|---|---|---|---|\n");
+        out.push_str(
+            "| Level | Rule | Where | Test | Finding | Measured |\n|---|---|---|---|---|---|\n",
+        );
         for f in active.iter().take(MAX_ROWS) {
             out.push_str(&row(f));
         }
