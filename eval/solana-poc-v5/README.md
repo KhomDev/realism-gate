@@ -7,9 +7,14 @@ reused. RustFund and the Solana Audit Arena are not sources for this corpus.
 
 ## Status
 
-**Scaffold committed before any unit was collected.** The salt below is fixed by
-this commit. Collection results, counts and the seal are recorded in
-`SEARCH_LOG.md` and `inventory.json` by later commits.
+**Collection closed 2026-11-27, sealed, not run.** Counted units: J 2
+(Code4rena Meteora Dynamic Bonding Curve), X 1 (Cashio infinite-mint
+reproduction), A 3 (OtterSec Port Sundial; separate cell, not pooled).
+J+X source clusters: 2. The amended FINAL minimum (≥ 60 labelled flags from
+≥ 4 clusters) is not met by this corpus; the search log lists the dead ends.
+Salted split of the 6 counted units: DEV 4, V1 2, V2 0, FINAL 0. FINAL was
+not enlarged. The salt below was fixed by the scaffold commit before any
+unit was collected.
 
 ## Tiers
 

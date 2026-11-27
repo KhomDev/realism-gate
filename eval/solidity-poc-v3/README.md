@@ -10,9 +10,14 @@ Solidity is measured on its own slices and never pooled with Solana.
 
 ## Status
 
-**Scaffold committed before any unit was collected.** The salt below is fixed by
-this commit. Collection results, counts and the seal are recorded in
-`SEARCH_LOG.md` and `inventory.json` by later commits.
+**Collection closed 2026-11-27, sealed, not run.** Counted units: X 35, all
+from `twabi/DeFi-Reentrancy-Hacks-Repository`, none of whose normalised text
+matches the opened DeFiHackLabs trees. Nine DeFiHackLabs tests added after
+pin `d4bd931` were collected and then dropped: they are already
+`solidity-poc-v1` units. v1+v2 X is 78; this corpus brings the combined X
+count to 113 of the 150 target. Salted split of the 35: DEV 11, V1 4, V2 6,
+FINAL 14. The salt below was fixed by the scaffold commit before any unit
+was collected.
 
 ## Tiers
 
