@@ -1,5 +1,5 @@
 //! The MCP server behind `realism-gate-mcp`, listed in the MCP Registry as
-//! `io.github.khomdev/rgate`.
+//! `io.github.KhomDev/rgate`.
 //!
 //! The server speaks MCP over stdio and shells out to `realism-gate`. It does
 //! not embed the checker, so every number a tool returns is the checker's own
@@ -26,7 +26,7 @@ use std::time::{Duration, Instant};
 
 /// The server's name in the MCP Registry. The crate README carries the same
 /// string after `mcp-name:`, which is how the registry checks ownership.
-pub const REGISTRY_NAME: &str = "io.github.khomdev/rgate";
+pub const REGISTRY_NAME: &str = "io.github.KhomDev/rgate";
 
 /// Protocol revisions this server answers, newest first. `initialize` echoes
 /// the client's revision when it is one of these, else offers the newest.

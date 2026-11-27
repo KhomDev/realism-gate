@@ -2,7 +2,7 @@
 
 Two pieces, both optional and both local: a skill the agent reads, and an MCP
 server (`realism-gate-mcp`, listed in the MCP Registry as
-`io.github.khomdev/rgate`) that runs the checker.
+`io.github.KhomDev/rgate`) that runs the checker.
 
 > **DEV-ONLY numbers.** The `measured` blocks and precision figures the tools
 > return come from data that was already opened; no held-out precision is

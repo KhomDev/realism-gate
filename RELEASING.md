@@ -69,6 +69,10 @@ list, in substance:
   the change is confined to `realism-gate-mcp`, whose 1.5.0 transport did not
   work with current clients: no rule, severity, CLI flag, default, report
   field or archive layout changed. Not a precedent for CLI changes.
+- **1.5.2 (2026-11-27), same day as 1.5.1, is metadata only:** the MCP
+  Registry name became `io.github.KhomDev/rgate` because the registry
+  namespace is case-sensitive and 1.5.1's crates.io README carried the
+  lowercase name, which cannot be changed after publishing.
 
 ## Compatibility policy
 

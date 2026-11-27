@@ -1,6 +1,6 @@
 [package]
 name = "rg-render"
-version = "1.5.1"
+version = "1.5.2"
 edition.workspace = true
 rust-version.workspace = true
 description = "Output formats (JSON, SARIF, text, Markdown, evidence card) for realism-gate. Internal crate of realism-gate: no API stability guarantee outside that package."

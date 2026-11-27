@@ -47,7 +47,7 @@ realism-gate verify-fix --poc test/Poc.t.sol --patched poc-patched/
 
 ## MCP tools
 
-From `realism-gate-mcp` (MCP Registry: `io.github.khomdev/rgate`). Each one runs the CLI and returns its output unedited; `isError` is the CLI's exit status.
+From `realism-gate-mcp` (MCP Registry: `io.github.KhomDev/rgate`). Each one runs the CLI and returns its output unedited; `isError` is the CLI's exit status.
 
 - `check_poc` (`path`, optional `declaration`, `fail_on`, `fragment`): step 1.
 - `check_claims` (`report`, optional `claims`, `poc`, `declaration`, `fail_on`): steps 2 and 3.
