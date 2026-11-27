@@ -227,3 +227,77 @@ fn f2_the_cli_passes_the_model_to_the_solidity_rules() {
     assert_eq!(with, run(true));
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+// ---------------------------------------------------------------------------
+// Which entry point the model answers with
+
+/// A target with two contracts that both define `harvest` (and an open
+/// `ping`), each with its own modifier on `harvest`. `Zeta` is written after
+/// `Alpha`, so it is the last candidate.
+fn two_contracts(name: &str, alpha: &str, zeta: &str) -> rg_program::ProgramModel {
+    let dir = scratch(name);
+    for (contract, modifier) in [("Alpha", alpha), ("Zeta", zeta)] {
+        std::fs::write(
+            dir.join(format!("src/{contract}.sol")),
+            format!(
+                "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\ncontract {contract} {{\n    address public owner;\n    constructor() {{ owner = msg.sender; }}\n    modifier onlyOwner() {{ require(msg.sender == owner, \"no\"); _; }}\n    function harvest() external {modifier} {{}}\n    function ping() external {{}}\n}}\n"
+            ),
+        )
+        .unwrap();
+    }
+    let model = rg_program::ProgramModel::resolve(&dir).expect("the contracts resolve");
+    let _ = std::fs::remove_dir_all(&dir);
+    model
+}
+
+/// The test contract deploys `T` and calls `harvest` on it.
+fn deploys_and_harvests(t: &str) -> String {
+    format!(
+        "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.20;\nimport \"forge-std/Test.sol\";\ncontract HarvestTest is Test {{\n    {t} vault;\n    function setUp() public {{ vault = new {t}(); }}\n    function testHarvest() public {{\n        uint256 before = address(this).balance;\n        vault.harvest();\n        assertGt(address(this).balance, before);\n    }}\n}}\n"
+    )
+}
+
+fn rg03_severity(src: &str, model: &rg_program::ProgramModel) -> Severity {
+    let r = report(src, Some(model));
+    let rg03 = rule(&r, "RG03");
+    assert_eq!(rg03.len(), 1, "{:?}", r.findings);
+    rg03[0].severity
+}
+
+#[test]
+fn f2_the_receiver_s_own_contract_answers() {
+    // `vault` is an `Alpha`, whose `harvest` is open; `Zeta.harvest` is
+    // `onlyOwner` and must not answer for it.
+    let model = two_contracts("own-contract", "", "onlyOwner");
+    assert_eq!(
+        rg03_severity(&deploys_and_harvests("Alpha"), &model),
+        Severity::Note
+    );
+    let model = two_contracts("own-contract-gated", "onlyOwner", "");
+    assert_eq!(
+        rg03_severity(&deploys_and_harvests("Alpha"), &model),
+        Severity::Warn
+    );
+}
+
+#[test]
+fn f2_an_unknown_receiver_type_is_answered_when_every_candidate_agrees() {
+    // `VaultV2` is not in the model: the function name decides, and both
+    // contracts' `harvest` are `onlyOwner`.
+    let model = two_contracts("agree", "onlyOwner", "onlyOwner");
+    assert_eq!(
+        rg03_severity(&deploys_and_harvests("VaultV2"), &model),
+        Severity::Warn
+    );
+}
+
+#[test]
+fn f2_candidates_that_disagree_are_no_answer() {
+    // `Alpha.harvest` is open and `Zeta.harvest` (the last candidate) is
+    // gated: no answer, so the name decides, and `harvest` reads as ordinary.
+    let model = two_contracts("disagree", "", "onlyOwner");
+    assert_eq!(
+        rg03_severity(&deploys_and_harvests("VaultV2"), &model),
+        Severity::Note
+    );
+}
