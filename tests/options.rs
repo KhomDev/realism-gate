@@ -59,6 +59,20 @@ fn pair(r: &str, s: &str) -> (String, String) {
     (r.to_string(), s.to_string())
 }
 
+/// A rule's level `raw` on Solidity as it ships by default: capped by the
+/// RG-A5 severity floor (`note` while the cell is in-sample). A level set by
+/// the config or `--severity` is not capped.
+fn shipped(r: &str, raw: &str) -> (String, String) {
+    use realism_gate::Severity::{Error, Note, Warn};
+    let level = match raw {
+        "error" => Error,
+        "warn" => Warn,
+        _ => Note,
+    };
+    let s = realism_gate::rules::measured::shipped(r, "solidity", level);
+    (r.to_string(), s.as_str().to_string())
+}
+
 fn outside_config(name: &str, body: &str) -> PathBuf {
     let path = std::env::temp_dir().join(format!("rg-policy-{}-{name}.toml", std::process::id()));
     std::fs::write(&path, body).unwrap();
@@ -103,7 +117,10 @@ fn config_sets_severity_and_turns_rules_off() {
             "RG06,RG11",
         ],
     );
-    assert_eq!(rules(&v), vec![pair("RG06", "error"), pair("RG11", "warn")]);
+    assert_eq!(
+        rules(&v),
+        vec![pair("RG06", "error"), shipped("RG11", "warn")]
+    );
     assert_eq!(
         run(
             &dir,
@@ -116,7 +133,10 @@ fn config_sets_severity_and_turns_rules_off() {
 
     // --no-config ignores the file.
     let v = json(&dir, &["--no-config"]);
-    assert_eq!(rules(&v), vec![pair("RG06", "error"), pair("RG11", "warn")]);
+    assert_eq!(
+        rules(&v),
+        vec![shipped("RG06", "error"), shipped("RG11", "warn")]
+    );
     assert!(v["config"].is_null());
 }
 
@@ -140,12 +160,12 @@ fn a_bad_config_is_a_usage_error() {
 fn exclude_drops_files_from_config_and_flags() {
     let dir = project("exclude");
     let v = json(&dir, &["--exclude", "test/RG06*"]);
-    assert_eq!(rules(&v), vec![pair("RG11", "warn")]);
+    assert_eq!(rules(&v), vec![shipped("RG11", "warn")]);
     assert_eq!(v["summary"]["suites"], 1);
     let cfg = outside_config("exclude", "exclude = [\"test/RG11_unpinned_fork.t.sol\"]\n");
     let cfg_s = cfg.to_str().unwrap();
     let v = json(&dir, &["--config", cfg_s]);
-    assert_eq!(rules(&v), vec![pair("RG06", "error")]);
+    assert_eq!(rules(&v), vec![shipped("RG06", "error")]);
     // The flag adds to the file. Excluding every suite leaves nothing
     // checked, which is an error, not a pass.
     let o = run(
@@ -182,7 +202,7 @@ fn changed_since_reports_only_changed_files() {
     std::fs::write(&rg11, format!("{text}\n// touched\n")).unwrap();
 
     let v = json(&dir, &["--changed-since", "HEAD"]);
-    assert_eq!(rules(&v), vec![pair("RG11", "warn")]);
+    assert_eq!(rules(&v), vec![shipped("RG11", "warn")]);
     assert_eq!(v["changed_since"]["ref"], "HEAD");
     assert_eq!(v["changed_since"]["files"], 1);
     // Everything was still read.
@@ -207,7 +227,19 @@ fn changed_since_reports_only_changed_files() {
 #[test]
 fn markdown_summarises_for_a_pull_request() {
     let dir = project("markdown");
-    let o = run(&dir, &["check", "--format", "markdown", "--no-config"]);
+    // The levels are set explicitly: by default both findings ship at the
+    // floor (note), and this test is about the FAIL summary.
+    let o = run(
+        &dir,
+        &[
+            "check",
+            "--format",
+            "markdown",
+            "--no-config",
+            "--severity",
+            "RG06=error,RG11=warn",
+        ],
+    );
     assert_eq!(o.status.code(), Some(1));
     let md = String::from_utf8_lossy(&o.stdout);
     assert!(md.contains(": FAIL"), "{md}");

@@ -8,6 +8,7 @@ the rerun command reproduces.
 |---|---|
 | tool | `realism-gate 1.4.0` |
 | rule set | RG01-RG20, sha256 `ae1794ca39ec7159` |
+| severity data | measured.json, sha256 `08731b2b4f997519` |
 | PoC | sha256 `646772314298b370` (`test/ShadowVault.t.sol`) |
 | report | sha256 `0b5fba2ac3b7fa82` (`finding.md`) |
 | claims | sha256 `8b5bc392845c08e8` (claims.yaml) |

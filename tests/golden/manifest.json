@@ -1,0 +1,1768 @@
+{
+  "description": "Golden output of the realism-gate CLI over the committed fixture tree. The case list was produced by tests/golden/generate.py from the pre-split binary (generated_from_commit); the expected outputs were re-recorded at RG-A5 (rerecorded_at_commit) after every changed case was reviewed as the intended severity-floor change. tests/golden.rs re-runs every case and compares stdout bytes and exit codes.",
+  "generator": "tests/golden/generate.py",
+  "generated_from_commit": "45ca25a8dd76842ae33503ce01b572942c80a33e",
+  "binary_sha256": "71916f9ddf329534f9c4695d37f49c2a21f61231fbda700aa3976378a4436398",
+  "tool_version": "1.4.0",
+  "case_count": 117,
+  "cases": [
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c2197b9c1a39cbe814f7a2b10dea3edc6c2b76c02666db8544613678eed71b8e",
+      "stdout_bytes": 45972,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad",
+        "--no-declaration",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "1349f0b66f971fe38f1e162336a29560f07ad41de467e2af10e50bddd3e819ac",
+      "stdout_bytes": 89255,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/declaration",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c0b56e5f5217ea318e514a68370f9f154f775e981ec44d5fee0e3a8828f26461",
+      "stdout_bytes": 2278,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/declaration",
+        "--no-declaration",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "a7d589825294f6f75d1085551bfa10a217ba9c752a9164ec21fe8aa604118972",
+      "stdout_bytes": 20776,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/declaration",
+        "--declaration",
+        "tests/fixtures/declaration/realism.yaml",
+        "--format",
+        "json"
+      ],
+      "exit": 2,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stderr_sha256": "3aa001ed6472818ee80632419b75d47a3709335c6e1e24c7a5df5998c8759940",
+      "stderr_bytes": 320,
+      "compare_stderr": false
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/declaration",
+        "--declaration",
+        "tests/fixtures/declaration/realism.yaml",
+        "--format",
+        "sarif"
+      ],
+      "exit": 2,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stderr_sha256": "3aa001ed6472818ee80632419b75d47a3709335c6e1e24c7a5df5998c8759940",
+      "stderr_bytes": 320,
+      "compare_stderr": false
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/good",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "01183b5b371e64dba09de09adeba78e29fc462eebf20af535068d2755f0861e4",
+      "stdout_bytes": 347,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/good",
+        "--no-declaration",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "def9254dc3031b3e0cdc4c672fd4ee8b8f0d6471776ae7c3c231ad8945796a19",
+      "stdout_bytes": 17826,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/inherit",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "f00618ff56ccccc2a91e76ba7631df75002f8d040a6f8ed029f1548857c67501",
+      "stdout_bytes": 1198,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/inherit",
+        "--no-declaration",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "95aefcdd84a718361ef18ecd7492b370e49fa3c03fe4262d74f15947d4752f52",
+      "stdout_bytes": 19180,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/move/bad",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "96b177af7abe25d9b373cefa58cd4c46d9dba88c5f08cfdc7efcb1629e60baf2",
+      "stdout_bytes": 3526,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/move/bad",
+        "--no-declaration",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "898ad1d0d667ac1e3169a08363d16693a559daf7e653b074d922e6b5a0f0fedb",
+      "stdout_bytes": 23021,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/move/good",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "592d26362f849f333694c0a87639a97d5d0eb71a179fc4e996eb18917abb6c60",
+      "stdout_bytes": 344,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/move/good",
+        "--no-declaration",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "def9254dc3031b3e0cdc4c672fd4ee8b8f0d6471776ae7c3c231ad8945796a19",
+      "stdout_bytes": 17826,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/review",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "fdf3964cd3bd9a2106c9d7400cd9bdb6625a932ce137097c842f4dff5667357b",
+      "stdout_bytes": 30601,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/review",
+        "--no-declaration",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "44bf3704ffdfc44730fe9cd259910555f9fa5814adafe7c97eea8dd3dc398787",
+      "stdout_bytes": 60989,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_declaration",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "02001f64cc0d86a788dc7218b3d84af85eff977ebaf0f5d3c8ca12a5cb239849",
+      "stdout_bytes": 1274,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_declaration",
+        "--no-declaration",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "559824cc5ce15e6d02a9f1efa25691f950e7fb7b8cf1a84798677019663e7d34",
+      "stdout_bytes": 19269,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_declaration",
+        "--declaration",
+        "tests/fixtures/declaration/realism.yaml",
+        "--format",
+        "json"
+      ],
+      "exit": 2,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stderr_sha256": "3aa001ed6472818ee80632419b75d47a3709335c6e1e24c7a5df5998c8759940",
+      "stderr_bytes": 320,
+      "compare_stderr": false
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_declaration",
+        "--declaration",
+        "tests/fixtures/declaration/realism.yaml",
+        "--format",
+        "sarif"
+      ],
+      "exit": 2,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 0,
+      "stderr_sha256": "3aa001ed6472818ee80632419b75d47a3709335c6e1e24c7a5df5998c8759940",
+      "stderr_bytes": 320,
+      "compare_stderr": false
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_shared",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "5f45d3a8f90884f4b2d0f69400fe4d8f9d3c0e963a7218e42bda28c88444b22f",
+      "stdout_bytes": 1241,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_shared",
+        "--no-declaration",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "7ef086ecdbf89d0d906cf27442011c0814a029d51ad90ea68ea6136acac82ba5",
+      "stdout_bytes": 19226,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_shared/common",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 2,
+      "stdout_sha256": "f28ea1ea504d0765f007bcde89d3622dbbc6e138da0693348a5d4d0fa54b0c4b",
+      "stdout_bytes": 344,
+      "stderr_sha256": "497625e1bffb1b1c1d11690f75451f8f54b2d4f223bc3574846bfeea7baca77d",
+      "stderr_bytes": 181,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_shared/common",
+        "--no-declaration",
+        "--format",
+        "sarif"
+      ],
+      "exit": 2,
+      "stdout_sha256": "def9254dc3031b3e0cdc4c672fd4ee8b8f0d6471776ae7c3c231ad8945796a19",
+      "stdout_bytes": 17826,
+      "stderr_sha256": "497625e1bffb1b1c1d11690f75451f8f54b2d4f223bc3574846bfeea7baca77d",
+      "stderr_bytes": 181,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_suppress",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b6d3d0c753d4f2debf15aebe6f84acbae2ca3227822c507018d4d26226913052",
+      "stdout_bytes": 2409,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_suppress",
+        "--no-declaration",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "2c68938b43b8ddc5437aaa4263b1458efdf2022229fe33a5a82967c17c5dc44b",
+      "stdout_bytes": 20652,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/suppress",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "7361e763134b9b0d4e484bf3160c574def9d36c0bfaaef3d06a8ddbfe651c567",
+      "stdout_bytes": 2163,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/suppress",
+        "--no-declaration",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "dd53016e69cc0e9458e182ed0b693af5833f79beeba192a666798ccb6e6067d3",
+      "stdout_bytes": 20393,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/ts_shared",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "ecc553ab4d688cc270150bd01842e290e34a5772ef598f5a8c3bccdd5a7818bc",
+      "stdout_bytes": 1211,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/ts_shared",
+        "--no-declaration",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "4f6ee6e2024dd566ea364c95606b0a9eb2e1ecb236996282c9c92ec881e29fae",
+      "stdout_bytes": 19167,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/ts_suppress",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "838dd063cec44ef8cb2e7f58e1d9eafedd3eb72a7f7ee136a333dc2f3436e2c4",
+      "stdout_bytes": 2173,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/ts_suppress",
+        "--no-declaration",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "7b1d10a6a98ee6d255f4e84b6fb4ace4899673f7271ecf3a8657db6ba7787be4",
+      "stdout_bytes": 20259,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/suppress",
+        "--no-declaration",
+        "--trust-inline-allows",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b2fdece2a2700046454b06f0fc2e2ba60e92424363b162228c7d13deea7e7f64",
+      "stdout_bytes": 2154,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/suppress",
+        "--no-declaration",
+        "--trust-inline-allows",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "35eb64168b60d883af00a9a4d0fe4c66e160f8235405adfea8cc361afdc71aed",
+      "stdout_bytes": 20585,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_suppress",
+        "--no-declaration",
+        "--trust-inline-allows",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "da34db52287f32d9eccbdf45aef7ece93cf5d50b66b8597e082ff6db3de2ab57",
+      "stdout_bytes": 2411,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_suppress",
+        "--no-declaration",
+        "--trust-inline-allows",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "29f6864b10167d4c01bd32891eaf125d35f4efe6ac82d8a5e47d0d0507860ba2",
+      "stdout_bytes": 20855,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/ts_suppress",
+        "--no-declaration",
+        "--trust-inline-allows",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "fb81f434ecf449888c4a912795f80b0c7d7255c020da3b11f58502073cd88c5c",
+      "stdout_bytes": 2156,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/ts_suppress",
+        "--no-declaration",
+        "--trust-inline-allows",
+        "--format",
+        "sarif"
+      ],
+      "exit": 0,
+      "stdout_sha256": "5145663bc410d7345e75c751a4c49558df6aeb2866b2332e8b181086225b0d6c",
+      "stdout_bytes": 20443,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG01_attacker_holds_privilege.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c89bc1b32c7abeb6d9e5e0895f2c116e3e1e05b1817db0c6ab41253ea5be540b",
+      "stdout_bytes": 1175,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG01_attacker_holds_privilege.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "015c85ad922a8b2af24d1874b0429cb5aecb63b8da24acc2a2ad06726e8315bd",
+      "stdout_bytes": 1104,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG01_attacker_holds_privilege.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "6bb1266c1c0384a3afd44b45b65f01ddf36e6b841f9420e40e3ef8e70a1f9411",
+      "stdout_bytes": 1192,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG02_prank_deployed_copy.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "474e1058fd2358227fb6faa04f025b074d2d92e6a22e59ce2db0a4d23b684444",
+      "stdout_bytes": 1407,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG02_privileged_signer.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "6c28619a9726abc97e58cba9ebe3abd09f0b71a7ff9d5aae8c1f67303c32b3c0",
+      "stdout_bytes": 1268,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG02_privileged_signer.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "ccd4cd2b9936a34934fc77e84f974bb34b4c83db116da91efab8b42d4f4aff09",
+      "stdout_bytes": 1312,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG02_privileged_step.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "3a64d7614af65cb452129a2091618052578a2f6bd2fc4ec329ed5c575c877d45",
+      "stdout_bytes": 1292,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG03_deployer_is_attacker.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b811c844475df9c867e565b6f381c53ce5e9b2058503c8d9f13ca4758c47c947",
+      "stdout_bytes": 1287,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG03_ordinary_deploy_is_a_note.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b5360c43d598494e01e1a4876d42824508603204b23f20789a8dcca5122adcb3",
+      "stdout_bytes": 1396,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG03_payer_is_deployer.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "2ef4672f43bc690816557ea2e71d7f2fae1cbf8f6a0053044bed489b7710c3f5",
+      "stdout_bytes": 1401,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG03_payer_is_deployer.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "42f9ea048de41466016b0d7bb7dbfd948a1c43f1bf4eed9b2b920e30d2de1c9f",
+      "stdout_bytes": 1357,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG04_account_write.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "3b147fec66fb1d71cb57fe0ccb276e341b7f73f80ea67347ff1229c46b1243d4",
+      "stdout_bytes": 1138,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG04_account_write.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "8bf328f31335f0d2156248d7c6e24155fb05a448d4836dc05a2d67a3d8cbbd09",
+      "stdout_bytes": 1183,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG04_stdstore_write.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "3fdd929c8c003ab392c2d7cf258e7e6f72f15cd2179c5f68f12179167170aafa",
+      "stdout_bytes": 2915,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG04_storage_write.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "a864f85b02adabdfa9b801d2d6332d346afed8f764ae6fa4b9f9601d8d548f0a",
+      "stdout_bytes": 1179,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG05_code_replacement.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d129c9a51122417efe37c44d18bc3ff585f963d5d2467b1c69c0461851f0ccaa",
+      "stdout_bytes": 1098,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG05_mock_program.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c1b8e030f2e9ffc3edaeec69cd9eecda19b3359ced68efefa73ae1e1f421305e",
+      "stdout_bytes": 1155,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG05_mock_program.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "97891c5cdf1ca9ea2f0522664edefbecda018599f408de2878411f91a587fd8f",
+      "stdout_bytes": 1099,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG06_balance_injection.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "750103367d0d7173e0107f3bb9d79d7ee944f3f16a09719024f4ad095988e1db",
+      "stdout_bytes": 1211,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG06_token_balance_injection.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "6bcf283eea283c9d6912f7a22f089892aae6b050223bf09475f6493546f7c62e",
+      "stdout_bytes": 1302,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG06_token_balance_injection.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "dcf09d78f737562cf51e32dca55719710ae5fe08e85ff29d705e6e9da322527e",
+      "stdout_bytes": 1423,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG07_mocked_call.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "a52439fdaeaff63960b6db4d95ab886d7758b74ec7c9880a3c54bc194314e248",
+      "stdout_bytes": 1347,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG08_no_assertion.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c23f40d3652e583b5aadf36de6b3ad06e2a46dc797e0be79c3387656262502a7",
+      "stdout_bytes": 1961,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG08_no_assertion.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "2ac8e451d6f8463119fb8e263c308f9896ec3d72123730ebf493d0666f277811",
+      "stdout_bytes": 1819,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG08_no_assertion.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "7f9f9ffe6a0a8e13bb67970e0620d4bb537cb26d379cdbc3b99a3b7237314649",
+      "stdout_bytes": 1916,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG09_inflated_baseline.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "190a34b11683657fa93ebd268a99e07e951aa4285c2b96c00e44d9ec903ddb42",
+      "stdout_bytes": 1162,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG09_tautological_assertion.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "fb40af020a3aa17f13c3931ee74d0e97b8a4978eadba407a44f660cefb05e16d",
+      "stdout_bytes": 1853,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG09_tautological_assertion.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d346d60f72f184b8324ce5e93dcf01b16f83389cfc8a86dbac22de7a3e8e0575",
+      "stdout_bytes": 1772,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG09_tautological_assertion.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "d770946a4790774e87d57b132acea3adc70c8ae85bfe8693d1a8ae9c9b82256b",
+      "stdout_bytes": 1782,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG10_no_baseline.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "769f692b61f27cdd0526eef797d5b401814d8d6fd4f9aab09a448e493365906c",
+      "stdout_bytes": 1160,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG10_no_baseline.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e4848143f3e064dbe68ccc8acee8fec983bda921f5f738a1743fcd1e70a114af",
+      "stdout_bytes": 1131,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG10_no_baseline.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e294a912222f63f19888e03ccc1ba6ab9ce548ae9e844ff18c0a8d08d1df39d8",
+      "stdout_bytes": 1136,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG10_test_contract_ether.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "7e95c3742fe1941e0fbb95486f9f2b45cda8a5b08addee9d12859822c0b676d2",
+      "stdout_bytes": 1136,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG11_live_rpc.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "dd4ee3e6804f32d21527e8715f27093dd9f5ed0ca22f58cd71cae7a6974f79e1",
+      "stdout_bytes": 1272,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG11_live_rpc.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "381f02cd8ba4e8519c08f322f8eaa84926913a76d894014eb71edc1a1193c60f",
+      "stdout_bytes": 1266,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG11_unpinned_fork.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "62ec6f426ff8ac28d1efe6f15943d24c23a0e1151426d8fe73d3fcaae7b1c08b",
+      "stdout_bytes": 1148,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG15_profit_ignores_fee.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "711259962b40d7c11f62e2a4ce7fc28fe2570caf0e9a82159bf1dd3b584b23b3",
+      "stdout_bytes": 1309,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG16_implausible_amount.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "e51d73fb761bd2c384d55a64d38a2c95cd6540a4ef8df4026ca80a2c61f3b390",
+      "stdout_bytes": 2966,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG17_unevidenced_setup.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "fa84b91bd14fb8eefb12d11512dfb38e300fa463749f7808beb0239b698b5eb8",
+      "stdout_bytes": 1349,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG18_revert_only.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "35fe4f750ed0796e4713fba42f255e8e91a5f5bb42473c27d3909324cbfa90fb",
+      "stdout_bytes": 1280,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG19_setup_hides_storage.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "4f15de295c47b204a90cd95e7934abbc3377373140346bf3a301fa56bb8566f4",
+      "stdout_bytes": 2112,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/bad/RG20_missing_citation.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "33c826a1568dbd59e686f29b5e7520bda4d3f42efa46bd4b570b9bd3cc929678",
+      "stdout_bytes": 1383,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/declaration/KeeperSandwich.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c0b56e5f5217ea318e514a68370f9f154f775e981ec44d5fee0e3a8828f26461",
+      "stdout_bytes": 2278,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/good/AnchorVaultExploit.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "592d26362f849f333694c0a87639a97d5d0eb71a179fc4e996eb18917abb6c60",
+      "stdout_bytes": 344,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/good/BankrunExploit.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "592d26362f849f333694c0a87639a97d5d0eb71a179fc4e996eb18917abb6c60",
+      "stdout_bytes": 344,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/good/FlashLoanFork.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "592d26362f849f333694c0a87639a97d5d0eb71a179fc4e996eb18917abb6c60",
+      "stdout_bytes": 344,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/good/FundedBaseline.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c610d271a38239a85812fc6a982ae9a19357bec7177bef518be17868a1ed6fed",
+      "stdout_bytes": 344,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/good/HardhatSuite.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 2,
+      "stdout_sha256": "851a0b2bb74be25cd44435cb0da616c1543a5f4a6ed6e1864990d45b9f4e002d",
+      "stdout_bytes": 344,
+      "stderr_sha256": "497625e1bffb1b1c1d11690f75451f8f54b2d4f223bc3574846bfeea7baca77d",
+      "stderr_bytes": 181,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/good/HelperAttack.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "592d26362f849f333694c0a87639a97d5d0eb71a179fc4e996eb18917abb6c60",
+      "stdout_bytes": 344,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/good/LocalDeployment.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "5b79e474c3d07172fb6dc45eefc08910ba0e99bfb05e70b2828ba7c902b9522b",
+      "stdout_bytes": 344,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/good/ProfitNetsFee.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "592d26362f849f333694c0a87639a97d5d0eb71a179fc4e996eb18917abb6c60",
+      "stdout_bytes": 344,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/good/SolanaLiteSvmExploit.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "592d26362f849f333694c0a87639a97d5d0eb71a179fc4e996eb18917abb6c60",
+      "stdout_bytes": 344,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/good/SolanaMolluskCheck.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "592d26362f849f333694c0a87639a97d5d0eb71a179fc4e996eb18917abb6c60",
+      "stdout_bytes": 344,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/good/SolanaProgramTestExploit.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "592d26362f849f333694c0a87639a97d5d0eb71a179fc4e996eb18917abb6c60",
+      "stdout_bytes": 344,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/inherit/BaseFixture.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 2,
+      "stdout_sha256": "f28ea1ea504d0765f007bcde89d3622dbbc6e138da0693348a5d4d0fa54b0c4b",
+      "stdout_bytes": 344,
+      "stderr_sha256": "497625e1bffb1b1c1d11690f75451f8f54b2d4f223bc3574846bfeea7baca77d",
+      "stderr_bytes": 181,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/inherit/Child.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "179a339ff7ff6edda2f4ff0cd9d89c018eb2869f5fa121f458bf1bcbe841510c",
+      "stdout_bytes": 344,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/move/bad/rg01_admin_cap.move",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "41a15ea4fe75a31684f7fa82efad72c9e8cc2f8ca666245d762c542b8835a075",
+      "stdout_bytes": 1124,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/move/bad/rg06_mint.move",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "17d16d9cfda2717234371a3e8ce06da7fb45d92e828eaf092122578f94f7e012",
+      "stdout_bytes": 1278,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/move/bad/rg08_no_assert.move",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "944a45069a07d548427a8f4d4a1f18e5da6e77f957acb2afb3d5f6f534ed019d",
+      "stdout_bytes": 1049,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/move/bad/rg10_no_baseline.move",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "73f05ba992a588a4896dd80bafac37ccf030e85ec0157b3e8b50352fb1645dbd",
+      "stdout_bytes": 1113,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/move/good/attacker_deposit.move",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "592d26362f849f333694c0a87639a97d5d0eb71a179fc4e996eb18917abb6c60",
+      "stdout_bytes": 344,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/review/AquaDockPoC.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "f53f209ba1cb0244392461f13c08722f364338bf35d73aef268aa1d5e37154f7",
+      "stdout_bytes": 12008,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/review/DirectPushRacePoC.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "ab52afa3661ec30093b028f4f7556960b12ded26280e5e1dea52c558c7046c1e",
+      "stdout_bytes": 3556,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/review/ExtructionRegisterIntegrity.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "c2a3054ec9a32453de70c6eb355fdf8d45b6b28831feadba361cfc59695f49a1",
+      "stdout_bytes": 4795,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/review/Poc02TakerFundsStranded.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "7f4f29ea33a67062a0d365e06fd66dd8a3607ad7c10762538e3299967e709094",
+      "stdout_bytes": 1216,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/review/Poc04ExtructionDrain.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "0f56accf53c8d926501c741579930bcf6dd3a5111b10d71c392866617559de8e",
+      "stdout_bytes": 6006,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/review/PocReplay.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "6a31b7ff574c53691d1f39b39b435dd9b3c7f94a5a3ef8454a7a9b977ce39328",
+      "stdout_bytes": 4749,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_declaration/keeper_harvest.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "02001f64cc0d86a788dc7218b3d84af85eff977ebaf0f5d3c8ca12a5cb239849",
+      "stdout_bytes": 1274,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_shared/common/mod.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 2,
+      "stdout_sha256": "a0a17d48b509fe44feb29483e7e3ee5cccd192209136264f1709a9fab10c7f56",
+      "stdout_bytes": 364,
+      "stderr_sha256": "497625e1bffb1b1c1d11690f75451f8f54b2d4f223bc3574846bfeea7baca77d",
+      "stderr_bytes": 181,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_shared/exploit.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "179a339ff7ff6edda2f4ff0cd9d89c018eb2869f5fa121f458bf1bcbe841510c",
+      "stdout_bytes": 344,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/rust_suppress/allowed.rs",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "b6d3d0c753d4f2debf15aebe6f84acbae2ca3227822c507018d4d26226913052",
+      "stdout_bytes": 2409,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/suppress/Allowed.t.sol",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "7361e763134b9b0d4e484bf3160c574def9d36c0bfaaef3d06a8ddbfe651c567",
+      "stdout_bytes": 2163,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/ts_shared/exploit.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "592d26362f849f333694c0a87639a97d5d0eb71a179fc4e996eb18917abb6c60",
+      "stdout_bytes": 344,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/ts_shared/utils.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 2,
+      "stdout_sha256": "a0a17d48b509fe44feb29483e7e3ee5cccd192209136264f1709a9fab10c7f56",
+      "stdout_bytes": 364,
+      "stderr_sha256": "497625e1bffb1b1c1d11690f75451f8f54b2d4f223bc3574846bfeea7baca77d",
+      "stderr_bytes": 181,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "check",
+        "tests/fixtures/ts_suppress/allowed.ts",
+        "--no-declaration",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "838dd063cec44ef8cb2e7f58e1d9eafedd3eb72a7f7ee136a333dc2f3436e2c4",
+      "stdout_bytes": 2173,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "rules"
+      ],
+      "exit": 0,
+      "stdout_sha256": "df17b61877bf484737afe64be127fff68ed1517e8bf20b27d16bbebf1d938eb6",
+      "stdout_bytes": 4499,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "rules",
+        "--format",
+        "json"
+      ],
+      "exit": 0,
+      "stdout_sha256": "1ab3168e447e4503a4906ade672564e6d64a301bb3446ffef214ff07f3e1e135",
+      "stdout_bytes": 36993,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "explain",
+        "RG06"
+      ],
+      "exit": 0,
+      "stdout_sha256": "bf2e345ab2da6f7854a6687a10f26339e670bd49e08c36a212582c4fd937a317",
+      "stdout_bytes": 3862,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    },
+    {
+      "argv": [
+        "explain",
+        "RG06",
+        "--markdown"
+      ],
+      "exit": 0,
+      "stdout_sha256": "8ba4368095a7a3e1de238377d4c2b432837b43ddb566b869c84c781d6c08d11f",
+      "stdout_bytes": 5640,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0,
+      "compare_stderr": true
+    }
+  ],
+  "rerecorded_at_commit": "bd6be3e70453a129f7a4ef05cb5f6be020bdcba0+raised",
+  "rerecorded_binary_sha256": "4d9245050963691f903de3c351c0da9e1f6cb8b3b86874b6400dc5bfaedd479d",
+  "rerecorded_reason": "RG-A5 follow-up: each findings measured record gains raised (the level the rule raised) and shipped; the unmeasured wording is not yet measured on fresh data. Review golden_review_rga5_raised_2026-11-27.txt: 71 JSON and 14 SARIF cases changed as intended, 32 identical, 0 unexpected.",
+  "rerecorded_reason_previous": "RG-A5 severity floor: every committed measured.json cell is fresh:false, so every finding ships at note; JSON findings gain a measured record; exit codes follow. Review: 85 changed JSON/SARIF cases and 4 catalog cases, 0 unexpected."
+}

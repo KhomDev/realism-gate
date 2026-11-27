@@ -4,6 +4,10 @@ on:
   push:
     branches: [main, "release/**"]
   pull_request:
+  # Work branches (p2/*) do not trigger the push filter and there is no PR
+  # for them, so the operator-approved CI has to be started by hand with
+  # `gh workflow run ci.yml --ref <branch>`. main/release pushes are unchanged.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -47,7 +51,10 @@ jobs:
           ./target/debug/rgate rules
           ./target/debug/realism-gate explain RG06 > /dev/null
           ./target/debug/realism-gate check tests/fixtures/good --no-declaration
-          if ./target/debug/realism-gate check tests/fixtures/bad --no-declaration; then
+          # The severity floor ships every rule at `note` until a fresh cell
+          # passes it (docs/precision.md), so the rules must still fire on the
+          # bad fixtures: fail at `note`.
+          if ./target/debug/realism-gate check tests/fixtures/bad --no-declaration --fail-on note; then
             echo "::error::the bad fixtures must fail the run"
             exit 1
           fi
@@ -68,15 +75,22 @@ jobs:
         shell: bash
         run: |
           set -eu
-          cargo package --list --locked > /tmp/files.txt
+          cargo package -p realism-gate --list --locked > /tmp/files.txt
           cat /tmp/files.txt
-          if grep -vE '^(src/.*\.rs|Cargo\.toml|Cargo\.toml\.orig|Cargo\.lock|README\.md|LICENSE|CHANGELOG\.md|eval/solana/measured\.json|\.cargo_vcs_info\.json)$' /tmp/files.txt; then
+          if grep -vE '^(src/.*\.rs|Cargo\.toml|Cargo\.toml\.orig|Cargo\.lock|README\.md|LICENSE|CHANGELOG\.md|\.cargo_vcs_info\.json)$' /tmp/files.txt; then
             echo "::error::unexpected files in the crate"
             exit 1
           fi
 
-      - name: Publish dry run (builds from the packaged crate)
-        run: cargo publish --dry-run --locked
+      # Plain `cargo package -p realism-gate --no-verify` fails until the
+      # workspace sub-crates are on crates.io: Cargo rewrites the path
+      # dependencies to their registry versions and resolves them before it
+      # writes the archive (PACKAGING.md). The script packages the same crate
+      # through a temporary [patch.crates-io] mapping, which proves the
+      # archive; publishing stays approval-gated.
+      - name: Package the binary crate
+        shell: bash
+        run: bash scripts/package-order.sh realism-gate
 
   # --------------------------------------------------------------------- MSRV
   msrv:
@@ -206,7 +220,7 @@ jobs:
         shell: bash
         run: |
           set -eu
-          if grep -rniE '(TcpStream|UdpSocket|TcpListener|std::net|reqwest|hyper|ureq|attohttpc|isahc)' src/ ; then
+          if grep -rniE '(TcpStream|UdpSocket|TcpListener|std::net|reqwest|hyper|ureq|attohttpc|isahc)' src/ crates/*/src/ ; then
             echo "::error::network code found in src/"
             exit 1
           fi

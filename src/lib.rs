@@ -12,32 +12,37 @@
 //! measurements without a baseline. [`solana`] holds the Solana frontends,
 //! Rust and TypeScript, and the rules as they apply to them.
 //!
+//! The analysis lives in workspace crates: `rg-ir` (the parsed model), the
+//! `rg-frontend-*` parsers, `rg-model` (project, trace, identities, claims and
+//! the report), `rg-rules`, `rg-exec` and `rg-render`. This crate is the
+//! binary: the CLI, the engine that runs the rules, the declaration and
+//! configuration readers, the claim binder and the MCP server. The moved
+//! modules are re-exported here, so `realism_gate::project` and the rest keep
+//! the paths the published library exposed.
+//!
 //! The library is what the `realism-gate` and `rgate` binaries run. Its API is
 //! not yet stable; the JSON and SARIF outputs are the supported interface.
 
 pub mod bind;
 pub mod changed;
 pub mod cite;
-pub mod claims;
 pub mod cli;
 pub mod config;
 pub mod declaration;
 pub mod engine;
-pub mod finding;
 mod git;
-pub mod identity;
-pub mod ir;
 pub mod mcp;
-pub mod move_lang;
-pub mod parse;
-pub mod project;
-pub mod render;
-pub mod rules;
-pub mod solana;
 pub mod suppress;
-pub mod trace;
-pub mod verify_fix;
+
+pub use rg_exec as verify_fix;
+pub use rg_frontend_sol::parse;
+pub use rg_ir::finding::{Finding, Severity};
+pub use rg_ir::{finding, ir};
+pub use rg_model::project::Project;
+pub use rg_model::{claims, identity, project, trace};
+pub use rg_render as render;
+pub use rg_rules::move_lang;
+pub use rg_rules::rules;
+pub use rg_rules::solana;
 
 pub use engine::{Options, Report, analyze};
-pub use finding::{Finding, Severity};
-pub use project::Project;

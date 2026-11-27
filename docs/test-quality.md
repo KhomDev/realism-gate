@@ -122,3 +122,62 @@ larger timeout is the way to classify those four.
 A missed mutant means the suite did not distinguish that change from the
 original. It is a review lead, not a failed build, and this measurement gates
 nothing.
+
+### Changed-lines measurement, F1/F2 binding work, 2026-11-27
+
+Before the `mutants.yml` fixes on `p2/f1-binding` (`--workspace
+--test-workspace=true`, `files`/`base` inputs, `-j 4`, artifact upload), the
+weekly job ran cargo-mutants from the root package only, so it **never mutated
+any file under `crates/**`** (where the rules and the exploit model live) and
+never ran the crates' own tests against a mutant. Earlier weekly numbers, had
+there been any, would have covered `src/` alone.
+
+Run [45934591406](https://github.com/KhomDev/realism-gate/actions/runs/45934591406)
+(GitHub Actions, ubuntu-latest), `p2/f1-binding` at `73e4b3c`, `--in-diff`
+against `d0c274a` over `crates/rg-model/src/exploit/mod.rs`,
+`crates/rg-rules/src/rules/mod.rs`, `crates/rg-rules/src/rules/privilege.rs`,
+`crates/rg-rules/src/solana/rules.rs` and `src/engine.rs`, whole workspace
+test suite per mutant:
+
+| Mutants tested | caught | missed | unviable |
+|---|---|---|---|
+| 110 | 95 | 1 | 14 |
+
+Survival rate: **1 of 96 = 1.0%** (`missed / (caught + missed)`).
+
+The one survivor is explained as an equivalent mutant:
+`crates/rg-model/src/exploit/mod.rs:2381`, `s.op < step.op` replaced with
+`s.op <= step.op` in `bind`. With `<=` the step being bound is itself admitted
+as a candidate "configuring instruction someone else signed". `bind` is only
+called for a signer of that step (`bind_signers` maps over `step.signers`), and
+in this branch (`!is_default`) `names` is `aliases(input, signer)`, which always
+contains `signer`. So the very next check, `other.signers.iter().any(|s|
+names.contains(s))`, skips the step, and the result cannot change for it. The mutant could only
+differ if a second step were placed at the same trace `op`; steps are built one
+per trace-op seed, but that is not asserted as an invariant anywhere. This is
+recorded as an explained survivor rather than killed with a contrived test.
+
+### RG-A6 frontends, changed lines since ae654cf (2026-11-27)
+
+Run 45938826459, `cargo mutants --workspace --test-workspace=true --in-diff`
+against `ae654cf`, files `crates/rg-frontend-rust/src/parse_rust.rs` and
+`crates/rg-frontend-ts/src/parse_ts.rs`: 123 mutants, 105 caught, 11 missed,
+3 unviable, 4 timeouts.
+
+- Nine survivors were missing tests, now added: six in `looks_like_script`
+  (each `&&`/`||` of the import, `require` and mocha checks), `i > 0` in
+  `tokens_hold_test_attr` (a bracket group first in a macro's tokens),
+  `added < 2` in `blank_diff_marks` (exactly two added lines) and the
+  `+++ `/`--- ` header check (a `+++ ` header is blanked whole, not read as an
+  added line).
+- Two are equivalent: `<` to `<=` on the loop bounds of `blank_elisions`
+  (line 229) and `blank_diff_marks` (line 276). The extra pass reads an empty
+  tail slice and changes nothing.
+- The four timeouts (`+=` to `*=`/`-=` in `blank_elisions`, `+` to `-`/`*`
+  in `blank_diff_marks`) make the scan loop stop advancing; the test run
+  detects them by timeout.
+
+Re-run 45946711166 on the branch with the new tests (`f414ed4`), same files
+and base: 123 mutants, 114 caught, **2 missed** (the two equivalents above),
+3 unviable, 4 timeouts (the same four). Survival rate: **2 of 116 = 1.7%**
+(`missed / (caught + missed)`).

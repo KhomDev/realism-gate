@@ -1,0 +1,12 @@
+{
+  "name": "realism-gate",
+  "version": "1.4.0",
+  "description": "Check exploit PoC tests and a draft finding's claims with realism-gate before submitting. Installs the realism-gate release from crates.io that matches this plugin's version.",
+  "author": {
+    "name": "KhomDev"
+  },
+  "homepage": "https://github.com/KhomDev/realism-gate",
+  "repository": "https://github.com/KhomDev/realism-gate",
+  "license": "MIT",
+  "keywords": ["security", "audit", "bug-bounty", "foundry", "solana", "poc"]
+}

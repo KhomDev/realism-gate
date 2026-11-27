@@ -212,3 +212,75 @@ adds nothing else: imports are not synthesised and a fragment that relies on
 the surrounding test file's imports stays unresolved. The output says
 `fragment: true` so a reader knows the test boundary is the tool's, not the
 author's.
+
+## P2: the program model and the 2026 corpora
+
+This section records what the P2 rebuild changed and where it still guesses.
+It is written while the round is unfinished; the numbers are DEV/in-sample and
+are not a transition verdict.
+
+**The program model (RG-A1).** `check --dump-program DIR` reads a protocol
+working tree and reports, per entry point, the authority it requires (Signer,
+Role, Owner, None or Unknown) with source spans. It reads:
+
+- Anchor: `#[derive(Accounts)]` with `Signer`, `has_one`, `constraint`,
+  `seeds`/`bump`, `owner =`, `address =`; the IDL fills gaps but the source wins
+  and records the conflict.
+- Native Solana: `is_signer` checks and owner/key comparisons in each handler.
+- Solidity: modifiers (including inherited and custom bodies), and in-body
+  `require`/`if-revert` on `msg.sender`, `hasRole` and `owner()`.
+
+What it cannot do:
+
+- It reads one working tree and refuses a commit (the tree must be checked
+  out); it never follows a `.git` outside `--target`.
+- Native handler detection is broad (any function taking `&[AccountInfo]`), and
+  the accessor exclusion is a heuristic; the DEV corpus numbers include harness
+  functions, so 582/583 entry points resolved is a **coverage** number.
+- Solidity internal-call following is by name in the most-derived-first
+  linearisation, depth 3; conditional branches are not treated as demands.
+- A missing struct, an unparsable attribute, an unresolved modifier or an
+  unnameable signer returns `Unknown(reason)`. It never guesses.
+
+**RG02/RG03 are still the old heuristics until RG-A2 lands.** On the v2
+held-out split they remain 0/16 and 0/5; the exploit model that replaces
+`trace.rs` + `identity.rs` + `solana/env.rs` is the item that targets the
+13/16 own-account class and the 5/5 payer class. Until it is merged and
+measured, the program model above is not wired into those rules.
+
+**The 2026 corpora are small and concentrated, by data availability.**
+
+- Solana v3: 58 J submissions from 3 origins (one 79.3%), which is only 20
+  distinct judged findings. The 40% source cap admits at most 5 J units and
+  FINAL can reach at most 29 J submissions, below the pre-registered minimum of
+  30. No tool change can make that row pass; the honest result is NOT YET.
+- Solidity v1: 520 J findings from 117 contests, but 91.7% is Code4rena (target:
+  no platform above 30%) and X is 36 of 150.
+- Dup-Bench v1: 111 contests labelled, 2022-11..2024-12 only; the original
+  2025/2026 split was unfillable and Amendment 1 fixes T=2024-03-01,
+  T2=2024-09-01.
+
+**TypeScript fragments are a known readability gap.** On the v3 DEV split, 7 of
+8 unreadable RustFund fragments are TypeScript test bodies; the fragment
+wrapper's TypeScript path does not drive a harness for them yet (RG-A6).
+
+**No round has been measured.** The v2 numbers in this repository are
+in-sample after the fixes that were developed from them. No two-reader labels,
+no fresh precision, no FAR or recall number on the new corpora exists at the
+time of writing, and no human label has been returned. Every number in
+`docs/precision.md` that predates this section should be read with that
+provenance.
+
+## P2R-2 release: what is not measured yet (2026-11-27)
+
+- **No held-out precision for the P2 binaries.** The release on `main` states DEV-only figures. V1,
+  V2 and FINAL are sealed and come after main (`eval/P2R2_PREREGISTRATION_POST_MAIN.md`).
+- **No P2 precision at all yet.** The DEV run of the release binary is counted
+  (`docs/precision.md`, "P2R-2 DEV-ONLY run"), but it has not been labelled.
+- **Every rule ships `note`.** The floor needs fresh cells, and none exists. The raised level is shown
+  next to the shipped one. A user who wants a gate uses `--severity RULE=LEVEL` or `--fail-on note`,
+  knowing that the level is not backed by a fresh measurement.
+- **Solana FINAL is small** (J11 + X13 + A2 units). Some Solana rule cells cannot reach the floor's
+  n ≥ 16 at FINAL, whatever their precision, so those rules will stay at `note`.
+- **`solidity-poc-v3` is excluded.** Its 35 units are near-copies of the opened DeFiHackLabs tree.
+- **The 1.4.0 held-out Solana rows** were measured on another binary. They are history only.

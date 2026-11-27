@@ -31,10 +31,14 @@ list, in substance:
 1. **The JSON schema is v1 and stable.** `realism-gate.report/v1` keeps
    `schema: 1`; fields are only added, never removed or redefined. SARIF for
    rule findings is unchanged.
-2. **Rule ids are stable.** RG01-RG20 keep their ids, slugs, severities and
-   meanings across the release. A 1.x release may add a rule, but never
-   renumber or re-grade an existing one without a major version and a
-   changelog entry that says which ids moved.
+2. **Rule ids are stable.** RG01-RG20 keep their ids, slugs and meanings
+   across the release. A 1.x release may add a rule but never renumber one.
+   Severity is calibrated data, not identity: a rule's severity may change in
+   a minor only with a measured reason in the changelog (the fresh cell, its
+   n and its Wilson interval), and never in a patch. This is the single
+   resolution of the old contradiction between this criterion and the
+   compatibility policy below; a measured re-grade is not a "re-grade
+   without a major".
 3. **Claim-binding precision is published.** `docs/precision.md` carries the
    measured number with its n and Wilson interval, generated from
    `eval/claims/results.json`. An unmeasured field is named as unmeasured, not
@@ -63,7 +67,9 @@ Stable within 1.x, and only changed in a minor with a changelog entry:
   `realism-gate-mcp`.
 
 May change in a minor, and is called out in the changelog: the text output, the
-library API, rule severities and defaults, and the MSRV.
+library API, rule severities and defaults, and the MSRV. A severity change
+carries its measured reason (the fresh cell, n and Wilson interval) in the
+changelog entry; see criterion 2.
 
 Never in a patch: a new rule, a changed rule severity, a changed default
 `--fail-on`, a removed flag, or a changed archive layout.
@@ -110,6 +116,19 @@ aborts with `bin realism-gate-mcp is not found` because it installs every
 binary the crate declares. The tag existed, the release did not. v0.6.1 fixes
 the packaging and supersedes v0.6.0; the v0.6.0 tag is left where it is.
 
+## Claude Code plugin
+
+The plugin version is the crate version. `plugin/.claude-plugin/plugin.json`
+and the `realism-gate` entry in `.claude-plugin/marketplace.json` name the
+crates.io release `bin/realism-gate-ensure` installs (`cargo binstall` when it
+is present, otherwise `cargo install --locked`). A version bump, patch or
+minor, changes those two files in the same commit as `Cargo.toml`.
+`tests/plugin.rs` fails if either disagrees with the crate, or if
+`plugin/skills/realism-gate/SKILL.md` is not a byte-for-byte copy of
+`skills/realism-gate/SKILL.md`. The plugin does not register
+`realism-gate-mcp`; that server stays a user MCP config after the CLI is
+installed (`plugin/README.md`).
+
 ## Release checklist
 
 Run from a clean checkout of `main`.
@@ -128,8 +147,17 @@ Run from a clean checkout of `main`.
    number. A 1.0 release with an unmeasured or stale claims page is not
    tagged.
 6. Bump the version in `Cargo.toml` (`Cargo.lock` follows), in `action.yml`
-   (`RG_DEFAULT_VERSION`), and in any doc that pins a version. `tests/docs.rs`
-   fails if `action.yml` disagrees with the crate version.
+   (`RG_DEFAULT_VERSION`), in `plugin/.claude-plugin/plugin.json` (`version`),
+   and in `.claude-plugin/marketplace.json` (the `realism-gate` entry's
+   `version`). The plugin version **is** the crates.io release
+   `realism-gate-ensure` installs, so a bump (for example 1.4.0 to 1.5.0)
+   changes `Cargo.toml`, `plugin.json` and the marketplace entry together.
+   Also bump any doc that pins a version, and if `skills/realism-gate/SKILL.md`
+   changed, copy it byte for byte to `plugin/skills/realism-gate/SKILL.md`.
+   `tests/docs.rs` fails if `action.yml` disagrees with the crate version.
+   `tests/plugin.rs` (`plugin_version_is_the_crate_version`) fails if
+   `plugin.json` or the marketplace entry disagrees with the crate version,
+   and `plugin_skill_is_the_repository_skill` fails if the plugin skill drifts.
 7. Add the changelog entry under the new version and move the `[Unreleased]`
    comparison link.
 8. If the README examples, the claims block or the golden card changed:

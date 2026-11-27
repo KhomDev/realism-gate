@@ -30,12 +30,31 @@ fn clean_input_exits_zero() {
     assert!(stdout(&o).contains("PASS"));
 }
 
+// Every rule ships at `note` while its measured cells are in-sample (the RG-A5
+// severity floor). The exit-code tests below therefore set the level they need
+// with `--severity`, which wins over the floor, so the threshold logic is still
+// exercised; `the_floor_alone_does_not_fail_the_build` pins the default.
+
+#[test]
+fn the_floor_alone_does_not_fail_the_build() {
+    let o = run(&[
+        "check",
+        "tests/fixtures/bad/RG06_balance_injection.t.sol",
+        "--no-declaration",
+    ]);
+    let out = stdout(&o);
+    assert_eq!(o.status.code(), Some(0), "{out}");
+    assert!(out.contains("RG06 balance-injection"), "{out}");
+}
+
 #[test]
 fn an_error_exits_one() {
     let o = run(&[
         "check",
         "tests/fixtures/bad/RG06_balance_injection.t.sol",
         "--no-declaration",
+        "--severity",
+        "RG06=error",
     ]);
     assert_eq!(o.status.code(), Some(1));
     let out = stdout(&o);
@@ -46,9 +65,23 @@ fn an_error_exits_one() {
 #[test]
 fn fail_on_controls_the_threshold() {
     let warn_only = "tests/fixtures/bad/RG11_unpinned_fork.t.sol";
-    let o = run(&["check", warn_only, "--no-declaration"]);
+    let warn = ["--severity", "RG11=warn"];
+    let o = run(&["check", warn_only, "--no-declaration", warn[0], warn[1]]);
     assert_eq!(o.status.code(), Some(0));
+    let o = run(&[
+        "check",
+        warn_only,
+        "--no-declaration",
+        warn[0],
+        warn[1],
+        "--fail-on",
+        "warn",
+    ]);
+    assert_eq!(o.status.code(), Some(1));
+    // At the floor (note) even `--fail-on warn` passes; `--fail-on note` fails.
     let o = run(&["check", warn_only, "--no-declaration", "--fail-on", "warn"]);
+    assert_eq!(o.status.code(), Some(0));
+    let o = run(&["check", warn_only, "--no-declaration", "--fail-on", "note"]);
     assert_eq!(o.status.code(), Some(1));
     let o = run(&[
         "check",
@@ -66,6 +99,8 @@ fn json_output_has_a_stable_envelope() {
         "check",
         "tests/fixtures/bad/RG04_storage_write.t.sol",
         "--no-declaration",
+        "--severity",
+        "RG04=error",
         "--format",
         "json",
     ]);
@@ -83,6 +118,8 @@ fn json_output_has_a_stable_envelope() {
     assert_eq!(f["suite"], "DebtClearTest");
     assert_eq!(f["tests"][0], "test_debtCanBeCleared");
     assert!(f.get("suppressed").is_none());
+    // RG-A5: each finding carries its rule's measured record for its language.
+    assert_eq!(f["measured"]["language"], "solidity", "{f}");
 }
 
 #[test]
@@ -92,6 +129,8 @@ fn sarif_output_is_sarif_2_1_0() {
         "tests/fixtures/suppress",
         "--no-declaration",
         "--trust-inline-allows",
+        "--severity",
+        "RG04=error",
         "--format",
         "sarif",
     ]);

@@ -43,6 +43,20 @@ fn move_examples_in_the_rule_pages_are_true() {
     }
 }
 
+/// The severity a finding ships at: the rule's own level `raw`, capped by the
+/// RG-A5 severity floor for the rule in the file's language
+/// (`rules::measured`, derived from `data/measured.json`). While every
+/// committed cell is in-sample the floor is `note`, so this is `note`; when a
+/// fresh FINAL cell lifts a rule, the raw level written in the test is what
+/// the assertion checks again.
+fn floored(rule: &str, file: &str, raw: Severity) -> Severity {
+    realism_gate::rules::measured::shipped(
+        rule,
+        realism_gate::rules::measured::lang_of_path(file),
+        raw,
+    )
+}
+
 fn expect(path: &str, want: &[(&str, Severity, u32)]) {
     let base = root();
     let files = discover(&[base.join(path)]).unwrap();
@@ -54,7 +68,7 @@ fn expect(path: &str, want: &[(&str, Severity, u32)]) {
         .collect();
     let want: Vec<(String, Severity, u32)> = want
         .iter()
-        .map(|(r, s, l)| (r.to_string(), *s, *l))
+        .map(|(r, s, l)| (r.to_string(), floored(r, path, *s), *l))
         .collect();
     assert_eq!(got, want, "{path}");
 }

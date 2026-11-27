@@ -1,0 +1,26 @@
+[package]
+name = "rg-model"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Project loading, execution trace, identity model, claims and report types for realism-gate."
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+# Published sub-crates are an approval-gated release step; see PACKAGING.md.
+publish = false
+
+[dependencies]
+rg-ir.workspace = true
+rg-frontend-sol.workspace = true
+rg-frontend-rust.workspace = true
+rg-frontend-ts.workspace = true
+rg-frontend-move.workspace = true
+rg-program.workspace = true
+regex.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde-saphyr.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

@@ -14,6 +14,7 @@ use crate::finding::Severity;
 use crate::project::{self, Project};
 use crate::render::{self, text::TextOptions};
 use crate::rules::{self, RULES};
+use crate::solana;
 use crate::verify_fix;
 use clap::{Parser, Subcommand, ValueEnum};
 use regex::Regex;
@@ -171,6 +172,20 @@ pub struct CheckArgs {
     /// Git commit of `--target` to read. The working tree is not trusted.
     #[arg(long, value_name = "REV", requires = "target")]
     pub target_commit: Option<String>,
+    /// Print the entry-point authority model for DIR and exit. Debug output:
+    /// a deterministic JSON document. No rule runs, and no test is read.
+    #[arg(long, value_name = "DIR")]
+    pub dump_program: Option<PathBuf>,
+    /// The protocol checkout the exploit model reads entry-point authorities
+    /// from (the RG-A1 program model). Without it, RG02 and RG03 read the
+    /// test's own grant data and never guess.
+    #[arg(long, value_name = "DIR")]
+    pub model_target: Option<PathBuf>,
+    /// Write the exploit model of every checked Solana test to FILE as
+    /// deterministic JSON (actors, steps, mutations, assertions, phases) and
+    /// exit. Debug output: no rule runs.
+    #[arg(long, value_name = "FILE")]
+    pub dump_model: Option<PathBuf>,
     /// The configuration file. Defaults to ./realism-gate.toml if present.
     #[arg(long, value_name = "FILE")]
     pub config: Option<PathBuf>,
@@ -519,6 +534,16 @@ fn wrap_fragment(src: &str, ext: &str) -> String {
 }
 
 fn check(args: CheckArgs) -> Result<ExitCode, String> {
+    if let Some(target) = &args.dump_program {
+        // Debug output for the program model. It reads only `target` and
+        // returns before any test file, declaration or config is read, so the
+        // check path is unchanged when the flag is absent.
+        let model = rg_program::ProgramModel::resolve(target)
+            .map_err(|error| format!("--dump-program: {error}"))?;
+        print!("{}", model.to_json_pretty());
+        println!();
+        return Ok(ExitCode::SUCCESS);
+    }
     let cwd = std::env::current_dir().map_err(|e| format!("current directory: {e}"))?;
     let paths = if args.paths.is_empty() {
         // Foundry keeps tests in test/, Cargo in tests/.
@@ -586,6 +611,45 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
         }),
         _ => None,
     };
+
+    // The RG-A1 program model, when the operator supplied a protocol
+    // checkout. It is read once and shared by every test's exploit model.
+    let program_model = match &args.model_target {
+        Some(dir) => Some(
+            rg_program::ProgramModel::resolve(dir)
+                .map_err(|error| format!("--model-target: {error}"))?,
+        ),
+        None => None,
+    };
+    if let Some(path) = &args.dump_model {
+        // Debug output for the exploit model: no rule runs, and the JSON is
+        // deterministic. It still honors the declaration, which classifies
+        // the attacker, and reads the program model when one is supplied.
+        let declared = solana::Declared {
+            attackers: decl
+                .as_ref()
+                .map(|d| d.attackers().collect())
+                .unwrap_or_default(),
+            privileged: decl
+                .as_ref()
+                .map(|d| d.privileged_identities().collect())
+                .unwrap_or_default(),
+            victims: decl
+                .as_ref()
+                .map(|d| d.victims().collect())
+                .unwrap_or_default(),
+        };
+        let model = solana::dump_model(&project, &declared, program_model.as_ref(), &cwd);
+        // `--dump-model json` is the item's spelling: write the JSON to
+        // standard output. Any other value is a file path.
+        if path.as_os_str() == "json" {
+            println!("{}", model.to_json_pretty());
+        } else {
+            std::fs::write(path, format!("{}\n", model.to_json_pretty()))
+                .map_err(|e| format!("{}: {e}", path.display()))?;
+        }
+        return Ok(ExitCode::SUCCESS);
+    }
 
     let config_path = match (&args.config, args.no_config) {
         (Some(p), _) => {
@@ -669,6 +733,7 @@ fn check(args: CheckArgs) -> Result<ExitCode, String> {
         only_files: changed.clone(),
         trust_inline_allows: args.trust_inline_allows,
         citations: citations.clone(),
+        program_model,
     };
     let mut report = engine::analyze(&project, loaded.as_ref(), &opts);
     report.fragment = fragment_input;

@@ -7,6 +7,15 @@ on:
   schedule:
     - cron: "17 4 * * 1"
   workflow_dispatch:
+    inputs:
+      files:
+        description: "Space-separated --file globs to mutate instead of the weekly set (changed files on a work branch)"
+        required: false
+        default: ""
+      base:
+        description: "Mutate only lines changed since this commit (cargo mutants --in-diff); used with files"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -18,8 +27,11 @@ jobs:
   mutants:
     name: cargo-mutants
     runs-on: ubuntu-latest
+    timeout-minutes: 340
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       - name: Install toolchain
         run: rustup toolchain install stable --profile minimal
@@ -32,14 +44,30 @@ jobs:
       # Survivors are review leads, not failures. The step is allowed to fail
       # so a surviving mutant never blocks the branch; the recorded numbers
       # are in the summary below.
+      - name: Mutate the requested files
+        if: ${{ inputs.files != '' }}
+        continue-on-error: true
+        env:
+          FILES: ${{ inputs.files }}
+          BASE: ${{ inputs.base }}
+        run: |
+          args=()
+          for f in $FILES; do args+=(--file "$f"); done
+          if [ -n "$BASE" ]; then
+            git diff "$BASE" HEAD -- $FILES > "$RUNNER_TEMP/changes.diff"
+            args+=(--in-diff "$RUNNER_TEMP/changes.diff")
+          fi
+          cargo mutants --workspace --test-workspace=true "${args[@]}" -j 4 --timeout 300
+
       - name: Mutate the rule, claim, bind and verify-fix code
+        if: ${{ inputs.files == '' }}
         continue-on-error: true
         run: |
-          cargo mutants \
-            --file 'src/rules/*.rs' \
-            --file 'src/claims/*.rs' \
+          cargo mutants --workspace --test-workspace=true \
+            --file 'crates/rg-rules/src/rules/*.rs' \
+            --file 'crates/rg-model/src/claims/*.rs' \
             --file 'src/bind/*.rs' \
-            --file 'src/verify_fix.rs' \
+            --file 'crates/rg-exec/src/lib.rs' \
             --timeout 120
 
       - name: Record the survival rate
@@ -67,3 +95,12 @@ jobs:
             echo
             echo "docs/test-quality.md says which scopes this covers. It is not a gate."
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the run
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: mutants-out
+          path: mutants.out/
+          if-no-files-found: ignore
+          retention-days: 90

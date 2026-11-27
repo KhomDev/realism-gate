@@ -468,19 +468,35 @@ What changed in the rules (details: CHANGELOG 1.2.0):
 
 ### Severity floor
 
-A rule ships at `error` on Solana only when its **fresh** held-out Wilson 95%
-lower bound is at least 0.80, and only when a fresh cell with at least five
-labels exists at all. In-sample cells cannot lift a rule over the floor; a
+**Since P2R (RG-A5) the shipped severity of every rule in every language
+(Solidity, Rust, TypeScript, JavaScript, Move) comes from
+`crates/rg-rules/data/measured.json` by the floor, derived at build time by
+`crates/rg-rules/build.rs`:** `error` only when a **fresh** cell's Wilson 95%
+lower bound is at least 0.80 with n >= 16; `warn` when it is at least 0.50
+with n >= 10; `note` otherwise. A finding ships at the lower of what its rule
+raised and that cap (`--severity` still overrides). "Fresh" is the cell's
+explicit `fresh` field. Every committed cell is `fresh: false` (the P1 set is
+in-sample, and the v2 and DeFiVulnLabs cells are opened slices measured by
+older binaries; numbers from different binaries are never pooled), so **every
+rule ships at `note` until the P2R-2 FINAL cells land**. Each finding prints
+its rule's fresh record for its language, or `unmeasured`.
+`tests/precision_floor.rs` checks the build-time table against an independent
+copy of the floor for all five languages.
+
+The history below is the pre-P2R policy. A rule shipped at `error` on Solana
+only when its **fresh** held-out Wilson 95%
+lower bound was at least 0.80, and only when a fresh cell with at least five
+labels existed at all. In-sample cells cannot lift a rule over the floor; a
 cell with fewer than five labels is a count, not a rate. The 1.2.0 P1 cells
 put RG01 (16.7%), RG04 (0%) and RG06 (0%) at `note`; the 1.3.0 v2 held-out
 round added RG02 (0/16) and RG03 (0/5), so both moved to `note` in 1.4.0. RG08
 is 10/10, whose lower bound is 0.7225, and RG09 has one fresh flag labelled
 unclear; neither clears the floor, so both ship at `warn` and **no Solana rule
 ships at `error` in 1.4.0**. RG08 returns to `error` at 16/16, where the lower
-bound reaches 0.8064. `tests/precision_floor.rs` reads
-`eval/solana/measured.json` and `eval/solana-poc-v2/measured.json`: a Solana
-`error` rule with no fresh cell of n >= 5, or with a fresh lower bound below
-0.80, fails the test.
+bound reaches 0.8064. (Until RG-A5, `tests/precision_floor.rs` read
+`eval/solana/measured.json` and `eval/solana-poc-v2/measured.json` and failed
+a Solana `error` rule with no fresh cell of n >= 5 or a fresh lower bound
+below 0.80.)
 
 ### Status of the re-measurement
 
@@ -494,3 +510,45 @@ binary: RG02 0/16 = 0.0% [0.0-19.4], RG03 0/5 = 0.0% [0.0-43.4], RG08 10/10 =
 [18.6-49.9] with a source-clustered bootstrap of [10.0-72.7]. The committed
 cells are in `eval/solana-poc-v2/measured.json`; the P1 numbers above are left
 as they stand.
+
+## P2R-2 DEV-ONLY run of the release binary (2026-11-27)
+
+> **DEV-ONLY. Not a held-out number, and not yet a precision.** This is what the P2 binary flags on the
+> opened DEV slices. The flags have **not been labelled yet**, so there is no P2 precision. The held-out
+> rounds come after main, under `eval/P2R2_PREREGISTRATION_POST_MAIN.md`.
+
+Binary: release build of `p2/integration` `d0d5e64`, sha256
+`c6df0c3dd0ebfafed5adc64692989824ad2799ca7376399665f6b11cd682775e`, run with
+`run.py --split DEV --version p2r2-dev-d0d5e64`. Every flag ships at `note` (RG-A5: no fresh cell).
+
+| Corpus | DEV units | Readable | Flags (all tiers) | J+X flags | N flags |
+|---|---:|---:|---:|---:|---:|
+| `solana-poc-v3` | 50 | 45 | 20 | 18 | 2 |
+| `solana-poc-v4` | 5 | 2 | 1 | 1 | 0 |
+| `solana-poc-v5` | 4 | 0 | 0 | 0 | 0 |
+| `solidity-poc-v1` | 234 | 215 | 250 | 181 | 69 |
+| `solidity-poc-v2` | 159 | 151 | 138 | 138 | 0 |
+
+J+X flags by rule (Solana and Solidity kept apart):
+
+| Rule | Solana (v3+v4) | Solidity (v1+v2) |
+|---|---:|---:|
+| RG01 | 0 | 1 |
+| RG02 | 2 | 92 |
+| RG03 | 3 | 19 |
+| RG04 | 0 | 4 |
+| RG05 | 0 | 9 |
+| RG06 | 0 | 4 |
+| RG07 | 0 | 12 |
+| RG08 | 11 | 98 |
+| RG09 | 0 | 5 |
+| RG10 | 3 | 8 |
+| RG11 | 0 | 5 |
+| RG16 | 0 | 10 |
+| RG17 | 0 | 6 |
+| RG18 | 0 | 46 |
+
+**DEV precision: a gap.** It needs the two-labeller protocol (`docs/labeling-rubric.md`). A
+50-flag practice pack drawn from these DEV flags is in `eval/labeling-pack/`. Until labels exist, the
+only labelled tables for this repository are the in-sample DeFiHackLabs rows above (0.1.0/0.2.0
+binaries) and the 1.4.0 rows, which are history and not numbers for the P2 binary.

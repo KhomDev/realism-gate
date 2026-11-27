@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/bin/realism-gate-ensure\" --status",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

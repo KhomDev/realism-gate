@@ -9,7 +9,10 @@ use crate::solana;
 use crate::suppress::{self, Directive};
 use crate::trace;
 use regex::Regex;
-use serde::Serialize;
+// The report types live in `rg-model`, below the renderers that consume them.
+// Re-exported here so `realism_gate::engine::{Report, Summary, ...}` keeps the
+// path the published 1.4.0 library exposed.
+pub use rg_model::report::{ChangedSince, ParseError, Report, Summary};
 use std::collections::{BTreeMap, BTreeSet};
 
 /// Index used in [`Raw::unit`] for findings filed against the declaration.
@@ -38,6 +41,11 @@ pub struct Options {
     /// Protocol tree and commit for RG20. Absent means the citation check
     /// does not run.
     pub citations: Option<crate::cite::Index>,
+    /// The RG-A1 program model of `--model-target`, when one was supplied.
+    /// The Solana rules and the Solidity RG02/RG03 read entry-point
+    /// authorities from it; without one they read the test's own grant data
+    /// and names, and never guess.
+    pub program_model: Option<rg_program::ProgramModel>,
 }
 
 impl Options {
@@ -56,78 +64,11 @@ impl Options {
     }
 }
 
-/// `--changed-since`: the revision and how many files differ from it.
-#[derive(Debug, Clone, Serialize)]
-pub struct ChangedSince {
-    #[serde(rename = "ref")]
-    pub git_ref: String,
-    pub files: usize,
-}
-
 /// A declaration together with where it came from.
 pub struct LoadedDeclaration<'a> {
     pub decl: &'a Declaration,
     pub path: String,
     pub text: &'a str,
-}
-
-#[derive(Debug, Clone, Serialize)]
-pub struct ParseError {
-    pub file: String,
-    pub message: String,
-}
-
-#[derive(Debug, Clone, Serialize, Default)]
-pub struct Summary {
-    pub files: usize,
-    pub suites: usize,
-    pub tests: usize,
-    pub errors: usize,
-    pub warnings: usize,
-    pub notes: usize,
-    pub suppressed: usize,
-    /// Allow comments ignored because they give no reason. The findings they
-    /// name stay active.
-    pub suppressions_ignored: usize,
-}
-
-fn is_false(b: &bool) -> bool {
-    !*b
-}
-
-#[derive(Debug, Clone, Serialize)]
-pub struct Report {
-    pub summary: Summary,
-    pub declaration: Option<String>,
-    /// The `realism-gate.toml` that was applied, if any.
-    pub config: Option<String>,
-    /// The input was read as a fragment: a test body pasted into an issue,
-    /// wrapped and parsed as one test. Added in 1.2.0.
-    #[serde(default, skip_serializing_if = "is_false")]
-    pub fragment: bool,
-    pub changed_since: Option<ChangedSince>,
-    pub findings: Vec<Finding>,
-    pub parse_errors: Vec<ParseError>,
-    /// Policy files found inside the repo under review and not applied.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub ignored_policy: Vec<String>,
-    /// The claim table, when `--report` or `--claims` was given. Added in 1.0.0.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub claims: Option<crate::claims::Table>,
-    /// How the claims were read: `structured` or `inferred`. Added in 1.0.0.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub claim_binding: Option<crate::claims::Binding>,
-}
-
-impl Report {
-    pub fn active(&self) -> impl Iterator<Item = &Finding> {
-        self.findings.iter().filter(|f| f.is_active())
-    }
-
-    /// Whether any active finding is at or above `level`.
-    pub fn fails(&self, level: Severity) -> bool {
-        self.active().any(|f| f.severity >= level)
-    }
 }
 
 pub fn analyze(
@@ -191,20 +132,22 @@ pub fn analyze(
             ),
             None => (None, None, None),
         };
-        // On a Solana test the shipped severity is the catalog's Solana
-        // policy (`solana_severity`), not whatever tier the rule's code used
-        // internally: that table is what docs/precision.md and the severity
-        // floor are written against. `--severity` still wins over both.
-        let shipped = match lang {
-            Lang::Rust | Lang::TypeScript => info.solana_severity(),
-            Lang::Solidity | Lang::Move => raw.severity,
-        };
+        // The shipped severity is the lower of what the rule's code raised
+        // and the level the severity floor allows this rule in this
+        // language, derived at build time from `data/measured.json`
+        // (`rules::measured`). `--severity` still wins over both.
+        let shipped = rules::measured::shipped(
+            info.id,
+            rules::measured::lang_key(lang, &file),
+            raw.severity,
+        );
         merged.insert(
             k,
             Finding {
                 rule: info.id,
                 slug: info.slug,
                 severity: opts.severity.get(info.id).copied().unwrap_or(shipped),
+                raised: raw.severity,
                 file,
                 line: raw.pos.line,
                 column: raw.pos.col,
@@ -252,7 +195,14 @@ pub fn analyze(
                 env.declared_privileged = d.decl.privileged_identities().collect();
                 env.deployment_evidence = d.decl.deployment_names().collect();
             }
-            for raw in rules::check_test(project, &suite, &tr, &env, fee_concession) {
+            for raw in rules::check_test_with(
+                project,
+                &suite,
+                &tr,
+                &env,
+                fee_concession,
+                opts.program_model.as_ref(),
+            ) {
                 add(
                     raw,
                     &suite.contract.name,
@@ -294,7 +244,14 @@ pub fn analyze(
                 continue;
             }
             // A test that drives no Solana harness is not a PoC.
-            let Some(raws) = solana::check_test(project, &scopes, &suite, test, &declared) else {
+            let Some(raws) = solana::check_test(
+                project,
+                &scopes,
+                &suite,
+                test,
+                &declared,
+                opts.program_model.as_ref(),
+            ) else {
                 continue;
             };
             if !counted {

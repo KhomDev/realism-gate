@@ -1,0 +1,594 @@
+{
+  "schema": "realism-gate.measured/v1",
+  "date": "2026-11-25",
+  "population": "public Solana PoCs (held-out split; eval/solana-poc): judged contest PoCs and exploit-by-construction tests. Cells with n<5 (any language) are counts only. The test-suite measurement is eval/solana/RESULTS.md.",
+  "source": "eval/solana-poc/results.json",
+  "frozen_rule_commit": "6019773976706e42e11ceefc2ee1b03496f2df54",
+  "fresh_policy": "A cell lifts its rule's severity only when `fresh` is true: labels from a sealed slice (V1/V2/FINAL) opened once by the frozen binary under test. A cell without `fresh` is not fresh. The floor (error: fresh Wilson 95% lower bound >= 0.80 with n >= 16; warn: >= 0.50 with n >= 10; else note) is applied at build time by crates/rg-rules/build.rs.",
+  "rules": {
+    "RG01": {
+      "rust": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "typescript": {
+        "labelled": 12,
+        "tp": 2,
+        "fp": 10,
+        "unclear": 0,
+        "precision": 0.1667,
+        "wilson95": [
+          0.047,
+          0.448
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "fresh": false,
+        "fresh_reason": "in-sample: the eval/solana-poc held-out split is the P1 population the P1-C fixes were designed against (docs/precision.md), measured by the binary frozen at 6019773; the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG02": {
+      "rust": {
+        "labelled": 5,
+        "tp": 1,
+        "fp": 4,
+        "unclear": 0,
+        "precision": 0.2,
+        "wilson95": [
+          0.0362,
+          0.6245
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "fresh": false,
+        "fresh_reason": "in-sample: the eval/solana-poc held-out split is the P1 population the P1-C fixes were designed against (docs/precision.md), measured by the binary frozen at 6019773; the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "typescript": {
+        "labelled": 25,
+        "tp": 7,
+        "fp": 18,
+        "unclear": 0,
+        "precision": 0.28,
+        "wilson95": [
+          0.1428,
+          0.4758
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "fresh": false,
+        "fresh_reason": "in-sample: the eval/solana-poc held-out split is the P1 population the P1-C fixes were designed against (docs/precision.md), measured by the binary frozen at 6019773; the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG03": {
+      "rust": {
+        "labelled": 1,
+        "tp": 0,
+        "fp": 1,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "count_only": true,
+        "fresh": false,
+        "fresh_reason": "in-sample: the eval/solana-poc held-out split is the P1 population the P1-C fixes were designed against (docs/precision.md), measured by the binary frozen at 6019773; the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "typescript": {
+        "labelled": 1,
+        "tp": 0,
+        "fp": 1,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "count_only": true,
+        "fresh": false,
+        "fresh_reason": "in-sample: the eval/solana-poc held-out split is the P1 population the P1-C fixes were designed against (docs/precision.md), measured by the binary frozen at 6019773; the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG04": {
+      "rust": {
+        "labelled": 14,
+        "tp": 0,
+        "fp": 14,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.2153
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "fresh": false,
+        "fresh_reason": "in-sample: the eval/solana-poc held-out split is the P1 population the P1-C fixes were designed against (docs/precision.md), measured by the binary frozen at 6019773; the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "typescript": {
+        "labelled": 2,
+        "tp": 0,
+        "fp": 2,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.6576
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "count_only": true,
+        "fresh": false,
+        "fresh_reason": "in-sample: the eval/solana-poc held-out split is the P1 population the P1-C fixes were designed against (docs/precision.md), measured by the binary frozen at 6019773; the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG05": {
+      "rust": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "typescript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "solidity": {
+        "labelled": 1,
+        "tp": 0,
+        "fp": 1,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ],
+        "status": "measured",
+        "split": "fresh",
+        "population": "Solidity public PoCs (DeFiVulnLabs)",
+        "count_only": true,
+        "fresh": false,
+        "fresh_reason": "in-sample: DeFiVulnLabs was fresh only for the rule logic frozen at e9bea03 (docs/precision.md); it is an opened slice measured by that older binary, and the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG06": {
+      "rust": {
+        "labelled": 6,
+        "tp": 0,
+        "fp": 6,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.3903
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "fresh": false,
+        "fresh_reason": "in-sample: the eval/solana-poc held-out split is the P1 population the P1-C fixes were designed against (docs/precision.md), measured by the binary frozen at 6019773; the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "typescript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG07": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG08": {
+      "rust": {
+        "labelled": 6,
+        "tp": 6,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.6097,
+          1.0
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "fresh": false,
+        "fresh_reason": "in-sample: the eval/solana-poc held-out split is the P1 population the P1-C fixes were designed against (docs/precision.md), measured by the binary frozen at 6019773; the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "typescript": {
+        "labelled": 24,
+        "tp": 23,
+        "fp": 1,
+        "unclear": 0,
+        "precision": 0.9583,
+        "wilson95": [
+          0.7976,
+          0.9926
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "fresh": false,
+        "fresh_reason": "in-sample: the eval/solana-poc held-out split is the P1 population the P1-C fixes were designed against (docs/precision.md), measured by the binary frozen at 6019773; the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "solidity": {
+        "labelled": 30,
+        "tp": 30,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.8865,
+          1.0
+        ],
+        "status": "measured",
+        "split": "fresh",
+        "population": "Solidity public PoCs (DeFiVulnLabs)",
+        "fresh": false,
+        "fresh_reason": "in-sample: DeFiVulnLabs was fresh only for the rule logic frozen at e9bea03 (docs/precision.md); it is an opened slice measured by that older binary, and the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG09": {
+      "rust": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "typescript": {
+        "labelled": 7,
+        "tp": 7,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.6457,
+          1.0
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "fresh": false,
+        "fresh_reason": "in-sample: the eval/solana-poc held-out split is the P1 population the P1-C fixes were designed against (docs/precision.md), measured by the binary frozen at 6019773; the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG10": {
+      "rust": {
+        "labelled": 2,
+        "tp": 0,
+        "fp": 2,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.6576
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "count_only": true,
+        "fresh": false,
+        "fresh_reason": "in-sample: the eval/solana-poc held-out split is the P1 population the P1-C fixes were designed against (docs/precision.md), measured by the binary frozen at 6019773; the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "typescript": {
+        "labelled": 1,
+        "tp": 0,
+        "fp": 1,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.7935
+        ],
+        "status": "measured",
+        "split": "heldout",
+        "population": "public Solana PoCs (held-out split; eval/solana-poc)",
+        "count_only": true,
+        "fresh": false,
+        "fresh_reason": "in-sample: the eval/solana-poc held-out split is the P1 population the P1-C fixes were designed against (docs/precision.md), measured by the binary frozen at 6019773; the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG11": {
+      "rust": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "typescript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "javascript": {
+        "status": "unmeasured",
+        "reason": "the rule raised no flag on a PoC in this language",
+        "fresh": false
+      },
+      "solidity": {
+        "labelled": 1,
+        "tp": 1,
+        "fp": 0,
+        "unclear": 0,
+        "precision": 1.0,
+        "wilson95": [
+          0.2065,
+          1.0
+        ],
+        "status": "measured",
+        "split": "fresh",
+        "population": "Solidity public PoCs (DeFiVulnLabs)",
+        "count_only": true,
+        "fresh": false,
+        "fresh_reason": "in-sample: DeFiVulnLabs was fresh only for the rule logic frozen at e9bea03 (docs/precision.md); it is an opened slice measured by that older binary, and the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG12": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG13": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG14": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG15": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG16": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG17": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG18": {
+      "solidity": {
+        "labelled": 7,
+        "tp": 0,
+        "fp": 7,
+        "unclear": 0,
+        "precision": 0.0,
+        "wilson95": [
+          0.0,
+          0.3543
+        ],
+        "status": "measured",
+        "split": "fresh",
+        "population": "Solidity public PoCs (DeFiVulnLabs)",
+        "fresh": false,
+        "fresh_reason": "in-sample: DeFiVulnLabs was fresh only for the rule logic frozen at e9bea03 (docs/precision.md); it is an opened slice measured by that older binary, and the P2R prompt §0.2 never pools numbers from different binaries"
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG19": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    },
+    "RG20": {
+      "solidity": {
+        "status": "unmeasured",
+        "reason": "no fresh Solidity labels; in-sample numbers are in docs/precision.md",
+        "fresh": false
+      },
+      "move": {
+        "status": "unmeasured",
+        "reason": "no labelled Move corpus",
+        "fresh": false
+      }
+    }
+  }
+}
