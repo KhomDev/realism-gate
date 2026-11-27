@@ -34,6 +34,24 @@ The SessionStart hook only reports a missing or mismatched CLI; it never
 installs anything. The CLI itself is offline; only the install step uses the
 network, through cargo.
 
+## MCP
+
+This plugin does not ship a `.mcp.json`, and `plugin.json` does not set
+`mcpServers`. Claude Code starts a plugin MCP server at session startup.
+`realism-gate-mcp` is not a file in the plugin: `realism-gate-ensure` installs
+it only as one of the three binaries of the pinned `realism-gate` crate, and
+only when a command runs it without `--status`. Wiring the server at
+`realism-gate-ensure` would install during session start (the hook's contract
+is the opposite) or print the binary path on stdout, which is the MCP channel.
+`REALISM_GATE_BIN` names the checker, not `realism-gate-mcp`, and ensure does
+not install when that variable is set, so a sibling MCP binary is not
+guaranteed. `${CLAUDE_PLUGIN_ROOT}` in an MCP `command` only reaches files
+bundled with the plugin.
+
+After `/realism-gate:install`, add `realism-gate-mcp` to your own MCP config,
+as in [`docs/agents.md`](../docs/agents.md). The skill text already names
+`check_poc` and `check_claims`.
+
 ## Commands
 
 | Command | What it does |
