@@ -11,7 +11,7 @@ cargo binstall realism-gate
 
 This installs the latest release from crates.io and the GitHub release archives. 1.5.0 added the
 precision floor (the `floor allows ...` lines in the output below), `check --dump-program` and the
-Claude Code plugin; 1.5.1 fixed the MCP server's transport (`realism-gate-mcp` did not work with current MCP clients in 1.5.0); 1.5.2 changed only the MCP Registry name to `io.github.KhomDev/rgate`. Check what you have with `realism-gate --version`. To build unreleased changes
+Claude Code plugin; 1.5.1 fixed the MCP server's transport (`realism-gate-mcp` did not work with current MCP clients in 1.5.0); 1.5.2 changed only the MCP Registry name to `io.github.KhomDev/rgate`. 1.5.3 shortened the GitHub Action description so the Actions Marketplace accepts it. Check what you have with `realism-gate --version`. To build unreleased changes
 from `main` instead: `cargo install --git https://github.com/KhomDev/realism-gate --locked`.
 
 > **DEV-ONLY numbers.** Every precision number for the P2 rules comes from data that was already opened;
@@ -37,7 +37,7 @@ makes. Each row is bound to evidence in the PoC and gets one of four statuses:
 <!-- BEGIN:example-claims -->
 
 ```text
-realism-gate 1.5.2  ·  1 file  ·  1 suite  ·  4 tests
+realism-gate 1.5.3  ·  1 file  ·  1 suite  ·  4 tests
 
 test/ShadowVault.t.sol
   note   RG03 deployer-is-attacker  test/ShadowVault.t.sol:57:26  ShadowVaultTest::test_healthyDistribution_shipsSurplus
@@ -178,7 +178,7 @@ The test deploys a vault and then drains it as admin, with `deal` writing the va
 <!-- BEGIN:example -->
 
 ```text
-realism-gate 1.5.2  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.5.3  ·  1 file  ·  1 suite  ·  1 test
 
 test/VaultDrain.t.sol
   note   RG11 unpinned-fork  test/VaultDrain.t.sol:17:9  VaultDrainTest::test_attackerDrainsVault
@@ -252,7 +252,7 @@ Same rule ids, same output. Rust harnesses (solana-program-test, LiteSVM, Mollus
 <!-- BEGIN:example-rust -->
 
 ```text
-realism-gate 1.5.2  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.5.3  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault_drain.rs
   note   RG11 unpinned-fork  tests/vault_drain.rs:21:15  vault_drain::test_attacker_drains_vault
@@ -304,7 +304,7 @@ shows why a rule exists and how it can be wrong.
 <!-- BEGIN:example-anchor -->
 
 ```text
-realism-gate 1.5.2  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.5.3  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault-drain.ts
   note   RG11 unpinned-fork  tests/vault-drain.ts:13:21  vault::lets the attacker drain the vault

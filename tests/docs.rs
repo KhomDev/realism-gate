@@ -367,6 +367,22 @@ fn action_default_version_is_the_crate_version() {
     );
 }
 
+/// The MCP Registry `server.json` names the crates.io version it publishes.
+/// A release that bumps the crate without these two fields fails here.
+#[test]
+fn server_json_version_is_the_crate_version() {
+    let want = env!("CARGO_PKG_VERSION");
+    let text = std::fs::read_to_string(root().join("server.json")).unwrap();
+    let v: serde_json::Value = serde_json::from_str(&text).expect("server.json is JSON");
+    assert_eq!(v["version"], want, "server.json top-level version");
+    let packages = v["packages"].as_array().expect("server.json packages");
+    let pkg = packages
+        .iter()
+        .find(|p| p["identifier"] == "realism-gate")
+        .expect("server.json packages lists realism-gate");
+    assert_eq!(pkg["version"], want, "server.json package version");
+}
+
 /// GitHub Marketplace lists the root `action.yml` only if it has a name, a
 /// description shorter than 125 characters and a branding icon and colour.
 /// The form refuses a longer description ("Description must be less than 125

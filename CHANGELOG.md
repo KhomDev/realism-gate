@@ -8,12 +8,21 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [1.5.3] - 2026-11-27
+
+Metadata only. No rule, CLI flag, default, report field, MCP tool or archive
+layout changed. The library crates stay at 1.5.0, except `rg-render` 1.5.3
+(same code; it carries the tool version). 1.5.2 cannot be listed on the
+GitHub Actions Marketplace: its action description was 136 characters, and
+the form requires fewer than 125.
+
 ### Changed
 
 - **The action's description is 113 characters** (was 136), so the GitHub
   Marketplace accepts it (the limit is fewer than 125). `tests/docs.rs` now
   checks the name, description length, branding and that `action.yml` is the
-  only action metadata file at the root.
+  only action metadata file at the root. `server.json` versions are pinned
+  to the crate version in the same test file.
 
 ## [1.5.2] - 2026-11-27
 
@@ -1136,7 +1145,8 @@ First release.
 - A pinned public-corpus benchmark (`scripts/bench-corpus.sh`,
   `bench/defihacklabs.json`, `docs/benchmark.md`), re-measured in CI.
 
-[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v1.5.2...HEAD
+[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v1.5.3...HEAD
+[1.5.3]: https://github.com/KhomDev/realism-gate/compare/v1.5.2...v1.5.3
 [1.5.2]: https://github.com/KhomDev/realism-gate/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/KhomDev/realism-gate/compare/v1.5.0...v1.5.1
 [1.1.0]: https://github.com/KhomDev/realism-gate/compare/v1.0.4...v1.1.0

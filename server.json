@@ -8,12 +8,12 @@
     "source": "github"
   },
   "websiteUrl": "https://khomdev.org/tools",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "packages": [
     {
       "registryType": "cargo",
       "identifier": "realism-gate",
-      "version": "1.5.2",
+      "version": "1.5.3",
       "transport": {
         "type": "stdio"
       },
