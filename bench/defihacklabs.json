@@ -10,69 +10,67 @@
   "rules": {
     "RG01": {
       "findings": {
-        "error": 1
+        "note": 1
       },
       "tests": 1
     },
     "RG02": {
       "findings": {
-        "warn": 15
+        "note": 15
       },
       "tests": 13
     },
     "RG04": {
       "findings": {
-        "error": 10,
-        "warn": 1
+        "note": 11
       },
       "tests": 6
     },
     "RG05": {
       "findings": {
-        "warn": 4
+        "note": 4
       },
       "tests": 4
     },
     "RG08": {
       "findings": {
-        "error": 16,
-        "warn": 595
+        "note": 611
       },
       "tests": 611
     },
     "RG10": {
       "findings": {
-        "warn": 2
+        "note": 2
       },
       "tests": 2
     },
     "RG11": {
       "findings": {
-        "warn": 1
+        "note": 1
       },
       "tests": 1
     },
     "RG15": {
       "findings": {
-        "warn": 1
+        "note": 1
       },
       "tests": 1
     },
     "RG16": {
       "findings": {
-        "warn": 1
+        "note": 1
       },
       "tests": 1
     },
     "RG17": {
       "findings": {
-        "warn": 9
+        "note": 9
       },
       "tests": 7
     },
     "RG18": {
       "findings": {
-        "warn": 2
+        "note": 2
       },
       "tests": 2
     }
