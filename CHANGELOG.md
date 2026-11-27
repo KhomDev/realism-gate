@@ -850,7 +850,7 @@ Rust findings, and the JSON/SARIF output, are unchanged.
   (`c0cafc5`) and LiteSVM's Node tests (`c848c56`): 229 files, 292 tests,
   all parsed; reading their findings found five false-positive patterns,
   fixed and pinned by tests
-  ([docs/precision.md](docs/precision.md#anchor-typescript-tests)).
+  ([docs/precision.md](docs/precision.md#rust-solana-and-anchor-typescript-tests)).
 - Rust: the LiteSVM and solana-program-library findings are identical to
   0.3.0's. Solidity: `scripts/bench-corpus.sh --check` matches
   `bench/defihacklabs.json`, and `eval/run.sh --check` reproduces the flags
@@ -925,7 +925,7 @@ output are unchanged.
   solana-program-library test suites (`264ca72`), 164 Rust files and 451
   tests, all parsed and ran in under a second per repository; reading their
   findings found four false-positive patterns, fixed and pinned by tests
-  ([docs/precision.md](docs/precision.md#rust-solana-tests)).
+  ([docs/precision.md](docs/precision.md#rust-solana-and-anchor-typescript-tests)).
 - DeFiHackLabs: `scripts/bench-corpus.sh --check` matches
   `bench/defihacklabs.json` unchanged.
 - Release binary on the same Windows x86-64 laptop: 4,940,288 -> 6,497,280

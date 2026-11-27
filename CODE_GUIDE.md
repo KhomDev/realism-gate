@@ -35,7 +35,7 @@ the documentation.
 14. [Measurement infrastructure](#14-measurement-infrastructure)
 15. [Tests](#15-tests)
 16. [CI, release and verification pipelines](#16-ci-release-and-verification-pipelines)
-17. [Known limitations at v0.4.0](#17-known-limitations-at-v0.4.0)
+17. [Known limitations at v0.4.0](#17-known-limitations-at-v040)
 
 ## 1. The crate and its two binaries
 
