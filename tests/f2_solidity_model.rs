@@ -12,6 +12,28 @@ use realism_gate::Severity;
 use realism_gate::engine::{Options, Report, analyze};
 use realism_gate::project::Project;
 
+/// The severity a finding ships at: the rule's own level `raw`, capped by the
+/// RG-A5 severity floor for the rule in the file's language
+/// (`rules::measured`, derived from `data/measured.json`). While every
+/// committed cell is in-sample the floor is `note`, so this is `note`; when a
+/// fresh FINAL cell lifts a rule, the raw level written in the test is what
+/// the assertion checks again.
+fn floored(rule: &str, file: &str, raw: Severity) -> Severity {
+    realism_gate::rules::measured::shipped(
+        rule,
+        realism_gate::rules::measured::lang_of_path(file),
+        raw,
+    )
+}
+
+/// RG03's level when the model finds an owner gate, as it ships on Solidity.
+/// The rule raises `warn`; while the Solidity RG03 cell is in-sample the
+/// floor caps it at `note`, so the model's answer is visible in the message
+/// and the binding record, not in the severity, until a fresh cell lands.
+fn gated_rg03() -> Severity {
+    floored("RG03", "test/Harvest.t.sol", Severity::Warn)
+}
+
 fn scratch(name: &str) -> std::path::PathBuf {
     let dir = std::env::temp_dir().join(format!("rg-f2-{}-{name}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
@@ -135,7 +157,7 @@ fn f2_rg03_reads_only_owner_from_the_model() {
     let with = report(DEPLOYER_HARVESTS, Some(&model));
     let rg03 = rule(&with, "RG03");
     assert_eq!(rg03.len(), 1, "{:?}", with.findings);
-    assert_eq!(rg03[0].severity, Severity::Warn, "{}", rg03[0].message);
+    assert_eq!(rg03[0].severity, gated_rg03(), "{}", rg03[0].message);
     assert!(rg03[0].message.contains("harvest"), "{}", rg03[0].message);
 }
 
@@ -222,7 +244,7 @@ fn f2_the_cli_passes_the_model_to_the_solidity_rules() {
     let without = run(false);
     let with = run(true);
     assert_eq!(severity(&without), "note");
-    assert_eq!(severity(&with), "warn");
+    assert_eq!(severity(&with), gated_rg03().as_str());
     // Determinism: the same run twice is byte-identical.
     assert_eq!(with, run(true));
     let _ = std::fs::remove_dir_all(&dir);
@@ -276,7 +298,7 @@ fn f2_the_receiver_s_own_contract_answers() {
     let model = two_contracts("own-contract-gated", "onlyOwner", "");
     assert_eq!(
         rg03_severity(&deploys_and_harvests("Alpha"), &model),
-        Severity::Warn
+        gated_rg03()
     );
 }
 
@@ -287,7 +309,7 @@ fn f2_an_unknown_receiver_type_is_answered_when_every_candidate_agrees() {
     let model = two_contracts("agree", "onlyOwner", "onlyOwner");
     assert_eq!(
         rg03_severity(&deploys_and_harvests("VaultV2"), &model),
-        Severity::Warn
+        gated_rg03()
     );
 }
 

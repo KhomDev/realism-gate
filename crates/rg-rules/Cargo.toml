@@ -20,3 +20,7 @@ rg-frontend-move.workspace = true
 regex.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+
+# build.rs derives the shipped severity table from data/measured.json.
+[build-dependencies]
+serde_json.workspace = true

@@ -45,6 +45,13 @@ pub fn rule_set_hash() -> String {
     sha256::hex(text.as_bytes())
 }
 
+/// The hash of the embedded `measured.json`, from which the shipped
+/// severities are derived at build time. The rule-set hash names each rule's
+/// catalog severity; this one pins the data that caps it.
+pub fn measured_hash() -> String {
+    sha256::hex(crate::rules::measured::DATA.as_bytes())
+}
+
 /// The hash of the PoC the run read: every file's display path and source, in
 /// load order. A moved file or a changed byte changes the hash.
 pub fn poc_hash(project: &Project) -> String {
@@ -65,6 +72,8 @@ struct Json<'a> {
     tool: &'static str,
     version: &'static str,
     rule_set_sha256: String,
+    /// Added within card/v1: the measurement data the severities come from.
+    measured_sha256: String,
     poc_sha256: String,
     report_sha256: Option<String>,
     claims_sha256: Option<String>,
@@ -86,6 +95,7 @@ pub fn json(input: &Input<'_>) -> String {
         tool: TOOL,
         version: VERSION,
         rule_set_sha256: rule_set_hash(),
+        measured_sha256: measured_hash(),
         poc_sha256: poc_hash(input.project),
         report_sha256: input
             .report_text
@@ -123,6 +133,10 @@ pub fn markdown(input: &Input<'_>) -> String {
     out.push_str(&format!(
         "| rule set | RG01-RG20, sha256 `{}` |\n",
         short(&rules)
+    ));
+    out.push_str(&format!(
+        "| severity data | measured.json, sha256 `{}` |\n",
+        short(&measured_hash())
     ));
     let files = input
         .project

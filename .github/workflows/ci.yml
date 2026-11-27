@@ -51,7 +51,10 @@ jobs:
           ./target/debug/rgate rules
           ./target/debug/realism-gate explain RG06 > /dev/null
           ./target/debug/realism-gate check tests/fixtures/good --no-declaration
-          if ./target/debug/realism-gate check tests/fixtures/bad --no-declaration; then
+          # The severity floor ships every rule at `note` until a fresh cell
+          # passes it (docs/precision.md), so the rules must still fire on the
+          # bad fixtures: fail at `note`.
+          if ./target/debug/realism-gate check tests/fixtures/bad --no-declaration --fail-on note; then
             echo "::error::the bad fixtures must fail the run"
             exit 1
           fi

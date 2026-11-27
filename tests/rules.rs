@@ -42,6 +42,20 @@ fn run(paths: &[&str], declaration: Option<&str>) -> Vec<(String, Severity, Stri
         .collect()
 }
 
+/// The severity a finding ships at: the rule's own level `raw`, capped by the
+/// RG-A5 severity floor for the rule in the file's language
+/// (`rules::measured`, derived from `data/measured.json`). While every
+/// committed cell is in-sample the floor is `note`, so this is `note`; when a
+/// fresh FINAL cell lifts a rule, the raw level written in the test is what
+/// the assertion checks again.
+fn floored(rule: &str, file: &str, raw: Severity) -> Severity {
+    realism_gate::rules::measured::shipped(
+        rule,
+        realism_gate::rules::measured::lang_of_path(file),
+        raw,
+    )
+}
+
 fn expect(path: &str, want: &[(&str, Severity, u32)]) {
     let got: Vec<(String, Severity, u32)> = run(&[path], None)
         .into_iter()
@@ -49,7 +63,7 @@ fn expect(path: &str, want: &[(&str, Severity, u32)]) {
         .collect();
     let want: Vec<(String, Severity, u32)> = want
         .iter()
-        .map(|(r, s, l)| (r.to_string(), *s, *l))
+        .map(|(r, s, l)| (r.to_string(), floored(r, path, *s), *l))
         .collect();
     assert_eq!(got, want, "{path}");
 }
@@ -452,7 +466,10 @@ fn a_finding_in_an_inherited_setup_is_reported_once_for_all_tests() {
     let report = analyze(&project, None, &Options::default());
     assert_eq!(report.findings.len(), 1);
     let f = &report.findings[0];
-    assert_eq!((f.rule, f.severity, f.line), ("RG06", Warn, 17));
+    assert_eq!(
+        (f.rule, f.severity, f.line),
+        ("RG06", floored("RG06", &f.file, Warn), 17)
+    );
     assert_eq!(f.file, "tests/fixtures/inherit/BaseFixture.sol");
     assert_eq!(f.tests, vec!["test_first", "test_second"]);
 }
@@ -476,7 +493,10 @@ fn suppressions_need_a_reason() {
     assert!(rg04.is_active());
     assert_eq!(rg04.ignored_suppression, Some(22));
     assert_eq!(report.summary.suppressed, 1);
-    assert_eq!(report.summary.errors, 1);
+    // The ignored allow leaves RG04 active at its shipped level.
+    assert_eq!(rg04.severity, floored("RG04", &rg04.file, Error));
+    let errors = usize::from(rg04.severity == Error);
+    assert_eq!(report.summary.errors, errors);
 }
 
 #[test]
@@ -501,8 +521,11 @@ fn without_a_declaration_role_holders_and_keepers_are_flagged() {
         .iter()
         .map(|(r, s, _, l)| (r.as_str(), *s, *l))
         .collect();
-    // mallet holds a granted role; keeper reads as one. Solidity keeps `warn`.
-    assert_eq!(rules, vec![("RG02", Warn, 26), ("RG02", Warn, 28)]);
+    // mallet holds a granted role; keeper reads as one. RG02's own level on
+    // Solidity is `warn`; it ships at the floor.
+    let sol = "KeeperSandwich.t.sol";
+    let rg02 = floored("RG02", sol, Warn);
+    assert_eq!(rules, vec![("RG02", rg02, 26), ("RG02", rg02, 28)]);
 }
 
 #[test]
@@ -519,11 +542,31 @@ fn a_declaration_replaces_the_heuristics_and_adds_boundary_rules() {
         rules,
         vec![
             // mallet is now the declared attacker, and the owner grants it a role.
-            ("RG01", Error, "KeeperSandwich.t.sol", 21),
+            (
+                "RG01",
+                floored("RG01", "KeeperSandwich.t.sol", Error),
+                "KeeperSandwich.t.sol",
+                21
+            ),
             // The keeper's step is declared, so RG02 is silent.
-            ("RG14", Note, "realism.yaml", 13),
-            ("RG13", Warn, "realism.yaml", 16),
-            ("RG12", Error, "realism.yaml", 19),
+            (
+                "RG14",
+                floored("RG14", "realism.yaml", Note),
+                "realism.yaml",
+                13
+            ),
+            (
+                "RG13",
+                floored("RG13", "realism.yaml", Warn),
+                "realism.yaml",
+                16
+            ),
+            (
+                "RG12",
+                floored("RG12", "realism.yaml", Error),
+                "realism.yaml",
+                19
+            ),
         ]
     );
 }

@@ -45,8 +45,8 @@ The machine-readable version is `bench/defihacklabs.json`.
 
 | | Tests | Share |
 |---|---:|---:|
-| Logs values but asserts none (RG08 warn) | 595 | 67.2% |
-| Neither logs nor asserts (RG08 error) | 16 | 1.8% |
+| Logs values but asserts none (RG08 raises warn) | 595 | 67.2% |
+| Neither logs nor asserts (RG08 raises error) | 16 | 1.8% |
 | **No assertion of any kind** | **611** | **69.0%** |
 
 This is the corpus's convention, not a defect of each entry: a shared modifier
@@ -102,7 +102,7 @@ than RG08.
 |---|---:|---:|
 | Tests with any finding | 635 | 638 |
 | Tests with a finding other than RG08 | 30 | 33 |
-| RG04 findings | 7 (5 error, 2 warn) | 11 (10 error, 1 warn) |
+| RG04 findings (level the rule raises) | 7 (5 error, 2 warn) | 11 (10 error, 1 warn) |
 
 Four new RG04 flags are `stdstore.target(...).checked_write` of a token
 `balanceOf` slot. They are labelled in `eval/labels/v0.6.0.jsonl`. RG19 did
@@ -110,6 +110,34 @@ not fire: no `setUp` both pranked as a role and wrote storage. The
 `balance + 1` shape of RG09 did not fire. A storage write that used to be a
 warning because it sat in `setUp` is an error now, except the one the rule
 still lowers because the slot names an attacker.
+
+### Shipped severity under the precision floor
+
+The levels in the tables above are the levels each rule raises. Since the
+severity floor ([precision](precision.md)), a finding ships at the lower of
+that level and the level its rule has earned in that language on a fresh
+measured cell. No committed cell is fresh yet, so every finding on this
+corpus ships as `note`, and `bench/defihacklabs.json`, which records shipped
+levels, counts all 658 findings as notes. The finding and test counts did not
+change; only the shipped level did.
+
+`bench/defihacklabs.json` records both levels per rule: `raised` is the
+level the rule raised, `findings` the level it shipped at. Every finding
+also prints both in its record line (`raised warn, shipped note`).
+
+| Rule | Raised by the rule | Shipped |
+|---|---|---|
+| RG01 | 1 error | 1 note |
+| RG02 | 15 warn | 15 note |
+| RG04 | 10 error, 1 warn | 11 note |
+| RG05 | 4 warn | 4 note |
+| RG08 | 16 error, 595 warn | 611 note |
+| RG10 | 2 warn | 2 note |
+| RG11 | 1 warn | 1 note |
+| RG15 | 1 warn | 1 note |
+| RG16 | 1 warn | 1 note |
+| RG17 | 9 warn | 9 note |
+| RG18 | 2 warn | 2 note |
 
 What the correct findings look like, without naming the incidents:
 

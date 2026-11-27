@@ -30,6 +30,29 @@ fn report(paths: &[&str], declaration: Option<&str>, opts: &Options) -> Report {
     analyze(&project, loaded.as_ref(), opts)
 }
 
+/// The severity a finding ships at: the rule's own level `raw`, capped by the
+/// RG-A5 severity floor for the rule in the file's language
+/// (`rules::measured`, derived from `data/measured.json`). While every
+/// committed cell is in-sample the floor is `note`, so this is `note`; when a
+/// fresh FINAL cell lifts a rule, the raw level written in the test is what
+/// the assertion checks again.
+fn floored(rule: &str, file: &str, raw: Severity) -> Severity {
+    realism_gate::rules::measured::shipped(
+        rule,
+        realism_gate::rules::measured::lang_of_path(file),
+        raw,
+    )
+}
+
+/// `want` with each raw level replaced by the level it ships at.
+fn shipped<'a>(
+    want: Vec<(&'a str, Severity, &'a str, u32)>,
+) -> Vec<(&'a str, Severity, &'a str, u32)> {
+    want.into_iter()
+        .map(|(r, s, f, l)| (r, floored(r, f, s), f, l))
+        .collect()
+}
+
 fn active(r: &Report) -> Vec<(&str, Severity, &str, u32)> {
     r.active()
         .map(|f| (f.rule, f.severity, f.file.as_str(), f.line))
@@ -112,11 +135,11 @@ fn a_declaration_names_the_attacker_and_silences_the_declared_role() {
     let yaml = "tests/fixtures/declaration/realism.yaml";
     assert_eq!(
         active(&with),
-        vec![
+        shipped(vec![
             ("RG14", Note, yaml, 13),
             ("RG13", Warn, yaml, 16),
             ("RG12", Error, yaml, 19),
-        ]
+        ])
     );
 }
 
@@ -151,7 +174,12 @@ fn match_filters_apply_to_rust_suites_and_tests() {
     assert_eq!(r.summary.tests, 1);
     assert_eq!(
         active(&r),
-        vec![("RG08", Warn, "tests/fixtures/bad/RG08_no_assertion.rs", 27)]
+        shipped(vec![(
+            "RG08",
+            Warn,
+            "tests/fixtures/bad/RG08_no_assertion.rs",
+            27
+        )])
     );
     let opts = Options {
         match_contract: Some(Regex::new("^RG10_").unwrap()),

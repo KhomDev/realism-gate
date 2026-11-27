@@ -45,6 +45,10 @@ pub struct Finding {
     pub rule: &'static str,
     pub slug: &'static str,
     pub severity: Severity,
+    /// The level the rule's code raised, before the severity floor and any
+    /// `--severity` override. Rendered in the finding's `measured` record.
+    #[serde(skip)]
+    pub raised: Severity,
     pub file: String,
     pub line: u32,
     pub column: u32,

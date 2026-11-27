@@ -38,7 +38,12 @@ pub fn render(report: &Report) -> String {
                 "partialFingerprints": {
                     "realismGate/v1": format!("{}:{}:{}", f.rule, f.file, f.evidence)
                 },
-                "properties": { "suite": f.suite, "tests": f.tests, "evidence": f.evidence },
+                "properties": {
+                    "suite": f.suite,
+                    "tests": f.tests,
+                    "evidence": f.evidence,
+                    "measured": super::json::record(f),
+                },
             });
             if let Some(s) = &f.suppressed {
                 result["suppressions"] = json!([{

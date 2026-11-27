@@ -92,6 +92,9 @@ jobs:
         with:
           version: ${{ inputs.tag }}
           path: tests/fixtures/bad/RG06_balance_injection.t.sol
+          # From the severity floor on, RG06 ships at `note` until measured;
+          # the level is set explicitly so the check does not depend on it.
+          args: "--severity RG06=error"
           changed-only: "false"
           comment: "false"
           fail-on: none

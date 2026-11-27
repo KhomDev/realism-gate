@@ -233,6 +233,10 @@ pub fn render(report: &Report, opts: TextOptions) -> String {
             let help = wrap(&format!("→ {}", f.help), 9, 96);
             out.push_str(&help);
         }
+        out.push_str(&format!(
+            "         {}\n",
+            p.dim(&format!("measured {}", super::json::record(f).text()))
+        ));
         if let Some(line) = f.ignored_suppression {
             out.push_str(&format!(
                 "         the allow comment on line {line} was ignored: it gives no reason\n"
@@ -371,6 +375,7 @@ mod tests {
                 rule: "RG01",
                 slug: "fake-slug",
                 severity: Severity::Warn,
+                raised: Severity::Warn,
                 file: "x.sol\n  error RG01 fake".to_string(),
                 line: 1,
                 column: 1,

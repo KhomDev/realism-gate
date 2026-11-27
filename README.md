@@ -38,6 +38,7 @@ test/ShadowVault.t.sol
          ↳ sheet.reserve()
          → Deploy and configure as one address, attack as another: `vm.startPrank(attacker)`
          before the exploit steps, or transfer ownership to a dedicated owner in `setUp()`.
+         measured solidity not yet measured on fresh data; floor allows note; raised note, shipped note
 
   note   RG03 deployer-is-attacker  test/ShadowVault.t.sol:68:25  ShadowVaultTest::test_negativeControl_distributesWithoutShadowVault
          3 call(s) in the exploit run as the test contract, which deployed `sheet`
@@ -47,6 +48,7 @@ test/ShadowVault.t.sol
          ↳ sheet.distributeSurplus()
          → Deploy and configure as one address, attack as another: `vm.startPrank(attacker)`
          before the exploit steps, or transfer ownership to a dedicated owner in `setUp()`.
+         measured solidity not yet measured on fresh data; floor allows note; raised note, shipped note
 
   note   RG03 deployer-is-attacker  test/ShadowVault.t.sol:81:9  ShadowVaultTest::test_shadowDrawBlocksDistribution
          2 call(s) in the exploit run as the test contract, which deployed `sheet`
@@ -57,6 +59,7 @@ test/ShadowVault.t.sol
          ↳ sheet.distributeSurplus()
          → Deploy and configure as one address, attack as another: `vm.startPrank(attacker)`
          before the exploit steps, or transfer ownership to a dedicated owner in `setUp()`.
+         measured solidity not yet measured on fresh data; floor allows note; raised note, shipped note
 
   note   RG03 deployer-is-attacker  test/ShadowVault.t.sol:111:26  ShadowVaultTest::test_psmDepositBlocked
          1 call(s) in the exploit run as the test contract, which deployed `vault`
@@ -66,6 +69,7 @@ test/ShadowVault.t.sol
          ↳ vault.locked(alice, USDT_A)
          → Deploy and configure as one address, attack as another: `vm.startPrank(attacker)`
          before the exploit steps, or transfer ownership to a dedicated owner in `setUp()`.
+         measured solidity not yet measured on fresh data; floor allows note; raised note, shipped note
 
 CLAIMS  claims.yaml  ·  structured
 CLAIM                           EVIDENCE                                      STATUS
@@ -167,14 +171,15 @@ The test deploys a vault and then drains it as admin, with `deal` writing the va
 realism-gate 1.4.0  ·  1 file  ·  1 suite  ·  1 test
 
 test/VaultDrain.t.sol
-  warn   RG11 unpinned-fork  test/VaultDrain.t.sol:17:9  VaultDrainTest::test_attackerDrainsVault
+  note   RG11 unpinned-fork  test/VaultDrain.t.sol:17:9  VaultDrainTest::test_attackerDrainsVault
          The fork has no block number, so it runs against the chain as it is today. Balances,
          prices and the bug itself can change before a triager runs it.
          ↳ vm.createSelectFork(vm.envString("RPC_URL"))
          → Pass the block: `vm.createSelectFork(url, BLOCK)`, and say in the report why that
          block is representative.
+         measured solidity not yet measured on fresh data; floor allows note; raised warn, shipped note
 
-  warn   RG02 privileged-step-in-exploit  test/VaultDrain.t.sol:24:9  VaultDrainTest::test_attackerDrainsVault
+  note   RG02 privileged-step-in-exploit  test/VaultDrain.t.sol:24:9  VaultDrainTest::test_attackerDrainsVault
          The exploit runs a step as `admin`: the name `admin` reads as the `admin` role. An
          attacker cannot sign as this address. Moving the prank into setUp() does not make it
          the attacker's action; a prank there next to a direct storage write is RG19. Declare
@@ -182,21 +187,24 @@ test/VaultDrain.t.sol
          on that role acting.
          ↳ vm.prank(admin)
          → Do not hide the prank in `setUp()`.
+         measured solidity not yet measured on fresh data; floor allows note; raised warn, shipped note
 
-  error  RG06 balance-injection  test/VaultDrain.t.sol:28:9  VaultDrainTest::test_attackerDrainsVault
+  note   RG06 balance-injection  test/VaultDrain.t.sol:28:9  VaultDrainTest::test_attackerDrainsVault
          deal() sets the `token` balance of `vault` (Vault) in the exploit. It transfers nothing
          and overwrites the balance the contract had, so its internal accounting never sees it.
          Fund the attacker and transfer instead.
          ↳ deal(address(token), address(vault), 1_000_000e18)
          → Fund the attacker with `deal`, then `transfer` from the attacker to the contract.
+         measured solidity not yet measured on fresh data; floor allows note; raised error, shipped note
 
-  warn   RG10 no-baseline  test/VaultDrain.t.sol:33:9  VaultDrainTest::test_attackerDrainsVault
+  note   RG10 no-baseline  test/VaultDrain.t.sol:33:9  VaultDrainTest::test_attackerDrainsVault
          The asserted value `token.balanceOf(attacker)` is read only after the attack. Without a
          before-value the test cannot tell a gain from a balance that was already there.
          ↳ assertGt(token.balanceOf(attacker), 0)
          → Read the same quantity before and after, and assert on the difference.
+         measured solidity not yet measured on fresh data; floor allows note; raised warn, shipped note
 
-SUMMARY  1 error  ·  3 warnings  ·  0 notes  ·  0 suppressed
+SUMMARY  0 errors  ·  0 warnings  ·  4 notes  ·  0 suppressed
 RESULT   FAIL  (fails on note and above)
 
 realism-gate reads the test; it does not run it. A clean result means no known
@@ -237,7 +245,7 @@ Same rule ids, same output. Rust harnesses (solana-program-test, LiteSVM, Mollus
 realism-gate 1.4.0  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault_drain.rs
-  warn   RG11 unpinned-fork  tests/vault_drain.rs:21:15  vault_drain::test_attacker_drains_vault
+  note   RG11 unpinned-fork  tests/vault_drain.rs:21:15  vault_drain::test_attacker_drains_vault
          The test creates a client for a live cluster, so every account it reads through it is
          the chain as it is today. Balances, prices and the bug itself can change before a
          triager runs it.
@@ -245,6 +253,7 @@ tests/vault_drain.rs
          → Dump each account the PoC needs at a recorded slot (`solana account <ADDRESS>
          --output-file <FILE>`) and load it from the file, and say in the report why that slot
          is representative.
+         measured rust not yet measured on fresh data; floor allows note; raised warn, shipped note
 
   note   RG02 privileged-step-in-exploit  tests/vault_drain.rs:30:5  vault_drain::test_attacker_drains_vault
          The exploit sends a transaction signed by `admin`: the name `admin` reads as the
@@ -253,6 +262,7 @@ tests/vault_drain.rs
          acting.
          ↳ send(&mut svm, set_withdraw_fee_ix(&admin.pubkey(), 0), &[&admin])
          → Do not treat a privileged signature as configuration by moving it earlier.
+         measured rust not yet measured on fresh data; floor allows note; raised note, shipped note
 
   note   RG06 balance-injection  tests/vault_drain.rs:32:5  vault_drain::test_attacker_drains_vault
          set_account sets the lamports of `vault_state` (a program-derived address) in the
@@ -261,15 +271,17 @@ tests/vault_drain.rs
          ↳ svm.set_account(vault_state, Account { lamports: 1_000_000 * LAMPORTS_PER_SOL, ..state })
          → Fund the attacker's own accounts, then transfer from the attacker to the program's
          account.
+         measured rust not yet measured on fresh data; floor allows note; raised note, shipped note
 
-  warn   RG10 no-baseline  tests/vault_drain.rs:34:5  vault_drain::test_attacker_drains_vault
+  note   RG10 no-baseline  tests/vault_drain.rs:34:5  vault_drain::test_attacker_drains_vault
          The asserted value `svm.get_balance(&attacker.pubkey())` is read only after the attack.
          Without a before-value the test cannot tell a gain from a balance that was already
          there.
          ↳ assert!(svm.get_balance(&attacker.pubkey()).unwrap() > 0);
          → Read the same quantity before and after, and assert on the difference.
+         measured rust not yet measured on fresh data; floor allows note; raised warn, shipped note
 
-SUMMARY  0 errors  ·  2 warnings  ·  2 notes  ·  0 suppressed
+SUMMARY  0 errors  ·  0 warnings  ·  4 notes  ·  0 suppressed
 RESULT   FAIL  (fails on note and above)
 
 realism-gate reads the test; it does not run it. A clean result means no known
@@ -285,7 +297,7 @@ shows why a rule exists and how it can be wrong.
 realism-gate 1.4.0  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault-drain.ts
-  warn   RG11 unpinned-fork  tests/vault-drain.ts:13:21  vault::lets the attacker drain the vault
+  note   RG11 unpinned-fork  tests/vault-drain.ts:13:21  vault::lets the attacker drain the vault
          The test creates a client for a live cluster, so every account it reads through it is
          the chain as it is today. Balances, prices and the bug itself can change before a
          triager runs it.
@@ -293,6 +305,7 @@ tests/vault-drain.ts
          → Dump each account the PoC needs at a recorded slot (`solana account <ADDRESS>
          --output-file <FILE>`) and load it from the file, and say in the report why that slot
          is representative.
+         measured typescript not yet measured on fresh data; floor allows note; raised warn, shipped note
 
   note   RG02 privileged-step-in-exploit  tests/vault-drain.ts:27:11  vault::lets the attacker drain the vault
          The exploit sends a transaction signed by `admin`: the name `admin` reads as the
@@ -301,6 +314,7 @@ tests/vault-drain.ts
          acting.
          ↳ program.methods.setWithdrawFee(new BN(0)).accounts({ admin: admin.publicKey, vaultState }).signers([admin]).rpc()
          → Do not treat a privileged signature as configuration by moving it earlier.
+         measured typescript not yet measured on fresh data; floor allows note; raised note, shipped note
 
   note   RG06 balance-injection  tests/vault-drain.ts:29:5  vault::lets the attacker drain the vault
          setAccount sets the lamports of `vaultState` (a program-derived address) in the
@@ -309,15 +323,17 @@ tests/vault-drain.ts
          ↳ context.setAccount(vaultState, { ...state!, lamports: 1_000_000 * LAMPORTS_PER_SOL })
          → Fund the attacker's own accounts, then transfer from the attacker to the program's
          account.
+         measured typescript not yet measured on fresh data; floor allows note; raised note, shipped note
 
-  warn   RG10 no-baseline  tests/vault-drain.ts:31:5  vault::lets the attacker drain the vault
+  note   RG10 no-baseline  tests/vault-drain.ts:31:5  vault::lets the attacker drain the vault
          The asserted value `context.banksClient.getBalance(attacker.publicKey)` is read only
          after the attack. Without a before-value the test cannot tell a gain from a balance
          that was already there.
          ↳ expect(Number(await context.banksClient.getBalance(attacker.publicKey))).to.be.greaterThan(0)
          → Read the same quantity before and after, and assert on the difference.
+         measured typescript not yet measured on fresh data; floor allows note; raised warn, shipped note
 
-SUMMARY  0 errors  ·  2 warnings  ·  2 notes  ·  0 suppressed
+SUMMARY  0 errors  ·  0 warnings  ·  4 notes  ·  0 suppressed
 RESULT   FAIL  (fails on note and above)
 
 realism-gate reads the test; it does not run it. A clean result means no known
