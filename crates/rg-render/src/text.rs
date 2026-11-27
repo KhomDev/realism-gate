@@ -375,6 +375,7 @@ mod tests {
                 rule: "RG01",
                 slug: "fake-slug",
                 severity: Severity::Warn,
+                raised: Severity::Warn,
                 file: "x.sol\n  error RG01 fake".to_string(),
                 line: 1,
                 column: 1,

@@ -21,11 +21,16 @@ def main(argv: list[str]) -> int:
 
     findings = [f for f in report["findings"] if "suppressed" not in f]
     by_rule: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
+    # The level each rule raised, before the severity floor; `findings`
+    # counts the shipped level. Older reports have no `measured.raised`.
+    raised_by_rule: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
     tests_by_rule: dict[str, set[tuple[str, str, str]]] = defaultdict(set)
     flagged: set[tuple[str, str, str]] = set()
     flagged_beyond_rg08: set[tuple[str, str, str]] = set()
     for f in findings:
         by_rule[f["rule"]][f["severity"]] += 1
+        raised = f.get("measured", {}).get("raised", f["severity"])
+        raised_by_rule[f["rule"]][raised] += 1
         for t in f["tests"]:
             ident = (f["file"], f["suite"], t)
             tests_by_rule[f["rule"]].add(ident)
@@ -46,6 +51,7 @@ def main(argv: list[str]) -> int:
         "rules": {
             rule: {
                 "findings": dict(sorted(by_rule[rule].items())),
+                "raised": dict(sorted(raised_by_rule[rule].items())),
                 "tests": len(tests_by_rule[rule]),
             }
             for rule in sorted(by_rule)

@@ -121,6 +121,24 @@ corpus ships as `note`, and `bench/defihacklabs.json`, which records shipped
 levels, counts all 658 findings as notes. The finding and test counts did not
 change; only the shipped level did.
 
+`bench/defihacklabs.json` records both levels per rule: `raised` is the
+level the rule raised, `findings` the level it shipped at. Every finding
+also prints both in its record line (`raised warn, shipped note`).
+
+| Rule | Raised by the rule | Shipped |
+|---|---|---|
+| RG01 | 1 error | 1 note |
+| RG02 | 15 warn | 15 note |
+| RG04 | 10 error, 1 warn | 11 note |
+| RG05 | 4 warn | 4 note |
+| RG08 | 16 error, 595 warn | 611 note |
+| RG10 | 2 warn | 2 note |
+| RG11 | 1 warn | 1 note |
+| RG15 | 1 warn | 1 note |
+| RG16 | 1 warn | 1 note |
+| RG17 | 9 warn | 9 note |
+| RG18 | 2 warn | 2 note |
+
 What the correct findings look like, without naming the incidents:
 
 - **RG01.** The harness pranks as the real owner of a helper contract and

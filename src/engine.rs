@@ -147,6 +147,7 @@ pub fn analyze(
                 rule: info.id,
                 slug: info.slug,
                 severity: opts.severity.get(info.id).copied().unwrap_or(shipped),
+                raised: raw.severity,
                 file,
                 line: raw.pos.line,
                 column: raw.pos.col,

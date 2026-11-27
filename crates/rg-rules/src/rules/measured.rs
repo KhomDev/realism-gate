@@ -214,6 +214,14 @@ pub struct Record {
     pub count_only: bool,
     /// The severity the floor allows this rule in this language.
     pub floor: Severity,
+    /// On a finding: the level the rule's code raised, before the floor and
+    /// any `--severity` override. Shown next to `shipped` so a lowered level
+    /// stays visible.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub raised: Option<Severity>,
+    /// On a finding: the level it ships at.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shipped: Option<Severity>,
 }
 
 fn round4(x: f64) -> f64 {
@@ -235,6 +243,8 @@ pub fn record_of(lang: &'static str, c: Option<&Cell>, floor: Severity) -> Recor
                 wilson95: (!count_only).then_some([round4(lo), round4(hi)]),
                 count_only,
                 floor,
+                raised: None,
+                shipped: None,
             }
         }
         _ => Record {
@@ -245,6 +255,8 @@ pub fn record_of(lang: &'static str, c: Option<&Cell>, floor: Severity) -> Recor
             wilson95: None,
             count_only: false,
             floor,
+            raised: None,
+            shipped: None,
         },
     }
 }
@@ -256,20 +268,29 @@ pub fn record(rule: &str, lang: &'static str) -> Record {
 
 impl Record {
     /// One line: `fresh 14/16 [64.0-96.5]`, `fresh 3/4 (n<5, count only)` or
-    /// `unmeasured (no fresh cell)`, then the floor.
+    /// `not yet measured on fresh data`, then the floor, then (on a finding)
+    /// the raised and shipped levels.
     pub fn text(&self) -> String {
         let body = match (self.status, self.tp, self.n, self.wilson95) {
             ("fresh", Some(tp), Some(n), Some([lo, hi])) => {
                 format!("fresh {tp}/{n} [{:.1}-{:.1}]", lo * 100.0, hi * 100.0)
             }
             ("fresh", Some(tp), Some(n), None) => format!("fresh {tp}/{n} (n<5, count only)"),
-            _ => "unmeasured (no fresh cell)".to_string(),
+            _ => "not yet measured on fresh data".to_string(),
         };
-        format!(
+        let mut line = format!(
             "{} {body}; floor allows {}",
             self.language,
             self.floor.as_str()
-        )
+        );
+        if let (Some(raised), Some(shipped)) = (self.raised, self.shipped) {
+            line.push_str(&format!(
+                "; raised {}, shipped {}",
+                raised.as_str(),
+                shipped.as_str()
+            ));
+        }
+        line
     }
 }
 
@@ -520,7 +541,16 @@ mod tests {
         assert_eq!(in_sample.status, "unmeasured");
         assert_eq!(
             in_sample.text(),
-            "solidity unmeasured (no fresh cell); floor allows note"
+            "solidity not yet measured on fresh data; floor allows note"
+        );
+        let on_finding = Record {
+            raised: Some(Severity::Warn),
+            shipped: Some(Severity::Note),
+            ..record_of("solidity", None, Severity::Note)
+        };
+        assert_eq!(
+            on_finding.text(),
+            "solidity not yet measured on fresh data; floor allows note; raised warn, shipped note"
         );
         let fresh = record_of("solidity", Some(&sample(16, 0, true)), Severity::Error);
         assert_eq!(fresh.status, "fresh");

@@ -54,9 +54,14 @@ struct Measured<'a> {
     measured: Record,
 }
 
-/// The fresh record a finding prints: its rule, in its file's language.
+/// The fresh record a finding prints: its rule, in its file's language, with
+/// the level the rule raised next to the level the finding ships at.
 pub fn record(f: &Finding) -> Record {
-    measured::record(f.rule, measured::lang_of_path(&f.file))
+    Record {
+        raised: Some(f.raised),
+        shipped: Some(f.severity),
+        ..measured::record(f.rule, measured::lang_of_path(&f.file))
+    }
 }
 
 fn body(report: &Report) -> Body<'_> {
@@ -112,6 +117,7 @@ mod tests {
                 rule: "RG08",
                 slug: "no-assertion",
                 severity: Severity::Note,
+                raised: Severity::Note,
                 file: "tests/poc.js".into(),
                 line: 3,
                 column: 1,
