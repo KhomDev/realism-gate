@@ -434,7 +434,16 @@ pub fn deployer_is_attacker(ctx: &Ctx<'_, '_>, out: &mut Vec<Raw>) {
             continue;
         }
         targets.insert(rk);
-        if is_access_controlled_method(&c.method) {
+        // The program model, when supplied, is positive evidence that the
+        // function is gated (`onlyOwner`, `onlyRole`, a `msg.sender` check).
+        // Its "no caller authority" answer is not used to clear a name: the
+        // Solidity resolver does not see a guard delegated to a library or
+        // an external contract, so that answer can be a miss. The holder is
+        // bound: the test contract deployed the contract and its constructor
+        // handed control to nobody else (`owned` above).
+        let gated = ctx.model_gate(i) == Some(super::ModelGate::Gated)
+            || is_access_controlled_method(&c.method);
+        if gated {
             privileged_count += 1;
             privileged_methods.insert(c.method.clone());
             privileged.get_or_insert(i);
