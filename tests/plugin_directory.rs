@@ -258,7 +258,7 @@ fn lite_tree_has_no_image_or_font_refs_except_the_icon() {
 fn lite_plugin_json_sets_privacy_and_listing_urls() {
     let plugin = json("plugin-directory/.claude-plugin/plugin.json");
     let privacy = "https://github.com/KhomDev/realism-gate/blob/main/plugin-directory/PRIVACY.md";
-    let docs = "https://github.com/KhomDev/realism-gate/blob/main/docs/agents.md";
+    let docs = "https://github.com/KhomDev/realism-gate/blob/main/plugin-directory/README.md";
     let support = "https://github.com/KhomDev/realism-gate/issues";
     assert_eq!(plugin["privacyPolicyUrl"], privacy, "privacyPolicyUrl");
     assert_eq!(plugin["documentationUrl"], docs, "documentationUrl");
@@ -271,6 +271,38 @@ fn lite_plugin_json_sets_privacy_and_listing_urls() {
             && policy.contains("send"),
         "PRIVACY.md must say the plugin does not collect, store or send data"
     );
+}
+
+/// The Directory refuses a plugin whose text tells Claude or the user to
+/// add a server the plugin does not declare. This tree is CLI-only: no
+/// file may mention a server, a client config, or the letters mcp.
+#[test]
+fn lite_tree_does_not_mention_mcp() {
+    let root = lite();
+    for entry in walk(&root) {
+        if entry.is_dir() {
+            continue;
+        }
+        let rel = entry
+            .strip_prefix(&root)
+            .unwrap()
+            .to_string_lossy()
+            .replace('\\', "/");
+        let name = entry.file_name().unwrap().to_string_lossy().to_lowercase();
+        if name == "icon.png" {
+            continue;
+        }
+        let bytes = fs::read(&entry).unwrap_or_else(|e| panic!("{rel}: {e}"));
+        let lower = String::from_utf8_lossy(&bytes).to_ascii_lowercase();
+        assert!(
+            !lower.contains("mcp"),
+            "{rel}: the Directory plugin must not mention mcp"
+        );
+        assert!(
+            !lower.contains("mcpservers"),
+            "{rel}: the Directory plugin must not mention mcpServers"
+        );
+    }
 }
 
 fn walk(dir: &Path) -> Vec<PathBuf> {

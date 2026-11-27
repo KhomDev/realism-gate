@@ -4,7 +4,7 @@ argument-hint: "[paths...] [--report finding.md] [--fail-on warn]"
 allowed-tools: Read, Grep, Glob, LS
 ---
 
-This plugin cannot run the CLI. Do not start a shell, and do not call realism-gate or realism-gate-mcp yourself.
+This plugin cannot run the CLI. Do not start a shell, and do not call realism-gate yourself.
 
 1. Identify the PoC paths the user named (default: the project's test directory). You may use Glob, LS, Read and Grep only, to see what is there.
 2. Give the user the exact command to run in their own terminal, for example:
