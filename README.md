@@ -9,9 +9,18 @@ For bounty hunters, contest auditors, and people hunting with an AI agent. A tes
 cargo binstall realism-gate
 ```
 
-From this commit, before a release exists: `cargo install --git https://github.com/KhomDev/realism-gate --locked`.
+This installs the latest release from crates.io and the GitHub release archives. The precision floor
+(`floor allows ...` in the output below), `check --dump-program` and the Claude Code plugin need
+1.5.0 or later; check with `realism-gate --version`. To run unreleased changes on `main`:
+`cargo install --git https://github.com/KhomDev/realism-gate --locked`.
+
+> **DEV-ONLY numbers.** Every precision number for the P2 rules comes from data that was already opened;
+> no held-out precision is claimed yet. See [docs/methodology.md](docs/methodology.md).
 
 > **Research:** [I measured my own audit tools against real exploit proofs, fixed what broke, and measured again](docs/research/2026-11-measure-fix-remeasure.md) (November 2026): how often each rule is right on real Solana PoCs, with n and 95% intervals, and what 1.4.0 changed because of it.
+>
+> **If you are labelling flags for this project, please do not read the article or `docs/precision.md`
+> until you have finished labelling:** they show per-rule results and would unblind you.
 
 ## 1.0: the claim table
 
