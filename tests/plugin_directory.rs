@@ -186,6 +186,93 @@ fn marketplace_lists_the_lite_plugin_without_replacing_the_full_one() {
     );
 }
 
+/// The Directory validator refuses a listing when a file in the plugin tree
+/// other than the required `.claude-plugin/icon.png` is an image or a font,
+/// or when a text file in that tree names one (a README badge, an `![...]`,
+/// an `<img>`, a `.png` path, and so on).
+#[test]
+fn lite_tree_has_no_image_or_font_refs_except_the_icon() {
+    let root = lite();
+    let allowed_icon = Path::new(".claude-plugin").join("icon.png");
+    let image_or_font_ext = [
+        ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".ico", ".bmp", ".avif", ".tif", ".tiff",
+        ".woff", ".woff2", ".ttf", ".otf", ".eot", ".pfb", ".pfm",
+    ];
+    for entry in walk(&root) {
+        if entry.is_dir() {
+            continue;
+        }
+        let rel = entry
+            .strip_prefix(&root)
+            .unwrap()
+            .to_string_lossy()
+            .replace('\\', "/");
+        let rel = rel.replace('\\', "/");
+        let name = entry.file_name().unwrap().to_string_lossy().to_lowercase();
+        let is_icon = Path::new(&rel) == allowed_icon
+            || rel.replace('\\', "/") == "plugin-directory/.claude-plugin/icon.png"
+            || rel == ".claude-plugin/icon.png"
+            || rel == ".claude-plugin\\icon.png";
+        let is_image_or_font = image_or_font_ext.iter().any(|ext| name.ends_with(ext));
+        if is_image_or_font {
+            assert!(
+                is_icon,
+                "plugin-directory may only contain one image, .claude-plugin/icon.png (found {rel})"
+            );
+            continue;
+        }
+        let bytes = fs::read(&entry).unwrap_or_else(|e| panic!("{rel}: {e}"));
+        if bytes.contains(&0) {
+            continue;
+        }
+        let text = String::from_utf8_lossy(&bytes);
+        assert!(
+            !text.contains("!["),
+            "{rel}: markdown image syntax is not allowed in the Directory tree"
+        );
+        let lower = text.to_ascii_lowercase();
+        assert!(
+            !lower.contains("<img") && !lower.contains("<image"),
+            "{rel}: HTML image tags are not allowed in the Directory tree"
+        );
+        assert!(
+            !lower.contains("@font-face") && !lower.contains("font-family:"),
+            "{rel}: font references are not allowed in the Directory tree"
+        );
+        for ext in image_or_font_ext {
+            // Allow the words only if we somehow quote the allowed icon path
+            // in a comment? We do not: no text file may mention an image or
+            // font filename, including icon.png. That is what the validator
+            // flagged on README.md.
+            let needle = ext;
+            if lower.contains(needle) {
+                panic!("{rel}: must not mention image or font files (found `{needle}`)");
+            }
+        }
+    }
+}
+
+/// The Directory listing reads these URLs from plugin.json. They point at
+/// files on `main` in this repository.
+#[test]
+fn lite_plugin_json_sets_privacy_and_listing_urls() {
+    let plugin = json("plugin-directory/.claude-plugin/plugin.json");
+    let privacy = "https://github.com/KhomDev/realism-gate/blob/main/plugin-directory/PRIVACY.md";
+    let docs = "https://github.com/KhomDev/realism-gate/blob/main/docs/agents.md";
+    let support = "https://github.com/KhomDev/realism-gate/issues";
+    assert_eq!(plugin["privacyPolicyUrl"], privacy, "privacyPolicyUrl");
+    assert_eq!(plugin["documentationUrl"], docs, "documentationUrl");
+    assert_eq!(plugin["supportUrl"], support, "supportUrl");
+    let policy = read("plugin-directory/PRIVACY.md").to_ascii_lowercase();
+    assert!(
+        policy.contains("does not")
+            && policy.contains("collect")
+            && policy.contains("store")
+            && policy.contains("send"),
+        "PRIVACY.md must say the plugin does not collect, store or send data"
+    );
+}
+
 fn walk(dir: &Path) -> Vec<PathBuf> {
     let mut out = Vec::new();
     let mut stack = vec![dir.to_path_buf()];
