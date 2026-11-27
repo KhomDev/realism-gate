@@ -122,3 +122,37 @@ larger timeout is the way to classify those four.
 A missed mutant means the suite did not distinguish that change from the
 original. It is a review lead, not a failed build, and this measurement gates
 nothing.
+
+### Changed-lines measurement, F1/F2 binding work, 2026-11-27
+
+Before the `mutants.yml` fixes on `p2/f1-binding` (`--workspace
+--test-workspace=true`, `files`/`base` inputs, `-j 4`, artifact upload), the
+weekly job ran cargo-mutants from the root package only, so it **never mutated
+any file under `crates/**`** (where the rules and the exploit model live) and
+never ran the crates' own tests against a mutant. Earlier weekly numbers, had
+there been any, would have covered `src/` alone.
+
+Run [45934591406](https://github.com/KhomDev/realism-gate/actions/runs/45934591406)
+(GitHub Actions, ubuntu-latest), `p2/f1-binding` at `73e4b3c`, `--in-diff`
+against `d0c274a` over `crates/rg-model/src/exploit/mod.rs`,
+`crates/rg-rules/src/rules/mod.rs`, `crates/rg-rules/src/rules/privilege.rs`,
+`crates/rg-rules/src/solana/rules.rs` and `src/engine.rs`, whole workspace
+test suite per mutant:
+
+| Mutants tested | caught | missed | unviable |
+|---|---|---|---|
+| 110 | 95 | 1 | 14 |
+
+Survival rate: **1 of 96 = 1.0%** (`missed / (caught + missed)`).
+
+The one survivor is explained as an equivalent mutant:
+`crates/rg-model/src/exploit/mod.rs:2381`, `s.op < step.op` replaced with
+`s.op <= step.op` in `bind`. With `<=` the step being bound is itself admitted
+as a candidate "configuring instruction someone else signed". `bind` is only
+called for a signer of that step (`bind_signers` maps over `step.signers`), and
+in this branch (`!is_default`) `names` is `aliases(input, signer)`, which always
+contains `signer`. So the very next check, `other.signers.iter().any(|s|
+names.contains(s))`, skips the step, and the result cannot change for it. The mutant could only
+differ if a second step were placed at the same trace `op`; steps are built one
+per trace-op seed, but that is not asserted as an invariant anywhere. This is
+recorded as an explained survivor rather than killed with a contrived test.

@@ -10,6 +10,12 @@ may change in any minor release.
 
 ### Added (P2)
 
+- **Claude Code plugin.** `plugin/` and the root `.claude-plugin/marketplace.json`.
+  The plugin version is the crates.io release `realism-gate-ensure` installs.
+  A release bumps `plugin/.claude-plugin/plugin.json` and the marketplace
+  entry with `Cargo.toml`; `tests/plugin.rs` fails if they disagree. The
+  SessionStart hook only reports a missing or mismatched CLI. The plugin does
+  not register `realism-gate-mcp` (see `plugin/README.md`).
 - **Program model (RG-A1).** `check --dump-program DIR` reads a protocol
   working tree and reports, per entry point, the authority it requires
   (`Signer(account)`, `Role(name)`, `Owner`, `None`, `Unknown(reason)`) with

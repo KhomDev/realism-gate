@@ -88,6 +88,23 @@ CORPORA = {
         cell_languages=("solidity", "other"),
         repos=dict(SOLIDITY_REPOS),
     ),
+    # P2R-2 additions (Amendment 2). Same vocabularies as their language's
+    # first corpus, so a Solana round may pool v3+v4 flags (one language
+    # family, one frozen binary) and a Solidity round v1+v2.
+    "solana-v4": Corpus(
+        name="solana-v4",
+        inventory=ROOT / "eval" / "solana-poc-v4" / "inventory.json",
+        cache=ROOT / ".corpus" / "solana-poc-v4",
+        languages=("rust", "typescript", "javascript", "other"),
+        cell_languages=("rust", "typescript", "javascript", "solidity", "other"),
+    ),
+    "solidity-v2": Corpus(
+        name="solidity-v2",
+        inventory=ROOT / "eval" / "solidity-poc-v2" / "inventory.json",
+        cache=ROOT / ".corpus" / "solidity-poc-v2",
+        languages=("solidity", "other"),
+        cell_languages=("solidity", "other"),
+    ),
 }
 
 

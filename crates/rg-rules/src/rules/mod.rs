@@ -82,6 +82,8 @@ impl<'p> Ctx<'p, '_> {
 
     /// What the program model says the external call at op `i` requires,
     /// when a model was supplied and it resolves the function without doubt.
+    /// The caller passes an external call (RG03 filters for one); any other
+    /// call simply finds no entry point of its name.
     /// The receiver's contract type picks the contract; when the test does
     /// not say it, the function name must resolve the same way in every
     /// contract that defines it. An `Unknown` authority, or a disagreement
@@ -89,9 +91,6 @@ impl<'p> Ctx<'p, '_> {
     pub fn model_gate(&self, i: usize) -> Option<ModelGate> {
         let model = self.program?;
         let call = self.trace.ops.get(i)?.call()?;
-        if call.class != CallClass::External || call.method.is_empty() {
-            return None;
-        }
         let contract = call.receiver.and_then(|r| {
             let k = key(r);
             self.env
@@ -308,6 +307,39 @@ mod tests {
         // A rule Rust does not check keeps its Solidity help.
         let rg07 = rule("RG07").unwrap();
         assert_eq!(help(rg07, Lang::Rust), help(rg07, Lang::Solidity));
+    }
+
+    #[test]
+    fn check_test_is_check_test_with_no_program_model() {
+        // The published `check_test` keeps its signature and its findings:
+        // it is `check_test_with` and no `--model-target`.
+        let src = r#"
+pragma solidity ^0.8.20;
+import "forge-std/Test.sol";
+contract VaultTest is Test {
+    Vault vault;
+    function setUp() public { vault = new Vault(); }
+    function testSweep() public {
+        vm.store(address(vault), bytes32(0), bytes32(uint256(1)));
+        vault.sweep();
+    }
+}
+"#;
+        let project = Project::from_sources(&[("test/Vault.t.sol", src)]);
+        let suites = project.suites();
+        let suite = suites.first().expect("a suite");
+        let base = crate::trace::SuiteBase::new(&project, suite);
+        let test = suite.tests[0];
+        let trace = crate::trace::build_with(&project, suite, test, &base);
+        let env = Env::new(&project, suite.unit, &trace);
+        let rules = |raws: Vec<Raw>| -> Vec<(&'static str, u32)> {
+            raws.into_iter().map(|r| (r.rule, r.pos.line)).collect()
+        };
+        let plain = rules(check_test(&project, suite, &trace, &env, false));
+        let with = rules(check_test_with(&project, suite, &trace, &env, false, None));
+        assert!(!plain.is_empty(), "the fixture has findings");
+        assert!(plain.iter().any(|(r, _)| *r == "RG04"), "{plain:?}");
+        assert_eq!(plain, with);
     }
 
     #[test]
