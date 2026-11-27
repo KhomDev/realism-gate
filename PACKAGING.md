@@ -8,7 +8,7 @@ The library crates are published to crates.io from 1.5.0, because the root crate
 without them. A library crate gets a new version only when its own code or manifest changes: 1.5.1 changed
 `realism-gate` (the MCP server) and no library code, so `realism-gate` 1.5.1 depends on the published 1.5.0
 libraries, except `rg-render`: it embeds its own `CARGO_PKG_VERSION` as the tool version in every report,
-SARIF log and card, so it moves with `realism-gate` (1.5.1, 1.5.2). Each `crates/*/Cargo.toml` carries its own `version`. They are internal: no API stability guarantee outside
+SARIF log and card, so it moves with `realism-gate` (1.5.1, 1.5.2, 1.5.3). Each `crates/*/Cargo.toml` carries its own `version`. They are internal: no API stability guarantee outside
 `realism-gate`. Publishing them is an approval-gated release step, not something a build does on its own.
 
 ## What is measured on this workspace

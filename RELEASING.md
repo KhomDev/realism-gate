@@ -73,6 +73,10 @@ list, in substance:
   Registry name became `io.github.KhomDev/rgate` because the registry
   namespace is case-sensitive and 1.5.1's crates.io README carried the
   lowercase name, which cannot be changed after publishing.
+- **1.5.3 (2026-11-27), same day as 1.5.2, is metadata only:** the GitHub
+  Action description was shortened to 113 characters so the Actions
+  Marketplace form accepts it (the limit is fewer than 125). 1.5.2 still
+  carries the 136-character description.
 
 ## Compatibility policy
 

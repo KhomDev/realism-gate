@@ -1,7 +1,7 @@
 {
   "schema": "realism-gate.card/v1",
   "tool": "realism-gate",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "rule_set_sha256": "ae1794ca39ec715946fe9623e0218fab9352bf418466dc03a5ed9f2a18657ef3",
   "measured_sha256": "08731b2b4f99751943da06687c00aa3edf81ae422e5ce46b82194deb7e78cbff",
   "poc_sha256": "646772314298b3700b4b0577834b6e7df98fe145e39416fd1ec385439df29515",
