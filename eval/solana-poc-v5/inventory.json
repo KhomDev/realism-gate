@@ -1,0 +1,246 @@
+{
+  "schema": "realism-gate.solana-poc-inventory/v5",
+  "date": "2026-11-27",
+  "salt": "rg-solana-v5-salt-72b381bcd3a9c789cbdf56fa727ae773",
+  "split_rule": "int(sha256(salt + '|' + unit_id)[:8], 16) % 100: 0-39 DEV, 40-59 V1, 60-74 V2, 75-99 FINAL",
+  "tiers": [
+    "J",
+    "X",
+    "N",
+    "A",
+    "AJ"
+  ],
+  "unit_rule": "J: one Code4rena Meteora final-report finding whose block select_block accepts. X: one incident reproduction file. A: one OtterSec advisory file with the sponsor PDF status. One counted unit per finding. A is not pooled with J or X.",
+  "selector": "eval/solana-poc-v3/build_inventory.py select_block (content-based)",
+  "units": [
+    {
+      "id": "J-c4-meteora-F50",
+      "source": "code4rena-meteora-dbc",
+      "platform": "code4rena",
+      "cluster": "code4rena-meteora-dbc",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "report-page-block",
+          "url": "https://code4rena.com/reports/2025-08-meteora-dynamic-bonding-curve",
+          "page_sha256": "b0152ad4b93b69cb978962623996565d1cada05dbb3eb916b694f40b7b7728df",
+          "block": 1,
+          "lang": "rust",
+          "fence_label": "",
+          "block_sha256": "685d2e95560e179a7958888bdf12fb0ac78f1a99fd12924c547739a693f7a860"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "outcome_source": "code4rena-final-report",
+      "outcome_evidence": "Swap rate limiter bypass vulnerability via swap2 instruction",
+      "outcome_url": "https://code4rena.com/reports/2025-08-meteora-dynamic-bonding-curve",
+      "group_id": "F-50",
+      "group_size": 1,
+      "duplicate_of": null,
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "685d2e95560e179a7958888bdf12fb0ac78f1a99fd12924c547739a693f7a860",
+      "split": "DEV"
+    },
+    {
+      "id": "J-c4-meteora-F118",
+      "source": "code4rena-meteora-dbc",
+      "platform": "code4rena",
+      "cluster": "code4rena-meteora-dbc",
+      "tier": "J",
+      "kind": "test-fragment",
+      "files": [
+        {
+          "kind": "report-page-block",
+          "url": "https://code4rena.com/reports/2025-08-meteora-dynamic-bonding-curve",
+          "page_sha256": "b0152ad4b93b69cb978962623996565d1cada05dbb3eb916b694f40b7b7728df",
+          "block": 2,
+          "lang": "rust",
+          "fence_label": "",
+          "block_sha256": "9f4f25d70d2c292f8c6dc5613df0649afbfbe3d21de6b05499629a67861ab19b"
+        }
+      ],
+      "outcome": "valid",
+      "severity": "Medium",
+      "outcome_source": "code4rena-final-report",
+      "outcome_evidence": "Zero free trades are possible under certain conditions",
+      "outcome_url": "https://code4rena.com/reports/2025-08-meteora-dynamic-bonding-curve",
+      "group_id": "F-118",
+      "group_size": 1,
+      "duplicate_of": null,
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "9f4f25d70d2c292f8c6dc5613df0649afbfbe3d21de6b05499629a67861ab19b",
+      "split": "V1"
+    },
+    {
+      "id": "X-cashio-infinite-mint",
+      "source": "pwnednomore-cashio",
+      "platform": "incident-repro",
+      "cluster": "cashio-2022-infinite-mint",
+      "tier": "X",
+      "kind": "binary-main",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/PwnedNoMore/cashio-exploit-workshop",
+          "commit": "9392b12a27406a86ea89fe4b78ff97dbf73d4bbe",
+          "path": "poc/src/main.rs",
+          "url": "https://github.com/PwnedNoMore/cashio-exploit-workshop/blob/9392b12a27406a86ea89fe4b78ff97dbf73d4bbe/poc/src/main.rs",
+          "blob_sha256": "4d5b77f5eb1ea307d906bf3700a266e8c2d21673c53e19003133c353675285f6",
+          "sha256_norm": "90b67d0c255542ca1b0af42d91b4047622e38b5a557834452248a8e003c16307",
+          "block_sha256": "90b67d0c255542ca1b0af42d91b4047622e38b5a557834452248a8e003c16307",
+          "lang": "rust",
+          "fence_label": ""
+        }
+      ],
+      "real_incident": true,
+      "incident": "Cashio infinite mint, March 2022",
+      "outcome": "incident-reproduction",
+      "outcome_source": "repository-readme",
+      "outcome_evidence": "which allowed the attacker to print infinite amount of $CASH",
+      "outcome_url": "https://github.com/PwnedNoMore/cashio-exploit-workshop/blob/9392b12a27406a86ea89fe4b78ff97dbf73d4bbe/README.md",
+      "group_id": "cashio-2022",
+      "group_size": 1,
+      "duplicate_of": null,
+      "license": "Apache-2.0",
+      "unlicensed": false,
+      "note": "pointer and hashes only; the Apache-2.0 text is not copied into git",
+      "selector_note": "v3 select_block does not treat async fn main as a driver; the pin is the whole blob",
+      "dedupe_key": "90b67d0c255542ca1b0af42d91b4047622e38b5a557834452248a8e003c16307",
+      "split": "DEV"
+    },
+    {
+      "id": "A-otter-port-sundial-00",
+      "source": "ottersec-port-sundial",
+      "platform": "ottersec",
+      "cluster": "ottersec-port-sundial",
+      "tier": "A",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/otter-sec/port-sundial-pocs",
+          "commit": "289272c0be544fd82646ae1fd62ecfdaf8bc84d9",
+          "path": "os-prt-adv-00/sundial_collateral.spec.ts",
+          "url": "https://github.com/otter-sec/port-sundial-pocs/blob/289272c0be544fd82646ae1fd62ecfdaf8bc84d9/os-prt-adv-00/sundial_collateral.spec.ts",
+          "sponsor_pdf": "https://github.com/port-finance/sundial/blob/9395556b5742f80fb8dfd3d0d1d0cdf933547318/audits/port-finance-sundial-audit-public.pdf",
+          "sponsor_pdf_sha256": "cfdec3d94d86474fffe90f0f27a32665fc123bf71610cb0847576f3e24799e80",
+          "blob_sha256": "4603f0a0247d71d2d9a0d2f87c0d17dd860196ffa751ad984a77fcf0097bf52d",
+          "sha256_norm": "b1221509a02a03a06b258a92efea67d320eccbe07cb546400481524f44fc3a3d",
+          "block_sha256": "b1221509a02a03a06b258a92efea67d320eccbe07cb546400481524f44fc3a3d",
+          "lang": "rust",
+          "fence_label": ""
+        }
+      ],
+      "outcome": "Resolved",
+      "severity": "Critical",
+      "outcome_source": "sponsor-published-audit-pdf",
+      "outcome_evidence": "OS-PRT-ADV-00 [Critical] [Resolved]: Excess Collateral Liquidations",
+      "outcome_url": "https://github.com/port-finance/sundial/blob/9395556b5742f80fb8dfd3d0d1d0cdf933547318/audits/port-finance-sundial-audit-public.pdf",
+      "group_id": "OS-PRT-ADV-00",
+      "group_size": 1,
+      "duplicate_of": null,
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "b1221509a02a03a06b258a92efea67d320eccbe07cb546400481524f44fc3a3d",
+      "split": "DEV"
+    },
+    {
+      "id": "A-otter-port-sundial-01",
+      "source": "ottersec-port-sundial",
+      "platform": "ottersec",
+      "cluster": "ottersec-port-sundial",
+      "tier": "A",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/otter-sec/port-sundial-pocs",
+          "commit": "289272c0be544fd82646ae1fd62ecfdaf8bc84d9",
+          "path": "os-prt-adv-01/incorrect_yield.spec.ts",
+          "url": "https://github.com/otter-sec/port-sundial-pocs/blob/289272c0be544fd82646ae1fd62ecfdaf8bc84d9/os-prt-adv-01/incorrect_yield.spec.ts",
+          "sponsor_pdf": "https://github.com/port-finance/sundial/blob/9395556b5742f80fb8dfd3d0d1d0cdf933547318/audits/port-finance-sundial-audit-public.pdf",
+          "sponsor_pdf_sha256": "cfdec3d94d86474fffe90f0f27a32665fc123bf71610cb0847576f3e24799e80",
+          "blob_sha256": "fb9be8a1f5eba1f83ed6a52c1c7fbf72cd7fa9d06ce6761d685683e400b6b45d",
+          "sha256_norm": "7f6f076d8ff37ca502fd972ee1bbead90349835d39705b74f5425932e4fd463f",
+          "block_sha256": "7f6f076d8ff37ca502fd972ee1bbead90349835d39705b74f5425932e4fd463f",
+          "lang": "rust",
+          "fence_label": ""
+        }
+      ],
+      "outcome": "Resolved",
+      "severity": "High",
+      "outcome_source": "sponsor-published-audit-pdf",
+      "outcome_evidence": "OS-PRT-ADV-01 [High] [Resolved]: Inaccurate Yield Token Calculations",
+      "outcome_url": "https://github.com/port-finance/sundial/blob/9395556b5742f80fb8dfd3d0d1d0cdf933547318/audits/port-finance-sundial-audit-public.pdf",
+      "group_id": "OS-PRT-ADV-01",
+      "group_size": 1,
+      "duplicate_of": null,
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "7f6f076d8ff37ca502fd972ee1bbead90349835d39705b74f5425932e4fd463f",
+      "split": "DEV"
+    },
+    {
+      "id": "A-otter-port-sundial-02",
+      "source": "ottersec-port-sundial",
+      "platform": "ottersec",
+      "cluster": "ottersec-port-sundial",
+      "tier": "A",
+      "kind": "test-file",
+      "files": [
+        {
+          "kind": "repo-file",
+          "repo": "https://github.com/otter-sec/port-sundial-pocs",
+          "commit": "289272c0be544fd82646ae1fd62ecfdaf8bc84d9",
+          "path": "os-prt-adv-02/incorrect_config_decimals.spec.ts",
+          "url": "https://github.com/otter-sec/port-sundial-pocs/blob/289272c0be544fd82646ae1fd62ecfdaf8bc84d9/os-prt-adv-02/incorrect_config_decimals.spec.ts",
+          "sponsor_pdf": "https://github.com/port-finance/sundial/blob/9395556b5742f80fb8dfd3d0d1d0cdf933547318/audits/port-finance-sundial-audit-public.pdf",
+          "sponsor_pdf_sha256": "cfdec3d94d86474fffe90f0f27a32665fc123bf71610cb0847576f3e24799e80",
+          "blob_sha256": "b7012049b654e21f91014817e7dd581d9b2d934cc90da318310d1dfdc9955ac0",
+          "sha256_norm": "b6c5d0e73eaf4b97210761eea2ce35ba50e165cde7b97080bce8b82aff192ee4",
+          "block_sha256": "b6c5d0e73eaf4b97210761eea2ce35ba50e165cde7b97080bce8b82aff192ee4",
+          "lang": "rust",
+          "fence_label": ""
+        }
+      ],
+      "outcome": "Resolved",
+      "severity": "High",
+      "outcome_source": "sponsor-published-audit-pdf",
+      "outcome_evidence": "OS-PRT-ADV-02 [High] [Resolved]: Config Changes Zero Critical Fields",
+      "outcome_url": "https://github.com/port-finance/sundial/blob/9395556b5742f80fb8dfd3d0d1d0cdf933547318/audits/port-finance-sundial-audit-public.pdf",
+      "group_id": "OS-PRT-ADV-02",
+      "group_size": 1,
+      "duplicate_of": null,
+      "license": "none",
+      "unlicensed": true,
+      "dedupe_key": "b6c5d0e73eaf4b97210761eea2ce35ba50e165cde7b97080bce8b82aff192ee4",
+      "split": "V1"
+    }
+  ],
+  "dropped": [],
+  "counts": {
+    "units_with_rows": 6,
+    "counted": 6,
+    "counted_by_tier": {
+      "A": 3,
+      "J": 2,
+      "X": 1
+    },
+    "counted_by_cluster": {
+      "cashio-2022-infinite-mint": 1,
+      "code4rena-meteora-dbc": 2,
+      "ottersec-port-sundial": 3
+    },
+    "split": {
+      "DEV": 4,
+      "V1": 2,
+      "V2": 0,
+      "FINAL": 0
+    }
+  },
+  "status": "sealed at collection; not run and not labelled"
+}
