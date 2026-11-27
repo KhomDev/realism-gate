@@ -24,7 +24,6 @@
         {
           "kind": "report-page-block",
           "url": "https://code4rena.com/reports/2025-08-meteora-dynamic-bonding-curve",
-          "page_sha256": "b0152ad4b93b69cb978962623996565d1cada05dbb3eb916b694f40b7b7728df",
           "block": 1,
           "lang": "rust",
           "fence_label": "",
@@ -55,7 +54,6 @@
         {
           "kind": "report-page-block",
           "url": "https://code4rena.com/reports/2025-08-meteora-dynamic-bonding-curve",
-          "page_sha256": "b0152ad4b93b69cb978962623996565d1cada05dbb3eb916b694f40b7b7728df",
           "block": 2,
           "lang": "rust",
           "fence_label": "",
