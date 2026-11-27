@@ -8,6 +8,13 @@ may change in any minor release.
 
 ## [Unreleased]
 
+### Changed
+
+- **The action's description is 113 characters** (was 136), so the GitHub
+  Marketplace accepts it (the limit is fewer than 125). `tests/docs.rs` now
+  checks the name, description length, branding and that `action.yml` is the
+  only action metadata file at the root.
+
 ## [1.5.2] - 2026-11-27
 
 Metadata only. No rule, CLI flag, default, report field, MCP tool or archive

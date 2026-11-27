@@ -366,3 +366,58 @@ fn action_default_version_is_the_crate_version() {
         "action.yml must set `{want}`"
     );
 }
+
+/// GitHub Marketplace lists the root `action.yml` only if it has a name, a
+/// description shorter than 125 characters and a branding icon and colour.
+/// The form refuses a longer description ("Description must be less than 125
+/// characters"), and it checks this only when a release is published.
+#[test]
+fn action_metadata_meets_the_marketplace_rules() {
+    let action = std::fs::read_to_string(root().join("action.yml")).unwrap();
+    let top = |key: &str| {
+        action
+            .lines()
+            .find_map(|l| l.strip_prefix(&format!("{key}: ")))
+            .map(|v| v.trim().trim_matches('"').to_string())
+    };
+    let name = top("name").expect("action.yml needs a top-level name");
+    assert!(!name.is_empty());
+    let description = top("description").expect("action.yml needs a top-level description");
+    assert!(
+        description.chars().count() < 125,
+        "action.yml description is {} characters; the Marketplace needs fewer than 125",
+        description.chars().count()
+    );
+    let branding: Vec<&str> = action
+        .lines()
+        .skip_while(|l| *l != "branding:")
+        .skip(1)
+        .take_while(|l| l.starts_with("  "))
+        .collect();
+    assert!(
+        branding.iter().any(|l| l.trim().starts_with("icon: ")),
+        "branding.icon"
+    );
+    let colours = [
+        "white",
+        "yellow",
+        "blue",
+        "green",
+        "orange",
+        "red",
+        "purple",
+        "gray-dark",
+    ];
+    assert!(
+        branding
+            .iter()
+            .filter_map(|l| l.trim().strip_prefix("color: "))
+            .any(|c| colours.contains(&c)),
+        "branding.color must be one of {colours:?}"
+    );
+    let roots = ["action.yml", "action.yaml"]
+        .iter()
+        .filter(|f| root().join(f).exists())
+        .count();
+    assert_eq!(roots, 1, "exactly one action metadata file at the root");
+}

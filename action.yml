@@ -1,5 +1,5 @@
 name: realism-gate PoC check
-description: Flag what makes a Foundry or Solana (Rust or Anchor TypeScript) proof of concept prove less than it claims. Static, no toolchain needed.
+description: Flag what makes a Foundry or Solana (Rust, Anchor TS) PoC prove less than it claims. Static, no toolchain needed.
 author: KhomDev
 branding:
   icon: shield
