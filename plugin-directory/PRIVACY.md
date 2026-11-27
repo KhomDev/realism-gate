@@ -12,9 +12,7 @@ Claude Code may read files in your project when you ask it to, using only
 Read, Grep, Glob and LS. Those reads stay in your local session. They are not
 sent to the plugin author.
 
-If you run `realism-gate` or `realism-gate-mcp` yourself, that process is
-yours. This plugin does not start those programs and does not receive their
-output. The MCP server, if you add it, is a program you configure; this
-plugin does not declare or launch it.
+If you run `realism-gate` yourself, that process is yours. This plugin does
+not start it and does not receive its output.
 
 Questions: [github.com/KhomDev/realism-gate/issues](https://github.com/KhomDev/realism-gate/issues).

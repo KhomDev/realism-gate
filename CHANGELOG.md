@@ -27,6 +27,12 @@ may change in any minor release.
   tree. A privacy policy is in `plugin-directory/PRIVACY.md` (no data is
   collected, stored or sent). `plugin.json` sets `privacyPolicyUrl`,
   `documentationUrl` and `supportUrl` to GitHub URLs on `main`.
+- **The Directory plugin no longer mentions adding a local server.** The
+  validator refuses text that tells the user to add a server the plugin
+  does not declare. `plugin-directory/` is CLI-only: it covers installing
+  and running `realism-gate` and reading its output. `documentationUrl`
+  points at `plugin-directory/README.md`. `tests/plugin_directory.rs`
+  fails if any file in that tree contains `mcp`.
 
 ## [1.5.3] - 2026-11-27
 

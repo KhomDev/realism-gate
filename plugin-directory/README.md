@@ -26,16 +26,14 @@ run it).
 ## What is in this tree
 
 - `skills/realism-gate/SKILL.md` — the repository skill, worded so the agent
-  asks you to run the CLI or MCP tools instead of running them itself.
+  asks you to run the CLI instead of running it itself.
 - `commands/check.md`, `install.md`, `upgrade.md` — the same three commands
   as the full plugin, with `allowed-tools` limited to `Read`, `Grep`, `Glob`
   and `LS`.
 - `.claude-plugin/plugin.json` — name, version and the Directory listing
   URLs (privacy policy, docs and support).
 
-There is no `hooks/` directory, no `bin/` directory, and no script. MCP setup
-is still yours: after the CLI is on `PATH`, `claude mcp add rgate -- realism-gate-mcp`,
-as in [`docs/agents.md`](../docs/agents.md).
+There is no `hooks/` directory, no `bin/` directory, and no script.
 
 `tests/plugin_directory.rs` fails if a hook, a `bin/` path, a disallowed
 tool, a `$` in `allowed-tools`, or a missing privacy-policy URL is added.
