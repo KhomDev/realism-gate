@@ -39,7 +39,7 @@
     "eval/solana-poc-v3/measure.py": "5cb9f8a870425a83bd34dfc0c60ba357481b4413d30e66a2800fe1d24248b5d0",
     "eval/p2r_corpora.py": "bb8d4a4824575e7965828d58777d48182c129795484c71442319cc4d80069e0f",
     "eval/p2r_packet.py": "8408fe2ed0b23e0ff01b6cf6813b9f2febdeca5fd394cbb834e71f54a90f76e7",
-    "eval/p2r_sheet.py": "057018f40607b2dac8b391bd605aabf321cb86d45546dd7a7f991ad138ecc89d",
+    "eval/p2r_sheet.py": "c50131c27fa9dd05c50847e0c8a0aa47239c5dab2b9116bac2754e60aa2954fc",
     "eval/p2r_counts.py": "53b0b67a0bd0a0bc62c52ba57b825e3c8abe25aafd68004e689c41f15b645453",
     "eval/p2r_score_human.py": "2363d62e009286fabd130470c56eee3ee36ceba307886afe44399238097e2627",
     "eval/solana-poc-v5/run.py": "f005c3391319aca0f6c73633fafa0ecf1574a5579065529d36f91d80573dba08",
@@ -88,7 +88,7 @@
     "build": "cargo +1.95.0-x86_64-pc-windows-gnu build --release --locked --offline --no-default-features (CARGO_PROFILE_RELEASE_LTO=false)",
     "binary_sha256": "54d23059b3ffc2d7a6f9602f3e03cd1d58b71cc333e487304301dad14df06478",
     "sealed_pairs_V1": {
-      "status": "judge labels collected; pairs_run.py not yet run when this was recorded",
+      "status": "run once on 2026-11-27 (Budapest); --check reproduced it byte-identically",
       "judge": "Code4rena judges' public GitHub labels (selected for report, duplicate-N). Not human or AI raters: the tool's recall@5 and FAR on these are judge-labelled.",
       "branch": "https://github.com/KhomDev/priorart/tree/p2/pairs-v1",
       "branch_commit": "3ab2547",
@@ -134,7 +134,13 @@
           }
         }
       },
-      "command": "python -I eval/dupbench/pairs_run.py --mode pairs --pairs eval/dupbench/pairs-swap/pairs_v1_swapped.json --round round-1 --version 0.2.2 --binary-sha256 54d23059b3ffc2d7a6f9602f3e03cd1d58b71cc333e487304301dad14df06478 --pair-labels <dir> --out <file>"
+      "command": "python -I eval/dupbench/pairs_run.py --mode pairs --pairs eval/dupbench/pairs-swap/pairs_v1_swapped.json --round round-1 --version 0.2.2 --binary-sha256 54d23059b3ffc2d7a6f9602f3e03cd1d58b71cc333e487304301dad14df06478 --pair-labels <dir> --out <file>",
+      "result": {
+        "file": "eval/rounds/round-1-pairs.json (in the priorart repo, branch p2/pairs-v1)",
+        "sha256": "e44f85dec33bbec000ecf5ab74374e873dbe47fb93fcba4df904e6d98f829e39",
+        "pooled_V1_fresh": "recall@5 350/445 = 78.65% [74.61, 82.21]; FAR at alarm 2/104 = 1.92% [0.53, 6.74]; warning precision 43/48 = 89.58% [77.83, 95.47]; abstention 81/549 = 14.75% [12.03, 17.97]",
+        "caveat": "judge-labelled (Code4rena judges), not human or AI raters; pooled Wilson ignores clustering by contest; six contests, one binary"
+      }
     },
     "dupbench": "validation split was already used for DEV tuning and is reported as in-sample, never as held-out; FINAL stays sealed"
   },
@@ -150,6 +156,17 @@
       ],
       "unchanged": "binary, rubric, pre-registration, golden manifest, V1 of solana-poc-v3, solana-poc-v4 and solidity-poc-v1 (already opened once), V2 and FINAL stay sealed",
       "order": "this file is merged to main before solana-poc-v5 V1 and solidity-poc-v2 V1 are opened and before pairs_run.py is run"
+    },
+    {
+      "id": "A2",
+      "recorded": "2026-11-27 (Europe/Budapest), after A1 and after solana-poc-v5 V1, solidity-poc-v2 V1 and the priorart pairs were run",
+      "authority": "Yura, relayed 17:44 Budapest (labellers: unpaid, 30, English, three areas; commit the V1 counts report)",
+      "changes": [
+        "scripts[eval/p2r_sheet.py] 057018f40607... -> c50131c27fa9...: the builder gained the sherlock-report-section-block pin kind and reads the page-pre-block pin without pre_index; it did not read tool output or labels. The solidity-poc-v1 sheet rebuilds byte-identically with it",
+        "adds eval/rounds/round-1-labellers.template.json (identities null) and eval/rounds/round-1-v1-counts.{md,json}",
+        "priorart.sealed_pairs_V1 records the run result hash"
+      ],
+      "unchanged": "binary, rubric, pre-registration, golden manifest, opened slices; V2 and FINAL stay sealed"
     }
   ]
 }

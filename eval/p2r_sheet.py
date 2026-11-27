@@ -75,7 +75,7 @@ def locate(pin: dict, line: int) -> tuple[str, str, str]:
         repo = github_repo(pin["repo"])
         link = f"https://github.com/{repo}/blob/{pin['commit']}/{pin['path']}#L{line}"
         return link, f"line {line}", f"https://github.com/{repo}/tree/{pin['commit']}"
-    if kind == "report-section-block":
+    if kind in ("report-section-block", "sherlock-report-section-block"):
         repo = github_repo(pin["repo"])
         link = f"https://github.com/{repo}/blob/{pin['commit']}/{pin['path']}"
         where = (f"section {pin['section']}, code block {int(pin['block']) + 1} (counting from 1) "
@@ -90,7 +90,7 @@ def locate(pin: dict, line: int) -> tuple[str, str, str]:
                  f"(counting from 1); the flagged line is quoted in the next column")
         return pin["url"], where, pin["url"]
     if kind == "page-pre-block":
-        where = (f"finding {pin.get('finding', '?')}, code block {int(pin['pre_index']) + 1} "
+        where = (f"finding {pin.get('finding', '?')}, code block {int(pin.get('pre_index', pin.get('block', 0))) + 1} "
                  f"(counting from 1); the flagged line is quoted in the next column")
         return pin["url"], where, pin["url"]
     raise SystemExit(f"unknown pin kind {kind!r}: add it to locate() before building a sheet")
@@ -273,11 +273,14 @@ def self_test() -> int:
         {"kind": "report-section-block", "repo": "https://github.com/o/f", "commit": "d" * 40,
          "path": "report.md", "section": "H-01", "block": 0, "issue_url": "https://github.com/o/f/issues/3"},
         {"kind": "page-pre-block", "url": "https://web.archive.org/x", "finding": "M-2", "pre_index": 1},
+        {"kind": "sherlock-report-section-block", "repo": "https://github.com/o/j", "commit": "e" * 40,
+         "path": "README.md", "section": "H-5", "block": 3, "issue_url": None},
     ]
     assert locate(pins[0], 12)[0].endswith("/blob/" + "c" * 40 + "/t/a.t.sol#L12")
     assert "code block 3" in locate(pins[1], 4)[1]
     assert "section H-01" in locate(pins[2], 4)[1]
     assert "code block 2" in locate(pins[3], 1)[1]
+    assert "section H-5, code block 4" in locate(pins[4], 1)[1]
     try:
         locate({"kind": "mystery"}, 1)
         raise AssertionError("unknown pin kind accepted")
