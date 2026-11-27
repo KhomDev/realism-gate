@@ -1,6 +1,7 @@
 # realism-gate
 
 **A writing and PoC-structure filter for Foundry, Solana and Move tests, plus an optional two-sided forge check. 1.0 also asks the other half of the question: does the proof prove what the report claims? It is not a validity oracle.**
+![realism-gate demo](docs/assets/realism-gate-demo.gif)
 
 For bounty hunters, contest auditors, and people hunting with an AI agent. A test can pass because the harness granted a role, wrote storage with `stdstore` or `vm.store`, moved that write into `setUp()`, or asserted `balance + 1 > before`. realism-gate looks for those shapes. With `--report` it also reads the finding's claims and binds each one to the evidence the PoC does or does not contain. A clean result means none of the patterns fired and no claim contradicted the test. It does not mean the bug is real, the citation exists, or a program pays for it.
 
