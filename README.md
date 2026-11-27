@@ -11,7 +11,7 @@ cargo binstall realism-gate
 
 This installs the latest release from crates.io and the GitHub release archives. 1.5.0 added the
 precision floor (the `floor allows ...` lines in the output below), `check --dump-program` and the
-Claude Code plugin; check what you have with `realism-gate --version`. To build unreleased changes
+Claude Code plugin; 1.5.1 fixed the MCP server's transport (`realism-gate-mcp` did not work with current MCP clients in 1.5.0). Check what you have with `realism-gate --version`. To build unreleased changes
 from `main` instead: `cargo install --git https://github.com/KhomDev/realism-gate --locked`.
 
 > **DEV-ONLY numbers.** Every precision number for the P2 rules comes from data that was already opened;
@@ -37,7 +37,7 @@ makes. Each row is bound to evidence in the PoC and gets one of four statuses:
 <!-- BEGIN:example-claims -->
 
 ```text
-realism-gate 1.5.0  ·  1 file  ·  1 suite  ·  4 tests
+realism-gate 1.5.1  ·  1 file  ·  1 suite  ·  4 tests
 
 test/ShadowVault.t.sol
   note   RG03 deployer-is-attacker  test/ShadowVault.t.sol:57:26  ShadowVaultTest::test_healthyDistribution_shipsSurplus
@@ -178,7 +178,7 @@ The test deploys a vault and then drains it as admin, with `deal` writing the va
 <!-- BEGIN:example -->
 
 ```text
-realism-gate 1.5.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.5.1  ·  1 file  ·  1 suite  ·  1 test
 
 test/VaultDrain.t.sol
   note   RG11 unpinned-fork  test/VaultDrain.t.sol:17:9  VaultDrainTest::test_attackerDrainsVault
@@ -231,7 +231,7 @@ shows why a rule exists and how it can be wrong.
 - A bounty hunter about to submit a PoC: run the rules, then bind the report's claims to what the test actually shows.
 - A contest auditor whose test deploys the protocol locally.
 - A triager who wants the claim table and the [evidence card](docs/evidence-card.md) next to the report.
-- An agent that drafts findings. The [skill](skills/realism-gate/SKILL.md) and [`realism-gate-mcp`](docs/agents.md) run the PoC check and the claim check before the report is written.
+- An agent that drafts findings. The [skill](skills/realism-gate/SKILL.md) and the MCP server [`realism-gate-mcp`](docs/agents.md) (`rgate` in the MCP Registry) run the PoC check and the claim check before the report is written.
 
 ## What it does
 
@@ -252,7 +252,7 @@ Same rule ids, same output. Rust harnesses (solana-program-test, LiteSVM, Mollus
 <!-- BEGIN:example-rust -->
 
 ```text
-realism-gate 1.5.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.5.1  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault_drain.rs
   note   RG11 unpinned-fork  tests/vault_drain.rs:21:15  vault_drain::test_attacker_drains_vault
@@ -304,7 +304,7 @@ shows why a rule exists and how it can be wrong.
 <!-- BEGIN:example-anchor -->
 
 ```text
-realism-gate 1.5.0  ·  1 file  ·  1 suite  ·  1 test
+realism-gate 1.5.1  ·  1 file  ·  1 suite  ·  1 test
 
 tests/vault-drain.ts
   note   RG11 unpinned-fork  tests/vault-drain.ts:13:21  vault::lets the attacker drain the vault
@@ -418,6 +418,18 @@ Inputs are capped, and the error names the limit: 8 MiB per source file, 128 MiB
 A claim table is narrower than the bug. Binding cannot confirm a role the test does not grant, an asset the PoC never names, an amount stated only in prose, a precondition it has no words for, or a citation without a target commit. The `fix` row is always open until you run `verify-fix`. And the inferred fallback reads only backticked identifiers, the headline's impact verb and the words "any user"/"unprivileged"/role names; everything else is `NOT CHECKABLE`, and an inferred run is never a pass.
 
 A clean result is not a payable finding. The full list is [docs/limitations.md](docs/limitations.md#claims-and-binding). How often a flag was right, on the corpora that were labelled, is [docs/precision.md](docs/precision.md); the claim-binding numbers (impact: 91.0% on the first build, n=100, Wilson 95% [83.8-95.2]; 98.9% after fixing the misses that the same set exposed, so in-sample) and their caveats are [there](docs/precision.md#claim-binding). The per-field scorecard publishes every field too: attacker and asset are not interpretable with this corpus, and amount, preconditions, cited and fix are not checkable.
+
+## MCP server and skill
+
+`realism-gate-mcp` is a stdio MCP server with five read-only tools: `check_poc`, `check_claims`, `dump_program`, `list_rules` and `explain_rule`. Each runs the CLI and returns its JSON unedited, so the numbers an agent sees are the CLI's (DEV-ONLY, as above). It refuses flag-shaped paths and unknown arguments, kills a run after 120 s, caps output at 4 MiB, and with `REALISM_GATE_MCP_ROOT` refuses any path outside that directory.
+
+```bash
+claude mcp add rgate -- realism-gate-mcp
+```
+
+The [skill](skills/realism-gate/SKILL.md) tells the agent when to call them and what a result does not prove. Setup for Claude Code, Cursor and Codex, the limits and the tests: [docs/agents.md](docs/agents.md).
+
+- MCP Registry name: `mcp-name: io.github.khomdev/rgate`
 
 ## Related
 

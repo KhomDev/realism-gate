@@ -1,6 +1,6 @@
 [package]
 name = "rg-program"
-version.workspace = true
+version = "1.5.0"
 edition.workspace = true
 rust-version.workspace = true
 description = "Entry-point authority model for realism-gate: which authority each Anchor, native Solana or Solidity entry point requires. Internal crate of realism-gate: no API stability guarantee outside that package."
