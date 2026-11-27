@@ -41,7 +41,9 @@
     "eval/p2r_packet.py": "8408fe2ed0b23e0ff01b6cf6813b9f2febdeca5fd394cbb834e71f54a90f76e7",
     "eval/p2r_sheet.py": "057018f40607b2dac8b391bd605aabf321cb86d45546dd7a7f991ad138ecc89d",
     "eval/p2r_counts.py": "53b0b67a0bd0a0bc62c52ba57b825e3c8abe25aafd68004e689c41f15b645453",
-    "eval/p2r_score_human.py": "2363d62e009286fabd130470c56eee3ee36ceba307886afe44399238097e2627"
+    "eval/p2r_score_human.py": "2363d62e009286fabd130470c56eee3ee36ceba307886afe44399238097e2627",
+    "eval/solana-poc-v5/run.py": "f005c3391319aca0f6c73633fafa0ecf1574a5579065529d36f91d80573dba08",
+    "eval/solidity-poc-v2/run.py": "aa2961333ade9413a5e755873fcec96a3dc8fc206c277d09cef87af967b848a7"
   },
   "scripts_note": "sha256 of the committed blobs at the commit that adds this file; the runners are unchanged since v1.5.0. The runners' CAP = 30 shapes only sample.jsonl and is not used for labelling: labelling reads every tier-J/X flag via p2r_packet.py / p2r_sheet.py --all-flags.",
   "labellers": "none yet: no labelling has started. Two external blinded labellers; identities and date to be recorded in an amendment to this file before any label is collected",
@@ -62,13 +64,21 @@
       "corpus": "solidity-poc-v1",
       "split": "V1",
       "expected_units": 111
+    },
+    {
+      "corpus": "solana-poc-v5",
+      "split": "V1",
+      "expected_units": 2
+    },
+    {
+      "corpus": "solidity-poc-v2",
+      "split": "V1",
+      "expected_units": 62
     }
   ],
   "does_not_open": [
     "FINAL (all corpora)",
-    "V2 (all corpora)",
-    "solana-poc-v5 V1",
-    "solidity-poc-v2 V1"
+    "V2 (all corpora)"
   ],
   "priorart": {
     "repo": "https://github.com/KhomDev/priorart",
@@ -77,7 +87,69 @@
     "version_output": "priorart 0.2.2",
     "build": "cargo +1.95.0-x86_64-pc-windows-gnu build --release --locked --offline --no-default-features (CARGO_PROFILE_RELEASE_LTO=false)",
     "binary_sha256": "54d23059b3ffc2d7a6f9602f3e03cd1d58b71cc333e487304301dad14df06478",
-    "sealed_pairs_V1": "not opened in this round: it needs --pair-labels (judge labels) and none exist",
+    "sealed_pairs_V1": {
+      "status": "judge labels collected; pairs_run.py not yet run when this was recorded",
+      "judge": "Code4rena judges' public GitHub labels (selected for report, duplicate-N). Not human or AI raters: the tool's recall@5 and FAR on these are judge-labelled.",
+      "branch": "https://github.com/KhomDev/priorart/tree/p2/pairs-v1",
+      "branch_commit": "3ab2547",
+      "pairs_file": {
+        "path": "eval/dupbench/pairs-swap/pairs_v1_swapped.json",
+        "sha256": "7e475fc07420fe299f4221e3ccf302e69bd3f74d1d0d9f61dd2cc190988bf132",
+        "note": "pairs.json v1 is unchanged and still pinned by the pre-registration; run with --pairs"
+      },
+      "scripts": {
+        "eval/dupbench/pairs_run.py": "005b4fe48ea94aceab368943a17fb004f01e4a49c9a429357cbdb09d7223f55d",
+        "eval/dupbench/pairs-swap/collect_pair_labels.py": "73f5d4ce4870196f4fd021899fa87a09617f6e74f717da8af30b7f8e28dffd3a",
+        "eval/dupbench/pairs-swap/make_pairs_v1.py": "6d5b3ad3b4c038a3c8955435fdc422dc8eb027062cc7f81376dd663c32851fe9",
+        "eval/dupbench/pairs-swap/sealed_optA.json": "d2af4796618a1ba48411f72017e8713fec35067217268e256236878eb97940a7"
+      },
+      "judge_labels": {
+        "labels.json_sha256": "2b7789b2f7ce4890ba4db8c95990f7ddf8c5a07c67f215e02253984378b1c647",
+        "pair-labels.lock.json_sha256": "779720a75c124e3d6a6fe48dc72ddbb462c7acb3f9799378cb964ed157da27aa",
+        "stored": "outside the repo (contains third-party issue text): _orchestration/logs/p2r2/pairs/pair-labels",
+        "contests": {
+          "2024-03-revert-lend": {
+            "paid_unique": 33,
+            "duplicates": 150
+          },
+          "2024-10-loopfi": {
+            "paid_unique": 7,
+            "duplicates": 6
+          },
+          "2022-11-paraspace": {
+            "paid_unique": 34,
+            "duplicates": 145
+          },
+          "2023-02-ethos": {
+            "paid_unique": 17,
+            "duplicates": 34
+          },
+          "2023-09-venus": {
+            "paid_unique": 5,
+            "duplicates": 75
+          },
+          "2023-07-arcade": {
+            "paid_unique": 8,
+            "duplicates": 35
+          }
+        }
+      },
+      "command": "python -I eval/dupbench/pairs_run.py --mode pairs --pairs eval/dupbench/pairs-swap/pairs_v1_swapped.json --round round-1 --version 0.2.2 --binary-sha256 54d23059b3ffc2d7a6f9602f3e03cd1d58b71cc333e487304301dad14df06478 --pair-labels <dir> --out <file>"
+    },
     "dupbench": "validation split was already used for DEV tuning and is reported as in-sample, never as held-out; FINAL stays sealed"
-  }
+  },
+  "amendments": [
+    {
+      "id": "A1",
+      "recorded": "2026-11-27T17:56:44+01:00 (Europe/Budapest)",
+      "authority": "Yura, relayed 17:44 Budapest: open solana-poc-v5 V1 and solidity-poc-v2 V1 (once each, same procedure, counts only); create the priorart sealed-pairs judge labels and run pairs_run.py",
+      "changes": [
+        "opens gains solana-poc-v5 V1 and solidity-poc-v2 V1; does_not_open loses them",
+        "scripts gains the two runners' blob sha256 (unchanged since v1.5.0)",
+        "priorart.sealed_pairs_V1 now pins the swapped pairs file, the judge labels and the scripts"
+      ],
+      "unchanged": "binary, rubric, pre-registration, golden manifest, V1 of solana-poc-v3, solana-poc-v4 and solidity-poc-v1 (already opened once), V2 and FINAL stay sealed",
+      "order": "this file is merged to main before solana-poc-v5 V1 and solidity-poc-v2 V1 are opened and before pairs_run.py is run"
+    }
+  ]
 }
