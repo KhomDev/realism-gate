@@ -2383,6 +2383,28 @@ mod tests {
     }
 
     #[test]
+    fn two_added_lines_are_a_diff_and_file_headers_are_blanked_whole() {
+        // Exactly two `+` lines is the threshold.
+        assert_eq!(
+            blank_diff_marks("+a;\n+b;\n").as_deref(),
+            Some(" a;\n b;\n")
+        );
+        // `+++ ` and `--- ` file headers, a hunk header and `diff --git` are
+        // blanked whole; a `+++ ` header is not read as an added line.
+        let src = "diff --git a/x.ts b/x.ts\n--- a/x.ts\n+++ b/x.ts\n@@ -1 +1,2 @@\n+c();\n+d();\n";
+        let out = blank_diff_marks(src).unwrap();
+        let blank = |s: &str| " ".repeat(s.len());
+        let want = format!(
+            "{}\n{}\n{}\n{}\n c();\n d();\n",
+            blank("diff --git a/x.ts b/x.ts"),
+            blank("--- a/x.ts"),
+            blank("+++ b/x.ts"),
+            blank("@@ -1 +1,2 @@")
+        );
+        assert_eq!(out, want);
+    }
+
+    #[test]
     fn a_repair_is_kept_only_when_it_parses_cleanly() {
         let elided = "it(\"x\", async () => {\n  await program.methods.a().accounts({ u, ... }).rpc();\n});\n";
         let unit = parse_fragment("t.ts", elided).unwrap();

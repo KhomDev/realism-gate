@@ -945,8 +945,26 @@ mod tests {
             "vec_of!(#[derive(Debug)] struct S;);\n",
             "m!(#[cfg(test)] fn t() {});\n",
             "m!(test, [test]);\n",
+            // A bracket group first in the macro's tokens has no `#` before it.
+            "m!([test] x);\n",
         ] {
             assert!(parse_source("t.rs", src).errors.is_empty(), "{src}");
+        }
+    }
+
+    #[test]
+    fn script_detection_needs_a_real_import_require_or_mocha_call() {
+        for yes in [
+            "import a from b",
+            "import \"side-effect\";",
+            "import 'side-effect';",
+            "  const a = require('a');",
+            "describe(\"x\", () => {",
+        ] {
+            assert!(looks_like_script(yes), "{yes}");
+        }
+        for no in ["import foo", "const x = 5;", "fn main() {}", "let it = 1;"] {
+            assert!(!looks_like_script(no), "{no}");
         }
     }
 
