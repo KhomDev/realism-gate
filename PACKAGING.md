@@ -4,9 +4,9 @@
 package (`realism-gate`); the library crates under `crates/` are the parts it
 is built from.
 
-The library crates are `publish = false` for now. Flipping them to publishable
-and publishing them is an approval-gated release step, not something a build
-does on its own.
+The library crates are published to crates.io from 1.5.0, each with the same version as `realism-gate`, because the
+root crate cannot be packaged without them. They are internal: no API stability guarantee outside
+`realism-gate`. Publishing them is an approval-gated release step, not something a build does on its own.
 
 ## What is measured on this workspace
 
@@ -33,7 +33,7 @@ resolution. The same failure appears one crate down (`rg-frontend-sol` needs
 `rg-ir`); only `rg-ir`, which has no workspace dependencies, packages plainly:
 
 ```sh
-cargo package -p rg-ir --no-verify --locked   # writes rg-ir-1.4.0.crate
+cargo package -p rg-ir --no-verify --locked   # writes rg-ir-1.5.0.crate
 ```
 
 So a verified `cargo package` (and `cargo publish --dry-run`) becomes possible

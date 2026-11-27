@@ -3,12 +3,12 @@ name = "rg-render"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
-description = "Output formats (JSON, SARIF, text, Markdown, evidence card) for realism-gate."
+description = "Output formats (JSON, SARIF, text, Markdown, evidence card) for realism-gate. Internal crate of realism-gate: no API stability guarantee outside that package."
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
-# Published sub-crates are an approval-gated release step; see PACKAGING.md.
-publish = false
+readme = "README.md"
+keywords = ["realism-gate", "security", "poc"]
 
 [dependencies]
 rg-ir.workspace = true

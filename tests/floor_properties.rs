@@ -4,8 +4,16 @@
 //! `precision_floor.rs` checks the build-time table against an independent
 //! re-implementation at fixed points. This file checks the invariants over
 //! every input proptest draws: bounds stay inside [0, 1], the level is monotone
-//! in TP and FP, a cell that is not fresh never lifts a rule, and the cap is
-//! idempotent and never raises a finding.
+//! in TP, turning a TP into an FP never raises it, a cell that is not fresh
+//! never lifts a rule, and the cap is idempotent and never raises a finding.
+//!
+//! "One more FP never raises the level" is NOT an invariant: the floor needs
+//! n >= 10 for `warn`, so 9 TP and 0 FP is `note` while 9 TP and 1 FP (n = 10,
+//! Wilson lower bound 0.596) is `warn`. A false positive adds a sample before
+//! it lowers the bound. This is the pre-registered minimum n, not a defect;
+//! `an_added_false_positive_can_lift_a_cell_over_the_minimum_n` pins it, and
+//! the property below holds n fixed. (proptest found it on CI after passing
+//! locally; the earlier form of this property was wrong.)
 
 use proptest::prelude::*;
 use realism_gate::Severity;
@@ -17,6 +25,41 @@ fn severity() -> impl Strategy<Value = Severity> {
         Just(Severity::Warn),
         Just(Severity::Error)
     ]
+}
+
+/// Exhaustive over a grid, so the two level properties do not depend on which
+/// inputs proptest draws.
+#[test]
+fn the_level_is_monotone_over_every_small_cell() {
+    for tp in 0u32..=150 {
+        for fp in 0u32..=150 {
+            let here = floor::level(true, true, tp, fp);
+            assert!(
+                floor::level(true, true, tp + 1, fp) >= here,
+                "tp+1 at {tp}/{fp}"
+            );
+            if tp >= 1 {
+                assert!(
+                    floor::level(true, true, tp - 1, fp + 1) <= here,
+                    "tp->fp swap at {tp}/{fp}"
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn an_added_false_positive_can_lift_a_cell_over_the_minimum_n() {
+    assert_eq!(
+        floor::level(true, true, 9, 0),
+        floor::NOTE,
+        "n = 9 is below the minimum n"
+    );
+    assert_eq!(
+        floor::level(true, true, 9, 1),
+        floor::WARN,
+        "n = 10, lower bound above 0.50"
+    );
 }
 
 proptest! {
@@ -37,8 +80,8 @@ proptest! {
     }
 
     #[test]
-    fn one_more_false_positive_never_raises_the_level(tp in 0u32..400, fp in 0u32..400) {
-        prop_assert!(floor::level(true, true, tp, fp + 1) <= floor::level(true, true, tp, fp));
+    fn turning_a_true_positive_into_a_false_positive_never_raises_the_level(tp in 1u32..400, fp in 0u32..400) {
+        prop_assert!(floor::level(true, true, tp - 1, fp + 1) <= floor::level(true, true, tp, fp));
     }
 
     #[test]

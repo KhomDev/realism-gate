@@ -8,6 +8,8 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-11-27
+
 ### Added (P2)
 
 - **Claude Code plugin.** `plugin/` and the root `.claude-plugin/marketplace.json`.
@@ -42,9 +44,22 @@ may change in any minor release.
   `rg-model`, `rg-rules`, `rg-exec` and `rg-render` are separate library
   crates; the `realism-gate` package keeps its name, its three binaries, its
   CLI flags and exit codes, the `report/v1` and `card/v1` schemas and the
-  SARIF output. The library crates are `publish = false` until they are
-  published in dependency order (PACKAGING.md); a golden test pins the CLI
-  output over every committed fixture to prove the split changed no bytes.
+  SARIF output. A golden test pins the CLI output over every committed
+  fixture to prove the split changed no bytes.
+- **The ten library crates are published to crates.io**, each at the same
+  version as `realism-gate` (`rg-ir`, `rg-frontend-sol`, `rg-frontend-rust`,
+  `rg-frontend-ts`, `rg-frontend-move`, `rg-program`, `rg-model`, `rg-rules`,
+  `rg-exec`, `rg-render`), in the dependency order of PACKAGING.md, because
+  `realism-gate` cannot be packaged without them. They are internal: no API
+  stability guarantee outside `realism-gate`. `publish = false` is removed;
+  each carries a README, the MIT LICENSE and keywords.
+- **`tests/golden.rs` restores the recorded tool version** before hashing
+  the CLI output, so a version bump no longer changes all 109 recorded hashes;
+  every other byte is still compared.
+- **Release cadence exception.** 1.5.0 is the fourth release in three days
+  (1.1.0, 1.2.0 and 1.4.0 shipped on 2026-11-25), which RELEASING.md's
+  one-minor-per-week rule does not allow. It is a recorded exception
+  decided by the maintainer; see RELEASING.md.
 
 ## [1.4.0] - 2026-11-25
 
