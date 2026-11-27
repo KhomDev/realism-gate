@@ -142,13 +142,26 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--labels", required=True)
     ap.add_argument("--measured", required=True)
     ap.add_argument("--results", required=True)
+    ap.add_argument("--tiers", default=None,
+                    help="comma-separated tiers to measure (e.g. J,X). Amendment 2: J+X is the "
+                         "verdict cell, J alone is descriptive, A and AJ are separate cells and "
+                         "are never pooled with J or X. Default: every flag (pre-Amendment-2 "
+                         "behaviour, kept so committed outputs reproduce).")
     ap.add_argument("--check", action="store_true")
     args = ap.parse_args(argv[1:])
     corpus = p2r_corpora.get(args.corpus)
     flags = {f["id"]: f for f in load_jsonl(Path(args.flags))}
+    tiers = None
+    if args.tiers:
+        tiers = sorted({t.strip().upper() for t in args.tiers.split(",") if t.strip()})
+        if {"A", "AJ"} & set(tiers) and {"J", "X", "N"} & set(tiers):
+            raise SystemExit("Amendment 2: tiers A and AJ are never pooled with J, X or N")
+        flags = {k: f for k, f in flags.items() if (f.get("tier") or "").upper() in tiers}
     p2r_corpora.check_languages(corpus, list(flags.values()))
     languages = corpus.cell_languages
     label_rows = load_jsonl(Path(args.labels))
+    if tiers is not None:
+        label_rows = [r for r in label_rows if r["id"] in flags]
 
     by_flag: dict[str, dict[str, dict]] = defaultdict(dict)
     for row in label_rows:
@@ -220,6 +233,8 @@ def main(argv: list[str]) -> int:
         "cells": measured_rules,
         "pooled": {"all": pooled(all_rows), "above_note": pooled(above)},
     }
+    if tiers is not None:
+        results["tiers"] = tiers
     measured = {
         "schema": "realism-gate.measured/v1",
         "population": "see the round preregistration",
