@@ -115,7 +115,7 @@
           "measured": {
             "type": "object",
             "description": "The rule's fresh (out-of-sample) record for the finding's language, and the severity the floor allows it. Added in P2R (RG-A5).",
-            "required": ["language", "status", "floor"],
+            "required": ["language", "status", "floor", "raised", "shipped"],
             "additionalProperties": false,
             "properties": {
               "language": { "type": "string", "enum": ["solidity", "rust", "typescript", "javascript", "move"] },
@@ -124,7 +124,9 @@
               "n": { "type": "integer", "description": "Decided labels, TP + FP." },
               "wilson95": { "type": "array", "description": "Wilson 95% interval [lower, upper], two numbers; absent when n < 5." },
               "count_only": { "type": "boolean", "description": "n < 5: a count, never a rate." },
-              "floor": { "type": "string", "enum": ["error", "warn", "note"], "description": "The highest severity the floor allows this rule in this language." }
+              "floor": { "type": "string", "enum": ["error", "warn", "note"], "description": "The highest severity the floor allows this rule in this language." },
+              "raised": { "type": "string", "enum": ["error", "warn", "note"], "description": "The level the rule raised, before the floor and any --severity override." },
+              "shipped": { "type": "string", "enum": ["error", "warn", "note"], "description": "The level the finding ships at (its severity)." }
             }
           }
         }
