@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# realism-gate-ensure — make the realism-gate CLI that matches this plugin available.
+#
+# The plugin version (.claude-plugin/plugin.json) IS the crates.io version of
+# realism-gate it drives: upgrading the plugin upgrades the CLI. Modes:
+#   realism-gate-ensure            print the binary path; install the pinned version if missing/different
+#   realism-gate-ensure --status   report only; never installs (used by the SessionStart hook)
+#   realism-gate-ensure --latest   install the newest crates.io release (explicit upgrade)
+# REALISM_GATE_BIN, if set, is used as-is (no install, no version change).
+# Installs go through cargo (binstall when present, else `cargo install --locked`);
+# nothing else touches the network, and the CLI itself is offline.
+set -euo pipefail
+
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+manifest="$here/.claude-plugin/plugin.json"
+want="$(sed -n 's/^[[:space:]]*"version":[[:space:]]*"\([^"]*\)".*/\1/p' "$manifest" | head -n1)"
+mode="${1:-ensure}"
+
+if [ -n "${REALISM_GATE_BIN:-}" ]; then
+  echo "$REALISM_GATE_BIN"
+  exit 0
+fi
+
+have_version() {
+  command -v realism-gate >/dev/null 2>&1 || return 1
+  realism-gate --version 2>/dev/null | awk '{print $2}'
+}
+
+current="$(have_version || true)"
+
+case "$mode" in
+  --status)
+    if [ -z "$current" ]; then
+      echo "realism-gate: not installed; run /realism-gate:install (pinned $want)."
+    elif [ "$current" != "$want" ]; then
+      echo "realism-gate: CLI $current differs from the plugin's $want; run /realism-gate:install."
+    fi
+    exit 0
+    ;;
+  --latest)
+    want="$(curl -fsSL -A "realism-gate-plugin" https://crates.io/api/v1/crates/realism-gate \
+      | sed -n 's/.*"max_stable_version":"\([^"]*\)".*/\1/p' | head -n1)"
+    [ -n "$want" ] || { echo "could not read the latest realism-gate version from crates.io" >&2; exit 1; }
+    ;;
+  ensure|"") ;;
+  *) echo "usage: realism-gate-ensure [--status|--latest]" >&2; exit 2 ;;
+esac
+
+if [ "$current" = "$want" ]; then
+  command -v realism-gate
+  exit 0
+fi
+
+command -v cargo >/dev/null 2>&1 || {
+  echo "realism-gate $want needs cargo (https://rustup.rs) or a release binary from" \
+       "https://github.com/KhomDev/realism-gate/releases/tag/v$want" >&2
+  exit 1
+}
+if cargo binstall -V >/dev/null 2>&1; then
+  cargo binstall -y --force "realism-gate@$want" >&2
+else
+  cargo install --locked --force realism-gate --version "$want" >&2
+fi
+command -v realism-gate
