@@ -14,6 +14,14 @@
       "version": "1.5.3",
       "category": "security",
       "keywords": ["security", "audit", "bug-bounty", "foundry", "solana", "poc"]
+    },
+    {
+      "name": "realism-gate-lite",
+      "source": "./plugin-directory",
+      "description": "Anthropic Directory build of realism-gate: the skill and read-only commands. It does not install or run the CLI; you run the checker yourself.",
+      "version": "1.5.3",
+      "category": "security",
+      "keywords": ["security", "audit", "bug-bounty", "foundry", "solana", "poc"]
     }
   ]
 }

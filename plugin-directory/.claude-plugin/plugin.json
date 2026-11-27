@@ -1,0 +1,19 @@
+{
+  "name": "realism-gate",
+  "version": "1.5.3",
+  "description": "Check exploit PoC tests and a draft finding's claims with realism-gate before submitting. This Directory build does not run the CLI: it shows the commands to run yourself.",
+  "author": {
+    "name": "KhomDev"
+  },
+  "homepage": "https://github.com/KhomDev/realism-gate",
+  "repository": "https://github.com/KhomDev/realism-gate",
+  "license": "MIT",
+  "keywords": [
+    "security",
+    "audit",
+    "bug-bounty",
+    "foundry",
+    "solana",
+    "poc"
+  ]
+}

@@ -427,7 +427,7 @@ A clean result is not a payable finding. The full list is [docs/limitations.md](
 claude mcp add rgate -- realism-gate-mcp
 ```
 
-The [skill](skills/realism-gate/SKILL.md) tells the agent when to call them and what a result does not prove. Setup for Claude Code, Cursor and Codex, the limits and the tests: [docs/agents.md](docs/agents.md).
+The [skill](skills/realism-gate/SKILL.md) tells the agent when to call them and what a result does not prove. Setup for Claude Code, Cursor and Codex, the limits and the tests: [docs/agents.md](docs/agents.md). The full Claude Code plugin is in [plugin/](plugin/); the Anthropic Directory build, which does not run the CLI, is in [plugin-directory/](plugin-directory/).
 
 - MCP Registry name: `mcp-name: io.github.KhomDev/rgate`
 

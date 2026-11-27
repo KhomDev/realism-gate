@@ -12,8 +12,15 @@ server (`realism-gate-mcp`, listed in the MCP Registry as
 
 The skill is [`skills/realism-gate/SKILL.md`](../skills/realism-gate/SKILL.md).
 It tells the agent to gate a PoC and check the report's claims before writing
-or submitting the finding. The Claude Code plugin ships the same file
-(`tests/plugin.rs` fails if the two differ).
+or submitting the finding. The full Claude Code plugin in [`plugin/`](../plugin/)
+ships that file byte for byte (`tests/plugin.rs` fails if the two differ).
+
+The Anthropic Directory plugin at [`plugin-directory/`](../plugin-directory/)
+is a separate, tighter bundle of the same skill (worded so the agent does not
+run the CLI) and read-only commands. It has no hooks, no installer and no
+shell tools, which is what the Directory requires of an unverified publisher.
+`tests/plugin_directory.rs` pins those rules. The full plugin in `plugin/` is
+unchanged.
 
 Claude Code reads a skill from the project's `.claude/skills/` or from
 `~/.claude/skills/`. Codex reads one from `~/.codex/skills/` or from a project
