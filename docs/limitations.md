@@ -270,3 +270,17 @@ no fresh precision, no FAR or recall number on the new corpora exists at the
 time of writing, and no human label has been returned. Every number in
 `docs/precision.md` that predates this section should be read with that
 provenance.
+
+## P2R-2 release: what is not measured yet (2026-11-27)
+
+- **No held-out precision for the P2 binaries.** The release on `main` states DEV-only figures. V1,
+  V2 and FINAL are sealed and come after main (`eval/P2R2_PREREGISTRATION_POST_MAIN.md`).
+- **No P2 precision at all yet.** The DEV run of the release binary is counted
+  (`docs/precision.md`, "P2R-2 DEV-ONLY run"), but it has not been labelled.
+- **Every rule ships `note`.** The floor needs fresh cells, and none exists. The raised level is shown
+  next to the shipped one. A user who wants a gate uses `--severity RULE=LEVEL` or `--fail-on note`,
+  knowing that the level is not backed by a fresh measurement.
+- **Solana FINAL is small** (J11 + X13 + A2 units). Some Solana rule cells cannot reach the floor's
+  n ≥ 16 at FINAL, whatever their precision, so those rules will stay at `note`.
+- **`solidity-poc-v3` is excluded.** Its 35 units are near-copies of the opened DeFiHackLabs tree.
+- **The 1.4.0 held-out Solana rows** were measured on another binary. They are history only.

@@ -510,3 +510,45 @@ binary: RG02 0/16 = 0.0% [0.0-19.4], RG03 0/5 = 0.0% [0.0-43.4], RG08 10/10 =
 [18.6-49.9] with a source-clustered bootstrap of [10.0-72.7]. The committed
 cells are in `eval/solana-poc-v2/measured.json`; the P1 numbers above are left
 as they stand.
+
+## P2R-2 DEV-ONLY run of the release binary (2026-11-27)
+
+> **DEV-ONLY. Not a held-out number, and not yet a precision.** This is what the P2 binary flags on the
+> opened DEV slices. The flags have **not been labelled yet**, so there is no P2 precision. The held-out
+> rounds come after main, under `eval/P2R2_PREREGISTRATION_POST_MAIN.md`.
+
+Binary: release build of `p2/integration` `d0d5e64`, sha256
+`c6df0c3dd0ebfafed5adc64692989824ad2799ca7376399665f6b11cd682775e`, run with
+`run.py --split DEV --version p2r2-dev-d0d5e64`. Every flag ships at `note` (RG-A5: no fresh cell).
+
+| Corpus | DEV units | Readable | Flags (all tiers) | J+X flags | N flags |
+|---|---:|---:|---:|---:|---:|
+| `solana-poc-v3` | 50 | 45 | 20 | 18 | 2 |
+| `solana-poc-v4` | 5 | 2 | 1 | 1 | 0 |
+| `solana-poc-v5` | 4 | 0 | 0 | 0 | 0 |
+| `solidity-poc-v1` | 234 | 215 | 250 | 181 | 69 |
+| `solidity-poc-v2` | 159 | 151 | 138 | 138 | 0 |
+
+J+X flags by rule (Solana and Solidity kept apart):
+
+| Rule | Solana (v3+v4) | Solidity (v1+v2) |
+|---|---:|---:|
+| RG01 | 0 | 1 |
+| RG02 | 2 | 92 |
+| RG03 | 3 | 19 |
+| RG04 | 0 | 4 |
+| RG05 | 0 | 9 |
+| RG06 | 0 | 4 |
+| RG07 | 0 | 12 |
+| RG08 | 11 | 98 |
+| RG09 | 0 | 5 |
+| RG10 | 3 | 8 |
+| RG11 | 0 | 5 |
+| RG16 | 0 | 10 |
+| RG17 | 0 | 6 |
+| RG18 | 0 | 46 |
+
+**DEV precision: a gap.** It needs the two-labeller protocol (`docs/labeling-rubric.md`). A
+50-flag practice pack drawn from these DEV flags is in `eval/labeling-pack/`. Until labels exist, the
+only labelled tables for this repository are the in-sample DeFiHackLabs rows above (0.1.0/0.2.0
+binaries) and the 1.4.0 rows, which are history and not numbers for the P2 binary.

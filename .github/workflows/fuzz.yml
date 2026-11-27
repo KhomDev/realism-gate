@@ -1,13 +1,19 @@
 name: fuzz
 
-# The long run. Each parser target gets five minutes of libFuzzer on Linux, once
-# a week. The same seed corpus is replayed by `cargo test` (tests/fuzz_corpus.rs)
-# on every CI run, on every platform; that is the short run.
+# Each parser target gets five minutes of libFuzzer on Linux once a week, and a
+# 30-second smoke on every pull request and integration push. The seed corpus is
+# also replayed by `cargo test` (tests/fuzz_corpus.rs) on every CI run, on every
+# platform.
 
 on:
   schedule:
     - cron: "17 3 * * 1"
   workflow_dispatch:
+  # Short smoke (30 s per target) on every pull request and integration push;
+  # the weekly schedule keeps the five-minute run.
+  pull_request:
+  push:
+    branches: ["p2/integration"]
 
 permissions:
   contents: read
@@ -35,13 +41,13 @@ jobs:
         with:
           tool: cargo-fuzz
 
-      - name: Fuzz ${{ matrix.target }} for five minutes
+      - name: Fuzz ${{ matrix.target }} (5 min weekly, 30 s smoke otherwise)
         working-directory: fuzz
         # cargo-fuzz derives its default target from the triple it was built
         # for, and the prebuilt binary from install-action is a musl build.
         # A musl target links libc statically, which ASan refuses, so pin the
         # gnu triple explicitly. See the 2026-11-23 red `fuzz` run.
-        run: cargo +nightly fuzz run --target x86_64-unknown-linux-gnu ${{ matrix.target }} -- -max_total_time=300
+        run: cargo +nightly fuzz run --target x86_64-unknown-linux-gnu ${{ matrix.target }} -- -max_total_time=${{ github.event_name == 'schedule' && 300 || 30 }}
 
       - name: Upload crashing inputs
         if: failure()
