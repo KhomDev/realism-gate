@@ -60,13 +60,10 @@ def snippet(path: Path | None, line: int) -> tuple[str, str]:
     return body, "ok"
 
 
-def packet_rows(corpus, run_dir: Path, cache: Path) -> list[dict]:
-    sample_path = run_dir / "sample.jsonl"
-    if not sample_path.is_file():
-        raise SystemExit(f"{sample_path} does not exist; a packet is produced only for a run's sample")
-    flags = load_jsonl(sample_path)
+def packet_rows(corpus, run_dir: Path, cache: Path, all_flags: bool = False) -> list[dict]:
+    flags = p2r_corpora.label_flags(run_dir, all_flags)
     if not flags:
-        raise SystemExit(f"{sample_path} is empty; nothing to label")
+        raise SystemExit(f"{run_dir} has no flags to label")
     p2r_corpora.check_languages(corpus, flags)
     units = corpus.units()
     rows = []
@@ -161,13 +158,15 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--run-dir", required=True)
     ap.add_argument("--out-dir", default=None)
     ap.add_argument("--cache", default=None)
+    ap.add_argument("--all-flags", action="store_true",
+                    help="label every tier-J/X flag of the run (held-out rounds, no cap) instead of sample.jsonl")
     ap.add_argument("--check", action="store_true")
     args = ap.parse_args(argv[1:])
     corpus = p2r_corpora.get(args.corpus)
     cache = Path(args.cache) if args.cache else corpus.cache
     run_dir = Path(args.run_dir)
     out = Path(args.out_dir) if args.out_dir else run_dir / "human"
-    rows = packet_rows(corpus, run_dir, cache)
+    rows = packet_rows(corpus, run_dir, cache, args.all_flags)
     jsonl = "".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n" for row in rows)
     md = markdown(corpus.name, rows)
     outputs = {out / "HUMAN_PACKET.md": md, out / "human_packet.jsonl": jsonl}

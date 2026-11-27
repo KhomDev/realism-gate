@@ -117,6 +117,37 @@ CORPORA = {
 }
 
 
+LABEL_TIERS = ("J", "X")
+
+
+def label_flags(run_dir: Path, all_flags: bool = False) -> list[dict]:
+    """The flags a labeller reads for one run.
+
+    `all_flags=False` is the runner's `sample.jsonl` (at most 30 per rule and
+    source; used for DEV, which is descriptive). `all_flags=True` is every
+    tier-J and tier-X flag the run raised, read from the run's own flags file
+    (`flags.jsonl`, or the single `flags/<version>.jsonl`), in flag-id order:
+    the held-out rule of `eval/P2R2_PREREGISTRATION_POST_MAIN.md` section 4.1
+    (every held-out flag is labelled; there is no cap).
+    """
+    if not all_flags:
+        path = run_dir / "sample.jsonl"
+        if not path.is_file():
+            raise SystemExit(f"{path} does not exist; a packet is produced only for a run's sample")
+        return [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
+    candidates = [run_dir / "flags.jsonl"]
+    candidates += sorted((run_dir / "flags").glob("*.jsonl")) if (run_dir / "flags").is_dir() else []
+    found = [c for c in candidates if c.is_file()]
+    if len(found) != 1:
+        raise SystemExit(f"expected exactly one flags file in {run_dir}, found {[str(c) for c in found]}")
+    rows = [json.loads(x) for x in found[0].read_text(encoding="utf-8").splitlines() if x.strip()]
+    rows = [r for r in rows if r.get("tier") in LABEL_TIERS]
+    ids = [r["id"] for r in rows]
+    if len(ids) != len(set(ids)):
+        raise SystemExit("duplicate flag ids in the flags file")
+    return sorted(rows, key=lambda r: r["id"])
+
+
 def names() -> list[str]:
     return sorted(CORPORA)
 
