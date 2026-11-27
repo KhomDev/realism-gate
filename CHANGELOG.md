@@ -8,6 +8,8 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-11-27
+
 ### Added (P2)
 
 - **Claude Code plugin.** `plugin/` and the root `.claude-plugin/marketplace.json`.

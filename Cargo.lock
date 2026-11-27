@@ -2374,7 +2374,7 @@ dependencies = [
 
 [[package]]
 name = "realism-gate"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
  "clap",
  "proptest",
@@ -2463,7 +2463,7 @@ dependencies = [
 
 [[package]]
 name = "rg-exec"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
  "serde_json",
  "tempfile",
@@ -2472,14 +2472,14 @@ dependencies = [
 
 [[package]]
 name = "rg-frontend-move"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
  "rg-ir",
 ]
 
 [[package]]
 name = "rg-frontend-rust"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
  "proc-macro2",
  "rg-ir",
@@ -2488,7 +2488,7 @@ dependencies = [
 
 [[package]]
 name = "rg-frontend-sol"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
  "rg-ir",
  "solar-parse",
@@ -2496,7 +2496,7 @@ dependencies = [
 
 [[package]]
 name = "rg-frontend-ts"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
  "oxc_allocator",
  "oxc_ast",
@@ -2507,14 +2507,14 @@ dependencies = [
 
 [[package]]
 name = "rg-ir"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "rg-model"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
  "regex",
  "rg-frontend-move",
@@ -2531,7 +2531,7 @@ dependencies = [
 
 [[package]]
 name = "rg-program"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
  "proc-macro2",
  "serde",
@@ -2543,7 +2543,7 @@ dependencies = [
 
 [[package]]
 name = "rg-render"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
  "rg-ir",
  "rg-model",
@@ -2554,7 +2554,7 @@ dependencies = [
 
 [[package]]
 name = "rg-rules"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
  "regex",
  "rg-frontend-move",

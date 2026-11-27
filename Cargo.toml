@@ -30,7 +30,7 @@ default-members = [
 ]
 
 [workspace.package]
-version = "1.4.0"
+version = "1.5.0"
 edition = "2024"
 rust-version = "1.95"
 license = "MIT"
@@ -40,16 +40,16 @@ homepage = "https://khomdev.org/tools"
 [workspace.dependencies]
 # The workspace's own crates. `version` is what Cargo rewrites a packaged
 # path dependency to; the path is what a checkout builds.
-rg-ir = { path = "crates/rg-ir", version = "1.4.0" }
-rg-frontend-sol = { path = "crates/rg-frontend-sol", version = "1.4.0" }
-rg-frontend-rust = { path = "crates/rg-frontend-rust", version = "1.4.0" }
-rg-frontend-ts = { path = "crates/rg-frontend-ts", version = "1.4.0" }
-rg-frontend-move = { path = "crates/rg-frontend-move", version = "1.4.0" }
-rg-program = { path = "crates/rg-program", version = "1.4.0" }
-rg-model = { path = "crates/rg-model", version = "1.4.0" }
-rg-rules = { path = "crates/rg-rules", version = "1.4.0" }
-rg-exec = { path = "crates/rg-exec", version = "1.4.0" }
-rg-render = { path = "crates/rg-render", version = "1.4.0" }
+rg-ir = { path = "crates/rg-ir", version = "1.5.0" }
+rg-frontend-sol = { path = "crates/rg-frontend-sol", version = "1.5.0" }
+rg-frontend-rust = { path = "crates/rg-frontend-rust", version = "1.5.0" }
+rg-frontend-ts = { path = "crates/rg-frontend-ts", version = "1.5.0" }
+rg-frontend-move = { path = "crates/rg-frontend-move", version = "1.5.0" }
+rg-program = { path = "crates/rg-program", version = "1.5.0" }
+rg-model = { path = "crates/rg-model", version = "1.5.0" }
+rg-rules = { path = "crates/rg-rules", version = "1.5.0" }
+rg-exec = { path = "crates/rg-exec", version = "1.5.0" }
+rg-render = { path = "crates/rg-render", version = "1.5.0" }
 
 clap = { version = "4.6.7", features = ["derive"] }
 # The TypeScript parser of the Oxc toolchain, for Anchor's tests. Pinned: oxc

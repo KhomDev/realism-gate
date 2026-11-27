@@ -33,7 +33,7 @@ resolution. The same failure appears one crate down (`rg-frontend-sol` needs
 `rg-ir`); only `rg-ir`, which has no workspace dependencies, packages plainly:
 
 ```sh
-cargo package -p rg-ir --no-verify --locked   # writes rg-ir-1.4.0.crate
+cargo package -p rg-ir --no-verify --locked   # writes rg-ir-1.5.0.crate
 ```
 
 So a verified `cargo package` (and `cargo publish --dry-run`) becomes possible
