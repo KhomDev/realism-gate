@@ -3,12 +3,12 @@ name = "rg-program"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
-description = "Entry-point authority model for realism-gate: which authority each Anchor, native Solana or Solidity entry point requires."
+description = "Entry-point authority model for realism-gate: which authority each Anchor, native Solana or Solidity entry point requires. Internal crate of realism-gate: no API stability guarantee outside that package."
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
-# Published sub-crates are an approval-gated release step; see PACKAGING.md.
-publish = false
+readme = "README.md"
+keywords = ["realism-gate", "security", "poc"]
 
 [dependencies]
 # The Rust parser: Anchor programs and native Solana handlers are Rust source.

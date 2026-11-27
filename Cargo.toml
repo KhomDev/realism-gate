@@ -86,9 +86,8 @@ keywords = ["foundry", "solana", "anchor", "security", "poc"]
 categories = ["command-line-utilities", "development-tools::testing"]
 rust-version.workspace = true
 # The published crate is the program: its CLI, engine, binders and the three
-# binaries. The analysis crates under crates/ are separate packages and are
-# publish = false until the sub-crates are published in dependency order; see
-# PACKAGING.md. No fixtures, no corpus, no workflows, no evaluation data.
+# binaries. The analysis crates under crates/ are separate packages, published
+# first in dependency order (1.5.0 onward); see PACKAGING.md. No fixtures, no corpus, no workflows, no evaluation data.
 include = ["/src/**/*.rs", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE", "/CHANGELOG.md"]
 
 # Two binaries, same program: `realism-gate` and the short `rgate`.
