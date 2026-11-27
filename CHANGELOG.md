@@ -8,6 +8,58 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [1.5.1] - 2026-11-27
+
+This is a patch release on the MCP server only. No rule, rule severity, CLI
+flag, default, report field or archive layout changed; the new MCP tools and
+settings wrap existing CLI commands. 1.5.0 shipped the broken transport, and
+1.5.1 supersedes it for MCP use. The library crates (`rg-*`) are unchanged
+and stay at 1.5.0.
+
+### Fixed (MCP)
+
+- **`realism-gate-mcp` speaks the MCP stdio transport.** Up to and including
+  1.5.0 it wrote every response with an LSP-style `Content-Length` header.
+  MCP's stdio transport is one JSON message per line, so current clients did
+  not connect: the MCP Inspector timed out after 15 s on `tools/list` against
+  the 1.5.0 binary. Responses are now one line each. A request framed with
+  `Content-Length` is still read and answered in that framing
+  (`src/mcp.rs` `serve`, `read_message`; `docs/agents.md`).
+- `initialize` echoes the client's protocol revision when it is `2025-06-18`,
+  `2025-03-26` or `2024-11-05` (it always said `2024-11-05`).
+- JSON-RPC error codes: unknown method `-32601`, bad arguments `-32602`,
+  invalid request `-32600` (batches, a null or fractional id, a missing
+  `jsonrpc`), unreadable JSON `-32700`. A complete line that is not JSON no
+  longer stops the server. Every error used to be `-32601`.
+- A checker that cannot start is a tool result with `isError: true` and the
+  reason, not a protocol error.
+
+### Added (MCP)
+
+- **Three more tools:** `dump_program` (`check --dump-program`), `list_rules`
+  (`rules --format json`) and `explain_rule` (`explain -- RULE`). All five
+  tools carry `readOnlyHint` annotations and `additionalProperties: false`
+  schemas; an argument a tool does not list is refused. `check_poc` takes
+  `fragment`.
+- **Limits the operator sets:** `REALISM_GATE_MCP_ROOT` (every path argument
+  must resolve inside it, symlinks followed), `REALISM_GATE_MCP_TIMEOUT_SECS`
+  (default 120; the run is killed past it), a 4 MiB cap per output stream
+  (refused, not cropped), a 4096-byte cap per argument. The checker's stdin is
+  closed.
+- `realism-gate-mcp --version` and `--help`. `serverInfo` is `rgate` /
+  `realism-gate`, and `initialize` returns `instructions` that carry the
+  DEV-ONLY caveat.
+- **MCP Registry metadata:** `server.json` (`io.github.khomdev/rgate`,
+  `registryType: cargo`) and a visible `mcp-name:` line in the README, which
+  is how the registry checks a crates.io package.
+- Tests: `tests/mcp_props.rs` (9 proptest properties), `tests/mcp_bounded.rs`
+  (deadline, cap, closed stdin, against a real child process),
+  `tests/mcp_stdio.rs` (a real newline-delimited client session whose tool
+  text is compared byte for byte with direct CLI runs), and 38 unit tests in
+  `src/mcp.rs` (was 11).
+- The skill names the five tools and says the `measured` numbers are
+  DEV-ONLY.
+
 ## [1.5.0] - 2026-11-27
 
 ### Added (P2)
@@ -1062,7 +1114,8 @@ First release.
 - A pinned public-corpus benchmark (`scripts/bench-corpus.sh`,
   `bench/defihacklabs.json`, `docs/benchmark.md`), re-measured in CI.
 
-[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v1.5.1...HEAD
+[1.5.1]: https://github.com/KhomDev/realism-gate/compare/v1.5.0...v1.5.1
 [1.1.0]: https://github.com/KhomDev/realism-gate/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/KhomDev/realism-gate/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/KhomDev/realism-gate/compare/v1.0.2...v1.0.3

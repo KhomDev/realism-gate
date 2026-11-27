@@ -231,7 +231,7 @@ shows why a rule exists and how it can be wrong.
 - A bounty hunter about to submit a PoC: run the rules, then bind the report's claims to what the test actually shows.
 - A contest auditor whose test deploys the protocol locally.
 - A triager who wants the claim table and the [evidence card](docs/evidence-card.md) next to the report.
-- An agent that drafts findings. The [skill](skills/realism-gate/SKILL.md) and [`realism-gate-mcp`](docs/agents.md) run the PoC check and the claim check before the report is written.
+- An agent that drafts findings. The [skill](skills/realism-gate/SKILL.md) and the MCP server [`realism-gate-mcp`](docs/agents.md) (`rgate` in the MCP Registry) run the PoC check and the claim check before the report is written.
 
 ## What it does
 
@@ -418,6 +418,18 @@ Inputs are capped, and the error names the limit: 8 MiB per source file, 128 MiB
 A claim table is narrower than the bug. Binding cannot confirm a role the test does not grant, an asset the PoC never names, an amount stated only in prose, a precondition it has no words for, or a citation without a target commit. The `fix` row is always open until you run `verify-fix`. And the inferred fallback reads only backticked identifiers, the headline's impact verb and the words "any user"/"unprivileged"/role names; everything else is `NOT CHECKABLE`, and an inferred run is never a pass.
 
 A clean result is not a payable finding. The full list is [docs/limitations.md](docs/limitations.md#claims-and-binding). How often a flag was right, on the corpora that were labelled, is [docs/precision.md](docs/precision.md); the claim-binding numbers (impact: 91.0% on the first build, n=100, Wilson 95% [83.8-95.2]; 98.9% after fixing the misses that the same set exposed, so in-sample) and their caveats are [there](docs/precision.md#claim-binding). The per-field scorecard publishes every field too: attacker and asset are not interpretable with this corpus, and amount, preconditions, cited and fix are not checkable.
+
+## MCP server and skill
+
+`realism-gate-mcp` is a stdio MCP server with five read-only tools: `check_poc`, `check_claims`, `dump_program`, `list_rules` and `explain_rule`. Each runs the CLI and returns its JSON unedited, so the numbers an agent sees are the CLI's (DEV-ONLY, as above). It refuses flag-shaped paths and unknown arguments, kills a run after 120 s, caps output at 4 MiB, and with `REALISM_GATE_MCP_ROOT` refuses any path outside that directory.
+
+```bash
+claude mcp add rgate -- realism-gate-mcp
+```
+
+The [skill](skills/realism-gate/SKILL.md) tells the agent when to call them and what a result does not prove. Setup for Claude Code, Cursor and Codex, the limits and the tests: [docs/agents.md](docs/agents.md).
+
+- MCP Registry name: `mcp-name: io.github.khomdev/rgate`
 
 ## Related
 

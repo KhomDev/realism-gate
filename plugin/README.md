@@ -48,9 +48,11 @@ not install when that variable is set, so a sibling MCP binary is not
 guaranteed. `${CLAUDE_PLUGIN_ROOT}` in an MCP `command` only reaches files
 bundled with the plugin.
 
-After `/realism-gate:install`, add `realism-gate-mcp` to your own MCP config,
-as in [`docs/agents.md`](../docs/agents.md). The skill text already names
-`check_poc` and `check_claims`.
+After `/realism-gate:install`, add `realism-gate-mcp` to your own MCP config
+(`claude mcp add rgate -- realism-gate-mcp`), as in
+[`docs/agents.md`](../docs/agents.md). The skill text names the five tools.
+The 1.5.0 server frames responses with `Content-Length`, which current MCP
+clients do not read; use a later release.
 
 ## Commands
 
