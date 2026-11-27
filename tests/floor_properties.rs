@@ -12,7 +12,11 @@ use realism_gate::Severity;
 use realism_gate::rules::measured::{self, floor};
 
 fn severity() -> impl Strategy<Value = Severity> {
-    prop_oneof![Just(Severity::Note), Just(Severity::Warn), Just(Severity::Error)]
+    prop_oneof![
+        Just(Severity::Note),
+        Just(Severity::Warn),
+        Just(Severity::Error)
+    ]
 }
 
 proptest! {
