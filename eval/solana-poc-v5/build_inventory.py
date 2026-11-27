@@ -179,7 +179,6 @@ def meteora_units(page_sha: str) -> list[dict]:
             "files": [{
                 "kind": "report-page-block",
                 "url": METEORA_URL,
-                "page_sha256": page_sha,
                 "block": sel["block"],
                 "lang": sel["lang"],
                 "fence_label": sel["fence_label"],
