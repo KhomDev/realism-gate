@@ -1,0 +1,83 @@
+{
+  "round": "round-1",
+  "frozen_commit": "77c89d9083cc6f8d43ab6ceff62966e57067f42d",
+  "tag": "v1.5.1",
+  "version": "1.5.1",
+  "release": "https://github.com/KhomDev/realism-gate/releases/tag/v1.5.1",
+  "binary": {
+    "target": "x86_64-pc-windows-msvc",
+    "file": "realism-gate.exe",
+    "archive": "realism-gate-1.5.1-x86_64-pc-windows-msvc.zip",
+    "archive_sha256": "a3ecf4d4ddaec7dd05c957c5d2efb65b5abc7be5a090daa72c3368e63d67c503",
+    "sha256": "9e2af1795df815b8f23594f265760367d06680eacf08c8084fc9c2ca8258a5d6",
+    "version_output": "realism-gate 1.5.1"
+  },
+  "rubric": {
+    "version": "v3",
+    "file": "docs/labeling-rubric.md",
+    "sha256": "68e278a17fff2888d1db55ddad1240785534c13450a638d4bef0b3a21aac6d6a"
+  },
+  "preregistration": {
+    "file": "eval/P2R2_PREREGISTRATION_POST_MAIN.md",
+    "sha256": "8512cfab2cf448edcbdd93f6e90f436ab8ff297dc8af447c22f3e3fad744e256"
+  },
+  "golden_manifest": {
+    "file": "tests/golden/manifest.json",
+    "sha256": "3b1dbe7d09d8bed2963bdd602c40515b880e4441b53ec40ac401168d16b43496",
+    "note": "identical blob at d0d5e64, c28122a and 77c89d9, and equal to the hash in the pre-registration"
+  },
+  "relation_to_preregistration": {
+    "preregistration_names": "source tree d0d5e646",
+    "rule_code_changed": false,
+    "evidence": "git diff --name-only d0d5e64 77c89d9 -- '*.rs' lists only src/mcp.rs, src/bin/realism-gate-mcp.rs and tests/*.rs; no crates/*/src file differs; tests/golden/manifest.json is the same blob; the DEV flag ids of the 1.5.0 and 1.5.1 release binaries are identical in every corpus (409 of 409), and equal those of the pre-release binary c6df0c3d",
+    "differences": "1.5.1 adds the MCP server fixes (src/mcp.rs); 1.5.0 added crates.io packaging, version bumps and test fixes. The CLI the runners call is the same."
+  },
+  "scripts": {
+    "eval/solana-poc-v3/run.py": "3d92eed346811c5b0dc6a113c9df2d0b1c9b924aff1711acc68f8014e12d3e13",
+    "eval/solana-poc-v4/run.py": "c331d1921cd58a9c49176f2f70d358327a7197b2f61f2e9b307cc98e5cef5740",
+    "eval/solidity-poc-v1/run.py": "08677d26cee13793606a94fb3a905807ff5630851648566be5e65693e791a8c3",
+    "eval/solana-poc-v3/measure.py": "5cb9f8a870425a83bd34dfc0c60ba357481b4413d30e66a2800fe1d24248b5d0",
+    "eval/p2r_corpora.py": "bb8d4a4824575e7965828d58777d48182c129795484c71442319cc4d80069e0f",
+    "eval/p2r_packet.py": "8408fe2ed0b23e0ff01b6cf6813b9f2febdeca5fd394cbb834e71f54a90f76e7",
+    "eval/p2r_sheet.py": "057018f40607b2dac8b391bd605aabf321cb86d45546dd7a7f991ad138ecc89d",
+    "eval/p2r_counts.py": "53b0b67a0bd0a0bc62c52ba57b825e3c8abe25aafd68004e689c41f15b645453",
+    "eval/p2r_score_human.py": "2363d62e009286fabd130470c56eee3ee36ceba307886afe44399238097e2627"
+  },
+  "scripts_note": "sha256 of the committed blobs at the commit that adds this file; the runners are unchanged since v1.5.0. The runners' CAP = 30 shapes only sample.jsonl and is not used for labelling: labelling reads every tier-J/X flag via p2r_packet.py / p2r_sheet.py --all-flags.",
+  "labellers": "none yet: no labelling has started. Two external blinded labellers; identities and date to be recorded in an amendment to this file before any label is collected",
+  "labelling": "every held-out tier-J/X flag, no cap, two labellers, kappa >= 0.70 or the cell is inconclusive",
+  "ai_labels": "none. No AI reader labelled V1; every V1 figure from this round is a count, never a precision",
+  "opens": [
+    {
+      "corpus": "solana-poc-v3",
+      "split": "V1",
+      "expected_units": 27
+    },
+    {
+      "corpus": "solana-poc-v4",
+      "split": "V1",
+      "expected_units": 5
+    },
+    {
+      "corpus": "solidity-poc-v1",
+      "split": "V1",
+      "expected_units": 111
+    }
+  ],
+  "does_not_open": [
+    "FINAL (all corpora)",
+    "V2 (all corpora)",
+    "solana-poc-v5 V1",
+    "solidity-poc-v2 V1"
+  ],
+  "priorart": {
+    "repo": "https://github.com/KhomDev/priorart",
+    "main_commit": "c57697d508357f1e20761169c96c702391c5516f",
+    "pr": "https://github.com/KhomDev/priorart/pull/41",
+    "version_output": "priorart 0.2.2",
+    "build": "cargo +1.95.0-x86_64-pc-windows-gnu build --release --locked --offline --no-default-features (CARGO_PROFILE_RELEASE_LTO=false)",
+    "binary_sha256": "54d23059b3ffc2d7a6f9602f3e03cd1d58b71cc333e487304301dad14df06478",
+    "sealed_pairs_V1": "not opened in this round: it needs --pair-labels (judge labels) and none exist",
+    "dupbench": "validation split was already used for DEV tuning and is reported as in-sample, never as held-out; FINAL stays sealed"
+  }
+}

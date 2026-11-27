@@ -169,7 +169,7 @@ def build(packet: list[dict], cal: list[dict], claims: dict[str, str], seed: str
         "",
         "- Label alone, without discussing rows with anyone until you're done.",
         "- Don't open realism-gate's docs, eval folders or articles until you've sent the sheet back.",
-        "- Some rows are calibration checks with known answers.",
+        *(["- Some rows are calibration checks with known answers."] if cal else []),
         "",
         "## Rules in this sheet",
         "",
@@ -234,12 +234,12 @@ def inside_repo(path: Path) -> bool:
         return False
 
 
-def rows_from_run(corpus, run_dir: Path, cache: Path, flag_ids: set[str] | None):
+def rows_from_run(corpus, run_dir: Path, cache: Path, flag_ids: set[str] | None, all_flags: bool = False):
     import p2r_corpora  # noqa: E402
 
     units = corpus.units()
     out = []
-    for flag in load_jsonl(run_dir / "sample.jsonl"):
+    for flag in p2r_corpora.label_flags(run_dir, all_flags):
         if flag_ids is not None and flag["id"] not in flag_ids:
             continue
         unit = units[flag["unit"]]
@@ -348,6 +348,10 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--seed")
     ap.add_argument("--unblind")
     ap.add_argument("--out")
+    ap.add_argument("--all-flags", action="store_true",
+                    help="label every tier-J/X flag of the run (held-out rounds, no cap) instead of sample.jsonl")
+    ap.add_argument("--no-calibration", action="store_true",
+                    help="build the sheet without calibration rows (use when no opened, labelled flags exist for this corpus)")
     args = ap.parse_args(argv[1:])
     if args.self_test:
         return self_test()
@@ -359,7 +363,8 @@ def main(argv: list[str]) -> int:
         Path(args.out).write_text(human, encoding="utf-8", newline="\n")
         print(json.dumps(stats))
         return 0
-    for need in ("run_dir", "cal_run_dir", "cal_labels", "out_dir", "key", "seed"):
+    needs = ("run_dir", "out_dir", "key", "seed") if args.no_calibration else ("run_dir", "cal_run_dir", "cal_labels", "out_dir", "key", "seed")
+    for need in needs:
         if not getattr(args, need):
             ap.error(f"--{need.replace('_', '-')} is required")
     key_path = Path(args.key)
@@ -369,13 +374,16 @@ def main(argv: list[str]) -> int:
 
     corpus = p2r_corpora.get(args.corpus)
     cache = Path(args.cache) if args.cache else corpus.cache
-    packet = rows_from_run(corpus, Path(args.run_dir), cache, None)
-    resolved = resolve_labels(load_jsonl(Path(args.cal_labels)))
-    cal_cache = Path(args.cal_cache) if args.cal_cache else cache
-    cands = rows_from_run(corpus, Path(args.cal_run_dir), cal_cache, set(resolved))
-    for c in cands:
-        c["answer"] = resolved[c["flag"]]
-    cal = choose_calibration([c for c in cands if c["answer"] != "unclear"], args.seed)
+    packet = rows_from_run(corpus, Path(args.run_dir), cache, None, args.all_flags)
+    if args.no_calibration:
+        cal = []
+    else:
+        resolved = resolve_labels(load_jsonl(Path(args.cal_labels)))
+        cal_cache = Path(args.cal_cache) if args.cal_cache else cache
+        cands = rows_from_run(corpus, Path(args.cal_run_dir), cal_cache, set(resolved))
+        for c in cands:
+            c["answer"] = resolved[c["flag"]]
+        cal = choose_calibration([c for c in cands if c["answer"] != "unclear"], args.seed)
     if {c["flag"] for c in cal} & {p["flag"] for p in packet}:
         raise SystemExit("a calibration row is also a packet row")
     sheet_csv, sheet_md, key_text = build(packet, cal, claims_table(), args.seed)
