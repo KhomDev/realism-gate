@@ -1,5 +1,5 @@
 #![forbid(unsafe_code)]
-//! MCP stdio server (`io.github.khomdev/rgate`). See `src/mcp.rs` for the
+//! MCP stdio server (`io.github.KhomDev/rgate`). See `src/mcp.rs` for the
 //! tools and the transport.
 //!
 //! The checker is `REALISM_GATE_BIN` when set, else a sibling of this
@@ -14,7 +14,7 @@ use std::process::Command;
 use std::time::Duration;
 
 const HELP: &str =
-    "realism-gate-mcp: the realism-gate MCP server (MCP Registry: io.github.khomdev/rgate)
+    "realism-gate-mcp: the realism-gate MCP server (MCP Registry: io.github.KhomDev/rgate)
 
 Speaks MCP over stdio: one JSON-RPC message per line on stdin and stdout.
 Content-Length framed requests are also read and answered in kind.

@@ -8,6 +8,20 @@ may change in any minor release.
 
 ## [Unreleased]
 
+## [1.5.2] - 2026-11-27
+
+Metadata only. No rule, CLI flag, default, report field, MCP tool or archive
+layout changed. The library crates stay at 1.5.0, except `rg-render` 1.5.2
+(same code; it carries the tool version).
+
+### Changed
+
+- **MCP Registry name is `io.github.KhomDev/rgate`** (was
+  `io.github.khomdev/rgate`). The registry namespace follows the GitHub login
+  and is case-sensitive, so the lowercase name could not be published. The
+  name changed in `server.json`, the README `mcp-name:` line, the
+  `realism-gate-mcp --help` text and the docs. 1.5.1 is not in the registry.
+
 ## [1.5.1] - 2026-11-27
 
 This is a patch release on the MCP server only. No rule, rule severity, CLI
@@ -1115,7 +1129,8 @@ First release.
 - A pinned public-corpus benchmark (`scripts/bench-corpus.sh`,
   `bench/defihacklabs.json`, `docs/benchmark.md`), re-measured in CI.
 
-[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/KhomDev/realism-gate/compare/v1.5.2...HEAD
+[1.5.2]: https://github.com/KhomDev/realism-gate/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/KhomDev/realism-gate/compare/v1.5.0...v1.5.1
 [1.1.0]: https://github.com/KhomDev/realism-gate/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/KhomDev/realism-gate/compare/v1.0.3...v1.0.4

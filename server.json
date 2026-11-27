@@ -1,6 +1,6 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.khomdev/rgate",
+  "name": "io.github.KhomDev/rgate",
   "title": "realism-gate",
   "description": "Offline static checks for exploit PoC tests (Foundry, Solana, Anchor TS) and a finding's claims.",
   "repository": {
@@ -8,12 +8,12 @@
     "source": "github"
   },
   "websiteUrl": "https://khomdev.org/tools",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "packages": [
     {
       "registryType": "cargo",
       "identifier": "realism-gate",
-      "version": "1.5.1",
+      "version": "1.5.2",
       "transport": {
         "type": "stdio"
       },

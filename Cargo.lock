@@ -2374,7 +2374,7 @@ dependencies = [
 
 [[package]]
 name = "realism-gate"
-version = "1.5.1"
+version = "1.5.2"
 dependencies = [
  "clap",
  "proptest",
@@ -2543,7 +2543,7 @@ dependencies = [
 
 [[package]]
 name = "rg-render"
-version = "1.5.1"
+version = "1.5.2"
 dependencies = [
  "rg-ir",
  "rg-model",

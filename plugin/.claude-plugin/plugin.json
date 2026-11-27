@@ -1,6 +1,6 @@
 {
   "name": "realism-gate",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Check exploit PoC tests and a draft finding's claims with realism-gate before submitting. Installs the realism-gate release from crates.io that matches this plugin's version.",
   "author": {
     "name": "KhomDev"

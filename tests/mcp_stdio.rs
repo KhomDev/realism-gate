@@ -443,7 +443,7 @@ fn version_help_and_bad_settings() {
     );
     let h = Command::new(bin).arg("--help").output().unwrap();
     assert!(h.status.success());
-    assert!(String::from_utf8_lossy(&h.stdout).contains("io.github.khomdev/rgate"));
+    assert!(String::from_utf8_lossy(&h.stdout).contains("io.github.KhomDev/rgate"));
     let bad = Command::new(bin).arg("--serve").output().unwrap();
     assert_eq!(bad.status.code(), Some(2));
     for (key, value) in [
