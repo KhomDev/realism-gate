@@ -8,6 +8,15 @@ may change in any minor release.
 
 ## [Unreleased]
 
+### Added
+
+- **Anthropic Directory plugin** at `plugin-directory/`: the skill (worded so
+  the agent does not run the CLI) and read-only commands (`allowed-tools` is
+  only Read, Grep, Glob and LS). No hooks, no `bin/` installer. A 1024×1024
+  icon sits at `plugin-directory/.claude-plugin/icon.png`. The full plugin in
+  `plugin/` is unchanged. `tests/plugin_directory.rs` pins the Directory
+  rules. The marketplace lists it as `realism-gate-lite`.
+
 ## [1.5.3] - 2026-11-27
 
 Metadata only. No rule, CLI flag, default, report field, MCP tool or archive

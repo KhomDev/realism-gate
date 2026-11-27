@@ -157,6 +157,14 @@ minor, changes those two files in the same commit as `Cargo.toml`.
 `realism-gate-mcp`; that server stays a user MCP config after the CLI is
 installed (`plugin/README.md`).
 
+The Anthropic Directory plugin at `plugin-directory/` is a second tree. It
+does not install or run the CLI, has no hooks and no `bin/`, and its command
+`allowed-tools` are only Read, Grep, Glob and LS. Leave `plugin/` as the full
+plugin. A version bump also updates `plugin-directory/.claude-plugin/plugin.json`
+and the `realism-gate-lite` entry in `.claude-plugin/marketplace.json`
+(`tests/plugin_directory.rs` checks both, and the icon and the Directory
+rules).
+
 ## Release checklist
 
 Run from a clean checkout of `main`.
@@ -186,6 +194,9 @@ Run from a clean checkout of `main`.
    `tests/plugin.rs` (`plugin_version_is_the_crate_version`) fails if
    `plugin.json` or the marketplace entry disagrees with the crate version,
    and `plugin_skill_is_the_repository_skill` fails if the plugin skill drifts.
+   The Directory plugin versions in `plugin-directory/.claude-plugin/plugin.json`
+   and the `realism-gate-lite` marketplace entry move in the same commit;
+   `tests/plugin_directory.rs` fails if they disagree with the crate.
 7. Add the changelog entry under the new version and move the `[Unreleased]`
    comparison link.
 8. If the README examples, the claims block or the golden card changed:
