@@ -47,7 +47,7 @@ jobs:
         # for, and the prebuilt binary from install-action is a musl build.
         # A musl target links libc statically, which ASan refuses, so pin the
         # gnu triple explicitly. See the 2026-11-23 red `fuzz` run.
-        run: cargo +nightly fuzz run --target x86_64-unknown-linux-gnu ${{ matrix.target }} -- -max_total_time=${{ github.event_name == 'schedule' && 300 || 30 }}
+        run: cargo +nightly fuzz run --target x86_64-unknown-linux-gnu ${{ matrix.target }} -- -timeout=10 -max_total_time=${{ github.event_name == 'schedule' && 300 || 30 }}
 
       - name: Upload crashing inputs
         if: failure()
