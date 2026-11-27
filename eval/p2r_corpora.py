@@ -104,6 +104,15 @@ CORPORA = {
         cache=ROOT / ".corpus" / "solidity-poc-v2",
         languages=("solidity", "other"),
         cell_languages=("solidity", "other"),
+    ),    # 2026-11-27 extension (DATASET_EXTENSION_RULES_P2R2.md), sealed before the
+    # Round-1 freeze. Pools with v3+v4 in the Solana cells
+    # (eval/P2R2_ANALYSIS_PLAN_ADDENDUM_1.md).
+    "solana-v5": Corpus(
+        name="solana-v5",
+        inventory=ROOT / "eval" / "solana-poc-v5" / "inventory.json",
+        cache=ROOT / ".corpus" / "solana-poc-v5",
+        languages=("rust", "typescript", "javascript", "other"),
+        cell_languages=("rust", "typescript", "javascript", "solidity", "other"),
     ),
 }
 
