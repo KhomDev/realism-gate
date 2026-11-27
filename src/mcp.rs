@@ -1306,6 +1306,7 @@ mod tests {
             &mut run,
         )
         .unwrap();
+        drop(run);
         assert_eq!(out["error"]["code"], INVALID_PARAMS, "{out}");
         assert!(calls.is_empty());
     }
