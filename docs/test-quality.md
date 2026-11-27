@@ -143,4 +143,7 @@ against `ae654cf`, files `crates/rg-frontend-rust/src/parse_rust.rs` and
   in `blank_diff_marks`) make the scan loop stop advancing; the test run
   detects them by timeout.
 
-The re-run on the branch with the new tests is run 45946711166.
+Re-run 45946711166 on the branch with the new tests (`f414ed4`), same files
+and base: 123 mutants, 114 caught, **2 missed** (the two equivalents above),
+3 unviable, 4 timeouts (the same four). Survival rate: **2 of 116 = 1.7%**
+(`missed / (caught + missed)`).
