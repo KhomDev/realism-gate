@@ -169,7 +169,7 @@ fi
 
 set +e
 "$bin" check "$root/tests/fixtures/bad/RG06_balance_injection.t.sol" \
-    --no-declaration --no-config --format json > "$work/report.json"
+    --no-declaration --no-config --severity RG06=error --format json > "$work/report.json"
 status=$?
 set -e
 if [ "$status" != 1 ]; then

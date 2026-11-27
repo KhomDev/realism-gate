@@ -59,12 +59,16 @@ jobs:
           changed-only: "false"
           comment: "false"
 
+      # The severity floor ships every rule at `note` until a fresh cell
+      # passes it (docs/precision.md). These cases test the action's exit
+      # and output contract, so they set the level explicitly with `args`.
       # --- warn-only: passes at fail-on error, fails at fail-on warn
       - id: warn_pass
         uses: ./
         with:
           binary: ${{ matrix.bin }}
           path: tests/fixtures/bad/RG11_unpinned_fork.t.sol
+          args: "--severity RG11=warn"
           changed-only: "false"
           comment: "false"
       - id: warn_fail
@@ -73,6 +77,7 @@ jobs:
         with:
           binary: ${{ matrix.bin }}
           path: tests/fixtures/bad/RG11_unpinned_fork.t.sol
+          args: "--severity RG11=warn"
           fail-on: warn
           changed-only: "false"
           comment: "false"
@@ -84,6 +89,7 @@ jobs:
         with:
           binary: ${{ matrix.bin }}
           path: tests/fixtures/bad/RG06_*.sol
+          args: "--severity RG06=error"
           changed-only: "false"
           comment: "false"
           sarif: "false"
@@ -92,6 +98,7 @@ jobs:
         with:
           binary: ${{ matrix.bin }}
           path: tests/fixtures/bad/RG06_*.sol
+          args: "--severity RG06=error"
           fail-on: none
           changed-only: "false"
           comment: "false"
@@ -122,6 +129,7 @@ jobs:
         with:
           binary: ${{ matrix.bin }}
           paths: tests/fixtures/bad/RG06_balance_injection.t.sol
+          args: "--severity RG06=error"
           changed-only: "false"
           comment: "false"
 
