@@ -60,8 +60,15 @@ list, in substance:
 - **1.5.0 first publishes the ten library crates** (`rg-ir` through
   `rg-render`, previously `publish = false`). Crate names on crates.io are
   permanent; the maintainer approved claiming all ten on 2026-11-27. They have
-  no API stability guarantee outside `realism-gate`, and their versions track
-  the workspace version.
+  no API stability guarantee outside `realism-gate`. From 1.5.1 a library is
+  re-published only when it changed: each `crates/*/Cargo.toml` carries its own
+  `version`, and `realism-gate` (the first `version =` line in the root
+  `Cargo.toml`, which `release.yml` reads) can be ahead of them.
+- **1.5.1 (2026-11-27) is a patch that adds MCP tools and MCP settings.** The
+  cadence says a patch is fixes only. The maintainer chose a patch because
+  the change is confined to `realism-gate-mcp`, whose 1.5.0 transport did not
+  work with current clients: no rule, severity, CLI flag, default, report
+  field or archive layout changed. Not a precedent for CLI changes.
 
 ## Compatibility policy
 
@@ -207,8 +214,11 @@ Run from a clean checkout of `main`.
     crates.io, from the archives and through the action. Since 1.5.0 the ten
     library crates are published too, **before** `realism-gate`, in the order
     of PACKAGING.md (`rg-ir`, the four frontends, `rg-program`, `rg-model`,
-    `rg-rules`, `rg-exec`, `rg-render`, then `realism-gate`), each at the
-    workspace version. crates.io limits new crate names to a burst of five and
+    `rg-rules`, `rg-exec`, `rg-render`, then `realism-gate`). Publish a library
+    only if its version was bumped because it changed (`git diff vPREV -- crates/NAME`);
+    otherwise `realism-gate` depends on the version already on crates.io. `rg-render` is
+    always bumped and published with `realism-gate`: its `VERSION` is the tool version the
+    reports print. crates.io limits new crate names to a burst of five and
     then one per ten minutes, so a first publish of all ten takes about an
     hour; wait for each crate to appear in the index before the next that
     depends on it.

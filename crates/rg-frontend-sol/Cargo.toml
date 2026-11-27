@@ -1,6 +1,6 @@
 [package]
 name = "rg-frontend-sol"
-version.workspace = true
+version = "1.5.0"
 edition.workspace = true
 rust-version.workspace = true
 description = "Solidity frontend for realism-gate: lowers solar's AST into the shared IR. Internal crate of realism-gate: no API stability guarantee outside that package."

@@ -30,7 +30,6 @@ default-members = [
 ]
 
 [workspace.package]
-version = "1.5.0"
 edition = "2024"
 rust-version = "1.95"
 license = "MIT"
@@ -49,7 +48,7 @@ rg-program = { path = "crates/rg-program", version = "1.5.0" }
 rg-model = { path = "crates/rg-model", version = "1.5.0" }
 rg-rules = { path = "crates/rg-rules", version = "1.5.0" }
 rg-exec = { path = "crates/rg-exec", version = "1.5.0" }
-rg-render = { path = "crates/rg-render", version = "1.5.0" }
+rg-render = { path = "crates/rg-render", version = "1.5.1" }
 
 clap = { version = "4.6.7", features = ["derive"] }
 # The TypeScript parser of the Oxc toolchain, for Anchor's tests. Pinned: oxc
@@ -75,7 +74,7 @@ tempfile = "3.27.0"
 
 [package]
 name = "realism-gate"
-version.workspace = true
+version = "1.5.1"
 edition.workspace = true
 description = "Static checker for Foundry and Solana (Rust and Anchor TypeScript) PoC tests: does the proof of concept show what an unprivileged attacker can do, or only what the harness made true?"
 license.workspace = true

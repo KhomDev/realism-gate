@@ -13,8 +13,9 @@ may change in any minor release.
 This is a patch release on the MCP server only. No rule, rule severity, CLI
 flag, default, report field or archive layout changed; the new MCP tools and
 settings wrap existing CLI commands. 1.5.0 shipped the broken transport, and
-1.5.1 supersedes it for MCP use. The library crates (`rg-*`) are unchanged
-and stay at 1.5.0.
+1.5.1 supersedes it for MCP use. The library crates are unchanged and stay at 1.5.0,
+except `rg-render` 1.5.1 (same code; it carries the tool version printed in
+reports, SARIF and cards).
 
 ### Fixed (MCP)
 

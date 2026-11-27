@@ -1,6 +1,6 @@
 [package]
 name = "rg-ir"
-version.workspace = true
+version = "1.5.0"
 edition.workspace = true
 rust-version.workspace = true
 description = "Parser-independent IR shared by realism-gate's frontends, model and rules. Internal crate of realism-gate: no API stability guarantee outside that package."
