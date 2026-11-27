@@ -156,3 +156,28 @@ names.contains(s))`, skips the step, and the result cannot change for it. The mu
 differ if a second step were placed at the same trace `op`; steps are built one
 per trace-op seed, but that is not asserted as an invariant anywhere. This is
 recorded as an explained survivor rather than killed with a contrived test.
+
+### RG-A6 frontends, changed lines since ae654cf (2026-11-27)
+
+Run 45938826459, `cargo mutants --workspace --test-workspace=true --in-diff`
+against `ae654cf`, files `crates/rg-frontend-rust/src/parse_rust.rs` and
+`crates/rg-frontend-ts/src/parse_ts.rs`: 123 mutants, 105 caught, 11 missed,
+3 unviable, 4 timeouts.
+
+- Nine survivors were missing tests, now added: six in `looks_like_script`
+  (each `&&`/`||` of the import, `require` and mocha checks), `i > 0` in
+  `tokens_hold_test_attr` (a bracket group first in a macro's tokens),
+  `added < 2` in `blank_diff_marks` (exactly two added lines) and the
+  `+++ `/`--- ` header check (a `+++ ` header is blanked whole, not read as an
+  added line).
+- Two are equivalent: `<` to `<=` on the loop bounds of `blank_elisions`
+  (line 229) and `blank_diff_marks` (line 276). The extra pass reads an empty
+  tail slice and changes nothing.
+- The four timeouts (`+=` to `*=`/`-=` in `blank_elisions`, `+` to `-`/`*`
+  in `blank_diff_marks`) make the scan loop stop advancing; the test run
+  detects them by timeout.
+
+Re-run 45946711166 on the branch with the new tests (`f414ed4`), same files
+and base: 123 mutants, 114 caught, **2 missed** (the two equivalents above),
+3 unviable, 4 timeouts (the same four). Survival rate: **2 of 116 = 1.7%**
+(`missed / (caught + missed)`).
