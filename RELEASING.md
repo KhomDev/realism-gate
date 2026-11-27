@@ -50,6 +50,19 @@ list, in substance:
    tag is moved to it, so `uses: KhomDev/realism-gate@v1` runs 1.x. The `v0`
    tag stays where it is: the last 0.x release.
 
+## Recorded exceptions
+
+- **1.5.0 (2026-11-27).** 1.1.0, 1.2.0 and 1.4.0 were all released on
+  2026-11-25, and 1.5.0 two days later, so the "at most one minor per week"
+  rule was broken again. The maintainer decided to ship P2R-2 (binding model,
+  precision floor, Claude Code plugin, measured release) as 1.5.0 anyway. It is
+  the same kind of exception as 1.1.0 to 1.4.0 and is not a precedent.
+- **1.5.0 first publishes the ten library crates** (`rg-ir` through
+  `rg-render`, previously `publish = false`). Crate names on crates.io are
+  permanent; the maintainer approved claiming all ten on 2026-11-27. They have
+  no API stability guarantee outside `realism-gate`, and their versions track
+  the workspace version.
+
 ## Compatibility policy
 
 Stable within 1.x, and only changed in a minor with a changelog entry:
@@ -191,7 +204,14 @@ Run from a clean checkout of `main`.
 14. `cargo publish` is a separate, manual step; it is not part of the release
     workflow. A release is not done while crates.io is behind: after
     publishing, `verify-release.yml` installs the published release from
-    crates.io, from the archives and through the action.
+    crates.io, from the archives and through the action. Since 1.5.0 the ten
+    library crates are published too, **before** `realism-gate`, in the order
+    of PACKAGING.md (`rg-ir`, the four frontends, `rg-program`, `rg-model`,
+    `rg-rules`, `rg-exec`, `rg-render`, then `realism-gate`), each at the
+    workspace version. crates.io limits new crate names to a burst of five and
+    then one per ten minutes, so a first publish of all ten takes about an
+    hour; wait for each crate to appear in the index before the next that
+    depends on it.
 15. Move the floating Action tag to the release, and only then:
     ```bash
     git tag -f -a v1 -m "v1: floating major tag, now vX.Y.Z" <commit>
