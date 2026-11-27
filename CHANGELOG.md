@@ -17,6 +17,17 @@ may change in any minor release.
   `plugin/` is unchanged. `tests/plugin_directory.rs` pins the Directory
   rules. The marketplace lists it as `realism-gate-lite`.
 
+### Fixed
+
+- **The Directory plugin README no longer names the icon file.** The
+  Anthropic Directory validator treats an image path in `README.md` as
+  "an image or font file that the plugin's code could run" and refuses the
+  listing. The README is plain text; the required icon remains at
+  `.claude-plugin/icon.png` and is not referenced from other files in that
+  tree. A privacy policy is in `plugin-directory/PRIVACY.md` (no data is
+  collected, stored or sent). `plugin.json` sets `privacyPolicyUrl`,
+  `documentationUrl` and `supportUrl` to GitHub URLs on `main`.
+
 ## [1.5.3] - 2026-11-27
 
 Metadata only. No rule, CLI flag, default, report field, MCP tool or archive

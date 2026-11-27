@@ -11,6 +11,9 @@ does not accept hooks, a `bin/` installer, or shell `allowed-tools` from an
 unverified publisher. The full plugin, which can install and run the pinned
 CLI, stays in [`plugin/`](../plugin/) and is unchanged.
 
+The privacy policy is in [PRIVACY.md](PRIVACY.md): this plugin does not
+collect, store or send any data.
+
 ## Install
 
 From this repository, in Claude Code, add the marketplace and install the
@@ -27,11 +30,12 @@ run it).
 - `commands/check.md`, `install.md`, `upgrade.md` — the same three commands
   as the full plugin, with `allowed-tools` limited to `Read`, `Grep`, `Glob`
   and `LS`.
-- `.claude-plugin/plugin.json` and `.claude-plugin/icon.png` (1024×1024).
+- `.claude-plugin/plugin.json` — name, version and the Directory listing
+  URLs (privacy policy, docs and support).
 
 There is no `hooks/` directory, no `bin/` directory, and no script. MCP setup
 is still yours: after the CLI is on `PATH`, `claude mcp add rgate -- realism-gate-mcp`,
 as in [`docs/agents.md`](../docs/agents.md).
 
 `tests/plugin_directory.rs` fails if a hook, a `bin/` path, a disallowed
-tool, a `$` in `allowed-tools`, or a missing/undersized icon is added.
+tool, a `$` in `allowed-tools`, or a missing privacy-policy URL is added.
