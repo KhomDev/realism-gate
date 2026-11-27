@@ -1,0 +1,19 @@
+{
+  "name": "realism-gate",
+  "owner": {
+    "name": "KhomDev"
+  },
+  "metadata": {
+    "description": "Claude Code plugin for realism-gate, the offline checker of exploit PoC tests and finding claims."
+  },
+  "plugins": [
+    {
+      "name": "realism-gate",
+      "source": "./plugin",
+      "description": "Check exploit PoC tests and a draft finding's claims with realism-gate before submitting. Installs the pinned realism-gate release from crates.io.",
+      "version": "1.4.0",
+      "category": "security",
+      "keywords": ["security", "audit", "bug-bounty", "foundry", "solana", "poc"]
+    }
+  ]
+}
