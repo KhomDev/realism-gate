@@ -1,0 +1,9 @@
+{
+  "schema": "realism-gate.solana-poc-inventory/v5",
+  "date": "2026-11-27",
+  "salt": "rg-solana-v5-salt-72b381bcd3a9c789cbdf56fa727ae773",
+  "split_rule": "int(sha256(salt + '|' + unit_id)[:8], 16) % 100: 0-39 DEV, 40-59 V1, 60-74 V2, 75-99 FINAL",
+  "tiers": ["J", "X", "N", "A", "AJ"],
+  "units": [],
+  "status": "scaffold: salt committed before any unit is collected"
+}

@@ -1,0 +1,9 @@
+{
+  "schema": "realism-gate.solidity-poc-inventory/v3",
+  "date": "2026-11-27",
+  "salt": "rg-solidity-v3-salt-e87258db84526f58a694424d3fae3c63",
+  "split_rule": "int(sha256(salt + '|' + unit_id)[:8], 16) % 100: 0-39 DEV, 40-59 V1, 60-74 V2, 75-99 FINAL",
+  "tiers": ["J", "X", "N", "A", "AJ"],
+  "units": [],
+  "status": "scaffold: salt committed before any unit is collected"
+}
