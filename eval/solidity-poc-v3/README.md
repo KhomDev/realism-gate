@@ -8,6 +8,16 @@ reproductions). It does not add Code4rena Solidity J.
 
 Solidity is measured on its own slices and never pooled with Solana.
 
+## EXCLUDED from every measurement (decision 2026-11-27)
+
+The orchestrator's S3 verification found that **all 35 counted units are near-copies of
+DeFiHackLabs tests that earlier runs have already opened** (the `d4bd931` tree; 14 of the matches
+sit in that tree's FINAL slice). Normalised exact-text matching missed them, so the claim
+below that none match is wrong for near-copies. Measuring them would count opened data as
+held-out. The corpus is kept as a record of the collection. No slice of it is opened, and no
+number in this repository is computed from it. Fresh Solidity X data has to come from a
+source disjoint from DeFiHackLabs.
+
 ## Status
 
 **Collection closed 2026-11-27, sealed, not run.** Counted units: X 35, all
