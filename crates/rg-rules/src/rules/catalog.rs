@@ -76,18 +76,16 @@ pub enum SolanaNotes {
 }
 
 impl RuleInfo {
-    /// The severity the rule ships at on Solana. RG01, RG02, RG03, RG04 and
-    /// RG06 are notes until a fresh held-out measurement supports more: the
-    /// 1.3.0 held-out cells are 0/16 (RG02), 0/5 (RG03), 16.7% (RG01), 0%
-    /// (RG04) and 0% (RG06). RG08 (10/10, Wilson lower bound 0.7225) and RG09
-    /// (one flag, unclear) do not clear the 0.80 floor either, so they ship at
-    /// warn; error returns at 16/16, where the lower bound reaches 0.8064.
+    /// The highest severity the rule ships at on Solana (Rust, TypeScript
+    /// and JavaScript tests): the catalog severity capped by the lowest level
+    /// the severity floor allows across those languages, derived at build
+    /// time from `data/measured.json` (`measured::derived`). A finding ships
+    /// at its own language's cap; this one value is for `explain`.
     pub fn solana_severity(&self) -> Severity {
-        match self.id {
-            "RG01" | "RG02" | "RG03" | "RG04" | "RG06" => Severity::Note,
-            "RG08" | "RG09" => Severity::Warn,
-            _ => self.severity,
-        }
+        ["rust", "typescript", "javascript"]
+            .into_iter()
+            .map(|lang| super::measured::derived(self.id, lang))
+            .fold(self.severity, Severity::min)
     }
 
     /// The fix that applies to a finding raised in `lang`.
@@ -666,13 +664,12 @@ pub fn markdown(r: &RuleInfo) -> String {
         r.severity.as_str(),
         r.severity_note
     ));
-    if r.solana_severity() != r.severity {
-        out.push_str(&format!(
-            "**On Solana:** {} — the shipped severity for Rust and Anchor TypeScript tests, \
-             set by the severity floor in `docs/precision.md`.\n\n",
-            r.solana_severity().as_str()
-        ));
-    }
+    out.push_str(&format!(
+        "**Shipped severity:** {} — the highest level a finding ships at in each language, \
+         derived at build time from `data/measured.json` by the severity floor in \
+         `docs/precision.md`; only a fresh cell lifts a rule above `note`.\n\n",
+        super::measured::shipped_line(r)
+    ));
     out.push_str(&format!("{}\n\n", r.summary));
     out.push_str(&format!("## Why it matters\n\n{}\n\n", r.why));
     out.push_str(&format!("## How to fix it\n\n{}\n\n", r.fix));

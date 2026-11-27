@@ -39,7 +39,7 @@ fn who(f: &Finding) -> String {
 
 fn row(f: &Finding) -> String {
     format!(
-        "| {} | [{}]({}) {} | {} | {} | {} |\n",
+        "| {} | [{}]({}) {} | {} | {} | {} | {} |\n",
         if f.is_active() {
             f.severity.as_str()
         } else {
@@ -51,6 +51,7 @@ fn row(f: &Finding) -> String {
         code(&format!("{}:{}", f.file, f.line)),
         who(f),
         cell(&f.message),
+        cell(&super::json::record(f).text()),
     )
 }
 
@@ -94,7 +95,7 @@ pub fn render(report: &Report, fail_on: Option<Severity>) -> String {
 
     let active: Vec<&Finding> = report.active().collect();
     if !active.is_empty() {
-        out.push_str("| Level | Rule | Where | Test | Finding |\n|---|---|---|---|---|\n");
+        out.push_str("| Level | Rule | Where | Test | Finding | Measured |\n|---|---|---|---|---|---|\n");
         for f in active.iter().take(MAX_ROWS) {
             out.push_str(&row(f));
         }

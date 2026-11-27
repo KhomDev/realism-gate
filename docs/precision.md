@@ -468,19 +468,35 @@ What changed in the rules (details: CHANGELOG 1.2.0):
 
 ### Severity floor
 
-A rule ships at `error` on Solana only when its **fresh** held-out Wilson 95%
-lower bound is at least 0.80, and only when a fresh cell with at least five
-labels exists at all. In-sample cells cannot lift a rule over the floor; a
+**Since P2R (RG-A5) the shipped severity of every rule in every language
+(Solidity, Rust, TypeScript, JavaScript, Move) comes from
+`crates/rg-rules/data/measured.json` by the floor, derived at build time by
+`crates/rg-rules/build.rs`:** `error` only when a **fresh** cell's Wilson 95%
+lower bound is at least 0.80 with n >= 16; `warn` when it is at least 0.50
+with n >= 10; `note` otherwise. A finding ships at the lower of what its rule
+raised and that cap (`--severity` still overrides). "Fresh" is the cell's
+explicit `fresh` field. Every committed cell is `fresh: false` (the P1 set is
+in-sample, and the v2 and DeFiVulnLabs cells are opened slices measured by
+older binaries; numbers from different binaries are never pooled), so **every
+rule ships at `note` until the P2R-2 FINAL cells land**. Each finding prints
+its rule's fresh record for its language, or `unmeasured`.
+`tests/precision_floor.rs` checks the build-time table against an independent
+copy of the floor for all five languages.
+
+The history below is the pre-P2R policy. A rule shipped at `error` on Solana
+only when its **fresh** held-out Wilson 95%
+lower bound was at least 0.80, and only when a fresh cell with at least five
+labels existed at all. In-sample cells cannot lift a rule over the floor; a
 cell with fewer than five labels is a count, not a rate. The 1.2.0 P1 cells
 put RG01 (16.7%), RG04 (0%) and RG06 (0%) at `note`; the 1.3.0 v2 held-out
 round added RG02 (0/16) and RG03 (0/5), so both moved to `note` in 1.4.0. RG08
 is 10/10, whose lower bound is 0.7225, and RG09 has one fresh flag labelled
 unclear; neither clears the floor, so both ship at `warn` and **no Solana rule
 ships at `error` in 1.4.0**. RG08 returns to `error` at 16/16, where the lower
-bound reaches 0.8064. `tests/precision_floor.rs` reads
-`eval/solana/measured.json` and `eval/solana-poc-v2/measured.json`: a Solana
-`error` rule with no fresh cell of n >= 5, or with a fresh lower bound below
-0.80, fails the test.
+bound reaches 0.8064. (Until RG-A5, `tests/precision_floor.rs` read
+`eval/solana/measured.json` and `eval/solana-poc-v2/measured.json` and failed
+a Solana `error` rule with no fresh cell of n >= 5 or a fresh lower bound
+below 0.80.)
 
 ### Status of the re-measurement
 

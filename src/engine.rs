@@ -132,14 +132,12 @@ pub fn analyze(
             ),
             None => (None, None, None),
         };
-        // On a Solana test the shipped severity is the catalog's Solana
-        // policy (`solana_severity`), not whatever tier the rule's code used
-        // internally: that table is what docs/precision.md and the severity
-        // floor are written against. `--severity` still wins over both.
-        let shipped = match lang {
-            Lang::Rust | Lang::TypeScript => info.solana_severity(),
-            Lang::Solidity | Lang::Move => raw.severity,
-        };
+        // The shipped severity is the lower of what the rule's code raised
+        // and the level the severity floor allows this rule in this
+        // language, derived at build time from `data/measured.json`
+        // (`rules::measured`). `--severity` still wins over both.
+        let shipped =
+            rules::measured::shipped(info.id, rules::measured::lang_key(lang, &file), raw.severity);
         merged.insert(
             k,
             Finding {
